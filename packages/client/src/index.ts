@@ -3,5 +3,5 @@
  * perspective uses comes from `@gestalts/sdk`, re-exported here for the host's own code.
  */
 export * from '@gestalts/sdk';
-export { Repo, type DeckSource, type RepoSource, type ConnectorStatus } from './repo';
+export { Repo, nodeHealth, type DeckSource, type NodeHealth, type NotesIn, type RepoSource, type ConnectorStatus } from './repo';
 export { useConnector, useHostRepo, useOpenRepo } from './react';

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useOpenRepo, type Repo } from '@gestalts/client';
+import { useOpenRepo, type NotesIn, type Repo } from '@gestalts/client';
 import { deckSources, type PluginEntry, type Registry } from './registry';
 import { installedPlugins, seedInstalls } from './installs';
 
@@ -14,18 +14,20 @@ function mountedDecks(dir: string, registry: Registry): string[] {
 }
 
 /**
- * The app's repo: notes in OPFS under `dir`, with the gestalts of every bundled plugin (so their merge rules apply
+ * The app's repo: notes in OPFS under `dir` or in the folder of the node at `node` (`where`), with the gestalts of every bundled plugin (so their merge rules apply
  * even to plugins uninstalled here) and the decks of the installed ones. Installs the distribution's plugins in a
  * new folder. Which decks to mount is only known once the folder is open, so it's remembered per browser; if the
  * installs changed since (on another device, say), the repo opens once more with the right decks.
  */
-export function usePluginRepo(dir: string, registry: Registry): { repo?: Repo; installed: PluginEntry[]; error?: string } {
+export function usePluginRepo(where: NotesIn, registry: Registry): { repo?: Repo; installed: PluginEntry[]; error?: string } {
+  const dir = where.dir ?? `node:${where.node}`;
   const [mounted, setMounted] = useState(() => mountedDecks(dir, registry));
+  const whereKey = JSON.stringify(where);
   const source = useMemo(() => ({
-    dir,
+    ...(JSON.parse(whereKey) as NotesIn),
     decks: deckSources(registry.plugins.filter((p) => mounted.includes(p.manifest.id))),
     gestalts: registry.plugins.flatMap((p) => p.gestalts),
-  }), [dir, registry, mounted]);
+  }), [whereKey, registry, mounted]);
   const { repo, error } = useOpenRepo(source);
   const [seeded, setSeeded] = useState<Repo | null>(null);
   useEffect(() => {

@@ -1,19 +1,45 @@
 # The node and sync
 
 The node (`crates/node`) makes a folder on this computer the source of truth for the web apps, and runs their
-plugins' workers. Apps embed it: the Gestalter's desktop app (the "connector", in the gestalter repo) adds a tray, a
-status window, its built-in plugins and its own frontends' origins. `gestalts-node` is the node alone, e.g. for a GPU
+plugins' workers. Apps embed it: the Gestalter's desktop app (`gestalter`, in the gestalter repo) adds a tray, its
+built-in plugins and its web build, which the node serves at `/`. `gestalts-node` is the node alone, e.g. for a GPU
 box:
 
 ```sh
 gestalts-node serve [--data DIR] # the folder from --data, else the remembered one
 gestalts-node lint DIR           # gestalts and lints per note
 gestalts-node publish DIR        # prepare a folder as a read-only deck
-# all of them: [--port 7717] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]...
+# all of them: [--port 7717] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
 ```
 
 `mise run serve DIR`, `lint-data` and `publish-data` run it with this repo's `plugins/`. The `dev` profile keeps its
 settings apart from an installed app. All use port 7717, so quit one before starting another.
+
+## Serving an app
+
+An app's web build is served at `/`: the embedding app's own (`Embedded::app`), or `--app-dir DIR` (e.g. a `dist/`
+from disk). `index.html` is `no-cache`, hashed `assets/*` are immutable, anything missing is a 404 (the apps route by
+query string only). The API stays at the root beside it.
+
+A page served this way uses the folder directly (`{ node: location.origin }` in `@gestalts/client`): the core runs
+over `Peer` to the node, so every write lands in the folder, nothing is copied into OPFS, and nothing syncs. Its
+copy-on-write from decks writes into the folder. `/events` keeps its index current.
+
+## Change events
+
+`GET /events` is a WebSocket. The node watches the open folder's `notes/` and `blobs/` (`crates/node/src/watch.rs`,
+the `notify` crate), so changes from anywhere (the API, a worker, a hand edit, a file sync tool) go out, debounced
+(100 ms, at most 1 s), as JSON:
+
+| message | |
+|---|---|
+| `{"changed": {"notes": [keys], "blobs": [names]}}` | written or removed; the page rereads just these |
+| `{"folder": {id, path} \| null}` | another folder is open: the page reloads |
+| `"reload"` | this client fell behind: reread everything |
+
+A WebSocket, not server-sent events, since browsers allow only six HTTP/1.1 connections per host and every open tab
+would hold one. A page that loses the socket shows that the desktop app isn't running, reconnects, and rereads
+everything once it's back.
 
 ## Folders
 
@@ -30,6 +56,8 @@ under `gestalts` (or `gestalts-<profile>`):
 | | |
 |---|---|
 | config | `config.json` (`folder`, `extra_origins`), `control-token` |
+
+The desktop app's rename (from `gestalts-connector` to `gestalter`) didn't move these: they're the node's.
 | data | `builtin-plugins/<hash>/` (unpacked from the binary), `plugins/` (your own), `uv/`, `python/` |
 | cache | `plugins/<id>/venv`, uv's download cache |
 
@@ -61,14 +89,20 @@ Plugins with workers:
 
 ## Access
 
-The node listens on `127.0.0.1` only. CORS allows `http(s)://localhost:*` and `127.0.0.1:*`, the embedding app's
-own frontends (the Gestalter's: `https://gestalter.koljasam.com`), `extra_origins` from the config, and any
-`--allow-origin`. The notes API
-has no authentication: anything on this machine with an allowed origin can read and write the folder.
+The node listens on `127.0.0.1` only, and answers only requests whose `Host` is `localhost`, `127.0.0.1` or `[::1]`,
+so a page on another domain that resolves to 127.0.0.1 (DNS rebinding) can't pass as same-origin. CORS allows
+`http(s)://localhost:*` and `127.0.0.1:*`, the origins the embedding app lists (`Embedded::origins`), `extra_origins`
+from the config, and any `--allow-origin`; `/events` checks the same list itself, since CORS doesn't cover
+WebSockets. The notes API has no authentication: anything on this machine with an allowed origin can read and write
+the folder.
 
-`/control/*` (status, choose folder, show window, quit) is only for the embedding app's own window. It needs the per-run
-token from `control-token` in the `x-gestalts-control` header, and rejects any request that carries an `Origin`, which
-is every request a web page can make.
+`/control/*` is for the embedding app: its own process (the tray) with the per-run token from `control-token` in the
+`x-gestalts-control` header, or the web frontend it serves, recognized as same-origin (`Origin` equal to the request's
+host, or, for a GET, `Sec-Fetch-Site: same-origin`). Any other request with an `Origin`, which is every request
+another web page can make, is refused.
+
+What `/control/*` does natively (the folder picker, the file manager, start on login, quit) is the embedding app's
+`Shell` (`server.rs`); the headless node's does none of it.
 
 | endpoint | |
 |---|---|
@@ -78,11 +112,16 @@ is every request a web page can make.
 | `GET /blobs` | names |
 | `GET/PUT/DELETE /blobs/{name}` | bytes; workers can't delete |
 | `POST /blobs/collect` | collects unreferenced blobs (above): `{deleted}` |
-| `GET /control/status`, `POST /control/folder {path}`, `POST /control/show`, `POST /control/quit` | the app's own window only (see above) |
+| `GET /events` | WebSocket of change events (above) |
+| `GET /control/status` | folder, connected web apps, uv and plugins, `autostart` (null if unavailable) |
+| `POST /control/folder {path}`, `POST /control/choose-folder` | open a folder, given or picked natively; the status |
+| `POST /control/reveal`, `PUT /control/autostart {on}`, `POST /control/show`, `POST /control/quit` | the app's shell |
+| anything else | the app's web build, if it has one |
 
 ## Sync
 
-The apps sync their writable OPFS notes with the folder at these times:
+Apps whose notes are in OPFS (loops-for-learning, or any page not served by the node) sync them with the folder at
+these times:
 - on connect
 - 0.8 s after each write
 - every 15 s
@@ -107,11 +146,13 @@ symmetric: two devices merging the same states get the same result, whichever is
 
 Blobs are content-addressed, so they're never merged. A blob goes to the side that lacks it only if a merged note
 uses it. After each successful sync, the app collects its own unreferenced blobs and asks the connector to collect
-the folder's (`POST /blobs/collect`). A blob is deleted only after it stayed unreferenced for 7 days and 3
+the folder's (`POST /blobs/collect`); a page on the folder directly asks once after opening. A blob is deleted only after it stayed unreferenced for 7 days and 3
 collections; the manifest of when each was first seen unreferenced is `.gestalts/blob-gc.json` in the folder (OPFS
 `<dir>-blob-gc` in the browser). "Referenced" means listed in `blobs` by a note that isn't a tombstone, or held by a
 conflict record; deck blobs are never collected.
 
 Caveats:
 - The educational app (loops-for-learning) pulls every note in the folder, and the blobs they use, into its OPFS layer. Of the shipped words, only those the learner rated (and their blobs) are in that layer, so only those reach the folder.
-- That app hosted on a public origin that calls `localhost` runs into Chrome's Private Network Access rules. The node does answer the preflight, but the prototype is only tested on local origins.
+- That app hosted on a public origin that calls `localhost` runs into Chrome's Private Network Access (now Local
+  Network Access, which asks the user for permission) rules. The node does answer the preflight, but this is only
+  tested on local origins. The Gestalter avoids it by being served by the node.

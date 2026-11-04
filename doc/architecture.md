@@ -21,7 +21,7 @@ plugins/<id>/         domain bundles, each a package `@gestalts-plugin/<id>`: pl
 The apps live in repos of their own, next to a checkout of this one (they link its packages and crates by path until
 they are published):
 - **gestalter**: the host with every plugin, panes as tabs (`distribution/`), and its desktop app around the node
-  (`desktop/`, the "connector").
+  (`desktop/`, `gestalter`), which serves that build.
 - **loops-for-learning**: the host with greek-alphabet, its one pane alone; hosted, for learning.
 
 Where it goes from here (the repos, the apps, what isn't built yet): [next-steps.md](next-steps.md).
@@ -39,12 +39,13 @@ The browser never parses YAML itself: `packages/client` calls the wasm core, whi
 
 ## Data flow in the apps
 
-| app | storage | with connector |
+| app | storage | with the desktop app |
 |---|---|---|
-| Gestalter | OPFS `gestalter/`, over the decks of its installed plugins (greek-alphabet) | OPFS syncs with the folder |
+| Gestalter | the folder, through the node that serves the page (`Peer`), over the decks of its installed plugins | always: it is served by it |
 | loops-for-learning | OPFS `demo/` (its name from when it was the Demo) over the greek-alphabet deck; a word is copied into OPFS when first rated | only the OPFS layer syncs with the folder |
 
-Both work without the connector. Connecting is remembered per browser.
+loops-for-learning works without the desktop app; connecting to it is remembered per browser. The Gestalter works
+only with it running ([node.md](node.md#serving-an-app)).
 
 ### Copy-on-write from a deck
 

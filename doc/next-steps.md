@@ -75,12 +75,13 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
 - [x] **Plugins as npm packages**: `plugin.yml`, gestalts, deck, `ui/` and `worker/` in one package. Distributions
   pin them in `package.json`, and `distribution.yml` keeps only the panes. `@gestalts/vite` and the desktop app's
   build read plugins from `node_modules`; the desktop app embeds the workers of the plugins it ships.
-- [ ] **The desktop app serves the Gestalter** (gestalter). Here: the node serves an app's build, and
-  `packages/client` uses the folder through the node directly, with no OPFS layer.
+- [x] **The desktop app serves the Gestalter** (gestalter). Here: the node serves an app's build, `packages/client`
+  uses the folder through the node directly, with no OPFS layer, and `/events` pushes the folder's changes.
 - [ ] **Panes per distribution.** A pane declares what it needs (`requires: {services: [typst@1]}`), and the host
   hides or greys the ones it can't satisfy. `pane@1` notes get the distribution they belong to, so a phone doesn't get
   the desktop's tabs; each host shows and seeds only its own. Installs stay global.
-- [ ] **[Cheaper sync](#cheaper-sync)**, before syncing over a network.
+- [ ] **[Cheaper sync](#cheaper-sync)**, before syncing over a network. It's loops-for-learning that pays for every
+  sync now, the only app still syncing OPFS with the folder.
 - [ ] **Pairing** a device with the desktop:
   - The node also listens on the home network, encrypted, and accepts only paired devices (this is the
     authentication the connector lacks).
@@ -169,7 +170,8 @@ there are two.
 Not built:
 - schedule triggers (parsed, never run)
 - a worker on another machine registering with the node by URL
-- change notifications: the node has no watch/SSE endpoint, and 15 s sync is slow for progress updates
+- change notifications for apps that sync (loops-for-learning): only a page on the folder directly gets `/events`;
+  a syncing one still waits up to 15 s, slow for progress updates
 - volume: `Repo` loads every note, so high-volume workers need retention or digest notes
 - Python validating gestalts: `mise run lint-data` for now, maybe a pyo3 binding of the core later
 - secrets live with the worker, never in notes
@@ -197,6 +199,8 @@ need an explicit approval or a container runtime.
 
 ### Other
 
+- loops-for-learning, once deployed: its origin in the desktop app's `ORIGINS`, and a check of Chrome's Local Network
+  Access prompt (and the other browsers) on the real site. With the hosted Gestalter gone, drop its origin there too.
 - Obsidian two-way sync: likely a converter between Markdown with frontmatter and notes, plus the existing sync.
 - A browser extension (e.g. vocabulary from Duolingo), writing through the node API.
 - Modification times in the `Storage` port, which the search needs for a "recent" list.

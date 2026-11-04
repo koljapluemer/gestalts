@@ -5,7 +5,7 @@ import { Conflicts } from '@gestalts/kit';
 
 const DEFAULT_URL = 'http://127.0.0.1:7717';
 
-/** Connect to a running gestalts-connector, which makes a folder on disk the source of truth. */
+/** Connect to the Gestalter desktop app, which makes a folder on disk the source of truth. */
 export const ConnectorSettings = definePerspective<Record<string, never>, { onOpen?: (key: string) => void }>({
   id: 'connector-settings',
   title: 'Connector',
@@ -17,9 +17,9 @@ export const ConnectorSettings = definePerspective<Record<string, never>, { onOp
     return (
       <div className="flex w-72 flex-col gap-2">
         <p className="text-sm text-base-content/70">
-          Sync with a folder on this computer through the Gestalts Connector app. Without it, everything stays in this browser.
+          Sync with a folder on this computer through the Gestalter desktop app. Without it, everything stays in this browser.
         </p>
-        <input className="input input-sm w-full" value={url} onChange={(e) => setUrl(e.target.value)} disabled={!!status.url} aria-label="Connector URL" />
+        <input className="input input-sm w-full" value={url} onChange={(e) => setUrl(e.target.value)} disabled={!!status.url} aria-label="Desktop app URL" />
         {status.url ? (
           <div className="flex gap-2">
             <button type="button" className="btn btn-sm flex-1" disabled={status.state === 'syncing'} onClick={() => void repo.sync()}>Sync now</button>

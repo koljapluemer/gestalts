@@ -13,16 +13,37 @@ const log = logger('repo');
 /** A read-only deck published at `url` (a folder with `index.json`), under its `source` id and earlier ones. */
 export type DeckSource = { source: string; aliases?: string[]; url: string };
 
-export type RepoSource = {
-  /** the user's notes live in OPFS under `dir` */
-  dir: string;
-  /** read-only decks under them; a deck note is copied into `dir` once the user's notes reference it */
+/** Where the user's notes live: in OPFS under `dir` (synced with a connector, if one is set), or in the folder the
+ * node at `node` serves (the desktop app; written directly, nothing to sync). */
+export type NotesIn = { dir: string; node?: undefined } | { node: string; dir?: undefined };
+
+export type RepoSource = NotesIn & {
+  /** read-only decks under them; a deck note is copied into the user's notes once those reference it */
   decks?: DeckSource[];
   /** gestalt definitions (YAML) beyond the core's, from plugins */
   gestalts?: string[];
 };
 
+/** A node's `/health`. */
+export type NodeHealth = { app: string; version: string; folder: { id: string; path: string } | null };
+
+/** Asks the node at `url` who it is and which folder it serves; throws if no node answers. */
+export async function nodeHealth(url: string): Promise<NodeHealth> {
+  const r = await fetch(new URL('health', withSlash(url)));
+  if (!r.ok) throw new Error(`no node at ${url} (${r.status})`);
+  return (await r.json()) as NodeHealth;
+}
+
+function withSlash(url: string) {
+  return url.endsWith('/') ? url : `${url}/`;
+}
+
+/** How long to wait before reconnecting to a node's change events, growing with each failure. */
+const RECONNECT_MS = [500, 1000, 2000, 5000];
+
 export type ConnectorStatus = {
+  /** `sync`: notes in this browser, synced with the connector at `url`; `direct`: the notes are the node's folder */
+  mode: 'sync' | 'direct';
   url: string | null;
   state: 'off' | 'syncing' | 'ok' | 'error';
   error?: string;
@@ -30,7 +51,7 @@ export type ConnectorStatus = {
   lastReport?: SyncReport;
   /** `conflict@1` notes recorded since connecting */
   conflicts: string[];
-  /** the folder the connector serves, as of the last sync */
+  /** the folder the connector serves, as of the last sync (direct: as of opening) */
   folder?: string;
 };
 
@@ -66,10 +87,13 @@ export class Repo implements Port {
   /** mutations queued or running, for the log */
   private pending = 0;
   private blobUrls = new Map<string, Promise<string | null>>();
-  private status: ConnectorStatus = { url: null, state: 'off', conflicts: [] };
+  private status: ConnectorStatus = { mode: 'sync', url: null, state: 'off', conflicts: [] };
   private statusListeners = new Set<() => void>();
   private syncTimer: ReturnType<typeof setTimeout> | undefined;
   private pollTimer: ReturnType<typeof setInterval> | undefined;
+  /** direct mode: the node's change events */
+  private events: WebSocket | undefined;
+  private closed = false;
   version = 0;
   /**
    * Settles once the first sync after opening is done (or failed), right away without a connector. Seed notes (default
@@ -85,17 +109,80 @@ export class Repo implements Port {
     try {
       ready ??= init().then(provideCoreNatives);
       await ready;
-      wasm = await WasmRepo.open(source.dir, source.decks ?? [], source.gestalts ?? []);
+      wasm = source.node !== undefined
+        ? await WasmRepo.openNode(source.node, source.decks ?? [], source.gestalts ?? [])
+        : await WasmRepo.open(source.dir, source.decks ?? [], source.gestalts ?? []);
     } catch (e) {
       span.fail(e);
       throw e;
     }
     span.end();
+    if (source.node !== undefined) return Repo.direct(wasm, source.node);
     const repo = new Repo(wasm, `gestalts-connector:${source.dir}`);
     let saved: string | null = null;
     try { saved = localStorage.getItem(repo.storageKey); } catch { /* no storage: start disconnected */ }
     repo.firstSync = saved ? repo.connect(saved).catch(() => undefined) : Promise.resolve();
     return repo;
+  }
+
+  /** A repo on the node's folder: no sync; the node's change events keep it current. */
+  private static async direct(wasm: WasmRepo, url: string): Promise<Repo> {
+    const repo = new Repo(wasm, '');
+    let folder: string | undefined;
+    try { folder = (await nodeHealth(url)).folder?.path; } catch { /* it answered a moment ago; the events will tell */ }
+    repo.setStatus({ mode: 'direct', url, state: 'ok', folder });
+    repo.listen(0);
+    void wasm.collectNodeBlobs().catch((e: unknown) => log.warn('collecting blobs failed', { error: e }));
+    return repo;
+  }
+
+  /** Direct mode: follows the node's change events, reconnecting after `failures` failed attempts. */
+  private listen(failures: number) {
+    const url = this.status.url;
+    if (!url || this.closed) return;
+    const ws = new WebSocket(new URL('events', withSlash(url)).href.replace(/^http/, 'ws'));
+    this.events = ws;
+    let opened = false;
+    ws.onopen = () => {
+      opened = true;
+      // changes while we weren't listening are unknown: reread everything
+      if (failures > 0 || this.status.state === 'error') void this.reload();
+      this.setStatus({ state: 'ok', error: undefined });
+    };
+    ws.onmessage = (m) => {
+      let event: { changed?: { notes: string[]; blobs: string[] }; folder?: unknown } | 'reload';
+      try { event = JSON.parse(String(m.data)) as typeof event; } catch { return; }
+      if (event === 'reload') void this.reload();
+      else if (event.changed) void this.reindex(event.changed.notes, event.changed.blobs);
+      // another folder: everything the app holds (installs, decks, panes) belongs to the old one
+      else if ('folder' in event) location.reload();
+    };
+    ws.onclose = () => {
+      if (this.events !== ws || this.closed) return;
+      this.setStatus({ state: 'error', error: 'The Gestalter desktop app isn\'t running.' });
+      const next = opened ? 0 : failures + 1;
+      setTimeout(() => this.listen(next), RECONNECT_MS[Math.min(next, RECONNECT_MS.length - 1)]);
+    };
+  }
+
+  private async reindex(notes: string[], blobs: string[]) {
+    try {
+      if (notes.length) await this.serial('reindex', () => this.wasm.reindex(notes), { notes: notes.length });
+      blobs.forEach((b) => this.blobUrls.delete(b));
+      if (notes.length || blobs.length) this.changed();
+    } catch (e) {
+      log.warn('rereading changed notes failed', { error: e });
+    }
+  }
+
+  private async reload() {
+    try {
+      await this.serial('reload', () => this.wasm.reload());
+      this.blobUrls.clear();
+      this.changed();
+    } catch (e) {
+      log.warn('rereading the folder failed', { error: e });
+    }
   }
 
   subscribe = (l: () => void) => {
@@ -235,7 +322,7 @@ export class Repo implements Port {
 
   private afterWrite() {
     this.changed();
-    if (this.status.url) {
+    if (this.status.mode === 'sync' && this.status.url) {
       clearTimeout(this.syncTimer);
       this.syncTimer = setTimeout(() => void this.sync(), 800);
     }
@@ -258,6 +345,7 @@ export class Repo implements Port {
 
   /** Syncs with the connector at `url` now, then after each write and every 15 s. */
   async connect(url: string): Promise<void> {
+    if (this.status.mode === 'direct') return;
     log.info('connect', { url });
     try { localStorage.setItem(this.storageKey, url); } catch { /* not remembered */ }
     clearInterval(this.pollTimer);
@@ -270,10 +358,13 @@ export class Repo implements Port {
   close() {
     clearInterval(this.pollTimer);
     clearTimeout(this.syncTimer);
+    this.closed = true;
+    this.events?.close();
     this.setStatus({ url: null, state: 'off' });
   }
 
   disconnect() {
+    if (this.status.mode === 'direct') return;
     log.info('disconnect');
     try { localStorage.removeItem(this.storageKey); } catch { /* nothing remembered */ }
     clearInterval(this.pollTimer);
@@ -289,7 +380,7 @@ export class Repo implements Port {
 
   private async runSync(): Promise<SyncReport | undefined> {
     const url = this.status.url;
-    if (!url) return;
+    if (!url || this.status.mode === 'direct') return;
     this.setStatus({ state: 'syncing' });
     try {
       const report = await this.serial('sync', () => this.wasm.sync(url) as Promise<SyncReport>);

@@ -1,6 +1,6 @@
 //! gestalts-node: serves a folder on this computer to the Gestalts apps over HTTP on 127.0.0.1, and hosts plugin
-//! workers. Apps embed it (the Gestalter's desktop app adds a tray and its built-in plugins); `gestalts-node` is the
-//! same server headless.
+//! workers. Apps embed it (the Gestalter's desktop app adds a tray, its built-in plugins and its web frontend, which
+//! the node serves); `gestalts-node` is the same server headless.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -13,10 +13,11 @@ pub mod paths;
 pub mod plugins;
 pub mod server;
 pub mod uv;
+pub mod watch;
 
 use paths::{Config, Paths};
 use plugins::PluginHost;
-use server::{AppState, Folder, UiRequest};
+use server::{AppFiles, AppState, Folder, Identity, Shell};
 
 #[derive(clap::Args, Clone, Debug)]
 pub struct Opts {
@@ -31,14 +32,22 @@ pub struct Opts {
     /// extra web origins allowed to connect (besides localhost and the app's own frontends)
     #[arg(long, global = true)]
     pub allow_origin: Vec<String>,
+    /// a web app's build (e.g. `dist/`) to serve at `/`, instead of the app's own
+    #[arg(long, global = true)]
+    pub app_dir: Option<PathBuf>,
     /// desktop app: start in the tray without opening the window (used by "Start on login")
     #[arg(long)]
     pub background: bool,
 }
 
-/// What an app brings along: plugins compiled into its binary, and the web origins of its own frontends.
+/// What an app brings along: its name, plugins and web frontend compiled into its binary, and the web origins of
+/// other frontends allowed to use it.
 #[derive(Clone, Copy)]
 pub struct Embedded {
+    /// reported as `app` in `/health`
+    pub name: &'static str,
+    /// the web frontend (a static build) served at `/`
+    pub app: Option<&'static include_dir::Dir<'static>>,
     /// the plugins (manifests, gestalts, workers; one folder each) and the Python SDK their workers depend on by
     /// relative path (`../../../sdk/python`), unpacked in that layout
     pub builtin: Option<(&'static include_dir::Dir<'static>, &'static include_dir::Dir<'static>)>,
@@ -46,7 +55,7 @@ pub struct Embedded {
 }
 
 impl Embedded {
-    pub const NONE: Embedded = Embedded { builtin: None, origins: &[] };
+    pub const NONE: Embedded = Embedded { name: "gestalts-node", app: None, builtin: None, origins: &[] };
 }
 
 /// The subcommands every node binary has.
@@ -81,6 +90,8 @@ pub struct Server {
     task: tokio::task::JoinHandle<()>,
     pub paths: Paths,
     pub control_token: String,
+    /// `http://127.0.0.1:<port>`, also where the app's web frontend is
+    pub address: String,
 }
 
 impl Server {
@@ -101,7 +112,7 @@ impl Server {
 
 /// Starts the server and the plugins. `remember` saves folders chosen later in the app's config.
 pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Option<Folder>, remember: bool,
-                    ui: Arc<dyn Fn(UiRequest) + Send + Sync>) -> Result<Server, String> {
+                    shell: Arc<dyn Shell>) -> Result<Server, String> {
     let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
     let control_token = uuid::Uuid::new_v4().to_string();
     paths::write_secret(&paths.control_token_file(), &control_token).map_err(|e| format!("cannot write the control token: {e}"))?;
@@ -113,7 +124,9 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
     let mut origins: Vec<String> = embedded.origins.iter().map(|o| o.to_string()).collect();
     origins.extend(Config::load(&paths).extra_origins);
     origins.extend(opts.allow_origin.iter().cloned());
-    let state = AppState::new(folder, plugins.clone(), control_token.clone(), remember.then(|| paths.clone()), ui, address, origins);
+    let app = opts.app_dir.clone().map(AppFiles::Disk).or(embedded.app.map(AppFiles::Embedded));
+    let identity = Identity { name: embedded.name, app };
+    let state = AppState::new(folder, plugins.clone(), control_token.clone(), remember.then(|| paths.clone()), shell, identity, address.clone(), origins);
     let (shutdown, stopped) = tokio::sync::oneshot::channel::<()>();
     let starting = plugins.clone();
     rt.spawn(async move { starting.start_all().await });
@@ -121,7 +134,7 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
         let served = axum::serve(listener, server::app(state)).with_graceful_shutdown(async { let _ = stopped.await; }).await;
         if let Err(e) = served { eprintln!("gestalts-node: server stopped: {e}"); }
     });
-    Ok(Server { rt, plugins, shutdown, task, paths, control_token })
+    Ok(Server { rt, plugins, shutdown, task, paths, control_token, address })
 }
 
 /// Where plugins come from: `--plugins-dir`, else the app's built-in ones (unpacked) and the user's.
@@ -174,7 +187,7 @@ pub fn serve(opts: &Opts, embedded: Embedded, data: Option<PathBuf>) -> Result<(
         Some(f) => println!("gestalts-node serving {} on http://127.0.0.1:{}", f.info().path, opts.port),
         None => println!("gestalts-node on http://127.0.0.1:{} (no folder yet: pass --data or choose one in the desktop app)", opts.port),
     }
-    let server = start_server(opts, embedded, paths, folder, remember, Arc::new(|_| {}))?;
+    let server = start_server(opts, embedded, paths, folder, remember, Arc::new(server::Headless))?;
     server.block_on(stop_requested());
     server.stop();
     Ok(())

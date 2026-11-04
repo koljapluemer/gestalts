@@ -23,14 +23,17 @@ fn to_js<T: Serialize>(v: &T) -> Result<JsValue, JsError> {
     v.serialize(&serde_wasm_bindgen::Serializer::json_compatible()).map_err(|e| JsError::new(&e.to_string()))
 }
 
-/// A repo over browser storage. Every method returning data hands out plain JSON-like objects.
+/// A repo over browser storage, or directly over a node's folder. Every method returning data hands out plain
+/// JSON-like objects.
 #[wasm_bindgen]
 pub struct WasmRepo {
     repo: Rc<Repo<Dyn>>,
     /// where this repo's own writes land, and what syncs with a connector
     writable: Dyn,
-    /// OPFS folder name, used to keep sync base snapshots next to the data
-    dir: String,
+    /// OPFS folder name, used to keep sync base snapshots next to the data; `None` when the notes are a node's
+    dir: Option<String>,
+    /// the node whose folder the notes are, when they are
+    node: Option<Rc<Peer>>,
     /// the storage with its decks, when it has any
     layered: Option<Rc<Layered<Dyn, Dyn>>>,
     upstream_report: RefCell<UpstreamReport>,
@@ -43,6 +46,19 @@ impl WasmRepo {
     /// the user's notes reference are copied into OPFS, and untouched copies follow deck changes
     /// (`gestalts_core::upstream`).
     pub async fn open(dir: String, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
+        let writable: Dyn = Rc::new(Opfs::open(&dir).await.map_err(err)?);
+        Self::build(writable, Some(dir), None, decks, gestalts).await
+    }
+
+    /// Like `open`, but the notes are the folder a node serves at `url` (the desktop app, usually this page's own
+    /// origin): every write goes straight to it, and nothing syncs.
+    #[wasm_bindgen(js_name = openNode)]
+    pub async fn open_node(url: String, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
+        let node = Rc::new(Peer::new(&url));
+        Self::build(node.clone(), None, Some(node), decks, gestalts).await
+    }
+
+    async fn build(writable: Dyn, dir: Option<String>, node: Option<Rc<Peer>>, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
         #[derive(serde::Deserialize)]
         struct DeckSpec {
             source: String,
@@ -52,25 +68,46 @@ impl WasmRepo {
         }
         let specs: Vec<DeckSpec> = if decks.is_undefined() || decks.is_null() { vec![] } else { from_js(decks)? };
         let g = Gestalts::builtin_with(&gestalts.iter().map(String::as_str).collect::<Vec<_>>()).map_err(|e| JsError::new(&e))?;
-        let writable: Dyn = Rc::new(Opfs::open(&dir).await.map_err(err)?);
         let mut mounted = Vec::new();
         for d in specs {
             let storage: Dyn = Rc::new(Static::open(&d.url).await.map_err(err)?);
             mounted.push(Deck { source: d.source, aliases: d.aliases, storage });
         }
-        if mounted.is_empty() {
-            return Self::build(writable.clone(), writable, dir, None, g).await;
-        }
-        let layered = Rc::new(Layered { decks: mounted, top: writable.clone() });
-        Self::build(layered.clone(), writable, dir, Some(layered), g).await
-    }
-
-    async fn build(storage: Dyn, writable: Dyn, dir: String, layered: Option<Rc<Layered<Dyn, Dyn>>>, gestalts: Gestalts) -> Result<WasmRepo, JsError> {
-        let repo = Rc::new(Repo::new(storage, gestalts));
-        let this = WasmRepo { repo, writable, dir, layered, upstream_report: RefCell::default() };
+        let (storage, layered) = if mounted.is_empty() {
+            (writable.clone(), None)
+        } else {
+            let layered = Rc::new(Layered { decks: mounted, top: writable.clone() });
+            (layered.clone() as Dyn, Some(layered))
+        };
+        let repo = Rc::new(Repo::new(storage, g));
+        let this = WasmRepo { repo, writable, dir, node, layered, upstream_report: RefCell::default() };
         this.pull_upstream().await?;
         this.repo.load().await.map_err(err)?;
         Ok(this)
+    }
+
+    /// Rereads `keys` from storage, after something else changed them (a node's change events), then brings deck
+    /// copies up to date. Returns every key reread, including copies that pulling upstream wrote.
+    pub async fn reindex(&self, keys: Vec<String>) -> Result<Vec<String>, JsError> {
+        self.pull_upstream().await?;
+        let mut changed = keys;
+        {
+            let up = self.upstream_report.borrow();
+            changed.extend(up.copied.iter().chain(&up.updated).cloned());
+        }
+        let repo = self.repo.clone();
+        repo.reindex(&changed).await.map_err(err)?;
+        Ok(changed)
+    }
+
+    /// For a repo on a node's folder: asks the node to collect the folder's unreferenced blobs (`POST
+    /// /blobs/collect`); the names it deleted.
+    #[wasm_bindgen(js_name = collectNodeBlobs)]
+    pub async fn collect_node_blobs(&self) -> Result<Vec<String>, JsError> {
+        match &self.node {
+            Some(node) => node.collect_blobs().await.map_err(err),
+            None => Ok(vec![]),
+        }
     }
 
     /// The keys of the notes copied from the deck `source` (or its `aliases`).
@@ -81,8 +118,8 @@ impl WasmRepo {
 
     /// Collects this browser's unreferenced blobs, after a successful sync (`gestalts_core::blobs`). The manifest
     /// lives in OPFS next to the data.
-    async fn collect_blobs(&self) -> Result<Vec<String>, JsError> {
-        let store = Opfs::open(&format!("{}-blob-gc", self.dir)).await.map_err(err)?;
+    async fn collect_blobs(&self, dir: &str) -> Result<Vec<String>, JsError> {
+        let store = Opfs::open(&format!("{dir}-blob-gc")).await.map_err(err)?;
         let mut manifest: gestalts_core::GcManifest =
             store.read_note("manifest").await.map_err(err)?.and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
         let texts = self.repo.texts();
@@ -205,6 +242,9 @@ impl WasmRepo {
     /// Syncs this repo's writable notes and blobs with a connector, then reloads.
     /// Returns the sync report plus `folder`, the path of the connector's open folder.
     pub async fn sync(&self, connector_url: String) -> Result<JsValue, JsError> {
+        let Some(dir) = &self.dir else {
+            return Err(JsError::new("these notes are the node's folder already: there is nothing to sync"));
+        };
         // ms per step, for the debug log
         let mut timings = serde_json::Map::new();
         let mut last = js_sys::Date::now();
@@ -218,12 +258,12 @@ impl WasmRepo {
         mark("health");
         let folder = &health["folder"];
         let (Some(folder_id), Some(folder_path)) = (folder["id"].as_str(), folder["path"].as_str()) else {
-            return Err(JsError::new("The connector has no folder open yet. Choose one in the Gestalts Connector."));
+            return Err(JsError::new("The desktop app has no folder open yet. Choose one in the Gestalter."));
         };
         // the base is per folder: the same connector URL may serve a different folder later, and
         // comparing against another folder's base would read its missing notes as deletions
         let slug: String = format!("{connector_url}#{folder_id}").chars().map(|c| if c.is_ascii_alphanumeric() { c } else { '_' }).collect();
-        let base = Opfs::open(&format!("{}-sync-base/{slug}", self.dir)).await.map_err(err)?;
+        let base = Opfs::open(&format!("{dir}-sync-base/{slug}")).await.map_err(err)?;
         mark("open_base");
         let report = gestalts_core::sync_with(&*self.writable, &remote, &base, self.repo.gestalts(), &now(), &mut mark).await.map_err(err)?;
         self.pull_upstream().await?;
@@ -237,7 +277,7 @@ impl WasmRepo {
         let repo = self.repo.clone();
         repo.reindex(&changed).await.map_err(err)?;
         mark("reindex");
-        let collected = self.collect_blobs().await?;
+        let collected = self.collect_blobs(dir).await?;
         let collected_remote = remote.collect_blobs().await.unwrap_or_default();
         mark("collect_blobs");
         let mut out = serde_json::to_value(&report).map_err(|e| JsError::new(&e.to_string()))?;
