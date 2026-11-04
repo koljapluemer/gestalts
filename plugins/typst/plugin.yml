@@ -7,7 +7,7 @@ description: Typst documents beside a note's canvas, compiled by the connector.
 gestalts: [typst-document@1]
 uses: [canvas@1, canvas@2, source@1]
 panes:
-  - { id: canvas2typ, title: Canvas2Typ, entry: ui/src/index.ts#Canvas2TypPane }
+  - { id: canvas2typ, title: Canvas2Typ, entry: ui/src/index.ts#Canvas2TypPane, requires: { services: [typst@1] } }
 access:
   read: all
   write: all

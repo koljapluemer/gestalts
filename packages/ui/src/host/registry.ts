@@ -13,11 +13,14 @@ export type PluginManifest = {
   description?: string;
   gestalts?: string[];
   uses?: string[];
-  panes?: { id: string; title: string; entry: string }[];
+  panes?: PaneManifest[];
   slots?: { slot: string; gestalt: string; entry: string }[];
   access?: { read?: Scope; write?: Scope };
   worker?: unknown;
 };
+
+/** A pane in `plugin.yml`; `requires.services` are the node services it needs (see `paneSupport`). */
+export type PaneManifest = { id: string; title: string; entry: string; requires?: { services?: string[] } };
 
 /** A bundled plugin, as the app's build (`virtual:gestalts-plugins`) hands it to the host. */
 export type PluginEntry = {
@@ -30,15 +33,15 @@ export type PluginEntry = {
   modules: Record<string, () => Promise<Record<string, unknown>>>;
 };
 
-/** `plugins`: the ids of the plugins the app is built with */
-export type Distribution = { plugins: string[]; default_panes: string[]; install_ui: boolean };
+/** `id`: whose pane notes are whose; `plugins`: the ids of the plugins the app is built with */
+export type Distribution = { id: string; plugins: string[]; default_panes: string[]; install_ui: boolean };
 
 export type Registry = { distribution: Distribution; plugins: PluginEntry[] };
 
 /** `<plugin>/<pane>` */
 export const paneRef = (plugin: string, pane: string) => `${plugin}/${pane}`;
 
-export function findPane(registry: Registry, ref: string): { plugin: PluginEntry; pane: NonNullable<PluginManifest['panes']>[number] } | undefined {
+export function findPane(registry: Registry, ref: string): { plugin: PluginEntry; pane: PaneManifest } | undefined {
   const [id, paneId] = ref.split('/');
   const plugin = registry.plugins.find((p) => p.manifest.id === id);
   const pane = plugin?.manifest.panes?.find((p) => p.id === paneId);

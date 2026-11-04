@@ -24,6 +24,9 @@ export type RepoSource = NotesIn & {
   gestalts?: string[];
 };
 
+/** One of a node's `/services`: `available` while its worker runs. */
+export type ServiceStatus = { id: string; available: boolean };
+
 /** A node's `/health`. */
 export type NodeHealth = { app: string; version: string; folder: { id: string; path: string } | null };
 
@@ -247,6 +250,18 @@ export class Repo implements Port {
   /** Returns undefined while offline. A declared service may still answer 503 while its worker starts. */
   service(id: string): ServiceClient | undefined {
     return this.status.url ? new ServiceClient(this.status.url.replace(/\/$/, ''), id) : undefined;
+  }
+
+  /** The services the node offers and whether each is running; null without a node, or if it didn't answer. */
+  async services(): Promise<ServiceStatus[] | null> {
+    const url = this.status.url;
+    if (!url) return null;
+    try {
+      const r = await fetch(new URL('services', withSlash(url)));
+      return r.ok ? ((await r.json()) as ServiceStatus[]) : null;
+    } catch {
+      return null;
+    }
   }
 
   /** What `raw` would index as, without saving it. */

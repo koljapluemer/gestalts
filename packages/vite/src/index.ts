@@ -1,8 +1,8 @@
 /**
  * The plugins an app is built with, as the virtual module `virtual:gestalts-plugins`: each plugin's manifest, its
  * gestalts (YAML text), its deck (served under `decks/<id>/`) and loaders for its UI modules. The plugins are the
- * app's `@gestalts-plugin/*` dependencies in its `package.json`; `distribution.yml` next to it says which panes it
- * opens with. The host loads plugins through this registry and never imports them, so an app builds with any list,
+ * app's `@gestalts-plugin/*` dependencies in its `package.json`; `distribution.yml` next to it names the distribution
+ * (`id`) and says which panes it opens with. The host loads plugins through this registry and never imports them, so an app builds with any list,
  * even an empty one.
  *
  * The packages may be linked from a sibling checkout (`link:../gestalts/...`), so this also dedupes React (and lucide), lets the
@@ -24,11 +24,11 @@ type Manifest = {
   host_api: number;
   gestalts?: string[];
   deck?: { path: string; aliases?: string[] };
-  panes?: { id: string; title: string; entry: string }[];
+  panes?: { id: string; title: string; entry: string; requires?: { services?: string[] } }[];
   slots?: { slot: string; gestalt: string; entry: string }[];
 };
 
-type Distribution = { default_panes?: string[]; install_ui?: boolean };
+type Distribution = { id?: unknown; default_panes?: string[]; install_ui?: boolean };
 
 type PackageJson = { dependencies?: Record<string, string> };
 
@@ -66,6 +66,8 @@ function files(dir: string): string[] {
 
 function load(appRoot: string) {
   const distribution = parse(readFileSync(join(appRoot, 'distribution.yml'), 'utf8')) as Distribution;
+  // pane notes record it, so a distribution keeps its id for good
+  if (typeof distribution.id !== 'string' || !/^[a-z0-9-]+$/.test(distribution.id)) throw new Error('distribution.yml needs an `id` (lowercase letters, digits and -)');
   const ids = dependencies(appRoot).filter((d) => d.startsWith(PLUGIN_SCOPE)).map((d) => d.slice(PLUGIN_SCOPE.length));
   const plugins = ids.map((id) => {
     const root = packageRoot(appRoot, PLUGIN_SCOPE + id);

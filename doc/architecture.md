@@ -95,6 +95,7 @@ uses: [fsrs-state@1, practice-session@1]   # owned elsewhere: a data dependency
 deck: { path: deck, aliases: [demo] }      # starter data, published-deck format
 panes:
   - { id: practice, title: Greek alphabet, entry: ui/src/index.ts#PracticePane }
+  # a pane may need node services: `requires: { services: [typst@1] }` (Canvas2Typ)
 slots:                                     # e.g. canvas: { slot: note-view, gestalt: canvas@2, entry: … }
 access:
   read: { gestalts: [pronunciation-card@1, fsrs-state@1, practice-session@1] }   # or `all`
@@ -108,7 +109,8 @@ worker: …                                  # optional, see node.md
 - **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
   (Canvas2Typ, and the `typst@1` worker), sources, learn, quotes, greek-alphabet (with a deck).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
-  `package.json`) and `distribution.yml` (`default_panes`, `install_ui`). `@gestalts/vite` turns them into
+  `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` is recorded in pane notes,
+  so it stays once released: `gestalter-desktop`, `loops-for-learning`, later `gestalter-android`. `@gestalts/vite` turns them into
   `virtual:gestalts-plugins`: each plugin's manifest, its gestalts, its deck (served under `decks/<id>/`) and loaders
   for its UI modules. The app builds with any list. The same preset dedupes React (packages may be linked from a
   sibling checkout) and replaces `@gestalts-sources;` in the app's CSS with an `@source` per package, at its real
@@ -121,9 +123,15 @@ worker: …                                  # optional, see node.md
 ### Panes and the host
 
 - **Panes are notes** (`pane@1`): the Gestalter's tabs. Opening one writes a note, closing it deletes it, dragging
-  sets its `position`. `?pane=<note key>` selects one. A folder without pane notes gets the distribution's
-  `default_panes`, under stable keys, so devices seeding at once write the same notes. A pane's own settings are
-  its note's `params`.
+  sets its `position`. `?pane=<note key>` selects one. A pane's own settings are its note's `params`.
+- **Per distribution**: a pane note records its `distribution`, and each host shows only its own, so a phone
+  doesn't get the desktop's tabs. When a distribution has none, it gets its `default_panes`, under stable keys
+  (`stableId("pane", "<distribution>/<plugin>/<pane>")`), so its devices seeding at once write the same notes.
+  Pane notes from before (no `distribution`) go to the first host with tabs that sees them. Installs stay global.
+- **Requirements**: a pane may need node services (`requires.services`). The host asks the node's `/services`
+  (`useServices()` in `@gestalts/client`, every 10 s): a pane whose service the node doesn't offer, or without a
+  node, isn't offered under +; one whose service isn't running is greyed there. An open tab that lacks one is
+  dimmed and its pane runs under a line saying what's missing (Canvas2Typ still edits without `typst@1`).
 - **The capability frame** (`host/PaneFrame.tsx`) runs each pane with the host's capabilities (`useHost()`):
   `openNote` and `createNote` (the host's editor or new-note form over the pane, kept in the URL as
   `?overlay=note:<key>` or `new`, so Back closes it), `pickNote`, `navigate`, `setTitle`, and `slot`, the views

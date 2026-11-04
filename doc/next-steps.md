@@ -77,7 +77,7 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
   build read plugins from `node_modules`; the desktop app embeds the workers of the plugins it ships.
 - [x] **The desktop app serves the Gestalter** (gestalter). Here: the node serves an app's build, `packages/client`
   uses the folder through the node directly, with no OPFS layer, and `/events` pushes the folder's changes.
-- [ ] **Panes per distribution.** A pane declares what it needs (`requires: {services: [typst@1]}`), and the host
+- [x] **Panes per distribution.** A pane declares what it needs (`requires: {services: [typst@1]}`), and the host
   hides or greys the ones it can't satisfy. `pane@1` notes get the distribution they belong to, so a phone doesn't get
   the desktop's tabs; each host shows and seeds only its own. Installs stay global.
 - [ ] **[Cheaper sync](#cheaper-sync)**, before syncing over a network. It's loops-for-learning that pays for every

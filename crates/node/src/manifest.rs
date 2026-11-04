@@ -74,6 +74,16 @@ pub struct PaneManifest {
     pub title: String,
     /// `<module path>#<export>`
     pub entry: String,
+    /// what a host needs to run it; one that can't hides or greys the pane
+    #[serde(default)]
+    pub requires: PaneRequires,
+}
+
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct PaneRequires {
+    /// `name@N` of node services (a worker's `services`)
+    pub services: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -229,6 +239,14 @@ fn valid_entry(entry: &str) -> Result<(), ManifestError> {
     safe_relative(Path::new(module))
 }
 
+fn valid_services(ids: &[String]) -> Result<(), ManifestError> {
+    let mut seen = BTreeSet::new();
+    for id in ids {
+        if !valid_id(id) || !id.contains('@') || !seen.insert(id) { return invalid(format!("invalid or duplicate service {id}")); }
+    }
+    Ok(())
+}
+
 fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     if m.schema != 2 { return invalid(format!("unsupported schema {}", m.schema)); }
     if !valid_id(&m.id) || m.id.contains('@') { return invalid(format!("invalid plugin id {}", m.id)); }
@@ -242,6 +260,7 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     for p in &m.panes {
         if !valid_id(&p.id) || p.id.contains('@') || !panes.insert(&p.id) { return invalid(format!("invalid or duplicate pane {}", p.id)); }
         valid_entry(&p.entry)?;
+        valid_services(&p.requires.services)?;
     }
     for s in &m.slots {
         valid_entry(&s.entry)?;
@@ -259,10 +278,7 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
         safe_relative(&w.project)?;
         if w.runtime != Runtime::Uv { return invalid("only the uv runtime is supported"); }
         if w.command.is_empty() || w.command.iter().any(String::is_empty) { return invalid("worker command is empty"); }
-        let mut services = BTreeSet::new();
-        for id in &w.services {
-            if !valid_id(id) || !id.contains('@') || !services.insert(id) { return invalid(format!("invalid or duplicate service {id}")); }
-        }
+        valid_services(&w.services)?;
         for trigger in &w.triggers {
             if let Trigger::Schedule { cron } = trigger
                 && cron.split_whitespace().count() != 5 { return invalid(format!("cron must have five fields: {cron}")); }
@@ -353,6 +369,20 @@ mod tests {
         assert!(gestalts_with(&[&PluginBundle::load(&dir).unwrap()]).unwrap_err().contains("nothing defines"));
         std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\naccess: {read: {gestalts: [term@1]}}\n").unwrap();
         assert!(PluginBundle::load(&dir).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn panes_require_services() {
+        let dir = std::env::temp_dir().join(format!("gestalts-plugin-requires-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let manifest = |services: &str| format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\npanes:\n  - {{ id: p, title: P, entry: ui/a.ts#P, requires: {{ services: {services} }} }}\n");
+        std::fs::write(dir.join("plugin.yml"), manifest("[typst@1]")).unwrap();
+        assert_eq!(PluginBundle::load(&dir).unwrap().manifest.panes[0].requires.services, ["typst@1"]);
+        for bad in ["[typst]", "[typst@1, typst@1]", "[Typst@1]"] {
+            std::fs::write(dir.join("plugin.yml"), manifest(bad)).unwrap();
+            assert!(PluginBundle::load(&dir).is_err(), "{bad}");
+        }
         std::fs::remove_dir_all(&dir).unwrap();
     }
 }

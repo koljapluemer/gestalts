@@ -14,6 +14,26 @@ export function useConnector() {
   return useSyncExternalStore(repo.connector.subscribe, repo.connector.get);
 }
 
+const SERVICES_POLL_MS = 10_000;
+
+/**
+ * The node's services by id, `true` while running: undefined until known, empty without a node. Asked again when
+ * the connector changes and every 10 s, since workers start after the page.
+ */
+export function useServices(): Map<string, boolean> | undefined {
+  const repo = useHostRepo();
+  const { url } = useConnector();
+  const [services, setServices] = useState<Map<string, boolean>>();
+  useEffect(() => {
+    let live = true;
+    const ask = () => void repo.services().then((list) => { if (live) setServices(new Map((list ?? []).map((s) => [s.id, s.available]))); });
+    ask();
+    const timer = setInterval(ask, SERVICES_POLL_MS);
+    return () => { live = false; clearInterval(timer); };
+  }, [repo, url]);
+  return services;
+}
+
 const opened = new Map<string, Promise<Repo>>();
 
 /** Opens a repo once per source (also across StrictMode's double effects); `error` says why it couldn't. */
