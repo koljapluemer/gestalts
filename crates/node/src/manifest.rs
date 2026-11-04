@@ -1,4 +1,5 @@
-//! Domain contracts for plugins (`plugin.yml`, schema 2). Runtime adapters belong in the connector and the apps.
+//! Domain contracts for plugins (`plugin.yml`, schema 2): pure, no IO beyond reading a bundle. Running workers is
+//! `plugins.rs`.
 //!
 //! A plugin is a domain bundle: the gestalts it owns, an optional deck, optional UI (panes and slot views) and an
 //! optional worker. See `doc/architecture.md#plugins`.

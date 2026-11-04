@@ -617,15 +617,17 @@ dependencies = [
  "flate2",
  "gestalts-core",
  "gestalts-fs",
- "gestalts-plugin-host",
+ "gestalts-peer",
  "include_dir",
  "mime_guess",
  "pollster",
  "reqwest",
  "serde",
  "serde_json",
+ "serde_yaml_ng",
  "sha2",
  "tar",
+ "thiserror",
  "tokio",
  "tower",
  "tower-http",
@@ -634,13 +636,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "gestalts-plugin-host"
+name = "gestalts-peer"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "futures",
  "gestalts-core",
+ "js-sys",
+ "reqwest",
  "serde",
- "serde_yaml_ng",
- "thiserror",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -650,6 +658,7 @@ dependencies = [
  "async-trait",
  "futures",
  "gestalts-core",
+ "gestalts-peer",
  "js-sys",
  "serde",
  "serde-wasm-bindgen",

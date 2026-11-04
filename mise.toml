@@ -8,7 +8,7 @@ uv = "0.13.6"
 "cargo:wasm-pack" = "0.15.1"
 
 [tasks.setup]
-description = "JS dependencies and the core compiled to wasm (after cloning, and after changing crates/core or crates/wasm)"
+description = "JS dependencies and the core compiled to wasm (after cloning, and after changing crates/core, crates/peer or crates/wasm)"
 run = [
   "pnpm install",
   "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",

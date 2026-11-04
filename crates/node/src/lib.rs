@@ -8,6 +8,7 @@ use std::sync::Arc;
 use clap::Subcommand;
 use gestalts_fs::FsStorage;
 
+pub mod manifest;
 pub mod paths;
 pub mod plugins;
 pub mod server;

@@ -163,20 +163,20 @@ async fn health(State(s): State<AppState>) -> Json<Health> {
     Json(Health { app: "gestalts-connector", version: env!("CARGO_PKG_VERSION"), folder: s.folder().map(|f| f.info.clone()) })
 }
 
-async fn worker_access(headers: &HeaderMap, state: &AppState) -> Result<Option<gestalts_plugin_host::Access>, Response> {
+async fn worker_access(headers: &HeaderMap, state: &AppState) -> Result<Option<crate::manifest::Access>, Response> {
     let Some(value) = headers.get(header::AUTHORIZATION) else { return Ok(None) };
     let value = value.to_str().map_err(|_| StatusCode::UNAUTHORIZED.into_response())?;
     let token = value.strip_prefix("Bearer ").ok_or_else(|| StatusCode::UNAUTHORIZED.into_response())?;
     state.plugins.policy_for_token(token).await.map(Some).ok_or_else(|| StatusCode::UNAUTHORIZED.into_response())
 }
 
-fn readable(gestalts: &gestalts_core::Gestalts, access: &gestalts_plugin_host::Access, key: &str, text: &str) -> bool {
+fn readable(gestalts: &gestalts_core::Gestalts, access: &crate::manifest::Access, key: &str, text: &str) -> bool {
     let note = gestalts_core::Note::parse(key, text);
     let gs = gestalts.of(&note);
     access.read.gestalts.iter().any(|g| gs.contains(g)) && access.read.tags_all.iter().all(|t| note.has_tag(t))
 }
 
-fn writable(access: &gestalts_plugin_host::Access, key: &str, text: &str) -> bool {
+fn writable(access: &crate::manifest::Access, key: &str, text: &str) -> bool {
     let note = gestalts_core::Note::parse(key, text);
     note.parse_error.is_none() && !access.write.tags_all.is_empty() && access.write.tags_all.iter().all(|t| note.has_tag(t))
 }
@@ -238,9 +238,9 @@ pub(crate) fn now_iso() -> String {
 }
 
 /// Blobs referenced by notes this worker may read.
-fn referenced_blobs(s: &FsStorage, gestalts: &gestalts_core::Gestalts, access: &gestalts_plugin_host::Access) -> Result<std::collections::BTreeSet<String>, Response> {
+fn referenced_blobs(s: &FsStorage, gestalts: &gestalts_core::Gestalts, access: &crate::manifest::Access) -> Result<std::collections::BTreeSet<String>, Response> {
     let mut names = std::collections::BTreeSet::new();
-    if access.blobs.read != gestalts_plugin_host::BlobRead::Referenced { return Ok(names); }
+    if access.blobs.read != crate::manifest::BlobRead::Referenced { return Ok(names); }
     for key in api(s.list_notes_sync())? {
         if let Some(text) = api(s.read_note_sync(&key))? && readable(gestalts, access, &key, &text) {
             names.extend(gestalts_core::Note::parse(key, text).blobs().into_iter().map(|b| b.target));
@@ -580,5 +580,41 @@ mod tests {
         let del = axum::http::Request::delete("/blobs/unused.png").body(Body::empty()).unwrap();
         assert_eq!(send(&app, del).await.0, StatusCode::NO_CONTENT);
         assert!(!dir.join("blobs/unused.png").exists());
+    }
+
+    /// The node API as another device sees it: `gestalts_peer::Peer` over real HTTP, syncing with the folder.
+    #[tokio::test]
+    async fn a_peer_syncs_with_the_folder() {
+        use gestalts_core::{Gestalts, Memory, Storage};
+        use gestalts_peer::Peer;
+
+        let dir = temp_dir("peer");
+        let app = app(state(Some(Folder::open(&dir).unwrap())));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\nblobs: [disk.png]\n").unwrap();
+        std::fs::write(dir.join("blobs/disk.png"), [1, 2]).unwrap();
+
+        let peer = Peer::new(&url);
+        let health = peer.health().await.unwrap();
+        assert_eq!(health["folder"]["path"].as_str().map(Path::new), Some(dir.canonicalize().unwrap().as_path()));
+
+        let local = Memory::default();
+        local.write_note("on-phone", "id: on-phone\nblobs: [phone.png]\n").await.unwrap();
+        local.write_blob("phone.png", &[3]).await.unwrap();
+        let base = Memory::default();
+        let report = gestalts_core::sync_with(&local, &peer, &base, &Gestalts::builtin(), "2026-01-01T00:00:00Z", &mut |_| {}).await.unwrap();
+        assert_eq!(report.pulled, ["on-disk"]);
+        assert_eq!(report.pushed, ["on-phone"]);
+        assert_eq!((report.blobs_pulled, report.blobs_pushed), (vec!["disk.png".to_owned()], vec!["phone.png".to_owned()]));
+        assert!(std::fs::read_to_string(dir.join("notes/on-phone.yml")).unwrap().contains("phone.png"));
+        assert_eq!(local.read_note("on-disk").await.unwrap().unwrap(), "id: on-disk\nblobs: [disk.png]\n");
+        assert_eq!(std::fs::read(dir.join("blobs/phone.png")).unwrap(), [3]);
+        assert_eq!(local.read_blob("disk.png").await.unwrap().unwrap(), [1, 2]);
+
+        assert_eq!(peer.read_note("missing").await.unwrap(), None);
+        peer.delete_note("on-phone").await.unwrap();
+        assert!(gestalts_core::is_tombstone_text(&peer.read_note("on-phone").await.unwrap().unwrap()));
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "gestalts-wasm"
-description = "The gestalts core in the browser: OPFS, static-site and connector storage adapters"
+description = "The gestalts core in the browser: with OPFS storage; HTTP storage comes from gestalts-peer"
 edition.workspace = true
 version.workspace = true
 
@@ -9,6 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 gestalts-core.workspace = true
+gestalts-peer.workspace = true
 async-trait.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -26,7 +27,6 @@ features = [
   "FileSystemHandle", "FileSystemDirectoryHandle", "FileSystemFileHandle",
   "FileSystemGetFileOptions", "FileSystemGetDirectoryOptions", "FileSystemRemoveOptions",
   "FileSystemWritableFileStream", "WritableStream", "File", "Blob",
-  "Request", "RequestInit", "Response", "Headers",
 ]
 
 [package.metadata.wasm-pack.profile.release]

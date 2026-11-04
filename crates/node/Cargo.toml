@@ -8,10 +8,11 @@ version.workspace = true
 pollster = "0.4"
 gestalts-core.workspace = true
 gestalts-fs.workspace = true
-gestalts-plugin-host = { path = "../plugin-host" }
 serde.workspace = true
 serde_json.workspace = true
+serde_yaml_ng.workspace = true
 sha2.workspace = true
+thiserror.workspace = true
 uuid.workspace = true
 axum = "0.8"
 clap = { version = "4", features = ["derive"] }
@@ -26,4 +27,5 @@ tower-http = { version = "0.6", features = ["cors"] }
 zip = { version = "9", default-features = false, features = ["deflate"] }
 
 [dev-dependencies]
+gestalts-peer.workspace = true
 tower = { version = "0.5", features = ["util"] }

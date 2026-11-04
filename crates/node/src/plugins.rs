@@ -6,11 +6,11 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use gestalts_core::{Gestalts, Note};
-use gestalts_plugin_host::{PluginBundle, Runtime, Trigger, WorkerManifest};
 use serde::{Deserialize, Serialize};
 use tokio::process::{Child, Command};
 use tokio::sync::{Mutex, RwLock};
 
+use crate::manifest::{PluginBundle, Runtime, Trigger, WorkerManifest};
 use crate::paths::Paths;
 use crate::uv::{self, UvState};
 
@@ -84,7 +84,7 @@ impl PluginHost {
                 found.insert(id, Arc::new(Mutex::new(HostedPlugin { bundle, worker, view, token: uuid::Uuid::new_v4().to_string(), worker_url: None, child: None })));
             }
         }
-        let gestalts = gestalts_plugin_host::gestalts_with(&bundles.iter().collect::<Vec<_>>())?;
+        let gestalts = crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())?;
         Ok(Self { inner: Arc::new(RwLock::new(found)), connector_url, paths, uv: Arc::new(std::sync::RwLock::new(UvState::Locating)), client: reqwest::Client::new(), gestalts: Arc::new(gestalts) })
     }
 
@@ -271,7 +271,7 @@ impl PluginHost {
         }
     }
 
-    pub async fn policy_for_token(&self, token: &str) -> Option<gestalts_plugin_host::Access> {
+    pub async fn policy_for_token(&self, token: &str) -> Option<crate::manifest::Access> {
         let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
         for p in plugins { let p = p.lock().await; if p.token == token { return Some(p.worker.access.clone()); } }
         None
@@ -287,7 +287,7 @@ pub fn load_gestalts(dirs: &[PathBuf]) -> Result<Gestalts, String> {
             bundles.push(PluginBundle::load(entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?);
         }
     }
-    gestalts_plugin_host::gestalts_with(&bundles.iter().collect::<Vec<_>>())
+    crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())
 }
 
 pub fn unpack_builtin(paths: &Paths, builtin: &include_dir::Dir<'_>, sdk: &include_dir::Dir<'_>) -> std::io::Result<PathBuf> {

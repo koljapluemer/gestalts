@@ -1,6 +1,5 @@
 //! JS API of the gestalts core. Wrapped by `packages/client`; not meant to be used directly.
 
-mod http;
 mod opfs;
 
 use std::cell::RefCell;
@@ -11,8 +10,8 @@ use gestalts_core::{Gestalts, IndexedNote, Note, Query, Repo, UpstreamReport, pu
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
-use crate::http::{Connector, Static};
 use crate::opfs::Opfs;
+use gestalts_peer::{Peer, Static};
 
 type Dyn = Rc<dyn Storage>;
 
@@ -214,7 +213,7 @@ impl WasmRepo {
             timings.insert(name.to_owned(), ((now - last).round() as i64).into());
             last = now;
         };
-        let remote = Connector::new(&connector_url);
+        let remote = Peer::new(&connector_url);
         let health = remote.health().await.map_err(err)?;
         mark("health");
         let folder = &health["folder"];

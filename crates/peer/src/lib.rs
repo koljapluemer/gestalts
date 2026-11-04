@@ -1,54 +1,13 @@
-//! Storage over `fetch`: a read-only static site, and the desktop connector.
+//! Storage over HTTP: [`Peer`], another device's node, and [`Static`], a published deck. Compiles for the browser
+//! (`fetch`) and natively (reqwest, which needs a tokio runtime).
+
+mod fetch;
 
 use async_trait::async_trait;
 use gestalts_core::storage::{Result, Storage, StorageError, check_key};
-use js_sys::{Uint8Array, encode_uri_component};
 use serde::Deserialize;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{Request, RequestInit, Response};
 
-use crate::opfs::js_err;
-
-fn enc(s: &str) -> String {
-    encode_uri_component(s).into()
-}
-
-/// `Ok(None)` on 404.
-async fn fetch(url: &str, method: &str, body: Option<&[u8]>) -> Result<Option<Response>> {
-    let init = RequestInit::new();
-    init.set_method(method);
-    if let Some(b) = body {
-        init.set_body(&Uint8Array::from(b).into());
-    }
-    let req = Request::new_with_str_and_init(url, &init).map_err(js_err)?;
-    let window = web_sys::window().ok_or_else(|| StorageError::Io("no window".into()))?;
-    let resp: Response = JsFuture::from(window.fetch_with_request(&req))
-        .await
-        .map_err(|e| StorageError::Io(format!("{method} {url}: {}", js_err(e))))?
-        .unchecked_into();
-    match resp.status() {
-        404 => Ok(None),
-        s if (200..300).contains(&s) => Ok(Some(resp)),
-        s => {
-            let text = JsFuture::from(resp.text().map_err(js_err)?).await.ok().and_then(|t| t.as_string()).unwrap_or_default();
-            Err(StorageError::Io(format!("{method} {url}: {s} {text}")))
-        }
-    }
-}
-
-async fn text(resp: Response) -> Result<String> {
-    Ok(JsFuture::from(resp.text().map_err(js_err)?).await.map_err(js_err)?.as_string().unwrap_or_default())
-}
-
-async fn bytes(resp: Response) -> Result<Vec<u8>> {
-    let buf = JsFuture::from(resp.array_buffer().map_err(js_err)?).await.map_err(js_err)?;
-    Ok(Uint8Array::new(&buf).to_vec())
-}
-
-async fn json<T: for<'de> Deserialize<'de>>(resp: Response) -> Result<T> {
-    serde_json::from_str(&text(resp).await?).map_err(|e| StorageError::Io(e.to_string()))
-}
+use crate::fetch::{enc, fetch, json};
 
 /// A gestalt data folder published as static files, with an `index.json` of `{notes: [keys], blobs: [names]}`.
 pub struct Static {
@@ -86,7 +45,7 @@ impl Storage for Static {
             return Ok(None);
         }
         match fetch(&format!("{}/notes/{}.yml", self.base, enc(key)), "GET", None).await? {
-            Some(r) => Ok(Some(text(r).await?)),
+            Some(r) => Ok(Some(r.text().await?)),
             None => Ok(None),
         }
     }
@@ -105,7 +64,7 @@ impl Storage for Static {
             return Ok(None);
         }
         match fetch(&format!("{}/blobs/{}", self.base, enc(name)), "GET", None).await? {
-            Some(r) => Ok(Some(bytes(r).await?)),
+            Some(r) => Ok(Some(r.bytes().await?)),
             None => Ok(None),
         }
     }
@@ -121,8 +80,8 @@ impl Storage for Static {
     }
 }
 
-/// The desktop connector (`gestalts-connector`), see `doc/node.md`.
-pub struct Connector {
+/// Another device's node (`gestalts-node`, the desktop app's "connector"), over its node API: see `doc/node.md`.
+pub struct Peer {
     base: String,
 }
 
@@ -132,12 +91,12 @@ struct NoteEntry {
     text: String,
 }
 
-impl Connector {
+impl Peer {
     pub fn new(base: &str) -> Self {
-        Connector { base: base.trim_end_matches('/').to_owned() }
+        Peer { base: base.trim_end_matches('/').to_owned() }
     }
 
-    /// Asks the connector to collect the folder's unreferenced blobs; the names it deleted. An older connector
+    /// Asks the node to collect the folder's unreferenced blobs; the names it deleted. An older node
     /// without the endpoint collects nothing.
     pub async fn collect_blobs(&self) -> Result<Vec<String>> {
         #[derive(Deserialize)]
@@ -150,21 +109,21 @@ impl Connector {
         }
     }
 
-    /// Fails unless a connector answers at the URL.
+    /// Fails unless a node answers at the URL.
     pub async fn health(&self) -> Result<serde_json::Value> {
-        let r = fetch(&format!("{}/health", self.base), "GET", None).await?.ok_or_else(|| StorageError::Io("no connector there".into()))?;
+        let r = fetch(&format!("{}/health", self.base), "GET", None).await?.ok_or_else(|| StorageError::Io("no node there".into()))?;
         json(r).await
     }
 }
 
 #[async_trait(?Send)]
-impl Storage for Connector {
+impl Storage for Peer {
     async fn list_notes(&self) -> Result<Vec<String>> {
         Ok(self.read_all_notes().await?.into_iter().map(|(k, _)| k).collect())
     }
     async fn read_note(&self, key: &str) -> Result<Option<String>> {
         match fetch(&format!("{}/notes/{}", self.base, enc(key)), "GET", None).await? {
-            Some(r) => Ok(Some(text(r).await?)),
+            Some(r) => Ok(Some(r.text().await?)),
             None => Ok(None),
         }
     }
@@ -182,7 +141,7 @@ impl Storage for Connector {
     }
     async fn read_blob(&self, name: &str) -> Result<Option<Vec<u8>>> {
         match fetch(&format!("{}/blobs/{}", self.base, enc(name)), "GET", None).await? {
-            Some(r) => Ok(Some(bytes(r).await?)),
+            Some(r) => Ok(Some(r.bytes().await?)),
             None => Ok(None),
         }
     }

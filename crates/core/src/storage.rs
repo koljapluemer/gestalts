@@ -1,4 +1,5 @@
-//! The storage port. Adapters: a folder on disk, OPFS, a static site, the connector over HTTP.
+//! The storage port. Adapters: a folder on disk (`fs`), OPFS (`wasm`), a static site and another device's node over
+//! HTTP (`peer`).
 
 use async_trait::async_trait;
 

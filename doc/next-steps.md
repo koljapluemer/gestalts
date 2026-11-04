@@ -71,7 +71,7 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
 - [x] **Split the repos**: this one, `gestalter` and `loops-for-learning` (fresh imports from `gestalts-legacy`,
   which keeps the earlier history). The connector is split into `node` here and the Gestalter's `desktop/` (tray,
   status, packaging, built-in plugins), with `gestalts-node` as the headless node, e.g. for a GPU box.
-- [ ] **Regroup** the rest into the layout above: the `peer` crate, and `node` absorbing `plugin-host`.
+- [x] **Regroup** the rest into the layout above: the `peer` crate, and `node` absorbing `plugin-host`.
 - [x] **Plugins as npm packages**: `plugin.yml`, gestalts, deck, `ui/` and `worker/` in one package. Distributions
   pin them in `package.json`, and `distribution.yml` keeps only the panes. `@gestalts/vite` and the desktop app's
   build read plugins from `node_modules`; the desktop app embeds the workers of the plugins it ships.
