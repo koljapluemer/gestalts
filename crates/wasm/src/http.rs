@@ -80,6 +80,11 @@ impl Storage for Static {
     }
     async fn read_note(&self, key: &str) -> Result<Option<String>> {
         check_key(key)?;
+        // the index is complete: asking the server for anything else is a 404 per lookup (copy-on-write looks up
+        // every key the user's notes reference)
+        if !self.index.notes.iter().any(|n| n == key) {
+            return Ok(None);
+        }
         match fetch(&format!("{}/notes/{}.yml", self.base, enc(key)), "GET", None).await? {
             Some(r) => Ok(Some(text(r).await?)),
             None => Ok(None),

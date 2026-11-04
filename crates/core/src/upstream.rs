@@ -154,8 +154,11 @@ pub async fn pull_upstream(decks: &[DeckRef<'_>], top: &dyn Storage) -> Result<U
             report.diverged.push(key);
         }
     }
-    for (key, text) in top.read_all_notes().await? {
-        report.copied.extend(copy_up_refs(decks, top, &key, &text).await?);
+    // each target once, however many notes reference it
+    let targets: BTreeSet<String> =
+        top.read_all_notes().await?.into_iter().flat_map(|(k, t)| Note::parse(k, t).relationships()).map(|r| r.target).collect();
+    for key in targets {
+        report.copied.extend(copy_up(decks, top, &key).await?);
     }
     Ok(report)
 }

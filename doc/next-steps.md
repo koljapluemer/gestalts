@@ -133,6 +133,8 @@ From sam-learns-things (each: catalog → deck, its Dexie tables → notes; the 
 - [ ] tprboard
 - [ ] al-kutshina
 
+All of these sam-learns ports should show in the `loops-for-learning` repo, following the "plugin comes with data, copy-on-write to user space" pattern.
+
 ## Not built yet
 
 ### Cheaper sync
