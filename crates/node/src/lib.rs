@@ -8,7 +8,9 @@ use std::sync::Arc;
 use clap::Subcommand;
 use gestalts_fs::FsStorage;
 
+pub mod lan;
 pub mod manifest;
+pub mod pairing;
 pub mod paths;
 pub mod plugins;
 pub mod server;
@@ -35,6 +37,9 @@ pub struct Opts {
     /// a web app's build (e.g. `dist/`) to serve at `/`, instead of the app's own
     #[arg(long, global = true)]
     pub app_dir: Option<PathBuf>,
+    /// the port paired devices reach this node on over the home network (only while one is paired or pairing)
+    #[arg(long, global = true, default_value_t = lan::LAN_PORT)]
+    pub lan_port: u16,
     /// desktop app: start in the tray without opening the window (used by "Start on login")
     #[arg(long)]
     pub background: bool,
@@ -88,6 +93,7 @@ pub struct Server {
     plugins: PluginHost,
     shutdown: tokio::sync::oneshot::Sender<()>,
     task: tokio::task::JoinHandle<()>,
+    lan: Arc<lan::Lan>,
     pub paths: Paths,
     pub control_token: String,
     /// `http://127.0.0.1:<port>`, also where the app's web frontend is
@@ -98,6 +104,7 @@ impl Server {
     /// Stops serving and stops every plugin worker.
     pub fn stop(self) {
         let _ = self.shutdown.send(());
+        self.lan.shutdown();
         let (plugins, task) = (self.plugins, self.task);
         self.rt.block_on(async move {
             plugins.stop_all().await;
@@ -126,7 +133,11 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
     origins.extend(opts.allow_origin.iter().cloned());
     let app = opts.app_dir.clone().map(AppFiles::Disk).or(embedded.app.map(AppFiles::Embedded));
     let identity = Identity { name: embedded.name, app };
-    let state = AppState::new(folder, plugins.clone(), control_token.clone(), remember.then(|| paths.clone()), shell, identity, address.clone(), origins);
+    let lan = Arc::new(lan::Lan::new(&paths, opts.lan_port)?);
+    let state = AppState::new(folder, plugins.clone(), control_token.clone(), remember.then(|| paths.clone()), shell, identity, address.clone(), origins)
+        .with_lan(lan.clone());
+    // devices paired earlier reach it from the start
+    if let Err(e) = rt.block_on(async { lan.update(&state) }) { eprintln!("gestalts-node: {e}"); }
     let (shutdown, stopped) = tokio::sync::oneshot::channel::<()>();
     let starting = plugins.clone();
     rt.spawn(async move { starting.start_all().await });
@@ -134,7 +145,7 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
         let served = axum::serve(listener, server::app(state)).with_graceful_shutdown(async { let _ = stopped.await; }).await;
         if let Err(e) = served { eprintln!("gestalts-node: server stopped: {e}"); }
     });
-    Ok(Server { rt, plugins, shutdown, task, paths, control_token, address })
+    Ok(Server { rt, plugins, shutdown, task, lan, paths, control_token, address })
 }
 
 /// Where plugins come from: `--plugins-dir`, else the app's built-in ones (unpacked) and the user's.

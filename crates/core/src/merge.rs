@@ -1,4 +1,4 @@
-//! Three-way merge of one note, and syncing two storages against a base snapshot.
+//! Three-way merge of one note (syncing two storages with it is [`crate::sync`]).
 //!
 //! A note merges by its policy: the default (`tags`, `relationships` and `blobs` as sets; `main`, `extra` and
 //! `tasks` as text; everything else per key) with the `merge:` rules of every gestalt the note is a candidate for on
@@ -14,16 +14,12 @@
 //!
 //! Every conflict no rule settles becomes a `conflict@1` note ([`conflict_note`]) on all three sides.
 
-use std::collections::{BTreeSet, HashMap};
-
 use gestalts_merge::{Conflict, Policy, Segment, canonical};
-use serde::Serialize;
 use serde_yaml_ng::{Mapping, Value};
 
 use crate::gestalt::Gestalts;
 use crate::note::{Note, parse_yaml, to_yaml};
 use crate::repo::stable_id;
-use crate::storage::{Result, Storage};
 use crate::upstream::content_hash;
 
 /// The outcome of merging one note.
@@ -218,103 +214,6 @@ fn path_label(path: &[Segment]) -> String {
         })
         .collect();
     format!(": {}", parts.join("."))
-}
-
-#[derive(Debug, Default, Serialize)]
-pub struct SyncReport {
-    /// notes changed locally because of remote
-    pub pulled: Vec<String>,
-    /// notes changed remotely because of local
-    pub pushed: Vec<String>,
-    /// `conflict@1` notes written
-    pub conflicts: Vec<String>,
-    pub blobs_pulled: Vec<String>,
-    pub blobs_pushed: Vec<String>,
-    /// how many notes each side had before the sync
-    pub notes: NoteCounts,
-}
-
-#[derive(Debug, Default, Serialize)]
-pub struct NoteCounts {
-    pub local: usize,
-    pub remote: usize,
-    pub base: usize,
-}
-
-/// The steps `sync_with` reports as it finishes them, in order.
-pub const SYNC_STEPS: [&str; 5] = ["read_local", "read_remote", "read_base", "merge_notes", "blobs"];
-
-/// Syncs `local` and `remote` against `base`, the state both had after the last sync.
-/// Afterwards all three hold the same notes. `now` (an ISO datetime) dates tombstones and conflict records.
-pub async fn sync(local: &dyn Storage, remote: &dyn Storage, base: &dyn Storage, gestalts: &Gestalts, now: &str) -> Result<SyncReport> {
-    sync_with(local, remote, base, gestalts, now, &mut |_| {}).await
-}
-
-/// `sync`, calling `step` with each of `SYNC_STEPS` as it's done (to time them; the core has no clock).
-pub async fn sync_with(local: &dyn Storage, remote: &dyn Storage, base: &dyn Storage, gestalts: &Gestalts, now: &str, step: &mut dyn FnMut(&str)) -> Result<SyncReport> {
-    let mut report = SyncReport::default();
-    let all = |v: Vec<(String, String)>| v.into_iter().collect::<HashMap<_, _>>();
-    let l = all(local.read_all_notes().await?);
-    step("read_local");
-    let r = all(remote.read_all_notes().await?);
-    step("read_remote");
-    let b = all(base.read_all_notes().await?);
-    step("read_base");
-    report.notes = NoteCounts { local: l.len(), remote: r.len(), base: b.len() };
-    // sorted, so the report lists keys in order
-    let keys: BTreeSet<&str> = l.keys().chain(r.keys()).chain(b.keys()).map(String::as_str).collect();
-    let mut merged: Vec<(String, String)> = Vec::new();
-
-    for key in keys {
-        let (lt, rt, bt) = (l.get(key).map(String::as_str), r.get(key).map(String::as_str), b.get(key).map(String::as_str));
-        let m = merge_note(key, bt, lt, rt, gestalts, now);
-        let Some(text) = m.text.as_deref() else { continue };
-        if Some(text) != lt {
-            local.write_note(key, text).await?;
-            report.pulled.push(key.to_owned());
-        }
-        if Some(text) != rt {
-            remote.write_note(key, text).await?;
-            report.pushed.push(key.to_owned());
-        }
-        if Some(text) != bt {
-            base.write_note(key, text).await?;
-        }
-        merged.push((key.to_owned(), text.to_owned()));
-        let id = Note::parse(key, text).id().to_owned();
-        for c in &m.conflicts {
-            let (ck, ct) = conflict_note(key, &id, c, m.raw, now);
-            // recorded earlier (by this or another device): keep that record
-            let known = [&l, &r, &b].iter().any(|s| s.contains_key(&ck));
-            if !known {
-                for s in [local, remote, base] {
-                    s.write_note(&ck, &ct).await?;
-                }
-                merged.push((ck.clone(), ct));
-                report.conflicts.push(ck);
-            }
-        }
-    }
-
-    step("merge_notes");
-
-    // only blobs a merged note uses go over, so collecting on one side isn't undone by the other
-    let used = crate::blobs::referenced_blobs(merged.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts);
-    let (lb, rb) = (local.list_blobs().await?, remote.list_blobs().await?);
-    for name in rb.iter().filter(|n| !lb.contains(n) && used.contains(*n)) {
-        if let Some(bytes) = remote.read_blob(name).await? {
-            local.write_blob(name, &bytes).await?;
-            report.blobs_pulled.push(name.clone());
-        }
-    }
-    for name in lb.iter().filter(|n| !rb.contains(n) && used.contains(*n)) {
-        if let Some(bytes) = local.read_blob(name).await? {
-            remote.write_blob(name, &bytes).await?;
-            report.blobs_pushed.push(name.clone());
-        }
-    }
-    step("blobs");
-    Ok(report)
 }
 
 #[cfg(test)]

@@ -80,14 +80,12 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
 - [x] **Panes per distribution.** A pane declares what it needs (`requires: {services: [typst@1]}`), and the host
   hides or greys the ones it can't satisfy. `pane@1` notes get the distribution they belong to, so a phone doesn't get
   the desktop's tabs; each host shows and seeds only its own. Installs stay global.
-- [ ] **[Cheaper sync](#cheaper-sync)**, before syncing over a network. It's loops-for-learning that pays for every
-  sync now, the only app still syncing OPFS with the folder.
-- [ ] **Pairing** a device with the desktop:
-  - The node also listens on the home network, encrypted, and accepts only paired devices (this is the
-    authentication the connector lacks).
-  - The desktop shows a QR code with its address and key; the phone scans it, and finds the desktop again by mDNS
-    when its address changes.
-  - Each peer has its own base, as each connector URL and folder id has now.
+- [x] **Cheaper sync**: each side lists `{key: hash}` and the base keeps a manifest of them, so a sync reads only the
+  notes that differ; it runs in phases, so writes don't wait for the network ([node.md](node.md#sync)).
+- [x] **Pairing** a device with the desktop ([node.md](node.md#pairing-and-the-home-network)): the node listens on
+  the home network over TLS with its own key while a device is paired or a pairing code is shown; the QR code holds
+  its addresses, key fingerprint and a one-time secret; devices get a token, pin the key, and find the node again by
+  mDNS. The device side (`gestalts_peer::paired`) awaits Android.
 - [ ] **Android** (gestalter). Here: `client`'s native backend (Tauri IPC) and the core with `FsStorage` on a phone.
 - [ ] **Publish** `@gestalts/core` (wasm), `client`, `sdk`, `kit`, `learning` and the Python SDK. Every plugin's
   standalone build (`mise run check-plugin-standalone`) runs in CI.
@@ -138,18 +136,15 @@ All of these sam-learns ports should show in the `loops-for-learning` repo, foll
 
 ## Not built yet
 
-### Cheaper sync
+### Sync
 
-Each sync still reads every local, remote and base note, and Firefox OPFS is slow per file
-([bug 2072928](https://bugzilla.mozilla.org/show_bug.cgi?id=2072928)). Next, guided by the step timings in the debug
-log:
-- track which keys changed locally since the last sync
-- have the node list `{key: hash}`, so only differing notes are fetched
-- keep a manifest of agreed hashes instead of a full base copy
-- release the write queue during network time
-
-If per-file OPFS cost still dominates: the core in a Worker with sync access handles, or notes stored in one OPFS
-file.
+- Opening a repo still reads every OPFS note, and Firefox OPFS is slow per file
+  ([bug 2072928](https://bugzilla.mozilla.org/show_bug.cgi?id=2072928)). If that dominates: the core in a Worker
+  with sync access handles, or notes stored in one OPFS file.
+- The node hashes every note of its folder on each `/sync/hashes`: cheap on disk, but a cache by modification time
+  would make it cheaper for large folders.
+- Paired devices have no change events: `/events` isn't served on the home network (it would need a WebSocket over
+  the pinned TLS), so they poll.
 
 ### Workers
 

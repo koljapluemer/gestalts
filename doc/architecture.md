@@ -4,10 +4,12 @@
 crates/merge          symmetric, rule-based 3-way merge of YAML values; knows nothing of notes
 crates/core           notes, gestalts, queries, sync, tombstones, blob collection; the Storage port. No IO.
 crates/fs             Storage adapter: a folder on disk
-crates/peer           Storage adapters over HTTP, native and wasm: another device's node, static decks
+crates/peer           Storage adapters over HTTP, native and wasm: another device's node, static decks; natively,
+                      pairing with a node on the home network
 crates/wasm           the core in the browser: its JS API and OPFS storage
-crates/node           gestalts-node: serves a folder on localhost, hosts workers, plugin manifests (plugin.yml,
-                      schema 2) and the gestalts of core + plugins; apps embed it, `gestalts-node` is it headless
+crates/node           gestalts-node: serves a folder on localhost (and to paired devices on the home network), hosts
+                      workers, plugin manifests (plugin.yml, schema 2) and the gestalts of core + plugins; apps embed
+                      it, `gestalts-node` is it headless
 gestalts/             the core's gestalt definitions (data, embedded into the core)
 packages/sdk          @gestalts/sdk: the perspective port (Repo interface, hooks, host capabilities, slots)
 packages/kit          @gestalts/kit: the public components, on the sdk only
@@ -29,9 +31,9 @@ Where it goes from here (the repos, the apps, what isn't built yet): [next-steps
 ## Core (Rust, native and wasm)
 
 - `Storage` (port): list/read/write/delete notes by key, list/read/write blobs by name. `?Send` so browser adapters fit.
-- Adapters: `FsStorage` (disk, atomic writes), `Opfs`, `Static` (read-only, a published data folder with `index.json`) and `Peer` (another device's node), both over HTTP in `crates/peer`, native and in the browser; `Layered` (any number of read-only decks + a writable top, copy-on-write), `Memory`.
+- Adapters: `FsStorage` (disk, atomic writes), `Opfs`, `Static` (read-only, a published data folder with `index.json`) and `Peer` (another device's node), both over HTTP in `crates/peer`, native and in the browser; `Layered` (any number of read-only decks + a writable top, copy-on-write), `Tracked` (knows its notes' hashes, for sync), `Memory`.
 - `Repo`: loads every note into an index (parsed YAML, gestalts, lints) and answers `Query {gestalt, gestaltsNone, tagsAll, tagsNone, keys, where}`, skipping tombstones. Its gestalts are the core's plus those of the app's plugins, loaded at runtime.
-- `merge_note` / `sync`: see [node.md](node.md#sync); deletes are tombstones ([gestalts.md](gestalts.md#deleting)).
+- `merge_note` / `sync` (in phases, reading only notes whose hashes differ, against a `SyncBase`): see [node.md](node.md#sync); deletes are tombstones ([gestalts.md](gestalts.md#deleting)).
 - `upstream`: copy-on-write from published decks into the user's storage, see below.
 - `blobs`: which blobs notes use, and collecting the rest ([node.md](node.md#sync)).
 

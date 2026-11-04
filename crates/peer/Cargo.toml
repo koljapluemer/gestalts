@@ -19,3 +19,8 @@ web-sys = { version = "0.3", features = ["Window", "Request", "RequestInit", "Re
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+# pairing: a client that pins the node's certificate, and finding the node again by mDNS
+mdns-sd = "0.13"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+sha2.workspace = true
+tokio = { version = "1", features = ["rt", "time"] }

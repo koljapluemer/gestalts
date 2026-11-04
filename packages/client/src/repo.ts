@@ -398,15 +398,19 @@ export class Repo implements Port {
     if (!url || this.status.mode === 'direct') return;
     this.setStatus({ state: 'syncing' });
     try {
-      const report = await this.serial('sync', () => this.wasm.sync(url) as Promise<SyncReport>);
+      // only the merge waits in the write queue; the network parts run alongside the app's writes
+      await this.wasm.syncFetch(url);
+      const merged = await this.serial('sync', () => this.wasm.syncMerge());
+      if (merged.length && this.status.url === url) this.changed();
+      const report = (await this.wasm.syncPush()) as SyncReport;
       if (this.status.url !== url) return report;
       log.info('sync done', {
         pushed: report.pushed.length, pulled: report.pulled.length, blobsPulled: report.blobs_pulled.length, conflicts: report.conflicts.length,
-        notes: report.notes, timings: report.timings,
+        notes: report.notes, compared: report.compared, timings: report.timings,
       });
       this.setStatus({ state: 'ok', lastSync: new Date(), lastReport: report, folder: report.folder, conflicts: [...this.status.conflicts, ...report.conflicts] });
-      const up = this.upstreamReport();
-      if (report.pulled.length || report.blobs_pulled.length || report.conflicts.length || up.copied.length || up.updated.length) {
+      // blobs arrived before the merge; a name looked up earlier may be cached as missing
+      if (report.blobs_pulled.length) {
         report.blobs_pulled.forEach((b) => this.blobUrls.delete(b));
         this.changed();
       }

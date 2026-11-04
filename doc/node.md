@@ -9,7 +9,7 @@ box:
 gestalts-node serve [--data DIR] # the folder from --data, else the remembered one
 gestalts-node lint DIR           # gestalts and lints per note
 gestalts-node publish DIR        # prepare a folder as a read-only deck
-# all of them: [--port 7717] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
+# all of them: [--port 7717] [--lan-port 7718] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
 ```
 
 `mise run serve DIR`, `lint-data` and `publish-data` run it with this repo's `plugins/`. The `dev` profile keeps its
@@ -55,11 +55,11 @@ under `gestalts` (or `gestalts-<profile>`):
 
 | | |
 |---|---|
-| config | `config.json` (`folder`, `extra_origins`), `control-token` |
-
-The desktop app's rename (from `gestalts-connector` to `gestalter`) didn't move these: they're the node's.
+| config | `config.json` (`folder`, `extra_origins`), `control-token`, `node.crt` and `node.key` (its TLS key, which is its id), `devices.json` (paired devices) |
 | data | `builtin-plugins/<hash>/` (unpacked from the binary), `plugins/` (your own), `uv/`, `python/` |
 | cache | `plugins/<id>/venv`, uv's download cache |
+
+The desktop app's rename (from `gestalts-connector` to `gestalter`) didn't move these: they're the node's.
 
 ## Plugins
 
@@ -89,7 +89,7 @@ Plugins with workers:
 
 ## Access
 
-The node listens on `127.0.0.1` only, and answers only requests whose `Host` is `localhost`, `127.0.0.1` or `[::1]`,
+The node listens on `127.0.0.1`, and there it answers only requests whose `Host` is `localhost`, `127.0.0.1` or `[::1]`,
 so a page on another domain that resolves to 127.0.0.1 (DNS rebinding) can't pass as same-origin. CORS allows
 `http(s)://localhost:*` and `127.0.0.1:*`, the origins the embedding app lists (`Embedded::origins`), `extra_origins`
 from the config, and any `--allow-origin`; `/events` checks the same list itself, since CORS doesn't cover
@@ -104,11 +104,16 @@ another web page can make, is refused.
 What `/control/*` does natively (the folder picker, the file manager, start on login, quit) is the embedding app's
 `Shell` (`server.rs`); the headless node's does none of it.
 
+On the home network it answers only paired devices (below).
+
 | endpoint | |
 |---|---|
-| `GET /health` | `{app, version, folder: {id, path} \| null}` |
+| `GET /health` | `{app, version, api, folder: {id, path} \| null}`; `api` is the node API's version (2: `/sync/*`) |
 | `GET /notes` | `[{key, text}]` — all notes |
 | `GET/PUT/DELETE /notes/{key}` | raw YAML text; `DELETE` writes the note's tombstone |
+| `GET /sync/hashes` | `{key: hash}` — every note's SHA-256 (hex) |
+| `POST /sync/read {keys}` | `[{key, text}]` — those of the notes that exist |
+| `POST /sync/write [{key, text}]` | writes them all |
 | `GET /blobs` | names |
 | `GET/PUT/DELETE /blobs/{name}` | bytes; workers can't delete |
 | `POST /blobs/collect` | collects unreferenced blobs (above): `{deleted}` |
@@ -116,6 +121,8 @@ What `/control/*` does natively (the folder picker, the file manager, start on l
 | `GET /control/status` | folder, connected web apps, uv and plugins, `autostart` (null if unavailable) |
 | `POST /control/folder {path}`, `POST /control/choose-folder` | open a folder, given or picked natively; the status |
 | `POST /control/reveal`, `PUT /control/autostart {on}`, `POST /control/show`, `POST /control/quit` | the app's shell |
+| `POST /control/pairing`, `DELETE /control/pairing` | open a pairing offer (`{uri, svg, addresses, expires_in}`), or close it |
+| `GET /control/devices`, `DELETE /control/devices/{id}` | the paired devices; unpair one |
 | anything else | the app's web build, if it has one |
 
 ## Sync
@@ -126,9 +133,33 @@ these times:
 - 0.8 s after each write
 - every 15 s
 
-At most one sync runs, and at most one more waits (`coalesce`, `packages/client/src/coalesce.ts`): requests while one is already waiting join it. Syncs and writes share one queue, so piled-up syncs would make every write wait. After a sync only the notes it wrote locally (pulled, conflict notes, upstream copies) are re-read into the index. The debug log's `sync done` lists the note counts and how long each step took.
+At most one sync runs, and at most one more waits (`coalesce`, `packages/client/src/coalesce.ts`): requests while one is already waiting join it. After a sync only the notes it wrote locally (pulled, conflict notes, upstream copies) are re-read into the index. The debug log's `sync done` lists the note counts, how many notes differed (`compared`), and how long each step took.
 
-Each side is compared with a **base**: the state after the last sync, stored in OPFS per connector URL and folder id.
+Each side is compared with a **base**: the state after the last sync, stored in OPFS per connector URL and folder id
+(a paired device keeps one per node and folder, `gestalts_peer::paired::base_name`).
+
+A sync reads only what changed (`crates/core/src/sync.rs`):
+- Each side lists `{key: hash}`. The node hashes its folder (`/sync/hashes`); the browser keeps the hashes of its
+  OPFS notes in memory (`Tracked`), learned when the repo opens (which reads every note anyway) and kept current by
+  every write.
+- The base keeps the hashes it agreed on in a manifest (the blob `manifest.json` next to its notes). A base from
+  before manifests gets one on its next sync.
+- Only notes whose three hashes differ are read: the remote ones in one request (`/sync/read`), a base text only
+  where both sides changed. Pushes go in one request too (`/sync/write`). A sync where nothing changed reads no
+  note, only the remote hashes and the manifest.
+- Each note the sync merges is read anew, so a hash gone stale (another tab wrote the note) never makes it write
+  over a change it hasn't seen; it only delays that note to a later sync.
+
+It runs in three phases, and only the middle one waits in the app's write queue, so the app's writes don't wait for
+the network:
+1. fetch, network only: the remote hashes, the remote texts that changed since the base, the blobs those use that
+   this side lacks
+2. merge, local only: merges, writes this side, moves the base for notes the remote already has
+3. push, network only: the blobs the pushed notes use, the notes, then the base
+
+The base moves only once both sides hold a text. A sync that fails halfway is redone by the next: the merge is
+symmetric, so it gives the same result again.
+
 Each note is then merged by `merge_note` (`crates/core/src/merge.rs`) with the engine in `crates/merge`, which is
 symmetric: two devices merging the same states get the same result, whichever is local.
 
@@ -144,12 +175,37 @@ symmetric: two devices merging the same states get the same result, whichever is
   sorts greater is kept, and the conflict is recorded as a `conflict@1` note on both sides
   ([gestalts.md](gestalts.md#conflicts)). The note editor and the connector settings list them: keep a side, or edit.
 
-Blobs are content-addressed, so they're never merged. A blob goes to the side that lacks it only if a merged note
-uses it. After each successful sync, the app collects its own unreferenced blobs and asks the connector to collect
+Blobs are content-addressed, so they're never merged. A blob goes to the side that lacks it only if a note going
+there uses it, and before that note. After each successful sync, the app collects its own unreferenced blobs and asks the connector to collect
 the folder's (`POST /blobs/collect`); a page on the folder directly asks once after opening. A blob is deleted only after it stayed unreferenced for 7 days and 3
 collections; the manifest of when each was first seen unreferenced is `.gestalts/blob-gc.json` in the folder (OPFS
 `<dir>-blob-gc` in the browser). "Referenced" means listed in `blobs` by a note that isn't a tombstone, or held by a
 conflict record; deck blobs are never collected.
+
+## Pairing and the home network
+
+Devices (a phone, a laptop) reach the node over the home network once paired with it. A browser can't, since it can't
+trust the node's own certificate: this is for apps with native networking (`gestalts_peer::paired`).
+
+- **The node's key.** On first start the node makes a self-signed TLS certificate and key (`node.crt`, `node.key`).
+  The certificate's SHA-256 is the node's id. Devices pin it, so no certificate authority is involved.
+- **Pairing.** The desktop's settings show a QR code (`POST /control/pairing`) holding
+  `gestalts-pair:?v=1&id=<fingerprint>&addr=<ip:port>,…&secret=<one-time secret>&name=<computer>`. It is valid for
+  five minutes, for one device. The device connects to an address over TLS, accepting only the certificate with
+  that fingerprint, and sends the secret to `POST /pair {secret, name}`. It gets back a token (`{token, device_id,
+  node_id}`) and keeps it with the addresses (`PairedNode`). The node keeps only the token's hash in `devices.json`.
+  Pairing attempts are limited to five a minute.
+- **Afterwards** every request carries `Authorization: Bearer <token>`. Forgetting a device in the settings
+  (`DELETE /control/devices/{id}`) ends its access at once.
+- **Finding it again.** The node advertises `_gestalts._tcp` by mDNS, with its id in the TXT record `id`. A device
+  tries the address that worked last, then the others, then whatever mDNS finds (`paired::connect`). On Android, the
+  app must hold a `MulticastLock` while discovering.
+- **When it listens.** Only while a pairing code is shown or a device is paired: on `--lan-port` (7718) on every
+  interface. Addresses on container and VM bridges (`docker0`, `br-…`, `virbr…`) aren't offered or advertised.
+- **What it serves there.** `GET /health` (`{app, version, api, node_id, folder}`) and `POST /pair` without a token.
+  With one, `/notes*`, `/sync/*` and `/blobs*`. Nothing else: not `/control`, `/events`, plugins, services or the
+  app's frontend. A paired device syncs like a browser does, with the node's folder, polling (no change events over
+  the network yet).
 
 Caveats:
 - The educational app (loops-for-learning) pulls every note in the folder, and the blobs they use, into its OPFS layer. Of the shipped words, only those the learner rated (and their blobs) are in that layer, so only those reach the folder.

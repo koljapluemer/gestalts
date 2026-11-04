@@ -61,6 +61,8 @@ export type SyncReport = {
   blobs_collected?: { local: string[]; remote: string[] };
   /** how many notes each side had: local, remote, base */
   notes?: { local: number; remote: number; base: number };
+  /** how many notes differed, so their texts were read and merged */
+  compared?: number;
   /** ms per step of the sync, for the debug log */
   timings?: Record<string, number>;
 };

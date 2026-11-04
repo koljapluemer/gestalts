@@ -1,5 +1,4 @@
 use super::*;
-use crate::storage::Memory;
 
 const NOW: &str = "2026-11-04T10:00:00Z";
 
@@ -165,48 +164,4 @@ fn conflict_notes_are_the_same_on_every_device() {
     assert_eq!(g.of(&Note::parse(&k1, &t1)), vec!["conflict@1"], "{:?}", g.lint(&Note::parse(&k1, &t1)));
     let other = Conflict { lost: Some(4.into()), ..c };
     assert_ne!(conflict_note("n", "n", &other, false, NOW).0, k1);
-}
-
-#[test]
-fn sync_converges() {
-    pollster::block_on(async {
-        let g = Gestalts::builtin();
-        let (l, r, b) = (Memory::default(), Memory::default(), Memory::default());
-        l.write_note("only-local", "x: 1").await.unwrap();
-        r.write_note("only-remote", "y: 1").await.unwrap();
-        r.write_note("uses-img", "blobs: [img.webp]").await.unwrap();
-        r.write_blob("img.webp", b"123").await.unwrap();
-        r.write_blob("unused.webp", b"9").await.unwrap();
-        let rep = sync(&l, &r, &b, &g, NOW).await.unwrap();
-        assert_eq!(rep.pulled, vec!["only-remote", "uses-img"]);
-        assert_eq!(rep.pushed, vec!["only-local"]);
-        assert_eq!(rep.blobs_pulled, vec!["img.webp"]);
-
-        // both edit the same note, different keys; one deletes another
-        l.write_note("only-local", "x: 2\nz: 1").await.unwrap();
-        r.write_note("only-local", "x: 1\nw: 1").await.unwrap();
-        r.write_note("only-remote", &tombstone("only-remote", NOW)).await.unwrap();
-        let rep = sync(&l, &r, &b, &g, NOW).await.unwrap();
-        assert!(rep.conflicts.is_empty());
-        let merged = l.read_note("only-local").await.unwrap().unwrap();
-        assert_eq!(r.read_note("only-local").await.unwrap().unwrap(), merged);
-        assert!(is_tombstone_text(&l.read_note("only-remote").await.unwrap().unwrap()));
-
-        // a real conflict: the same winner on both sides, and one conflict note
-        l.write_note("only-local", "x: 3").await.unwrap();
-        r.write_note("only-local", "x: 4").await.unwrap();
-        let rep = sync(&l, &r, &b, &g, NOW).await.unwrap();
-        assert_eq!(rep.conflicts.len(), 1);
-        assert_eq!(l.read_note("only-local").await.unwrap().as_deref(), Some("x: 4"));
-        assert_eq!(r.read_note("only-local").await.unwrap().as_deref(), Some("x: 4"));
-        let ck = &rep.conflicts[0];
-        let c = parse_yaml(&r.read_note(ck).await.unwrap().unwrap()).unwrap();
-        assert_eq!(c["lost"], Value::from(3));
-        assert_eq!(c["path"], parse_yaml("[x]").unwrap());
-        assert_eq!(c["note"], Value::from("only-local"));
-
-        // nothing changed: a no-op, and the conflict isn't recorded twice
-        let rep = sync(&l, &r, &b, &g, NOW).await.unwrap();
-        assert!(rep.pulled.is_empty() && rep.pushed.is_empty() && rep.conflicts.is_empty());
-    });
 }

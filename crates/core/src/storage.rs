@@ -1,9 +1,16 @@
 //! The storage port. Adapters: a folder on disk (`fs`), OPFS (`wasm`), a static site and another device's node over
 //! HTTP (`peer`).
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+
 use async_trait::async_trait;
 
 use crate::note::valid_key;
+use crate::upstream::content_hash;
+
+/// `{key: content hash}` of notes (see [`content_hash`]).
+pub type Hashes = BTreeMap<String, String>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
@@ -41,6 +48,30 @@ pub trait Storage {
             }
         }
         Ok(out)
+    }
+
+    /// Every note's content hash; adapters that can answer without sending every text override this.
+    async fn note_hashes(&self) -> Result<Hashes> {
+        Ok(self.read_all_notes().await?.into_iter().map(|(k, t)| (k, content_hash(t.as_bytes()))).collect())
+    }
+
+    /// The given notes that exist; adapters with a bulk endpoint override this.
+    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+        let mut out = Vec::new();
+        for key in keys {
+            if let Some(text) = self.read_note(key).await? {
+                out.push((key.clone(), text));
+            }
+        }
+        Ok(out)
+    }
+
+    /// Writes several notes; adapters with a bulk endpoint override this.
+    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+        for (key, text) in notes {
+            self.write_note(key, text).await?;
+        }
+        Ok(())
     }
 }
 
@@ -213,11 +244,108 @@ macro_rules! forward_storage {
             async fn write_blob(&self, name: &str, bytes: &[u8]) -> Result<()> { (**self).write_blob(name, bytes).await }
             async fn delete_blob(&self, name: &str) -> Result<()> { (**self).delete_blob(name).await }
             async fn read_all_notes(&self) -> Result<Vec<(String, String)>> { (**self).read_all_notes().await }
+            async fn note_hashes(&self) -> Result<Hashes> { (**self).note_hashes().await }
+            async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> { (**self).read_notes(keys).await }
+            async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> { (**self).write_notes(notes).await }
         }
     };
 }
 forward_storage!(Box<S>);
 forward_storage!(std::rc::Rc<S>);
+forward_storage!(&S);
+
+/// A storage that knows the content hash of each of its notes, so a sync can tell which changed without reading them
+/// ([`crate::sync`]).
+///
+/// It learns them as notes pass through: reading every note (which opening a repo does anyway) seeds it, and every
+/// read, write and delete keeps it current. Until seeded, `note_hashes` reads every note once.
+///
+/// Writes from elsewhere (another browser tab on the same OPFS) can leave a hash stale. That's safe: a sync reads the
+/// real text of every note it merges or writes, so a stale hash only delays pushing that note until the tab that wrote
+/// it syncs, or the page is opened again.
+pub struct Tracked<S> {
+    inner: S,
+    hashes: RefCell<Option<Hashes>>,
+}
+
+impl<S: Storage> Tracked<S> {
+    pub fn new(inner: S) -> Self {
+        Tracked { inner, hashes: RefCell::new(None) }
+    }
+
+    pub fn inner(&self) -> &S {
+        &self.inner
+    }
+
+    fn note(&self, key: &str, text: Option<&str>) {
+        if let Some(h) = self.hashes.borrow_mut().as_mut() {
+            match text {
+                Some(t) => h.insert(key.to_owned(), content_hash(t.as_bytes())),
+                None => h.remove(key),
+            };
+        }
+    }
+}
+
+#[async_trait(?Send)]
+impl<S: Storage> Storage for Tracked<S> {
+    async fn list_notes(&self) -> Result<Vec<String>> {
+        self.inner.list_notes().await
+    }
+    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+        let t = self.inner.read_note(key).await?;
+        self.note(key, t.as_deref());
+        Ok(t)
+    }
+    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+        self.inner.write_note(key, text).await?;
+        self.note(key, Some(text));
+        Ok(())
+    }
+    async fn delete_note(&self, key: &str) -> Result<()> {
+        self.inner.delete_note(key).await?;
+        self.note(key, None);
+        Ok(())
+    }
+    async fn list_blobs(&self) -> Result<Vec<String>> {
+        self.inner.list_blobs().await
+    }
+    async fn read_blob(&self, name: &str) -> Result<Option<Vec<u8>>> {
+        self.inner.read_blob(name).await
+    }
+    async fn write_blob(&self, name: &str, bytes: &[u8]) -> Result<()> {
+        self.inner.write_blob(name, bytes).await
+    }
+    async fn delete_blob(&self, name: &str) -> Result<()> {
+        self.inner.delete_blob(name).await
+    }
+    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
+        let all = self.inner.read_all_notes().await?;
+        *self.hashes.borrow_mut() = Some(all.iter().map(|(k, t)| (k.clone(), content_hash(t.as_bytes()))).collect());
+        Ok(all)
+    }
+    async fn note_hashes(&self) -> Result<Hashes> {
+        if let Some(h) = self.hashes.borrow().as_ref() {
+            return Ok(h.clone());
+        }
+        self.read_all_notes().await?;
+        Ok(self.hashes.borrow().clone().unwrap_or_default())
+    }
+    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+        let found = self.inner.read_notes(keys).await?;
+        for key in keys {
+            self.note(key, found.iter().find(|(k, _)| k == key).map(|(_, t)| t.as_str()));
+        }
+        Ok(found)
+    }
+    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+        self.inner.write_notes(notes).await?;
+        for (k, t) in notes {
+            self.note(k, Some(t));
+        }
+        Ok(())
+    }
+}
 
 #[cfg(test)]
 mod tests {

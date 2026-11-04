@@ -22,6 +22,8 @@ use gestalts_fs::FsStorage;
 use serde::{Deserialize, Serialize};
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
+use crate::lan::{Lan, LanView};
+use crate::pairing::{DeviceView, Offer, Refused};
 use crate::paths::{Config, Paths};
 use crate::plugins::{PluginHost, PluginView};
 use crate::uv::UvState;
@@ -130,6 +132,8 @@ pub struct AppState {
     address: String,
     /// web origins allowed besides localhost and the app's own frontends
     extra_origins: Arc<[String]>,
+    /// the home network: paired devices, and the listener for them
+    lan: Option<Arc<Lan>>,
 }
 
 impl AppState {
@@ -137,10 +141,18 @@ impl AppState {
     pub fn new(folder: Option<Folder>, plugins: PluginHost, control_token: String, remember_in: Option<Paths>,
                shell: Arc<dyn Shell>, identity: Identity, address: String, extra_origins: Vec<String>) -> Self {
         let state = AppState { folder: Arc::default(), watcher: Arc::default(), events: Events::default(), plugins, clients: Arc::default(),
-                               control_token: control_token.into(), remember_in, shell, identity, address, extra_origins: extra_origins.into() };
+                               control_token: control_token.into(), remember_in, shell, identity, address, extra_origins: extra_origins.into(), lan: None };
         if let Some(f) = folder { state.set_folder(f); }
         state
     }
+
+    /// Lets devices on the home network pair with this node and sync with it.
+    pub fn with_lan(mut self, lan: Arc<Lan>) -> Self {
+        self.lan = Some(lan);
+        self
+    }
+
+    pub fn lan(&self) -> Option<&Arc<Lan>> { self.lan.as_ref() }
 
     fn folder(&self) -> Option<Arc<Folder>> { self.folder.read().expect("folder lock").clone() }
 
@@ -163,7 +175,8 @@ impl AppState {
             .map(|(origin, seen)| ClientView { origin: origin.clone(), seconds_ago: now.duration_since(*seen).as_secs() })
             .collect();
         StatusView { version: env!("CARGO_PKG_VERSION").into(), address: self.address.clone(), folder: self.folder().map(|f| f.info.clone()),
-                     clients, plugins, uv: self.plugins.uv_state(), autostart: self.shell.autostart() }
+                     clients, plugins, uv: self.plugins.uv_state(), autostart: self.shell.autostart(),
+                     lan: self.lan.as_ref().map(|l| l.view()), devices: self.lan.as_ref().map(|l| l.pairing.devices()).unwrap_or_default() }
     }
 }
 
@@ -183,10 +196,14 @@ impl IntoResponse for ApiError {
 /// Storage results as handler results.
 fn api<T>(r: Result<T, StorageError>) -> Result<T, Response> { r.map_err(|e| ApiError(e).into_response()) }
 
+/// The node API's version, in `/health`: a peer checks it before it syncs. 2 added `/sync/*`.
+pub const API_VERSION: u32 = 2;
+
 #[derive(Serialize)]
 struct Health {
     app: &'static str,
     version: &'static str,
+    api: u32,
     /// null until a folder is chosen
     folder: Option<FolderInfo>,
 }
@@ -208,16 +225,21 @@ pub struct StatusView {
     pub uv: UvState,
     /// whether the app starts on login; absent if it can't
     pub autostart: Option<bool>,
+    /// the home network; absent if this node doesn't pair
+    #[serde(default)]
+    pub lan: Option<LanView>,
+    #[serde(default)]
+    pub devices: Vec<DeviceView>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct NoteEntry {
     key: String,
     text: String,
 }
 
 async fn health(State(s): State<AppState>) -> Json<Health> {
-    Json(Health { app: s.identity.name, version: env!("CARGO_PKG_VERSION"), folder: s.folder().map(|f| f.info.clone()) })
+    Json(Health { app: s.identity.name, version: env!("CARGO_PKG_VERSION"), api: API_VERSION, folder: s.folder().map(|f| f.info.clone()) })
 }
 
 async fn worker_access(headers: &HeaderMap, state: &AppState) -> Result<Option<crate::manifest::Access>, Response> {
@@ -286,6 +308,65 @@ async fn delete_note(State(state): State<AppState>, UrlPath(key): UrlPath<String
     let tomb = gestalts_core::tombstone(&id, &now_iso());
     api(s.write_note_sync(&key, &tomb))?;
     state.plugins.note_changed(&key, &tomb).await;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+// --- sync: what a syncing app reads and writes, so it fetches only the notes that differ (doc/node.md#sync) ---
+
+/// Apps only: a worker reads and writes through `/notes`, where its access is checked.
+async fn app_only(headers: &HeaderMap, state: &AppState) -> Result<(), Response> {
+    match worker_access(headers, state).await? {
+        Some(_) => Err(StatusCode::FORBIDDEN.into_response()),
+        None => Ok(()),
+    }
+}
+
+/// Runs blocking file work off the async threads.
+async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T, StorageError> + Send + 'static) -> Result<T, Response> {
+    let r = tokio::task::spawn_blocking(f).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response())?;
+    api(r)
+}
+
+/// `{key: hash}` of every note.
+async fn sync_hashes(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<gestalts_core::Hashes>, Response> {
+    let s = state.store()?;
+    app_only(&headers, &state).await?;
+    Ok(Json(blocking(move || {
+        let mut out = gestalts_core::Hashes::new();
+        for key in s.list_notes_sync()? {
+            if let Some(text) = s.read_note_sync(&key)? {
+                out.insert(key, gestalts_core::content_hash(text.as_bytes()));
+            }
+        }
+        Ok(out)
+    }).await?))
+}
+
+#[derive(Deserialize)]
+struct Keys { keys: Vec<String> }
+
+/// The given notes that exist.
+async fn sync_read(State(state): State<AppState>, headers: HeaderMap, Json(req): Json<Keys>) -> Result<Json<Vec<NoteEntry>>, Response> {
+    let s = state.store()?;
+    app_only(&headers, &state).await?;
+    Ok(Json(blocking(move || {
+        let mut out = Vec::new();
+        for key in req.keys {
+            if let Some(text) = s.read_note_sync(&key)? { out.push(NoteEntry { key, text }); }
+        }
+        Ok(out)
+    }).await?))
+}
+
+/// Writes several notes.
+async fn sync_write(State(state): State<AppState>, headers: HeaderMap, Json(notes): Json<Vec<NoteEntry>>) -> Result<StatusCode, Response> {
+    let s = state.store()?;
+    app_only(&headers, &state).await?;
+    let written = blocking(move || {
+        for n in &notes { s.write_note_sync(&n.key, &n.text)?; }
+        Ok(notes)
+    }).await?;
+    for n in &written { state.plugins.note_changed(&n.key, &n.text).await; }
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -491,6 +572,37 @@ async fn control_autostart(State(s): State<AppState>, Json(req): Json<Autostart>
     Ok(control_status(State(s)).await)
 }
 
+fn lan_of(s: &AppState) -> Result<Arc<Lan>, (StatusCode, String)> {
+    s.lan.clone().ok_or((StatusCode::NOT_FOUND, "this node doesn't pair with devices".to_owned()))
+}
+
+/// Opens a pairing offer: the QR code a device scans.
+async fn control_pairing(State(s): State<AppState>) -> Result<Json<Offer>, (StatusCode, String)> {
+    let lan = lan_of(&s)?;
+    lan.offer(&s).map(Json).map_err(|e| (StatusCode::CONFLICT, e))
+}
+
+async fn control_cancel_pairing(State(s): State<AppState>) -> Result<StatusCode, (StatusCode, String)> {
+    let lan = lan_of(&s)?;
+    lan.pairing.cancel();
+    lan.update(&s).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+async fn control_devices(State(s): State<AppState>) -> Result<Json<Vec<DeviceView>>, (StatusCode, String)> {
+    Ok(Json(lan_of(&s)?.pairing.devices()))
+}
+
+/// Unpairs a device: its token stops working at once, and with no device left the node stops listening.
+async fn control_forget_device(State(s): State<AppState>, UrlPath(id): UrlPath<String>) -> Result<StatusCode, (StatusCode, String)> {
+    let lan = lan_of(&s)?;
+    if !lan.pairing.forget(&id).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))? {
+        return Err((StatusCode::NOT_FOUND, "no such device".into()));
+    }
+    lan.update(&s).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 async fn control_show(State(s): State<AppState>) -> StatusCode {
     s.shell.show();
     StatusCode::NO_CONTENT
@@ -604,12 +716,18 @@ pub fn app(state: AppState) -> Router {
         .route("/autostart", put(control_autostart))
         .route("/show", post(control_show))
         .route("/quit", post(control_quit))
+        .route("/pairing", post(control_pairing).delete(control_cancel_pairing))
+        .route("/devices", get(control_devices))
+        .route("/devices/{id}", axum::routing::delete(control_forget_device))
         .route_layer(middleware::from_fn_with_state(state.clone(), control_auth));
     Router::new()
         .route("/health", get(health))
         .route("/events", get(events))
         .route("/notes", get(list_notes))
         .route("/notes/{key}", get(read_note).put(write_note).delete(delete_note))
+        .route("/sync/hashes", get(sync_hashes))
+        .route("/sync/read", post(sync_read))
+        .route("/sync/write", post(sync_write))
         .route("/blobs", get(list_blobs))
         .route("/blobs/collect", post(collect_blobs))
         .route("/blobs/{name}", get(read_blob).put(write_blob).delete(delete_blob))
@@ -623,6 +741,69 @@ pub fn app(state: AppState) -> Router {
         .layer(DefaultBodyLimit::max(512 * 1024 * 1024))
         .layer(cors)
         .layer(middleware::from_fn(local_host_only))
+        .with_state(state)
+}
+
+// --- the home network: paired devices over TLS (lan.rs) ---
+
+#[derive(Serialize)]
+struct LanHealth {
+    app: &'static str,
+    version: &'static str,
+    api: u32,
+    node_id: String,
+    folder: Option<FolderInfo>,
+}
+
+async fn lan_health(State(s): State<AppState>) -> Json<LanHealth> {
+    let node_id = s.lan.as_ref().map(|l| l.node_id().to_owned()).unwrap_or_default();
+    Json(LanHealth { app: s.identity.name, version: env!("CARGO_PKG_VERSION"), api: API_VERSION, node_id, folder: s.folder().map(|f| f.info.clone()) })
+}
+
+#[derive(Deserialize)]
+struct PairRequest { secret: String, name: String }
+
+/// A device redeems the secret of the open offer for its token.
+async fn pair(State(s): State<AppState>, Json(req): Json<PairRequest>) -> Response {
+    let Some(lan) = s.lan.clone() else { return StatusCode::NOT_FOUND.into_response() };
+    match lan.pairing.redeem(lan.node_id(), &req.secret, &req.name, &now_iso()) {
+        Ok(paired) => Json(paired).into_response(),
+        Err(Refused::Invalid) => (StatusCode::FORBIDDEN, "this pairing code expired or was used already").into_response(),
+        Err(Refused::TooManyAttempts) => (StatusCode::TOO_MANY_REQUESTS, "too many attempts: wait a minute").into_response(),
+    }
+}
+
+/// Lets through only paired devices (`Authorization: Bearer <device token>`). Removes the header afterwards, so the
+/// handlers treat the device as an app, not as a worker.
+async fn device_auth(State(s): State<AppState>, mut request: Request, next: Next) -> Response {
+    let token = request.headers().get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).and_then(|v| v.strip_prefix("Bearer "));
+    let known = match (token, &s.lan) {
+        (Some(t), Some(lan)) => lan.pairing.check(t, &now_iso()).is_some(),
+        _ => false,
+    };
+    if !known { return StatusCode::UNAUTHORIZED.into_response(); }
+    request.headers_mut().remove(header::AUTHORIZATION);
+    next.run(request).await
+}
+
+/// The API on the home network: the notes, blobs and sync for paired devices, and pairing. Not `/control`,
+/// `/events`, the plugins or the app's frontend. No CORS: its clients are apps, not web pages.
+pub fn lan_app(state: AppState) -> Router {
+    let devices = Router::new()
+        .route("/notes", get(list_notes))
+        .route("/notes/{key}", get(read_note).put(write_note).delete(delete_note))
+        .route("/sync/hashes", get(sync_hashes))
+        .route("/sync/read", post(sync_read))
+        .route("/sync/write", post(sync_write))
+        .route("/blobs", get(list_blobs))
+        .route("/blobs/collect", post(collect_blobs))
+        .route("/blobs/{name}", get(read_blob).put(write_blob).delete(delete_blob))
+        .route_layer(middleware::from_fn_with_state(state.clone(), device_auth));
+    Router::new()
+        .route("/health", get(lan_health))
+        .route("/pair", post(pair))
+        .merge(devices)
+        .layer(DefaultBodyLimit::max(512 * 1024 * 1024))
         .with_state(state)
 }
 
@@ -838,6 +1019,94 @@ mod tests {
         assert!(!dir.join("blobs/unused.png").exists());
     }
 
+    #[tokio::test]
+    async fn sync_endpoints() {
+        let dir = temp_dir("sync");
+        let app = app(state(Some(Folder::open(&dir).unwrap())));
+        std::fs::write(dir.join("notes/a.yml"), "x: 1\n").unwrap();
+        let (status, body) = send(&app, get_req("/sync/hashes")).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body, format!("{{\"a\":\"{}\"}}", gestalts_core::content_hash(b"x: 1\n")));
+        let post = |uri: &str, json: serde_json::Value| axum::http::Request::post(uri).header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(json.to_string())).unwrap();
+        let write = post("/sync/write", serde_json::json!([{ "key": "b", "text": "y: 2\n" }, { "key": "c", "text": "z: 3\n" }]));
+        assert_eq!(send(&app, write).await.0, StatusCode::NO_CONTENT);
+        let (status, body) = send(&app, post("/sync/read", serde_json::json!({ "keys": ["b", "missing", "a"] }))).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body, r#"[{"key":"b","text":"y: 2\n"},{"key":"a","text":"x: 1\n"}]"#);
+        let bad = post("/sync/write", serde_json::json!([{ "key": "../escape", "text": "" }]));
+        assert_eq!(send(&app, bad).await.0, StatusCode::BAD_REQUEST);
+    }
+
+    /// Pairing a device over the home network, and syncing with it: TLS pinned to the node's key, a one-time secret,
+    /// a token per device.
+    #[tokio::test]
+    async fn a_device_pairs_and_syncs_over_the_network() {
+        use gestalts_core::{Gestalts, Memory, Storage};
+        use gestalts_peer::paired::{PairingUri, connect, pair};
+
+        let dir = temp_dir("lan");
+        let s = state(Some(Folder::open(&dir).unwrap()));
+        let lan = Arc::new(Lan::new(s.remember_in.as_ref().unwrap(), 0).unwrap());
+        let s = s.with_lan(lan.clone());
+        let app = app(s.clone());
+        assert!(!lan.view().listening, "nothing paired: not on the network");
+
+        let control = |method: &str, uri: &str| axum::http::Request::builder().method(method).uri(uri).header(CONTROL_HEADER, "secret").body(Body::empty()).unwrap();
+        let (status, body) = send(&app, control("POST", "/control/pairing")).await;
+        if status == StatusCode::CONFLICT && body.contains("isn't connected") {
+            eprintln!("skipped: no network here");
+            return;
+        }
+        assert_eq!(status, StatusCode::OK, "{body}");
+        assert!(lan.view().listening);
+        let offer: Offer = serde_json::from_str(&body).unwrap();
+        let mut uri = PairingUri::parse(&offer.uri).unwrap();
+        assert_eq!(uri.node_id, lan.node_id());
+        // over loopback, which the listener (on every interface) answers too
+        let port = lan.view().port;
+        uri.addrs = vec![format!("127.0.0.1:{port}")];
+
+        let impostor = PairingUri { node_id: "0".repeat(64), ..uri.clone() };
+        assert!(pair(&impostor, "Phone").await.is_err(), "another certificate");
+        let mut node = pair(&uri, "Phone").await.unwrap();
+        assert!(pair(&uri, "Phone").await.is_err(), "the secret is used up");
+        assert_eq!(lan.pairing.devices()[0].name, "Phone");
+
+        let peer = connect(&mut node).await.unwrap();
+        let local = Memory::default();
+        local.write_note("from-phone", "id: from-phone\n").await.unwrap();
+        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\n").unwrap();
+        let report = gestalts_core::sync(&local, &peer, &Memory::default(), &Gestalts::builtin(), "2026-01-01T00:00:00Z").await.unwrap();
+        assert_eq!((report.pulled, report.pushed), (vec!["on-disk".to_owned()], vec!["from-phone".to_owned()]));
+        assert!(dir.join("notes/from-phone.yml").exists());
+
+        // without the token, or for anything but the notes: refused
+        let client = gestalts_peer::paired::pinned_client(lan.node_id()).unwrap();
+        let get = |path: &str| client.get(format!("https://127.0.0.1:{port}{path}")).send();
+        assert_eq!(get("/notes").await.unwrap().status(), 401);
+        assert_eq!(get("/control/status").await.unwrap().status(), 404);
+        assert_eq!(get("/health").await.unwrap().status(), 200);
+
+        // forgotten: its token stops working, and with nothing paired the node leaves the network
+        let id = node.device_id.clone();
+        assert_eq!(send(&app, control("DELETE", &format!("/control/devices/{id}"))).await.0, StatusCode::NO_CONTENT);
+        assert!(peer.list_blobs().await.is_err());
+        assert!(!lan.view().listening);
+    }
+
+    /// Needs multicast on a network interface, which CI and containers often lack: `cargo test -- --ignored mdns`.
+    #[tokio::test(flavor = "multi_thread")]
+    #[ignore]
+    async fn mdns_finds_a_listening_node() {
+        let s = state(None);
+        let lan = Arc::new(Lan::new(s.remember_in.as_ref().unwrap(), 0).unwrap());
+        let s = s.with_lan(lan.clone());
+        lan.offer(&s).unwrap();
+        let found = gestalts_peer::paired::discover(lan.node_id(), Duration::from_secs(5)).await;
+        assert!(found.iter().any(|a| a.ends_with(&format!(":{}", lan.view().port))), "{found:?}");
+    }
+
     /// The node API as another device sees it: `gestalts_peer::Peer` over real HTTP, syncing with the folder.
     #[tokio::test]
     async fn a_peer_syncs_with_the_folder() {
@@ -868,6 +1137,16 @@ mod tests {
         assert_eq!(local.read_note("on-disk").await.unwrap().unwrap(), "id: on-disk\nblobs: [disk.png]\n");
         assert_eq!(std::fs::read(dir.join("blobs/phone.png")).unwrap(), [3]);
         assert_eq!(local.read_blob("disk.png").await.unwrap().unwrap(), [1, 2]);
+
+        // nothing changed: only the hashes are compared
+        let report = gestalts_core::sync(&local, &peer, &base, &Gestalts::builtin(), "2026-01-01T00:00:00Z").await.unwrap();
+        assert_eq!((report.compared, report.pulled.len(), report.pushed.len()), (0, 0, 0));
+        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk
+blobs: [disk.png]
+edited: true
+").unwrap();
+        let report = gestalts_core::sync(&local, &peer, &base, &Gestalts::builtin(), "2026-01-01T00:00:00Z").await.unwrap();
+        assert_eq!((report.compared, report.pulled), (1, vec!["on-disk".to_owned()]));
 
         assert_eq!(peer.read_note("missing").await.unwrap(), None);
         peer.delete_note("on-phone").await.unwrap();

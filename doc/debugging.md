@@ -26,7 +26,7 @@ then reload. `delete localStorage['gestalts:debug']` turns it off.
 
 | scope | what |
 |---|---|
-| `repo` | `open`; every mutation (`putValue`, `putRaw`, `delete`, `writeBlob`, `sync`) as a span, with how long it `waitedMs` behind the ones before it; `changed` (version); connect, disconnect, sync failures; `sync done` with note counts and ms per step (`health`, `open_base`, `read_local`, `read_remote`, `read_base`, `merge_notes`, `blobs`, `pull_upstream`, `reindex`); `sync: coalesced` when a sync request joins one already waiting |
+| `repo` | `open`; every mutation (`putValue`, `putRaw`, `delete`, `writeBlob`, `sync`) as a span, with how long it `waitedMs` behind the ones before it; `changed` (version); connect, disconnect, sync failures; `sync done` with note counts, how many notes differed (`compared`) and ms per step (`health`, `open_base`, `remote_hashes`, `fetch_remote`, `local_hashes`, `merge_notes`, `pull_upstream`, `reindex`, `push`, `collect_blobs`); only `merge_notes` and what follows up to `reindex` wait in the write queue; `sync: coalesced` when a sync request joins one already waiting |
 | `practice` | `saveReview` (state write + session trial) as a span |
 | `learn` | `rate`, `rated` (when the background save is done), each `pick` (slot, counts); a warning if the card just rated comes up again |
 | `greek` | `rate`, `rated` (with the next card) |
