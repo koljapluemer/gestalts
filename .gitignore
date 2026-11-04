@@ -1,0 +1,7 @@
+target/
+node_modules/
+dist/
+packages/client/wasm/
+*.tsbuildinfo
+__pycache__/
+.venv/

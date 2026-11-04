@@ -1,0 +1,13 @@
+name: scene-object
+version: 1
+description: >-
+  A thing in a practice scene (a board, a room), shown by a `model` (glb) or an `image`. `props` are its
+  properties, `hold` what it holds.
+requires_tags: [scene-object]
+fields:
+  title: { type: string, required: true }
+  props: { type: map }
+  hold: { type: map }
+blobs:
+  model: { max: 1 }
+  image: { max: 1 }

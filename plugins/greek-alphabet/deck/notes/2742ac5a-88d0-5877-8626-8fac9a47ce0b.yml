@@ -1,0 +1,12 @@
+id: 2742ac5a-88d0-5877-8626-8fac9a47ce0b
+title: κροκόδειλος
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 42dc9f88cfe0bb57.webp
+- label: audio
+  file: e93a89611611326f.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

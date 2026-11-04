@@ -1,0 +1,6 @@
+name: project
+version: 1
+description: Something being worked on; its issues point to it.
+requires_tags: [project]
+fields:
+  title: { type: string }

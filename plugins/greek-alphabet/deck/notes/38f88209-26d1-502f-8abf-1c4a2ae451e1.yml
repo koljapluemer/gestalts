@@ -1,0 +1,12 @@
+id: 38f88209-26d1-502f-8abf-1c4a2ae451e1
+title: κομήτης
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 296c4c57f1a22074.webp
+- label: audio
+  file: 6a9a4de6b85adeac.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

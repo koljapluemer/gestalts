@@ -1,0 +1,10 @@
+name: settings
+version: 1
+description: >-
+  Preferences that sync, for one `scope` (a perspective id); any further fields are the scope's. Keyed
+  `stableId("settings", scope)`. Settings that only make sense on one machine stay in the connector's config.
+requires_tags: [settings]
+fields:
+  scope: { type: string, required: true }
+# per key, as every note: two devices changing different settings never conflict
+merge: map

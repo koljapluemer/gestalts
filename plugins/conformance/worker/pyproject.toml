@@ -1,0 +1,8 @@
+[project]
+name = "gestalts-conformance-worker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["gestalts-plugin-sdk"]
+
+[tool.uv.sources]
+gestalts-plugin-sdk = { path = "../../../sdk/python" }

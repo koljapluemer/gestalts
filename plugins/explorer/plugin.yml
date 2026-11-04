@@ -1,0 +1,12 @@
+schema: 2
+id: explorer
+version: 1.0.0
+host_api: 1
+title: Explorer
+description: Search every note and edit several at once; or start a new one.
+panes:
+  - { id: explorer, title: Explorer, entry: ui/src/index.ts#ExplorerPane }
+  - { id: new, title: New note, entry: ui/src/index.ts#NewNotePane }
+access:
+  read: all
+  write: all

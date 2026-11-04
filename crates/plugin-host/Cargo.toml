@@ -1,0 +1,12 @@
+[package]
+name = "gestalts-plugin-host"
+description = "Runtime-independent contracts for Gestalts plugins and workers"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+gestalts-core.workspace = true
+serde.workspace = true
+serde_yaml_ng.workspace = true
+thiserror.workspace = true
+

@@ -1,0 +1,10 @@
+name: pronunciation-card
+version: 1
+description: A term to read out loud; audio reveals the pronunciation, an optional image hints at the meaning.
+requires_tags: [pronunciation-card]
+fields:
+  title: { type: string, required: true }
+  lang: { type: string }
+blobs:
+  audio: { min: 1, max: 1 }
+  image: { max: 1 }

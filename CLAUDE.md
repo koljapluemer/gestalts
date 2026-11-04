@@ -1,0 +1,6 @@
+- do not attempt to read my private notes.
+- do not drive the browser, leave visual checks to the user.
+- do not look at folders outside of this repo w/o being explicitly told so
+- keep README lean, and docs/.md up to date
+- this is a real, user-facing app that has to work, and not just on this random dev machine
+- do not repeatedly tell me what I put in this claude.md, I know

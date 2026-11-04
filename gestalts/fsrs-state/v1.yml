@@ -1,0 +1,32 @@
+name: fsrs-state
+version: 1
+description: >-
+  A learner's spaced-repetition state for the note it `reviews`, as a ts-fsrs (v6) card.
+  Kept apart from the reviewed note so that content can stay read-only or be shared.
+  With `facet`, the state is for that one facet of the note (a cloze level, an exercise); without, for the whole note.
+  Keyed `stableId("fsrs-state", target)` or `stableId("fsrs-state", "<target>/<facet>")` (`stateKey`).
+requires_tags: [fsrs-state]
+fields:
+  model: { type: string, required: true }        # e.g. FSRS-7
+  facet: { type: string }
+  last_rating: { type: integer, required: true, one_of: [1, 2, 3, 4] }
+  card:
+    type: map
+    required: true
+    fields:
+      dueAt: { type: datetime, required: true }
+      lastReviewAt: { type: datetime }
+      stability: { type: number, required: true }
+      stabilityFast: { type: number }
+      difficulty: { type: number, required: true }
+      state: { type: integer, required: true, one_of: [0, 1, 2, 3] }
+      scheduleStatus: { type: string }
+      reps: { type: integer, required: true, min: 0 }
+      lapses: { type: integer, required: true, min: 0 }
+      scheduledDays: { type: number }
+      learningStep: { type: integer, min: 0 }
+relationships:
+  reviews: { min: 1, max: 1, dies_with_target: true }
+# two devices rating the same card: the later review wins as a whole, then the one with more reps
+merge:
+  whole: { newest_by: [card.lastReviewAt, card.reps] }

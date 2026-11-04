@@ -1,0 +1,35 @@
+{
+  "name": "@gestalts-plugin/typst",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Typst documents, beside a note's canvas",
+  "type": "module",
+  "exports": {
+    ".": "./ui/src/index.ts",
+    "./plugin.yml": "./plugin.yml"
+  },
+  "files": [
+    "plugin.yml",
+    "gestalts",
+    "ui",
+    "worker"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/view": "6.43.15",
+    "@gestalts/kit": "workspace:*",
+    "@gestalts/sdk": "workspace:*",
+    "codemirror-lang-typst": "0.6.0",
+    "lucide-react": "1.66.0"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1"
+  }
+}

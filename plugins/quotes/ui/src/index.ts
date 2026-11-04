@@ -1,0 +1,1 @@
+export { QuotesPane } from './QuotesPane';

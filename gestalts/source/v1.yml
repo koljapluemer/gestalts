@@ -1,0 +1,34 @@
+name: source
+version: 1
+description: >-
+  A bibliographic source in the biblatex model: the fields needed to cite in ACM, IEEE and APA, plus a URL.
+  Names are `family, given`, `family, suffix, given`, or one name without a comma (an organisation).
+  `bib_extra` keeps imported BibTeX fields this model has no place for, written back on export.
+requires_tags: [source]
+fields:
+  title: { type: string, required: true }
+  citekey: { type: string, required: true }
+  entrytype: { type: string, required: true, one_of: [article, book, incollection, inproceedings, thesis, report, online, software, misc] }
+  author: { type: string_list }
+  editor: { type: string_list }
+  date: { type: partial_date }
+  urldate: { type: partial_date }
+  journaltitle: { type: string }
+  booktitle: { type: string }
+  series: { type: string }
+  type: { type: string }
+  number: { type: string }
+  volume: { type: string }
+  edition: { type: string }
+  version: { type: string }
+  pages: { type: string }
+  publisher: { type: string_list }
+  institution: { type: string_list }
+  organization: { type: string_list }
+  location: { type: string_list }
+  doi: { type: string }
+  isbn: { type: string }
+  eprint: { type: string }
+  eprinttype: { type: string }
+  url: { type: url }
+  bib_extra: { type: map }

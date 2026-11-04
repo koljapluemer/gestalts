@@ -1,0 +1,20 @@
+name: cards
+version: 1
+description: >-
+  Flashcards that are part of the note, front to back. `id` names a card within the note, e.g. as the `facet` of
+  its `fsrs-state`: the `card_id` of its front when it was made, kept when the front is edited. Replaces
+  `flashcard@1` notes that are `card-of` it, which are folded in (and retired) on the first save.
+trigger_fields: [cards]
+fields:
+  cards:
+    type: list
+    required: true
+    items:
+      type: map
+      fields:
+        id: { type: string, required: true }
+        front: { type: text, required: true }
+        back: { type: text, required: true }
+merge:
+  keys:
+    cards: { list_by: id, item: { keys: { front: text, back: text } } }

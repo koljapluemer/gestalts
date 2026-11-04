@@ -1,0 +1,12 @@
+id: 8f9b9b38-ee12-581d-8993-d0e36669b3a0
+title: δράκων
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: a8c5985857bfc62a.webp
+- label: audio
+  file: bee4a6d395040a13.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

@@ -1,0 +1,31 @@
+{
+  "name": "@gestalts-plugin/quotes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quotes, learned word by word from the end",
+  "type": "module",
+  "exports": {
+    ".": "./ui/src/index.ts",
+    "./plugin.yml": "./plugin.yml"
+  },
+  "files": [
+    "plugin.yml",
+    "gestalts",
+    "ui"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@gestalts/learning": "workspace:*",
+    "@gestalts/sdk": "workspace:*",
+    "lucide-react": "1.66.0"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1"
+  }
+}

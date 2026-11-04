@@ -1,0 +1,12 @@
+[package]
+name = "gestalts-merge"
+description = "Symmetric, rule-based three-way merge of YAML values"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+diffy = "0.5"
+serde_yaml_ng.workspace = true
+
+[dev-dependencies]
+proptest = "1"

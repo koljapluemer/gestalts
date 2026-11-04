@@ -1,0 +1,15 @@
+schema: 2
+id: greek-alphabet
+version: 1.0.0
+host_api: 1
+title: Greek alphabet
+description: The Ancient Greek letters by their sounds, practised by spaced repetition.
+gestalts: [pronunciation-card@1]
+uses: [fsrs-state@1, practice-session@1]
+# the deck was the Demo's own (`demo`) before it became this plugin's: copies made then keep following it
+deck: { path: deck, aliases: [demo] }
+panes:
+  - { id: practice, title: Greek alphabet, entry: ui/src/index.ts#PracticePane }
+access:
+  read: { gestalts: [pronunciation-card@1, fsrs-state@1, practice-session@1] }
+  write: { gestalts: [fsrs-state@1, practice-session@1] }

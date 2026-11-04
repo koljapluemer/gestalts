@@ -1,0 +1,40 @@
+name: sentence
+version: 1
+description: >-
+  A sentence in a language, optionally split into `parts` (each may point to a `term@1` note by id) and with `gaps`
+  to fill in. A sentence spoken in a video or recording is `segment-of` that note, from `start` to `end` (seconds).
+requires_tags: [sentence]
+fields:
+  title: { type: string, required: true }
+  lang: { type: string }
+  translations: { type: string_list }
+  transcription: { type: string }
+  credits:
+    type: list
+    items:
+      type: map
+      fields:
+        for: { type: string }
+        text: { type: text, required: true }
+  parts:
+    type: list
+    items:
+      type: map
+      fields:
+        content: { type: string, required: true }
+        translations: { type: string_list }
+        transcription: { type: string }
+        examples: { type: list }
+        term: { type: string }
+  gaps:
+    type: list
+    items:
+      type: map
+      fields:
+        word: { type: string, required: true }
+        at: { type: integer, min: 0 }
+        distractors: { type: string_list }
+  start: { type: number, min: 0 }
+  end: { type: number, min: 0 }
+relationships:
+  segment-of: { max: 1 }

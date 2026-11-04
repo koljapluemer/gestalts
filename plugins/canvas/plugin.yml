@@ -1,0 +1,14 @@
+schema: 2
+id: canvas
+version: 1.0.0
+host_api: 1
+title: Canvas
+description: A note's canvas of free text and linked notes.
+uses: [canvas@1, canvas@2]
+panes:
+  - { id: canvas, title: Canvas, entry: ui/src/index.ts#CanvasPane }
+slots:
+  - { slot: note-view, gestalt: canvas@2, entry: ui/src/index.ts#CanvasView }
+access:
+  read: all
+  write: all

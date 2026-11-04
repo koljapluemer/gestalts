@@ -1,0 +1,15 @@
+name: typst-document
+version: 1
+description: >-
+  A Typst document. `assets` maps the paths it reads (e.g. `/images/a.webp`) to blobs, which a compiler
+  places at those paths; `/sources.bib` is always the bibliography of the sources it cites. The last
+  built PDF is the blob labelled `pdf`.
+requires_tags: [typst]
+fields:
+  title: { type: string }
+  source: { type: text, required: true }
+  assets: { type: map, values: { type: blob } }
+blobs:
+  pdf: { max: 1 }
+relationships:
+  document-of: { max: 1 }

@@ -1,0 +1,21 @@
+name: canvas
+version: 1
+description: >-
+  An infinite plane of free Markdown text and linked notes, about the note it is `canvas-of`. Nodes are in
+  z-order, each at its top-left position, with exactly one of `text` or `note` (a note id). Every linked
+  note is also an `on-canvas` relationship, so it travels with the canvas.
+requires_tags: [canvas]
+fields:
+  nodes:
+    type: list
+    required: true
+    items:
+      type: map
+      fields:
+        id: { type: string, required: true }
+        x: { type: number, required: true }
+        y: { type: number, required: true }
+        text: { type: text }
+        note: { type: string }
+relationships:
+  canvas-of: { min: 1, max: 1 }

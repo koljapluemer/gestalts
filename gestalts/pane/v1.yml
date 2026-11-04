@@ -1,0 +1,22 @@
+name: pane
+version: 1
+description: >-
+  An open pane (a tab in the Gestalter): `pane` names it as `<plugin>/<pane>`, `title` overrides the plugin's,
+  `params` are its own settings, and `position.order` places it among the others. Opening a pane writes a note;
+  closing it deletes the note. The default panes of an app are keyed `stableId("pane", "<plugin>/<pane>")`, so two
+  devices seeding a new folder write the same notes.
+requires_tags: [pane]
+fields:
+  pane: { type: string, required: true }
+  title: { type: string }
+  params: { type: map }
+  position:
+    type: map
+    required: true
+    fields:
+      order: { type: number, required: true }
+      at: { type: datetime, required: true }
+merge:
+  keys:
+    # the later move wins, as a whole
+    position: { newest_by: [at] }

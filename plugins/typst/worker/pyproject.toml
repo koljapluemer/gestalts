@@ -1,0 +1,8 @@
+[project]
+name = "gestalts-typst-worker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["gestalts-plugin-sdk", "typst==0.15.0"]
+
+[tool.uv.sources]
+gestalts-plugin-sdk = { path = "../../../sdk/python" }

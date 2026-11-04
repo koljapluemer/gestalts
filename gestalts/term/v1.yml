@@ -1,0 +1,24 @@
+name: term
+version: 1
+description: >-
+  A word or expression in a language: its translations, transliteration and examples. Alternate spellings go in
+  `aliases`. `value` is for terms that stand for a number (a numeral).
+requires_tags: [term]
+fields:
+  title: { type: string, required: true }
+  lang: { type: string }
+  translations: { type: string_list }
+  transliteration: { type: string }
+  examples:
+    type: list
+    items:
+      type: map
+      fields:
+        text: { type: text, required: true }
+        translation: { type: text }
+        credit: { type: string }
+  value: { type: number }
+blobs:
+  image: { max: 1 }
+  audio: { max: 1 }
+  doodle: { max: 1 }

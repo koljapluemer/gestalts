@@ -1,0 +1,7 @@
+name: quote
+version: 1
+description: A quotation in `main`, with who said it; it may `cites` the `source@1` it comes from.
+requires_tags: [quote]
+fields:
+  main: { type: text, required: true }
+  attribution: { type: string }

@@ -1,0 +1,15 @@
+name: template
+version: 2
+description: >-
+  A text template (e.g. a Jinja HTML page) the note renders with, stored on it as `template`. `name` is the
+  template's file name, if it had one. Replaces a `template@1` note that is `template-of` it, which is folded in
+  (and retired) on the first save.
+trigger_fields: [template]
+fields:
+  template:
+    type: map
+    required: true
+    fields:
+      format: { type: string, required: true, one_of: [jinja-html] }
+      source: { type: text, required: true }
+      name: { type: string }

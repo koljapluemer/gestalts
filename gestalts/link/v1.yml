@@ -1,0 +1,6 @@
+name: link
+version: 1
+description: A note pointing to a web page.
+trigger_fields: [url]
+fields:
+  url: { type: url, required: true }

@@ -1,0 +1,8 @@
+name: daily
+version: 1
+description: >-
+  The journal entry for one day. Its key is `stableId("daily", date)`, so a note made for the same date
+  on two devices is one note once they sync.
+requires_tags: [daily]
+fields:
+  date: { type: date, required: true }

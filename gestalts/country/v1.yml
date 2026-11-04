@@ -1,0 +1,15 @@
+name: country
+version: 1
+description: >-
+  A country: `code` is ISO 3166 alpha-3, `world_map` holds what the map exercises need (switches, zoom).
+  Countries easily confused with it are `distractor` relationships; a group of countries is a plain note with
+  `member` relationships.
+requires_tags: [country]
+fields:
+  title: { type: string, required: true }
+  code: { type: string, required: true }
+  alpha2: { type: string }
+  priority: { type: number }
+  world_map: { type: map }
+blobs:
+  flag: { max: 1 }

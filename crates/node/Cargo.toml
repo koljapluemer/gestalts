@@ -1,0 +1,29 @@
+[package]
+name = "gestalts-node"
+description = "Serves a folder of Gestalts notes on 127.0.0.1 and hosts plugin workers; apps embed it"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+pollster = "0.4"
+gestalts-core.workspace = true
+gestalts-fs.workspace = true
+gestalts-plugin-host = { path = "../plugin-host" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+uuid.workspace = true
+axum = "0.8"
+clap = { version = "4", features = ["derive"] }
+directories = "6"
+flate2 = "1"
+include_dir = "0.7"
+mime_guess = "2"
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls", "blocking"] }
+tar = "0.4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "process", "time", "sync"] }
+tower-http = { version = "0.6", features = ["cors"] }
+zip = { version = "9", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }

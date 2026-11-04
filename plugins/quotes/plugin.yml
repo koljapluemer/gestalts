@@ -1,0 +1,13 @@
+schema: 2
+id: quotes
+version: 1.0.0
+host_api: 1
+title: Quotes
+description: Quotes you collect, learned word by word from the end (cloze levels, by spaced repetition).
+gestalts: [quote@1]
+uses: [fsrs-state@1, practice-session@1]
+panes:
+  - { id: quotes, title: Quotes, entry: ui/src/index.ts#QuotesPane }
+access:
+  read: { gestalts: [quote@1, fsrs-state@1, practice-session@1] }
+  write: { gestalts: [quote@1, fsrs-state@1, practice-session@1] }

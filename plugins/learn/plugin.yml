@@ -1,0 +1,12 @@
+schema: 2
+id: learn
+version: 1.0.0
+host_api: 1
+title: Learn
+description: Every flashcard of every note, reviewed by spaced repetition.
+uses: [cards@1, flashcard@1, fsrs-state@1, practice-session@1]
+panes:
+  - { id: learn, title: Learn, entry: ui/src/index.ts#LearnPane }
+access:
+  read: all
+  write: { gestalts: [fsrs-state@1, practice-session@1] }

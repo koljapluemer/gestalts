@@ -1,0 +1,12 @@
+id: 6a358eac-756b-5c31-bcf4-5825803bf701
+title: ἐλέφας
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 0729263da192e229.webp
+- label: audio
+  file: e7b24f87054e3880.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

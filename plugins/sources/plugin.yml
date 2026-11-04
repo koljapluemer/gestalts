@@ -1,0 +1,12 @@
+schema: 2
+id: sources
+version: 1.0.0
+host_api: 1
+title: Sources
+description: Bibliographic sources, imported from and exported to BibTeX.
+uses: [source@1]
+panes:
+  - { id: sources, title: Sources, entry: ui/src/index.ts#SourcesPane }
+access:
+  read: all
+  write: all

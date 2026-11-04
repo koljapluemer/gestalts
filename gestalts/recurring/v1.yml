@@ -1,0 +1,8 @@
+name: recurring
+version: 1
+description: Something happening every week on a weekday, optionally up to and including `until`.
+requires_tags: [recurring]
+fields:
+  title: { type: string }
+  weekday: { type: string, required: true, one_of: [mo, tu, we, th, fr, sa, su] }
+  until: { type: partial_date }

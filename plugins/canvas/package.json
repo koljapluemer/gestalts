@@ -1,0 +1,30 @@
+{
+  "name": "@gestalts-plugin/canvas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A note's canvas of text and linked notes",
+  "type": "module",
+  "exports": {
+    ".": "./ui/src/index.ts",
+    "./plugin.yml": "./plugin.yml"
+  },
+  "files": [
+    "plugin.yml",
+    "ui"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@gestalts/kit": "workspace:*",
+    "@gestalts/sdk": "workspace:*",
+    "@xyflow/react": "12.12.0",
+    "lucide-react": "1.66.0"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1"
+  }
+}

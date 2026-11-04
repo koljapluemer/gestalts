@@ -1,0 +1,12 @@
+id: 8e127544-4f99-505d-9797-62c4d0ae7978
+title: ῥινόκερως
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: ce93fbdf99883c65.webp
+- label: audio
+  file: 9c92d558739c9f37.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

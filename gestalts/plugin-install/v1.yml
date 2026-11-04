@@ -1,0 +1,11 @@
+name: plugin-install
+version: 1
+description: >-
+  A plugin installed in this folder: `plugin` (its id), where it came from (`source`: `built-in`, or a URL later),
+  the `version` installed and whether it's `enabled`. Keyed `stableId("plugin", id)`. Uninstalling deletes the note.
+requires_tags: [plugin-install]
+fields:
+  plugin: { type: string, required: true }
+  source: { type: string, required: true }
+  version: { type: string }
+  enabled: { type: bool }

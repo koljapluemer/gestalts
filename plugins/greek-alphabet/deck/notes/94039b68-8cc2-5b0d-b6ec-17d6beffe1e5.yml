@@ -1,0 +1,12 @@
+id: 94039b68-8cc2-5b0d-b6ec-17d6beffe1e5
+title: ἀμφορεύς
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: d998aaccb222b8e8.webp
+- label: audio
+  file: a9f4ce0f02e8a158.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

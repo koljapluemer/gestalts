@@ -1,0 +1,12 @@
+id: 6464c2d8-31bf-533c-9f58-bf7e1976ed05
+title: πυραμίς
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: e0983830030c279d.webp
+- label: audio
+  file: ffcd31e2b7b31ae1.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

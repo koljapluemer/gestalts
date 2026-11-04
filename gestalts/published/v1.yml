@@ -1,0 +1,9 @@
+name: published
+version: 1
+description: >-
+  A note's text as published at `publish_route` (segments of a-z, 0-9 and dashes joined by `/`; the last may be
+  `_index`), written for readers and kept apart from `main`.
+trigger_fields: [publish_route, publish]
+fields:
+  publish_route: { type: string, required: true }
+  publish: { type: text, required: true }

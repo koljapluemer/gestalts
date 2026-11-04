@@ -1,0 +1,12 @@
+id: a818388a-a009-5110-81aa-87e02fae8499
+title: τίγρις
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: da16e31fba29efc9.webp
+- label: audio
+  file: f0319836f32ca057.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

@@ -1,0 +1,28 @@
+{
+  "name": "@gestalts/ui",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./host": "./src/host/index.ts",
+    "./perspectives": "./src/perspectives/index.ts",
+    "./debug": "./src/debug/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@gestalts/client": "workspace:*",
+    "@gestalts/kit": "workspace:*",
+    "@gestalts/sdk": "workspace:*",
+    "lucide-react": "1.66.0"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "description": "The host: app shells, panes from pane notes, plugins and their installs, connector settings"
+}

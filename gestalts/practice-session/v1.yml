@@ -1,0 +1,24 @@
+name: practice-session
+version: 1
+description: >-
+  One practice session in one perspective (`app`): when, how long the learner was active, how many trials, and the
+  app's own `events`. Written by one device only, under a random key, so the log never conflicts.
+requires_tags: [practice-session]
+fields:
+  app: { type: string, required: true }
+  started: { type: datetime, required: true }
+  ended: { type: datetime }
+  active_ms: { type: integer, min: 0 }
+  trials: { type: integer, min: 0 }
+  events:
+    type: list
+    items:
+      type: map
+      fields:
+        at: { type: datetime, required: true }
+merge:
+  keys:
+    events: { union_by: at }
+    active_ms: max
+    trials: max
+    ended: max

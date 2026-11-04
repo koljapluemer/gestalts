@@ -1,0 +1,8 @@
+name: issue
+version: 1
+description: A piece of work belonging to the projects its `project` relationships point to.
+requires_tags: [issue]
+fields:
+  title: { type: string }
+relationships:
+  project: { min: 1 }

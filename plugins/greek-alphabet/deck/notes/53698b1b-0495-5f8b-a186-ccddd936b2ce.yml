@@ -1,0 +1,12 @@
+id: 53698b1b-0495-5f8b-a186-ccddd936b2ce
+title: φοῖνιξ
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: f88406aaa9deb112.webp
+- label: audio
+  file: 51d60d60e58e7ce3.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

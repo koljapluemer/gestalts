@@ -1,0 +1,8 @@
+name: template
+version: 1
+description: A text template (e.g. a Jinja HTML page) another note renders with.
+requires_tags: [template]
+fields:
+  title: { type: string }
+  format: { type: string, required: true, one_of: [jinja-html] }
+  source: { type: text, required: true }

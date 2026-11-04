@@ -1,0 +1,7 @@
+name: flashcard
+version: 1
+description: Something to recall, front to back.
+requires_tags: [flashcard]
+fields:
+  front: { type: text, required: true }
+  back: { type: text, required: true }

@@ -1,0 +1,13 @@
+name: practice-state
+version: 1
+description: >-
+  A learner's state for the note it `reviews` (or one `facet` of it) under a scheduler other than FSRS; `model`
+  names it (`ebisu`, `leitner-patience`, `streak`, …) and defines `state`. Keyed
+  `stableId("practice-state", target)` or `stableId("practice-state", "<target>/<facet>")` (`stateKey`).
+requires_tags: [practice-state]
+fields:
+  model: { type: string, required: true }
+  facet: { type: string }
+  state: { type: map, required: true }
+relationships:
+  reviews: { min: 1, max: 1, dies_with_target: true }

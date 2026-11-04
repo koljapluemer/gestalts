@@ -1,0 +1,12 @@
+id: 0d2edfc7-501d-5d65-9804-ab93a65c6763
+title: καρδία
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 43b7dfe7fe9e95cd.webp
+- label: audio
+  file: e5b943d04b85efec.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

@@ -1,0 +1,12 @@
+id: a780aea1-c6fb-535a-8d12-074ade18873b
+title: μέταλλον
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 4d7c80d315201289.webp
+- label: audio
+  file: a5b4faf0bbdfe890.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

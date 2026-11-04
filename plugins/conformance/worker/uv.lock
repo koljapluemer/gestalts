@@ -1,0 +1,19 @@
+version = 1
+revision = 3
+requires-python = ">=3.12"
+
+[[package]]
+name = "gestalts-conformance-worker"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "gestalts-plugin-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "gestalts-plugin-sdk", directory = "../../../sdk/python" }]
+
+[[package]]
+name = "gestalts-plugin-sdk"
+version = "0.1.0"
+source = { directory = "../../../sdk/python" }

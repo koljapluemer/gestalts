@@ -1,0 +1,12 @@
+id: f03d01b4-1aee-5914-a2a1-4821dbe79fa3
+title: δεινόσαυρος
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: cf4ee75c4c57325f.webp
+- label: audio
+  file: 077cef20931db19c.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng

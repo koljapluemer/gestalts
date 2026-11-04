@@ -1,0 +1,47 @@
+# Developer tools and tasks. After cloning: `mise install`, then `mise run setup`.
+# Rust itself is pinned in rust-toolchain.toml (rustup reads it).
+
+[tools]
+node = "26.12.0"
+pnpm = "10.32.1"
+uv = "0.13.6"
+"cargo:wasm-pack" = "0.15.1"
+
+[tasks.setup]
+description = "JS dependencies and the core compiled to wasm (after cloning, and after changing crates/core or crates/wasm)"
+run = [
+  "pnpm install",
+  "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",
+]
+
+[tasks.check]
+description = "Tests, lints and typechecks"
+depends = ["setup"]
+run = [
+  "cargo test --workspace -q",
+  "cargo clippy --workspace -q -- -D warnings",
+  "pnpm lint",
+  "pnpm typecheck",
+  "pnpm test",
+]
+
+[tasks.serve]
+description = "The node headless with this repo's plugins, for working on workers without an app's desktop shell"
+usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
+run = "cargo run -q -p gestalts-node -- --profile dev --plugins-dir plugins serve --data {{usage.dir}}"
+
+[tasks.lint-data]
+description = "Print each note's gestalts and lints for a data folder"
+usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
+run = "cargo run -q --release -p gestalts-node -- --plugins-dir plugins lint {{usage.dir}}"
+
+[tasks.publish-data]
+description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, lints"
+usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
+run = "cargo run -q --release -p gestalts-node -- --plugins-dir plugins publish {{usage.dir}}"
+
+[tasks.check-plugin-standalone]
+description = "Build a plugin outside the workspace, against the packed public packages only (as in a repo of its own)"
+usage = 'arg "<id>" help="the plugin, e.g. quotes"'
+depends = ["setup"]
+run = "bash scripts/check-plugin-standalone.sh {{usage.id}}"

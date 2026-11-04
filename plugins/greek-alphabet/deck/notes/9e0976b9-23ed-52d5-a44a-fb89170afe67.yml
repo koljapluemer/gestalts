@@ -1,0 +1,12 @@
+id: 9e0976b9-23ed-52d5-a44a-fb89170afe67
+title: πάπυρος
+lang: grc
+tags:
+- pronunciation-card
+- greek-alphabet
+blobs:
+- label: image
+  file: 852aafe08680e318.webp
+- label: audio
+  file: 07ec0e043b1ca73b.mp3
+source: sam-learns-things ancient-greek-alphabet; audio generated with espeak-ng
