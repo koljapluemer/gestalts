@@ -84,18 +84,20 @@ export function PaneTabs({ registry, title, end }: { registry: Registry; title: 
               </button>
             </div>
           ); })}
-          <details className="dropdown">
-            <summary className="btn btn-sm btn-ghost btn-square" title="Open a pane"><Plus className="size-4" /></summary>
-            <ul className="menu dropdown-content z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-1 shadow">
-              {available.map((a) => (
-                <li key={a.ref} className={a.support.state === 'ok' ? '' : 'menu-disabled'} title={supportText(a.support)}>
-                  <button type="button" disabled={a.support.state !== 'ok'} onClick={() => open(a.ref)}>{a.title}</button>
-                </li>
-              ))}
-              {!available.length && <li className="menu-disabled"><span>No plugin with panes is installed</span></li>}
-            </ul>
-          </details>
         </div>
+        {/* outside the scrolling tab strip: its overflow would clip the menu */}
+        <details className="dropdown dropdown-end">
+          <summary className="btn btn-sm btn-ghost btn-square" title="Open a pane"><Plus className="size-4" /></summary>
+          <ul className="menu dropdown-content z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-1 shadow">
+            {available.map((a) => (
+              <li key={a.ref} className={a.support.state === 'ok' ? '' : 'menu-disabled'} title={supportText(a.support)}>
+                <button type="button" disabled={a.support.state !== 'ok'}
+                        onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); open(a.ref); }}>{a.title}</button>
+              </li>
+            ))}
+            {!available.length && <li className="menu-disabled"><span>No plugin with panes is installed</span></li>}
+          </ul>
+        </details>
         {end}
       </nav>
       <main className="min-h-0 flex-1">
