@@ -19,5 +19,5 @@ pub use sync::{Fetched, NoteCounts, Pending, SYNC_STEPS, SyncBase, SyncReport, f
 pub use note::{Note, ParseError, Ref};
 pub use repo::{IndexedNote, Query, Repo, new_id, stable_id, state_key};
 pub use storage::{Deck, Hashes, Layered, Memory, Storage, StorageError, Tracked};
-pub use upstream::{DeckRef, UpstreamReport, content_hash, copies_of, pull_upstream};
+pub use upstream::{DeckRef, Decks, Merged, UpstreamReport, content_hash, copies_of, pull_upstream};
 pub use serde_yaml_ng::Value;

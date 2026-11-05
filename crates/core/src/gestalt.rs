@@ -410,7 +410,7 @@ pub(crate) mod tests {
     /// The core's gestalts and those of the plugins these tests read about.
     pub(crate) fn with_plugins() -> Gestalts {
         Gestalts::builtin_with(&[
-            include_str!("../../../plugins/greek-alphabet/gestalts/pronunciation-card/v1.yml"),
+            include_str!("../testdata/pronunciation-card.yml"),
             include_str!("../../../plugins/typst/gestalts/typst-document/v1.yml"),
             include_str!("../../../plugins/quotes/gestalts/quote/v1.yml"),
         ])

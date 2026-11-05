@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useHostRepo } from '@gestalts/client';
 import { useQuery } from '@gestalts/sdk';
-import { install, installState, setEnabled, uninstall } from './installs';
+import { deckEnabled, install, installState, setDeckEnabled, setEnabled, uninstall, wantedDecks } from './installs';
 import type { PluginEntry, Registry, Scope } from './registry';
 
 function scopeText(s: Scope | undefined): string {
@@ -12,15 +12,18 @@ function scopeText(s: Scope | undefined): string {
 
 /**
  * The plugins bundled with this app: what each may read and write, and whether it's installed here (a
- * `plugin-install@1` note, so the choice syncs). Changing installs takes a reload, which mounts or unmounts decks.
+ * `plugin-install@1` note, so the choice syncs), and which of its decks are on. Changing installs or decks takes a
+ * reload, which mounts or unmounts decks. `mounted`: the plugins installed when the repo opened; `decks`: the deck
+ * sources mounted then.
  */
-export function PluginSettings({ registry, mounted }: { registry: Registry; mounted: PluginEntry[] }) {
+export function PluginSettings({ registry, mounted, decks }: { registry: Registry; mounted: PluginEntry[]; decks: string[] }) {
   const repo = useHostRepo();
   useQuery({ gestalt: 'plugin-install@1' }); // re-render when installs change
   const [removeData, setRemoveData] = useState(false);
   const [busy, setBusy] = useState(false);
   const run = (f: () => Promise<void>) => { setBusy(true); void f().finally(() => setBusy(false)); };
-  const changed = registry.plugins.some((p) => (installState(repo, p.manifest.id) === 'installed') !== mounted.includes(p));
+  const changed = registry.plugins.some((p) => (installState(repo, p.manifest.id) === 'installed') !== mounted.includes(p))
+    || wantedDecks(repo, registry).map((d) => d.source).sort().join() !== [...decks].sort().join();
   return (
     <div className="flex w-96 max-w-[90vw] flex-col gap-2">
       <p className="text-sm text-base-content/70">Plugins bundled with this app. Uninstalling one keeps your copies of its notes unless you remove them too.</p>
@@ -34,6 +37,17 @@ export function PluginSettings({ registry, mounted }: { registry: Registry; moun
                   <p className="font-semibold">{p.manifest.title ?? p.manifest.id} <span className="font-normal text-base-content/50">{p.manifest.version}</span></p>
                   {p.manifest.description && <p className="text-xs text-base-content/70">{p.manifest.description}</p>}
                   <p className="text-xs text-base-content/60">Reads {scopeText(p.manifest.access?.read ?? 'all')}; writes {scopeText(p.manifest.access?.write)}.</p>
+                  {state !== 'uninstalled' && p.decks.length > 1 && (
+                    <div className="mt-1 flex flex-wrap gap-x-3">
+                      {p.decks.map((d) => (
+                        <label key={d.id} className="label text-xs">
+                          <input type="checkbox" className="checkbox checkbox-xs" checked={deckEnabled(repo, p, d.id)} disabled={busy}
+                                 onChange={(e) => run(() => setDeckEnabled(repo, p, d.id, e.target.checked))} />
+                          {d.title}
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {state === 'uninstalled'
                   ? <button type="button" className="btn btn-xs btn-primary" disabled={busy} onClick={() => run(() => install(repo, p))}>Install</button>

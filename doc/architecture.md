@@ -17,14 +17,18 @@ packages/learning     @gestalts/learning: FSRS by facet, practice sessions, lear
 packages/client       the host's core in the browser: the wasm-backed Repo, opening, syncing
 packages/ui           the host: panes from pane notes, plugin installs, the capability frame, connector settings
 packages/vite         @gestalts/vite: builds an app with its plugins (`virtual:gestalts-plugins`, decks, Tailwind sources)
-plugins/<id>/         domain bundles, each a package `@gestalts-plugin/<id>`: plugin.yml, their gestalts, deck, ui/ and worker/
+plugins/<id>/         domain bundles, each a package `@gestalts-plugin/<id>`: plugin.yml, their gestalts, decks, ui/ and worker/
 ```
 
 The apps live in repos of their own, next to a checkout of this one (they link its packages and crates by path until
 they are published):
 - **gestalter**: the host with every plugin, panes as tabs (`distribution/`), and its desktop app around the node
   (`desktop/`, `gestalter`), which serves that build.
-- **loops-for-learning**: the host with greek-alphabet, its one pane alone; hosted, for learning.
+- **loops-for-learning**: the host with the learning plugins, one pane at a time; hosted, for learning.
+
+Plugins that are content rather than a part of the paradigm (the learning mini tools) live in **gestalt-plugins**,
+grouped by where they come from (`sam-learns/<id>/`). A plugin there is an interaction (find countries on a map, read
+a script aloud), and its topics are decks. They import only the public packages, like the plugins here.
 
 Where it goes from here (the repos, the apps, what isn't built yet): [next-steps.md](next-steps.md).
 
@@ -44,7 +48,7 @@ The browser never parses YAML itself: `packages/client` calls the wasm core, whi
 | app | storage | with the desktop app |
 |---|---|---|
 | Gestalter | the folder, through the node that serves the page (`Peer`), over the decks of its installed plugins | always: it is served by it |
-| loops-for-learning | OPFS `demo/` (its name from when it was the Demo) over the greek-alphabet deck; a word is copied into OPFS when first rated | only the OPFS layer syncs with the folder |
+| loops-for-learning | OPFS `demo/` (its name from when it was the Demo) over its plugins' decks; a word or country is copied into OPFS when first practised | only the OPFS layer syncs with the folder |
 
 loops-for-learning works without the desktop app; connecting to it is remembered per browser. The Gestalter works
 only with it running ([node.md](node.md#serving-an-app)).
@@ -52,13 +56,22 @@ only with it running ([node.md](node.md#serving-an-app)).
 ### Copy-on-write from a deck
 
 A learner's data must stand on its own: a folder synced from loops-for-learning holds the rated words, not just review states pointing at words that live elsewhere. So user space is **closed under references**:
-- Writing a note through `Layered` copies every deck note it references (`relationships`), from the deck that has it, with that note's blobs and, in turn, its references. Rating a word writes an `fsrs-state` note, which copies the word.
+- Writing a note through `Layered` copies every deck note it references (`relationships`), as the decks have it, with that note's blobs and, in turn, its references. Rating a word writes an `fsrs-state` note, which copies the word. A country copies the countries it's confused with (`distractor`), and theirs: one answer on the world map copies most of the world.
 - `pull_upstream` runs on open and after each sync. It copies whatever is still missing (e.g. references that arrived by sync) and brings copies up to date.
 
-Each copy is the deck text plus an `upstream` trailer naming the deck (its plugin's id; see [data-format.md](data-format.md)). A deck may list earlier ids as `aliases`: copies made under one follow it too, as copies made when the deck was the Demo's own (`source: demo`) follow the greek-alphabet plugin's deck. When a deck changes:
+A plugin has any number of decks, each mounted as `<plugin>/<deck>` (its `source`), and installs can switch decks
+off one by one. **Decks that hold the same key hold the same thing**: decks key their notes by what they are (a
+country `stableId("country", <ISO code>)`), so the world and Africa decks hold one Kenya. Where several mounted decks
+hold a key, `Layered` reads the merge of their texts by the gestalts' merge rules, without a base, in the order of
+their sources (`upstream::Decks`): tags and relationships unite, equal values pass. A value they disagree on keeps the
+merge's canonical winner and is reported in `upstreamReport().deck_conflicts`, never written: decks are read-only.
+
+Each copy is the merged text plus an `upstream` trailer naming the decks it came from (see
+[data-format.md](data-format.md)). When the decks change (an edit, or a deck holding the note mounted or unmounted):
 - an untouched copy is replaced with the new upstream text
 - an edited copy is left alone and reported as diverged
 - words nobody rated simply stay upstream, so they update for free
+- a copy none of whose decks is mounted stays as it is
 
 The repo's `upstreamReport()` says what the last check did; loops-for-learning logs it to the console. A tombstone in user space hides the deck note under it, and is never copied over.
 
@@ -85,22 +98,24 @@ The repo's `upstreamReport()` says what the last check did; loops-for-learning l
 
 ### Plugins
 
-A plugin is a domain bundle in `plugins/<id>/` with a `plugin.yml` (schema 2):
+A plugin is a domain bundle in `plugins/<id>/` (or a repo of its own, as gestalt-plugins') with a `plugin.yml`
+(schema 2):
 
 ```yaml
 schema: 2
-id: greek-alphabet
+id: alphabet-pronunciation-via-visual-cognates
 version: 1.0.0
 host_api: 1
 gestalts: [pronunciation-card@1]           # owned here, defined in gestalts/<name>/v<N>.yml
 uses: [fsrs-state@1, practice-session@1]   # owned elsewhere: a data dependency
-deck: { path: deck, aliases: [demo] }      # starter data, published-deck format
+decks:                                     # starter content, published-deck format, mounted as <plugin>/<deck>
+  - { id: greek-alphabet, title: Ancient Greek, path: decks/greek-alphabet }
 panes:
-  - { id: practice, title: Greek alphabet, entry: ui/src/index.ts#PracticePane }
+  - { id: practice, title: Alphabet pronunciation, entry: ui/src/index.ts#PracticePane }
   # a pane may need node services: `requires: { services: [typst@1] }` (Canvas2Typ)
 slots:                                     # e.g. canvas: { slot: note-view, gestalt: canvas@2, entry: … }
 access:
-  read: { gestalts: [pronunciation-card@1, fsrs-state@1, practice-session@1] }   # or `all`
+  read: { gestalts: [pronunciation-card@1, fsrs-state@1, practice-session@1] }   # or `all`; `tags_all` for plain notes
   write: { gestalts: [fsrs-state@1, practice-session@1] }
 worker: …                                  # optional, see node.md
 ```
@@ -109,18 +124,21 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
-  (Canvas2Typ, and the `typst@1` worker), sources, learn, quotes, greek-alphabet (with a deck).
+  (Canvas2Typ, and the `typst@1` worker), sources, learn, quotes. gestalt-plugins has the learning ones with decks
+  (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` is recorded in pane notes,
   so it stays once released: `gestalter-desktop`, `loops-for-learning`, later `gestalter-android`. `@gestalts/vite` turns them into
-  `virtual:gestalts-plugins`: each plugin's manifest, its gestalts, its deck (served under `decks/<id>/`) and loaders
+  `virtual:gestalts-plugins`: each plugin's manifest, its gestalts, its decks (served under `decks/<plugin>/<deck>/`) and loaders
   for its UI modules. The app builds with any list. The same preset dedupes React (packages may be linked from a
   sibling checkout) and replaces `@gestalts-sources;` in the app's CSS with an `@source` per package, at its real
   path: Tailwind doesn't reliably scan through pnpm's symlinks.
 - **Installs** are `plugin-install@1` notes (`stableId("plugin", id)`), seeded for the distribution's plugins once
   a new folder has synced, so they sync like notes. The Gestalter's plugin menu enables, disables, uninstalls and
-  reinstalls them, showing what each may read and write. Uninstalling unmounts the deck (after a reload); the
-  user's copies stay unless "also delete my copies" asks to delete the notes copied from its deck.
+  reinstalls them, showing what each may read and write, and switches a plugin's decks on and off (`decks: {<id>:
+  false}` on the install note). Uninstalling unmounts its decks (after a reload); the user's copies stay unless "also
+  delete my copies" asks to delete the notes copied from its decks alone (a note another plugin's deck holds too
+  stays).
 
 ### Panes and the host
 

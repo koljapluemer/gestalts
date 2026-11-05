@@ -114,7 +114,7 @@ copy-on-write never copies it back.
 | `flashcard@1` | tag `flashcard`, `front` and `back` |
 | `appointment@1` | tag `appointment`, `date` |
 | `link@1` | a well-formed `url` |
-| `pronunciation-card@1` | (plugin greek-alphabet) tag `pronunciation-card`, `title` (the term), blob `audio`, optional blob `image`, optional `lang` |
+| `pronunciation-card@1` | (plugin alphabet-pronunciation-via-visual-cognates, in gestalt-plugins) tag `pronunciation-card`, `title` (the term), blob `audio`, optional blob `image`, optional `lang` |
 | `fsrs-state@1` | tag `fsrs-state`, one relationship `reviews`, `model` (e.g. `FSRS-7`), `last_rating` 1–4, `card` (a ts-fsrs v6 card), optional `facet` |
 | `recurring@1` | tag `recurring`, `weekday` (`mo`…`su`), optional `until` (partial date) |
 | `daily@1` | tag `daily`, `date`; keyed `stableId("daily", date)`, so one note per date across devices |
@@ -130,7 +130,7 @@ copy-on-write never copies it back.
 | `term@1` | tag `term`, `title` (the term), optional `lang`, `translations`, `transliteration`, `examples` (each `text`, `translation`, `credit`), `value` (a numeral's number); blobs `image`, `audio`, `doodle` at most one each; alternate spellings in `aliases` |
 | `sentence@1` | tag `sentence`, `title` (the sentence), optional `lang`, `translations`, `transcription`, `credits` (each `for`, `text`), `parts` (each `content`, `translations`, `transcription`, `examples`, `term` = a `term@1` id), `gaps` (each `word`, `at`, `distractors`), `start`/`end` in seconds with at most one `segment-of` |
 | `quote@1` | (plugin quotes) tag `quote`, `main`, optional `attribution`; may `cites` a `source@1` |
-| `country@1` | tag `country`, `title`, `code` (ISO alpha-3), optional `alpha2`, `priority`, `world_map` (map), blob `flag` at most one; `distractor` relationships to other countries |
+| `country@1` | tag `country`, `title`, `code` (ISO alpha-3), optional `alpha2`, `priority`, `world_map` (map), blobs `flag` and `geometry` (a GeoJSON feature) at most one each; `distractor` relationships to other countries; keyed `stableId("country", code)` in decks, so decks holding a country merge |
 | `scene-object@1` | tag `scene-object`, `title`, optional `props`, `hold` (maps), blob `model` (glb) or `image` |
 | `interaction@1` | tag `interaction`, `action`, optional `effects`, `instructions` (lang → sentences); one `actor`, at most one `target` |
 | `practice-state@1` | tag `practice-state`, one `reviews`, `model` (a scheduler other than FSRS: `ebisu`, `streak`, …), `state` (map), optional `facet` |

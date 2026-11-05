@@ -1,7 +1,7 @@
 //! Domain contracts for plugins (`plugin.yml`, schema 2): pure, no IO beyond reading a bundle. Running workers is
 //! `plugins.rs`.
 //!
-//! A plugin is a domain bundle: the gestalts it owns, an optional deck, optional UI (panes and slot views) and an
+//! A plugin is a domain bundle: the gestalts it owns, its decks, optional UI (panes and slot views) and an
 //! optional worker. See `doc/architecture.md#plugins`.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -44,8 +44,9 @@ pub struct PluginManifest {
     /// `name@N` of gestalts owned elsewhere that it reads or writes: a data dependency
     #[serde(default)]
     pub uses: Vec<String>,
+    /// starter content, one deck per topic; mounted under `<plugin id>/<deck id>`
     #[serde(default)]
-    pub deck: Option<DeckManifest>,
+    pub decks: Vec<DeckManifest>,
     #[serde(default)]
     pub panes: Vec<PaneManifest>,
     #[serde(default)]
@@ -57,14 +58,14 @@ pub struct PluginManifest {
     pub worker: Option<WorkerManifest>,
 }
 
-/// Starter data in the published-deck format, mounted read-only under the user's folder.
+/// Starter content in the published-deck format, mounted read-only under the user's folder. Decks that hold the same
+/// key hold the same thing, and are merged when both are mounted.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct DeckManifest {
+    pub id: String,
+    pub title: String,
     pub path: PathBuf,
-    /// earlier `source` ids of this deck, so copies made under them keep following it
-    #[serde(default)]
-    pub aliases: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -255,7 +256,12 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     for id in m.gestalts.iter().chain(&m.uses) {
         if gestalt_file(id).is_none() { return invalid(format!("gestalt {id} is not name@N")); }
     }
-    if let Some(d) = &m.deck { safe_relative(&d.path)?; }
+    let mut decks = BTreeSet::new();
+    for d in &m.decks {
+        if !valid_id(&d.id) || d.id.contains('@') || !decks.insert(&d.id) { return invalid(format!("invalid or duplicate deck {}", d.id)); }
+        if d.title.trim().is_empty() { return invalid(format!("deck {} has no title", d.id)); }
+        safe_relative(&d.path)?;
+    }
     let mut panes = BTreeSet::new();
     for p in &m.panes {
         if !valid_id(&p.id) || p.id.contains('@') || !panes.insert(&p.id) { return invalid(format!("invalid or duplicate pane {}", p.id)); }
@@ -353,8 +359,26 @@ mod tests {
         }
         assert!(bundles.len() >= 2);
         let g = gestalts_with(&bundles.iter().collect::<Vec<_>>()).unwrap();
-        assert!(g.get("pronunciation-card@1").is_some());
+        assert!(g.get("quote@1").is_some());
         assert!(g.get("fsrs-state@1").is_some());
+    }
+
+    #[test]
+    fn decks_have_unique_ids_titles_and_safe_paths() {
+        let load = |decks: &str| {
+            let dir = std::env::temp_dir().join(format!("gestalts-plugin-decks-{}-{}", std::process::id(), decks.len()));
+            std::fs::create_dir_all(&dir).unwrap();
+            std::fs::write(dir.join("plugin.yml"), format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\ndecks: {decks}\n")).unwrap();
+            let r = PluginBundle::load(&dir).map(|b| b.manifest.decks.len());
+            std::fs::remove_dir_all(&dir).unwrap();
+            r
+        };
+        assert_eq!(load("[{id: world, title: World, path: decks/world}, {id: africa, title: Africa, path: decks/africa}]").unwrap(), 2);
+        assert!(load("[{id: a, title: A, path: d/a}, {id: a, title: B, path: d/b}]").is_err());
+        assert!(load("[{id: a, title: A, path: ../a}]").is_err());
+        assert!(load("[{id: Africa, title: A, path: d/a}]").is_err());
+        assert!(load("[{id: a, title: ' ', path: d/a}]").is_err());
+        assert!(load("[{id: a, title: A, path: d/a, aliases: [b]}]").is_err());
     }
 
     #[test]

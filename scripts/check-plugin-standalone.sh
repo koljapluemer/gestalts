@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Builds plugins/<id> outside the workspace, against packed @gestalts/sdk, kit and learning only, the way it would
-# build in a repo of its own. Fails on anything that reaches back into the monorepo.
+# Builds a plugin outside any workspace, against packed @gestalts/sdk, kit and learning only, the way it would build in
+# a repo of its own. Fails on anything that reaches back into a monorepo. The plugin is `plugins/<id>` here, or a path
+# to a plugin folder (another repo's, as gestalt-plugins').
 set -euo pipefail
-id="${1:?usage: check-plugin-standalone.sh <plugin id>}"
+arg="${1:?usage: check-plugin-standalone.sh <plugin id or folder>}"
 root="$(cd "$(dirname "$0")/.." && pwd)"
-plugin="$root/plugins/$id"
-[ -f "$plugin/plugin.yml" ] || { echo "no plugin $id" >&2; exit 1; }
+if [ -d "$arg" ]; then plugin="$(cd "$arg" && pwd)"; else plugin="$root/plugins/$arg"; fi
+id="$(basename "$plugin")"
+[ -f "$plugin/plugin.yml" ] || { echo "no plugin $arg" >&2; exit 1; }
 work="$(mktemp -d "${TMPDIR:-/tmp}/gestalts-standalone-$id-XXXX")"
 trap 'rm -rf "$work"' EXIT
 
@@ -18,7 +20,7 @@ for pkg in sdk kit learning; do (cd "$root/packages/$pkg" && pnpm pack --pack-de
 pack() { ls "$work/packs"/gestalts-"$1"-*.tgz; }
 
 cp -r "$plugin" "$work/$id"
-rm -rf "$work/$id/node_modules" "$work/$id/dist"
+rm -rf "$work/$id/node_modules" "$work/$id/dist" "$work/$id/decks" "$work/$id/import"
 cd "$work/$id"
 node - "$(pack sdk)" "$(pack kit)" "$(pack learning)" "$root/package.json" <<'JS'
 const fs = require('fs');
@@ -27,7 +29,7 @@ const files = { '@gestalts/sdk': `file:${sdk}`, '@gestalts/kit': `file:${kit}`, 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const dev = JSON.parse(fs.readFileSync(rootPkg, 'utf8')).devDependencies;
 for (const [k, v] of Object.entries(pkg.dependencies)) {
-  if (String(v).startsWith('workspace:')) {
+  if (String(v).startsWith('workspace:') || (k.startsWith('@gestalts/') && String(v).startsWith('link:'))) {
     if (!files[k]) throw new Error(`${k} is not a public package`);
     pkg.dependencies[k] = files[k];
   }

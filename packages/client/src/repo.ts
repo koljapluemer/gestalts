@@ -11,7 +11,7 @@ import { coalesce } from './coalesce';
 const log = logger('repo');
 
 /** A read-only deck published at `url` (a folder with `index.json`), under its `source` id and earlier ones. */
-export type DeckSource = { source: string; aliases?: string[]; url: string };
+export type DeckSource = { source: string; url: string };
 
 /** Where the user's notes live: in OPFS under `dir` (synced with a connector, if one is set), or in the folder the
  * node at `node` serves (the desktop app; written directly, nothing to sync). */
@@ -297,9 +297,9 @@ export class Repo implements Port {
     return keys;
   }
 
-  /** The keys of the notes copied from the deck `source` (or one of its `aliases`). */
-  copiesOf(source: string, aliases: string[] = []): Promise<string[]> {
-    return this.wasm.copiesOf(source, aliases) as Promise<string[]>;
+  /** The keys of the notes copied from the decks `sources` alone (every deck they came from is one of them). */
+  copiesOf(sources: string[]): Promise<string[]> {
+    return this.wasm.copiesOf(sources) as Promise<string[]>;
   }
 
   /** Whether `key` was deleted (is a tombstone); `get` returns nothing for it. */

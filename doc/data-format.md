@@ -33,22 +33,28 @@ How the core copes with missing or broken pieces:
 
 ## Published decks
 
-A deck shipped read-only (a plugin's `deck/`, like greek-alphabet's) follows a few more rules, so that copies in user space can follow it:
+A deck shipped read-only (one of a plugin's `decks`) follows a few more rules, so that copies in user space can
+follow it:
 - **Blobs are content-addressed**: `<first 16 hex digits of sha256>.<ext>`. A replaced image gets a new name, which changes the note that uses it.
 - **Notes are never deleted, they're retired**: tag them `retired` (publishing rejects tombstones). Perspectives skip retired notes, and copies pick the tag up like any other change.
 - **Note ids are the file names**, since relationships are resolved to keys in the deck.
+- **Keys say what a note is**, so the same thing has the same key in every deck: a country is
+  `stableId("country", <ISO alpha-3>)`, a group of them `stableId("country-group", <id>)`. Where several mounted decks
+  hold a key, it reads as the merge of their texts by the gestalts' rules, without a base (tags and relationships
+  unite); a value they disagree on is reported, and the merge's canonical winner kept. Decks holding the same note
+  should agree on everything but what they leave out (the Africa deck keeps only African look-alikes).
 - Deck notes have no `upstream` field. User-space copies get one, appended as the last lines:
 
   ```yaml
   upstream:
-    source: greek-alphabet   # the deck's id: its plugin's (copies made as `demo` follow it too, an alias)
-    hash: <sha256 of the deck note's text as copied>
+    sources: [learn-world-map/africa, learn-world-map/whole-world]   # the decks merged into it, <plugin>/<deck>
+    hash: <sha256 of the merged text as copied>
   ```
 
   A copy is untouched while the text before the trailer still has that hash.
 
 To publish after editing notes or overwriting blob files, run `mise run publish-data <folder>` (e.g.
-`plugins/greek-alphabet/deck`) and commit the result. It:
+`plugins/<id>/decks/<deck>`; gestalt-plugins has its own task) and commit the result. It:
 1. renames blobs to their content hash and rewrites the notes that use them
 2. deletes blobs no note uses
 3. writes `index.json`

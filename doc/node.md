@@ -12,7 +12,8 @@ gestalts-node publish DIR        # prepare a folder as a read-only deck
 # all of them: [--port 7717] [--lan-port 7718] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
 ```
 
-`mise run serve DIR`, `lint-data` and `publish-data` run it with this repo's `plugins/`. The `dev` profile keeps its
+`mise run serve DIR`, `lint-data` and `publish-data` run it with this repo's `plugins/`, and gestalt-plugins' groups
+(`sam-learns/`) when it's checked out next to this repo (`scripts/plugin-dirs.sh`). The `dev` profile keeps its
 settings apart from an installed app. All use port 7717, so quit one before starting another.
 
 ## Serving an app

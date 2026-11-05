@@ -1,1 +1,0 @@
-export { PracticePane } from './GreekAlphabetPane';

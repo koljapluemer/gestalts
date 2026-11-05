@@ -75,6 +75,8 @@ export type UpstreamReport = {
   updated: string[];
   /** edited copies whose upstream changed; left as they are */
   diverged: string[];
+  /** values mounted decks disagree on (no merge rule settled them), as `key: path` */
+  deck_conflicts: string[];
 };
 
 export type Ref = { target: string; label: string | null };

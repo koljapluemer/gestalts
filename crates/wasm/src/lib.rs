@@ -73,10 +73,10 @@ fn marker(timings: &mut serde_json::Map<String, serde_json::Value>, last: &mut f
 
 #[wasm_bindgen]
 impl WasmRepo {
-    /// Notes in OPFS under `dir`, over read-only decks (`[{source, aliases, url}]`, published folders, see
-    /// `Static`), with the core's gestalts plus `gestalts` (YAML definitions from plugins). Copy-on-write: deck notes
-    /// the user's notes reference are copied into OPFS, and untouched copies follow deck changes
-    /// (`gestalts_core::upstream`).
+    /// Notes in OPFS under `dir`, over read-only decks (`[{source, url}]`, published folders, see `Static`), with the
+    /// core's gestalts plus `gestalts` (YAML definitions from plugins). Decks holding the same key are merged by those
+    /// gestalts' rules. Copy-on-write: deck notes the user's notes reference are copied into OPFS, and untouched
+    /// copies follow deck changes (`gestalts_core::upstream`).
     pub async fn open(dir: String, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
         // tracked, so a sync knows which notes changed without reading them all
         let writable: Dyn = Rc::new(Tracked::new(Opfs::open(&dir).await.map_err(err)?));
@@ -95,21 +95,20 @@ impl WasmRepo {
         #[derive(serde::Deserialize)]
         struct DeckSpec {
             source: String,
-            #[serde(default)]
-            aliases: Vec<String>,
             url: String,
         }
         let specs: Vec<DeckSpec> = if decks.is_undefined() || decks.is_null() { vec![] } else { from_js(decks)? };
         let g = Gestalts::builtin_with(&gestalts.iter().map(String::as_str).collect::<Vec<_>>()).map_err(|e| JsError::new(&e))?;
         let mut mounted = Vec::new();
+        let gestalts_for_decks = g.clone();
         for d in specs {
             let storage: Dyn = Rc::new(Static::open(&d.url).await.map_err(err)?);
-            mounted.push(Deck { source: d.source, aliases: d.aliases, storage });
+            mounted.push(Deck { source: d.source, storage });
         }
         let (storage, layered) = if mounted.is_empty() {
             (writable.clone(), None)
         } else {
-            let layered = Rc::new(Layered { decks: mounted, top: writable.clone() });
+            let layered = Rc::new(Layered::new(mounted, writable.clone(), gestalts_for_decks));
             (layered.clone() as Dyn, Some(layered))
         };
         let repo = Rc::new(Repo::new(storage, g));
@@ -143,10 +142,10 @@ impl WasmRepo {
         }
     }
 
-    /// The keys of the notes copied from the deck `source` (or its `aliases`).
+    /// The keys of the notes copied from the decks `sources` alone (every deck in their trailer is one of them).
     #[wasm_bindgen(js_name = copiesOf)]
-    pub async fn copies_of(&self, source: String, aliases: Vec<String>) -> Result<Vec<String>, JsError> {
-        gestalts_core::copies_of(&*self.writable, &source, &aliases).await.map_err(err)
+    pub async fn copies_of(&self, sources: Vec<String>) -> Result<Vec<String>, JsError> {
+        gestalts_core::copies_of(&*self.writable, &sources).await.map_err(err)
     }
 
     /// Collects this browser's unreferenced blobs, after a successful sync (`gestalts_core::blobs`). The manifest
@@ -170,10 +169,13 @@ impl WasmRepo {
         Ok(())
     }
 
-    /// What the last check against upstream did: `{copied, updated, diverged}`, all empty for a plain OPFS repo.
+    /// What the last check against upstream did: `{copied, updated, diverged, deck_conflicts}`, all empty for a plain
+    /// OPFS repo. `deck_conflicts` (`key: path`) are values mounted decks disagree on, from the last full read.
     #[wasm_bindgen(js_name = upstreamReport)]
     pub fn upstream_report(&self) -> Result<JsValue, JsError> {
-        to_js(&*self.upstream_report.borrow())
+        let r = self.upstream_report.borrow();
+        let deck_conflicts = self.layered.as_ref().map(|l| l.deck_conflicts.borrow().clone()).unwrap_or_default();
+        to_js(&UpstreamReport { copied: r.copied.clone(), updated: r.updated.clone(), diverged: r.diverged.clone(), deck_conflicts })
     }
 
     /// Rereads everything from storage.

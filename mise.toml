@@ -26,22 +26,22 @@ run = [
 ]
 
 [tasks.serve]
-description = "The node headless with this repo's plugins, for working on workers without an app's desktop shell"
+description = "The node headless with this repo's plugins (and gestalt-plugins', when checked out next to it), for working on workers without an app's desktop shell"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q -p gestalts-node -- --profile dev --plugins-dir plugins serve --data {{usage.dir}}"
+run = "cargo run -q -p gestalts-node -- --profile dev $(bash scripts/plugin-dirs.sh) serve --data {{usage.dir}}"
 
 [tasks.lint-data]
 description = "Print each note's gestalts and lints for a data folder"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q --release -p gestalts-node -- --plugins-dir plugins lint {{usage.dir}}"
+run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) lint {{usage.dir}}"
 
 [tasks.publish-data]
 description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, lints"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q --release -p gestalts-node -- --plugins-dir plugins publish {{usage.dir}}"
+run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
 
 [tasks.check-plugin-standalone]
 description = "Build a plugin outside the workspace, against the packed public packages only (as in a repo of its own)"
-usage = 'arg "<id>" help="the plugin, e.g. quotes"'
+usage = 'arg "<plugin>" help="a plugin here (its id, e.g. quotes) or a plugin folder elsewhere"'
 depends = ["setup"]
-run = "bash scripts/check-plugin-standalone.sh {{usage.id}}"
+run = "bash scripts/check-plugin-standalone.sh {{usage.plugin}}"

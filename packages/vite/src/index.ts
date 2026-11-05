@@ -1,6 +1,6 @@
 /**
  * The plugins an app is built with, as the virtual module `virtual:gestalts-plugins`: each plugin's manifest, its
- * gestalts (YAML text), its deck (served under `decks/<id>/`) and loaders for its UI modules. The plugins are the
+ * gestalts (YAML text), its decks (served under `decks/<id>/<deck>/`) and loaders for its UI modules. The plugins are the
  * app's `@gestalts-plugin/*` dependencies in its `package.json`; `distribution.yml` next to it names the distribution
  * (`id`) and says which panes it opens with. The host loads plugins through this registry and never imports them, so an app builds with any list,
  * even an empty one.
@@ -23,7 +23,7 @@ type Manifest = {
   id: string;
   host_api: number;
   gestalts?: string[];
-  deck?: { path: string; aliases?: string[] };
+  decks?: { id: string; title: string; path: string }[];
   panes?: { id: string; title: string; entry: string; requires?: { services?: string[] } }[];
   slots?: { slot: string; gestalt: string; entry: string }[];
 };
@@ -78,10 +78,13 @@ function load(appRoot: string) {
       const [name, version] = g.split('@');
       return readFileSync(join(root, 'gestalts', name, `v${version}.yml`), 'utf8');
     });
-    const deckDir = manifest.deck ? join(root, manifest.deck.path) : null;
-    if (deckDir && !existsSync(join(deckDir, 'index.json'))) throw new Error(`${id}: its deck has no index.json; run \`mise run publish-data ${relative(process.cwd(), deckDir)}\``);
+    const decks = (manifest.decks ?? []).map((d) => {
+      const dir = join(root, d.path);
+      if (!existsSync(join(dir, 'index.json'))) throw new Error(`${id}: its deck ${d.id} has no index.json; run \`mise run publish-data ${relative(process.cwd(), dir)}\``);
+      return { id: d.id, title: d.title, dir };
+    });
     const modules = [...new Set([...(manifest.panes ?? []), ...(manifest.slots ?? [])].map((e) => e.entry.split('#')[0]))];
-    return { id, root, manifest, gestalts, deckDir, modules };
+    return { id, root, manifest, gestalts, decks, modules };
   });
   for (const ref of distribution.default_panes ?? []) {
     const [plugin, pane] = ref.split('/');
@@ -124,27 +127,28 @@ export function gestaltsPlugins(): PluginOption[] {
       const entries = plugins.map((p) => {
         this.addWatchFile(join(p.root, 'plugin.yml'));
         const modules = p.modules.map((m) => `${JSON.stringify(m)}: () => import(${JSON.stringify(join(p.root, m))})`).join(', ');
-        const deck = p.deckDir ? { source: p.id, aliases: p.manifest.deck?.aliases ?? [], path: `decks/${p.id}` } : null;
-        return `{ manifest: ${JSON.stringify(p.manifest)}, gestalts: ${JSON.stringify(p.gestalts)}, deck: ${JSON.stringify(deck)}, modules: { ${modules} } }`;
+        const decks = p.decks.map((d) => ({ id: d.id, title: d.title, source: `${p.id}/${d.id}`, path: `decks/${p.id}/${d.id}` }));
+        return `{ manifest: ${JSON.stringify(p.manifest)}, gestalts: ${JSON.stringify(p.gestalts)}, decks: ${JSON.stringify(decks)}, modules: { ${modules} } }`;
       });
       return `export const distribution = ${JSON.stringify({ default_panes: [], install_ui: false, ...distribution })};\nexport const plugins = [${entries.join(',\n')}];\n`;
     },
     configureServer(server) {
-      // decks in development: /decks/<id>/… from plugins/<id>/<deck path>
+      // decks in development: /decks/<plugin>/<deck>/… from the plugin's deck path
       server.middlewares.use((req, res, next) => {
-        const m = /^\/decks\/([a-z0-9-]+)\/(.+)$/.exec((req.url ?? '').split('?')[0]);
+        const m = /^\/decks\/([a-z0-9.-]+)\/([a-z0-9.-]+)\/(.+)$/.exec((req.url ?? '').split('?')[0]);
         if (!m) return next();
-        const p = load(appRoot).plugins.find((x) => x.id === m[1]);
-        const file = p?.deckDir && resolve(p.deckDir, decodeURIComponent(m[2]));
-        if (!file || !file.startsWith(p.deckDir + '/') || !existsSync(file)) { res.statusCode = 404; res.end(); return; }
+        const d = load(appRoot).plugins.find((x) => x.id === m[1])?.decks.find((x) => x.id === m[2]);
+        const file = d && resolve(d.dir, decodeURIComponent(m[3]));
+        if (!d || !file || !file.startsWith(d.dir + '/') || !existsSync(file)) { res.statusCode = 404; res.end(); return; }
         res.end(readFileSync(file));
       });
     },
     generateBundle() {
       for (const p of load(appRoot).plugins) {
-        if (!p.deckDir) continue;
-        for (const f of files(p.deckDir)) {
-          this.emitFile({ type: 'asset', fileName: `decks/${p.id}/${relative(p.deckDir, f)}`, source: readFileSync(f) });
+        for (const d of p.decks) {
+          for (const f of files(d.dir)) {
+            this.emitFile({ type: 'asset', fileName: `decks/${p.id}/${d.id}/${relative(d.dir, f)}`, source: readFileSync(f) });
+          }
         }
       }
     },

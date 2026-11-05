@@ -22,12 +22,14 @@ format + core  ←  platform (host, plugin contract, node, peer)  ←  plugins  
 A repo isn't a package. Imports need released, versioned packages with clear boundaries, not a repo for each.
 
 - **`gestalts`**: the foundation, one repo publishing many packages: the format and core, the platform and the
-  plugins. Its interfaces still change, and nothing outside uses one part of it alone yet, so a host change and the
+  plugins that are part of the paradigm (Explorer, Canvas, Learn, …). Its interfaces still change, and nothing outside uses one part of it alone yet, so a host change and the
   plugin fixes it needs land in one commit. The lint keeps dependencies pointing down, so it can be cut apart along
   those lines later: when something outside needs only one part (an iOS or Python reader of the core, third-party
   plugins against a stable `host_api`).
 - **`gestalter`**: `desktop/`, `android/`, later `ios/`, and the distribution they share. Its own steps (the
   desktop serving the Gestalter, Android) are in its `doc/next-steps.md`.
+- **`gestalt-plugins`**: plugins that are content, grouped by origin (`sam-learns/`): each an interaction whose
+  topics are its decks, importing only the public packages. Apps link them like gestalts' own.
 - **`loops-for-learning`**, the educational web app.
 - **Later apps**, each a repo of its own.
 
@@ -61,7 +63,7 @@ packages/
   ui             the host: pane shell, capability frame, installs, conflict resolver
   vite           builds an app with its plugins
 sdk/python       the worker contract (PyPI)
-plugins/         every plugin, each an npm package
+plugins/         the paradigm's plugins, each an npm package (the content ones are gestalt-plugins')
 ```
 
 ## Steps
@@ -87,8 +89,11 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
   its addresses, key fingerprint and a one-time secret; devices get a token, pin the key, and find the node again by
   mDNS. The device side (`gestalts_peer::paired`) awaits Android.
 - [ ] **Android** (gestalter). Here: `client`'s native backend (Tauri IPC) and the core with `FsStorage` on a phone.
-- [ ] **Publish** `@gestalts/core` (wasm), `client`, `sdk`, `kit`, `learning` and the Python SDK. Every plugin's
-  standalone build (`mise run check-plugin-standalone`) runs in CI.
+- [x] **Decks per plugin, merged by key**, and the content plugins in gestalt-plugins (learn-world-map with two decks;
+  greek-alphabet became alphabet-pronunciation-via-visual-cognates).
+- [ ] **Publish** `@gestalts/core` (wasm), `client`, `sdk`, `kit`, `learning`, `ui`, `vite` and the Python SDK, and
+  the plugins the apps ship (gestalts' and gestalt-plugins'). Every plugin's standalone build
+  (`mise run check-plugin-standalone`) runs in CI.
 - [ ] **Apps pin released versions** instead of linking a sibling checkout, with CI per repo.
 
 ### What pairing doesn't cover
@@ -119,7 +124,8 @@ From dsl:
 
 From sam-learns-things (each: catalog → deck, its Dexie tables → notes; the users' learning data isn't migrated):
 - [x] quotes
-- [ ] learn-flags, world-map
+- [x] world-map (gestalt-plugins' learn-world-map)
+- [ ] learn-flags
 - [ ] top-vocab, dont-translate
 - [ ] 20-words
 - [ ] with-videos
@@ -132,7 +138,7 @@ From sam-learns-things (each: catalog → deck, its Dexie tables → notes; the 
 - [ ] tprboard
 - [ ] al-kutshina
 
-All of these sam-learns ports should show in the `loops-for-learning` repo, following the "plugin comes with data, copy-on-write to user space" pattern.
+All of these sam-learns ports go into gestalt-plugins' `sam-learns/` and show in `loops-for-learning`, following the "plugin comes with decks, copy-on-write to user space" pattern.
 
 ## Not built yet
 

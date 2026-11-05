@@ -27,7 +27,7 @@ sam-learns-things has no migration yet.
 | `term@1` | tag `term`, `title` (the term), `lang`, `translations` (list), `transliteration`, `examples` (list of `{text, translation, credit}`), optional blobs `image`, `audio`, `doodle`; alternate spellings in `aliases` | top-vocab words, 20-words words, with-videos vocab, dont-translate (image + `aliases` as the expressions), arabicnumbers numbers (`title` the numeral, `value`), typingpractice entries |
 | `sentence@1` | tag `sentence`, `title` (the sentence), `lang`, `translations`, `transcription`, `credits` (list of `{for, text}`), `parts` (list of `{content, translations, transcription, examples, term}`, `term` optionally a `term@1` id), `gaps` (list of `{word, at?, distractors}`); optional `start`, `end` (seconds) with a `segment-of` relationship | infinitesentences, egyptiansentences, saetze (one gap, one distractor), with-videos snippets (`segment-of` a `link@1` note for the video, with `lang`), tprboard/al-kutshina instructions |
 | `quote@1` | tag `quote`, `main`, `attribution`; optional `cites` relationship to a `source@1` | quotes |
-| `country@1` | tag `country`, `title`, `code` (ISO alpha-3), `alpha2`, `priority`, blob `flag`, `world_map` (map: the exercise switches and zooms); distractors as `distractor` relationships to other countries; groups as plain notes with `member` relationships | world-map, learn-flags |
+| `country@1` | tag `country`, `title`, `code` (ISO alpha-3), `alpha2`, `priority`, blobs `flag` and `geometry` (a GeoJSON feature), `world_map` (map: the exercise switches and zooms); distractors as `distractor` relationships to other countries; groups as plain notes with `member` relationships; keyed `stableId("country", code)` in decks | world-map, learn-flags |
 | `scene-object@1` | tag `scene-object`, `title` (its name), `props` (map), `hold` (map), blob `model` (glb) or `image` | tprboard objects, al-kutshina items |
 | `interaction@1` | tag `interaction`, `action`, `effects` (map: sender/receiver effect or reaction code, replacement image), one `actor` and at most one `target` relationship (scene objects), `instructions` (map: lang → list of accepted sentences) | tprboard relationships and task texts, al-kutshina capabilities, affordances and quests |
 | `practice-state@1` | tag `practice-state`, one `reviews` relationship, `model` (`ebisu`, `leitner-patience`, `streak`, `arabicnumbers-sr`, …), optional `facet`, `state` (map, as the model defines it) | every scheduler that isn't FSRS: tprboard (Ebisu), 20-words memorize board, triangle and simplify topic streaks, arabicnumbers levels |
@@ -70,7 +70,7 @@ and collages (Chromium), the continuous `.bib` / site / portfolio exports.
 
 | app | content | state |
 |---|---|---|
-| ancient-greek-alphabet | `pronunciation-card@1` (done) | `fsrs-state@1` |
+| ancient-greek-alphabet | `pronunciation-card@1` (done: gestalt-plugins' alphabet-pronunciation-via-visual-cognates) | `fsrs-state@1` |
 | hebrewscript, minimal-pairs-practice | `pronunciation-card@1` | `practice-session@1` events |
 | just-flashcards | `flashcard@1` | `fsrs-state@1` |
 | quotes | `quote@1` | `fsrs-state@1`, facet = cloze level |
@@ -80,7 +80,7 @@ and collages (Chromium), the continuous `.bib` / site / portfolio exports.
 | infinitesentences | `sentence@1` with `parts` | `fsrs-state@1` per gloss; learned sentences and daily counts derive from sessions |
 | saetze, egyptiansentences | `sentence@1` with `gaps` | sessions (highscores) |
 | arabicnumbers, typingpractice | `term@1` | `practice-state@1` / sessions |
-| world-map, learn-flags | `country@1` (+ geometry as a blob on a deck note) | `fsrs-state@1` per country and per exercise |
+| world-map, learn-flags | `country@1` (blob `geometry` per country; world-map done: gestalt-plugins' learn-world-map, decks Whole World and Countries of Africa) | `fsrs-state@1` per country and per exercise, `practice-session@1` events |
 | tprboard, al-kutshina | `scene-object@1` + `interaction@1` | `practice-state@1` (Ebisu), sessions |
 | currency, simplify-expressions, triangle-congruence | generated; topic notes | `practice-state@1`, sessions |
 

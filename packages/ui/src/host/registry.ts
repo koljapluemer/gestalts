@@ -27,11 +27,14 @@ export type PluginEntry = {
   manifest: PluginManifest;
   /** the definitions of the gestalts it owns, as YAML */
   gestalts: string[];
-  /** its deck, relative to the app (`decks/<id>`) */
-  deck: { source: string; aliases: string[]; path: string } | null;
+  /** its decks: `source` is `<plugin>/<deck>`, `path` relative to the app (`decks/<plugin>/<deck>`) */
+  decks: DeckEntry[];
   /** its UI modules by path */
   modules: Record<string, () => Promise<Record<string, unknown>>>;
 };
+
+/** One of a plugin's decks, as the build serves it. */
+export type DeckEntry = { id: string; title: string; source: string; path: string };
 
 /** `id`: whose pane notes are whose; `plugins`: the ids of the plugins the app is built with */
 export type Distribution = { id: string; plugins: string[]; default_panes: string[]; install_ui: boolean };
@@ -48,8 +51,8 @@ export function findPane(registry: Registry, ref: string): { plugin: PluginEntry
   return plugin && pane ? { plugin, pane } : undefined;
 }
 
-export function deckSources(plugins: PluginEntry[]): DeckSource[] {
-  return plugins.flatMap((p) => (p.deck ? [{ source: p.deck.source, aliases: p.deck.aliases, url: new URL(p.deck.path, document.baseURI).href }] : []));
+export function deckSources(decks: DeckEntry[]): DeckSource[] {
+  return decks.map((d) => ({ source: d.source, url: new URL(d.path, document.baseURI).href }));
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a plugin's export, typed by the caller

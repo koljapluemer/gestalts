@@ -84,26 +84,36 @@ pub fn note_key_from_file(file: &str) -> Option<&str> {
     file.strip_suffix(".yml").filter(|k| valid_key(k))
 }
 
-/// A read-only deck under a [`Layered`] storage: its `source` id, earlier ids (`aliases`), and its notes.
+/// A read-only deck under a [`Layered`] storage: its `source` id (`<plugin>/<deck>`) and its notes.
 pub struct Deck<B> {
     pub source: String,
-    pub aliases: Vec<String>,
     pub storage: B,
 }
 
-/// Reads from `top`, falling back to the decks in order; writes go to `top` only.
+/// Reads from `top`, falling back to the decks; writes go to `top` only.
 /// Used for read-only shipped content (decks) plus the user's own notes (`top`). A tombstone in `top` hides the deck
-/// note under it.
+/// note under it. A key several decks hold is the merge of their texts, by `gestalts`' rules
+/// ([`crate::upstream::Decks`]).
 /// Copy-on-write: a note written to `top` pulls the deck notes it references into `top` (see [`crate::upstream`]),
-/// tagged with their deck's `source`.
+/// tagged with their decks' `source`s.
 pub struct Layered<B, T> {
     pub decks: Vec<Deck<B>>,
     pub top: T,
+    pub gestalts: crate::Gestalts,
+    /// what the decks disagreed on when last read in full, as `key: path`
+    pub deck_conflicts: std::cell::RefCell<Vec<String>>,
 }
 
 impl<B: Storage, T> Layered<B, T> {
-    pub fn deck_refs(&self) -> Vec<crate::upstream::DeckRef<'_>> {
-        self.decks.iter().map(|d| crate::upstream::DeckRef { source: &d.source, aliases: &d.aliases, storage: &d.storage }).collect()
+    pub fn new(decks: Vec<Deck<B>>, top: T, gestalts: crate::Gestalts) -> Self {
+        Layered { decks, top, gestalts, deck_conflicts: Default::default() }
+    }
+
+    pub fn deck_refs(&self) -> crate::upstream::Decks<'_> {
+        crate::upstream::Decks {
+            decks: self.decks.iter().map(|d| crate::upstream::DeckRef { source: &d.source, storage: &d.storage as &dyn Storage }).collect(),
+            gestalts: &self.gestalts,
+        }
     }
 }
 
@@ -120,12 +130,7 @@ impl<B: Storage, T: Storage> Storage for Layered<B, T> {
         if let Some(t) = self.top.read_note(key).await? {
             return Ok(Some(t));
         }
-        for d in &self.decks {
-            if let Some(t) = d.storage.read_note(key).await? {
-                return Ok(Some(t));
-            }
-        }
-        Ok(None)
+        Ok(self.deck_refs().read(key).await?.map(|m| m.text))
     }
     async fn write_note(&self, key: &str, text: &str) -> Result<()> {
         self.top.write_note(key, text).await?;
@@ -169,14 +174,15 @@ impl<B: Storage, T: Storage> Storage for Layered<B, T> {
     }
     async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
         let mut out = self.top.read_all_notes().await?;
-        let mut seen: std::collections::HashSet<String> = out.iter().map(|(k, _)| k.clone()).collect();
-        for d in &self.decks {
-            for (k, t) in d.storage.read_all_notes().await? {
-                if seen.insert(k.clone()) {
-                    out.push((k, t));
-                }
+        let seen: std::collections::HashSet<String> = out.iter().map(|(k, _)| k.clone()).collect();
+        let mut conflicts = Vec::new();
+        for (k, m) in self.deck_refs().read_all().await? {
+            conflicts.extend(m.conflicts);
+            if !seen.contains(&k) {
+                out.push((k, m.text));
             }
         }
+        *self.deck_conflicts.borrow_mut() = conflicts;
         Ok(out)
     }
 }
@@ -358,11 +364,11 @@ mod tests {
             base.write_note("c", "title: x\nblobs: [a.mp3]\n").await.unwrap();
             base.write_note("unused", "title: y\n").await.unwrap();
             base.write_blob("a.mp3", &[1]).await.unwrap();
-            let l = Layered { decks: vec![Deck { source: "demo".into(), aliases: vec![], storage: base }], top: Memory::default() };
+            let l = Layered::new(vec![Deck { source: "p/demo".into(), storage: base }], Memory::default(), crate::Gestalts::builtin());
             l.write_note("s", "relationships: [{to: c, label: reviews}]\n").await.unwrap();
             assert_eq!(l.top.list_notes().await.unwrap(), vec!["c", "s"]);
             assert_eq!(l.top.list_blobs().await.unwrap(), vec!["a.mp3"]);
-            assert!(l.read_note("c").await.unwrap().unwrap().contains("source: demo"));
+            assert!(l.read_note("c").await.unwrap().unwrap().contains("sources: [p/demo]"));
             assert_eq!(l.list_notes().await.unwrap().len(), 3);
         });
     }
@@ -372,7 +378,7 @@ mod tests {
         pollster::block_on(async {
             let base = Memory::default();
             base.write_note("c", "title: x\n").await.unwrap();
-            let repo = crate::Repo::new(Layered { decks: vec![Deck { source: "demo".into(), aliases: vec![], storage: base }], top: Memory::default() }, crate::Gestalts::builtin());
+            let repo = crate::Repo::new(Layered::new(vec![Deck { source: "p/demo".into(), storage: base }], Memory::default(), crate::Gestalts::builtin()), crate::Gestalts::builtin());
             repo.load().await.unwrap();
             repo.delete("c", "2026-11-04T10:00:00Z").await.unwrap();
             repo.load().await.unwrap();

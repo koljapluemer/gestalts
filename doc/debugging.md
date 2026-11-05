@@ -29,8 +29,9 @@ then reload. `delete localStorage['gestalts:debug']` turns it off.
 | `repo` | `open`; every mutation (`putValue`, `putRaw`, `delete`, `writeBlob`, `sync`) as a span, with how long it `waitedMs` behind the ones before it; `changed` (version); connect, disconnect, sync failures; `sync done` with note counts, how many notes differed (`compared`) and ms per step (`health`, `open_base`, `remote_hashes`, `fetch_remote`, `local_hashes`, `merge_notes`, `pull_upstream`, `reindex`, `push`, `collect_blobs`); only `merge_notes` and what follows up to `reindex` wait in the write queue; `sync: coalesced` when a sync request joins one already waiting |
 | `practice` | `saveReview` (state write + session trial) as a span |
 | `learn` | `rate`, `rated` (when the background save is done), each `pick` (slot, counts); a warning if the card just rated comes up again |
-| `greek` | `rate`, `rated` (with the next card) |
-| `demo` | deck updates found on open |
+| `pronunciation` | `rate`, `rated` (with the next card) |
+| `world-map` | `rated` (country, exercise, grade); geometry blobs that didn't load |
+| `loops` | deck updates found on open, and values decks disagree on (`decks disagree`) |
 | `ui` | render errors caught by a pane's error boundary, with the component stack |
 | `global` | uncaught errors and unhandled promise rejections |
 

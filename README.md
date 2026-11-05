@@ -16,7 +16,7 @@ mise install          # once after cloning, and when mise.toml changes
 mise run setup        # JS dependencies and the core in wasm; the apps' setup runs this too
 mise run check        # tests, lints, typechecks
 mise run check-plugin-standalone quotes          # build a plugin outside the workspace, as in its own repo
-mise run publish-data plugins/greek-alphabet/deck   # after editing a plugin's deck
+mise run publish-data plugins/<id>/decks/<deck>     # after editing a plugin's deck
 mise run serve ~/some-folder                      # the node headless with this repo's plugins
 mise tasks            # everything else
 ```
