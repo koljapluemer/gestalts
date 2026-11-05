@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Braces, Eye, FileQuestion, PenLine, Trash2, X } from 'lucide-react';
 import { definePerspective, noteLabel, useNote, type IndexedNote, type Repo } from '@gestalts/sdk';
 import { GestaltBadges } from '../components';
@@ -10,6 +10,8 @@ type Props = {
   onClose: (key: string) => void;
   /** a linked or related note was clicked; without it links are inert */
   onOpen?: (key: string) => void;
+  /** more buttons in each note's header, before Delete (e.g. the Queue's hide toggle) */
+  actions?: (note: IndexedNote) => ReactNode;
 };
 
 type Mode = 'view' | 'text' | 'yaml';
@@ -28,13 +30,13 @@ export const UniversalEditor = definePerspective<Record<string, never>, Props>({
   id: 'universal-editor',
   title: 'Editor',
   data: {},
-  Component: ({ open, onClose, onOpen, repo }) => {
+  Component: ({ open, onClose, onOpen, actions, repo }) => {
     if (!open.length) {
       return <p className="p-8 text-center text-base-content/60">Open a note from the search, or create one.</p>;
     }
     return (
       <div className="flex flex-col gap-3 p-3">
-        {open.map((key, i) => <OpenNote key={key} noteKey={key} autofocus={i === 0} onClose={() => onClose(key)} onOpen={onOpen} repo={repo} />)}
+        {open.map((key, i) => <OpenNote key={key} noteKey={key} autofocus={i === 0} onClose={() => onClose(key)} onOpen={onOpen} actions={actions} repo={repo} />)}
       </div>
     );
   },
@@ -51,11 +53,12 @@ function storedMode(key: string): Mode {
   return 'view';
 }
 
-function OpenNote({ noteKey, autofocus, onClose, onOpen, repo }: {
+function OpenNote({ noteKey, autofocus, onClose, onOpen, actions, repo }: {
   noteKey: string;
   autofocus: boolean;
   onClose: () => void;
   onOpen?: (key: string) => void;
+  actions?: (note: IndexedNote) => ReactNode;
   repo: Repo;
 }) {
   const note = useNote(noteKey);
@@ -97,6 +100,7 @@ function OpenNote({ noteKey, autofocus, onClose, onOpen, repo }: {
                 </button>
               ))}
             </div>
+            {actions?.(note)}
             <button type="button" className="btn btn-ghost btn-xs btn-square" title="Delete note" onClick={onDelete}><Trash2 className="size-4" /></button>
             <button type="button" className="btn btn-ghost btn-xs btn-square" title="Close" onClick={onClose}><X className="size-4" /></button>
           </header>

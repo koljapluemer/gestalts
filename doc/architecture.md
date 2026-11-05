@@ -124,7 +124,7 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
-  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), sources, learn, quotes. gestalt-plugins has the
+  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), queue, sources, learn, quotes. gestalt-plugins has the
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
@@ -235,6 +235,16 @@ alert says so. The Greek alphabet works the same way. Deleting a card deletes it
   host's editor.
 - **Past appointments**, at the bottom: those whose date ends before today (a month-only one once the month is
   over; an open-ended range never), deleted together after a confirmation. Recurring and undated notes are kept.
+
+## Queue
+
+`plugins/queue`, as dsl's tab was: three random notes of yours, and Next (`n`) to draw others. The batch is kept
+outside the pane, so it stays while other tabs are open. The toggle beside Next shows the notes simply (label and
+body) or in full (the editor), kept for the browser session. The pool (`POOL` in `ui/src/queue.ts`, edited there)
+leaves out what dsl's did (appointments, recurring items, sources, dailies, explorations), bookkeeping (learner
+state, sessions, settings, installs, conflicts) and deck content (countries, terms, sentences, cards, quotes, …),
+which deck panes practise. Each note's hide toggle tags it `no-q`, which leaves it out of later draws; toggling
+again is the undo. A hidden note stays on screen until the next draw; a deleted one drops out.
 
 ## Search sidebar
 

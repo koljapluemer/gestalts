@@ -1,0 +1,12 @@
+schema: 2
+id: queue
+version: 1.0.0
+host_api: 1
+title: Queue
+description: A few random notes of yours to revisit, and Next to draw others.
+panes:
+  - { id: queue, title: Queue, entry: ui/src/index.ts#QueuePane }
+access:
+  # the full view edits any note, the hide toggle tags any note
+  read: all
+  write: all

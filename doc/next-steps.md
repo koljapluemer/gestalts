@@ -117,7 +117,8 @@ From dsl:
 - [x] Daily and Calendar (day/range views, past-appointment cleanup)
 - [ ] Projects, Goals, Tasks
 - [ ] Desk, Explorations, Tags, Suggest
-- [ ] Queue, Float, Questions (Ollama service)
+- [x] Queue
+- [ ] Float, Questions (Ollama service)
 - [ ] Graph
 - [ ] Published and the site export
 - [ ] Portfolio, card collages (`renders`, Chromium plugin), PDF export
