@@ -127,7 +127,7 @@ worker: …                                  # optional, see node.md
   (Canvas2Typ, and the `typst@1` worker), sources, learn, quotes. gestalt-plugins has the learning ones with decks
   (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
-  `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` is recorded in pane notes,
+  `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
   so it stays once released: `gestalter-desktop`, `loops-for-learning`, later `gestalter-android`. `@gestalts/vite` turns them into
   `virtual:gestalts-plugins`: each plugin's manifest, its gestalts, its decks (served under `decks/<plugin>/<deck>/`) and loaders
   for its UI modules. The app builds with any list. The same preset dedupes React (packages may be linked from a
@@ -142,12 +142,13 @@ worker: …                                  # optional, see node.md
 
 ### Panes and the host
 
-- **Panes are notes** (`pane@1`): the Gestalter's tabs. Opening one writes a note, closing it deletes it, dragging
-  sets its `position`. `?pane=<note key>` selects one. A pane's own settings are its note's `params`.
-- **Per distribution**: a pane note records its `distribution`, and each host shows only its own, so a phone
-  doesn't get the desktop's tabs. When a distribution has none, it gets its `default_panes`, under stable keys
-  (`stableId("pane", "<distribution>/<plugin>/<pane>")`), so its devices seeding at once write the same notes.
-  Pane notes from before (no `distribution`) go to the first host with tabs that sees them. Installs stay global.
+- **Tabs are local** (`host/tabs.ts`): the Gestalter's tabs live in this browser's localStorage, under
+  `gestalts-tabs:<distribution id>`, as `{v: 1, tabs: [{id, pane, title?, params}]}` in tab order. A tab is an
+  instance of a pane with its own `id` and settings (`params`), so a pane can be open more than once. `?pane=<tab id>`
+  selects one (a pane ref works too, for links). They aren't notes: opening, closing and moving a tab never waits on
+  the repo, and tabs didn't gain much from syncing.
+- **Per distribution**: each distribution keeps tabs of its own, so a phone doesn't get the desktop's. Without any
+  stored, its `default_panes` are the tabs; once the user closes them all, they stay closed. Installs stay global.
 - **Requirements**: a pane may need node services (`requires.services`). The host asks the node's `/services`
   (`useServices()` in `@gestalts/client`, every 10 s): a pane whose service the node doesn't offer, or without a
   node, isn't offered under +; one whose service isn't running is greyed there. An open tab that lacks one is

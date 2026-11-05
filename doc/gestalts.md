@@ -136,7 +136,6 @@ copy-on-write never copies it back.
 | `practice-state@1` | tag `practice-state`, one `reviews`, `model` (a scheduler other than FSRS: `ebisu`, `streak`, …), `state` (map), optional `facet` |
 | `practice-session@1` | tag `practice-session`, `app` (perspective id), `started`, optional `ended` (datetimes), `active_ms`, `trials`, `events` (each with `at`); random key, one writer |
 | `settings@1` | tag `settings`, `scope` (perspective id), further fields as the scope defines; keyed `stableId("settings", scope)` |
-| `pane@1` | tag `pane`, `pane` (`<plugin>/<pane>`), optional `distribution` (whose tab), `title`, `params`; `position` `{order, at}`, the later move winning ([architecture.md](architecture.md#panes-and-the-host)) |
 | `plugin-install@1` | tag `plugin-install`, `plugin`, `source`, optional `version`, `enabled`; keyed `stableId("plugin", id)` |
 | `conflict@1` | tag `conflict`, `note`, `path`, `recorded`, optional `base`, `kept`, `lost`, `raw`; one `conflict-of` ([Conflicts](#conflicts)) |
 

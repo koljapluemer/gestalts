@@ -80,8 +80,10 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
 - [x] **The desktop app serves the Gestalter** (gestalter). Here: the node serves an app's build, `packages/client`
   uses the folder through the node directly, with no OPFS layer, and `/events` pushes the folder's changes.
 - [x] **Panes per distribution.** A pane declares what it needs (`requires: {services: [typst@1]}`), and the host
-  hides or greys the ones it can't satisfy. `pane@1` notes get the distribution they belong to, so a phone doesn't get
-  the desktop's tabs; each host shows and seeds only its own. Installs stay global.
+  hides or greys the ones it can't satisfy. Each distribution keeps tabs of its own. Installs stay global.
+- [x] **Tabs are local**, in localStorage, not `pane@1` notes (that gestalt is gone; old pane notes are plain notes
+  now). Writing a note per tab action made closing a tab wait in the repo's write queue, for seconds, and syncing tabs
+  gained little. A tab is a pane instance with its own id and `params`, so a pane can later be open several times.
 - [x] **Cheaper sync**: each side lists `{key: hash}` and the base keeps a manifest of them, so a sync reads only the
   notes that differ; it runs in phases, so writes don't wait for the network ([node.md](node.md#sync)).
 - [x] **Pairing** a device with the desktop ([node.md](node.md#pairing-and-the-home-network)): the node listens on

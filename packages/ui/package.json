@@ -24,5 +24,5 @@
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
-  "description": "The host: app shells, panes from pane notes, plugins and their installs, connector settings"
+  "description": "The host: app shells, panes as local tabs, plugins and their installs, connector settings"
 }

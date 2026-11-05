@@ -47,7 +47,7 @@ export function definePerspective<D extends DataSpec, P extends object = object,
   return Object.assign(Host, { id: def.id, title: def.title });
 }
 
-/** A pane gets its own settings (`params`, from its `pane@1` note) and nothing else. */
+/** A pane gets its own settings (`params`, from its tab) and nothing else. */
 export type PaneProps = { params: Record<string, string> };
 
 export type Pane = ComponentType<PaneProps> & { title: string };
