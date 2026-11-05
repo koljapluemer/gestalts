@@ -114,7 +114,7 @@ Generic note-taking features (Daily, Calendar, Projects, Graph…) are as much p
 
 From dsl:
 - [x] Learn
-- [ ] Daily and Calendar (day/range views, past-appointment cleanup)
+- [x] Daily and Calendar (day/range views, past-appointment cleanup)
 - [ ] Projects, Goals, Tasks
 - [ ] Desk, Explorations, Tags, Suggest
 - [ ] Queue, Float, Questions (Ollama service)

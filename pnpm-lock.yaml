@@ -169,6 +169,22 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
 
+  plugins/calendar:
+    dependencies:
+      '@gestalts/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
+      '@gestalts/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      lucide-react:
+        specifier: 1.66.0
+        version: 1.66.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+
   plugins/canvas:
     dependencies:
       '@gestalts/kit':

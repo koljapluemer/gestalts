@@ -1,0 +1,14 @@
+schema: 2
+id: calendar
+version: 1.0.0
+host_api: 1
+title: Calendar
+description: Today's daily note, and appointments and recurring items by day or over a range.
+uses: [daily@1, appointment@1, recurring@1]
+panes:
+  - { id: daily, title: Daily, entry: ui/src/index.ts#DailyPane }
+  - { id: calendar, title: Calendar, entry: ui/src/index.ts#CalendarPane }
+access:
+  # the daily note's [[ completion and previews reach any note
+  read: all
+  write: { gestalts: [daily@1, appointment@1, recurring@1] }

@@ -124,8 +124,8 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
-  (Canvas2Typ, and the `typst@1` worker), sources, learn, quotes. gestalt-plugins has the learning ones with decks
-  (learn-world-map, alphabet-pronunciation-via-visual-cognates).
+  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), sources, learn, quotes. gestalt-plugins has the
+  learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
   so it stays once released: `gestalter-desktop`, `loops-for-learning`, later `gestalter-android`. `@gestalts/vite` turns them into
@@ -221,6 +221,20 @@ back with Again, Hard, Good, Easy (1–4); the counts are due · new · all. Rev
 `learn` practice session. A rating shows the next card at once: `useLocalReviews` lays the new state over the
 query's until the query has it, and the save runs in the background (it may wait behind a sync); if it fails, an
 alert says so. The Greek alphabet works the same way. Deleting a card deletes its `fsrs-state` too (`dies_with_target`).
+
+## Daily and Calendar
+
+`plugins/calendar`, as dsl's tabs were:
+- **Daily** edits today's `daily@1` note in the text editor. A day starts at 04:00 local time, so at 01:00 it's still
+  yesterday's note, and an open tab moves on within a minute. The note is keyed `stableId("daily", date)` and created
+  when there's none (another `daily@1` of that date counts too), so two devices creating it make one note.
+- **Calendar** lists `appointment@1` and `recurring@1` notes by day or over a From..To range (this week, Sunday to
+  Saturday, by default); view, day and range are in the URL. Keys: ←/→ a day (or the range's length), `t` today/this
+  week, `a` add, `d`/`r` day/range view. An appointment dated a month, a year or a range longer than a day shows
+  once, under "Ongoing", not on every day. `+` adds an appointment on that day by its title; an item opens in the
+  host's editor.
+- **Past appointments**, at the bottom: those whose date ends before today (a month-only one once the month is
+  over; an open-ended range never), deleted together after a confirmation. Recurring and undated notes are kept.
 
 ## Search sidebar
 

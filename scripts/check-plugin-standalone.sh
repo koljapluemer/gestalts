@@ -34,7 +34,7 @@ for (const [k, v] of Object.entries(pkg.dependencies)) {
     pkg.dependencies[k] = files[k];
   }
 }
-pkg.devDependencies = { ...pkg.devDependencies, typescript: dev.typescript, vite: dev.vite, '@vitejs/plugin-react': dev['@vitejs/plugin-react'], '@types/react': dev['@types/react'], 'react-dom': pkg.peerDependencies.react };
+pkg.devDependencies = { ...pkg.devDependencies, typescript: dev.typescript, vite: dev.vite, '@vitejs/plugin-react': dev['@vitejs/plugin-react'], '@types/react': dev['@types/react'], '@types/react-dom': dev['@types/react-dom'], 'react-dom': pkg.peerDependencies.react };
 pkg.pnpm = { overrides: files };
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 JS
