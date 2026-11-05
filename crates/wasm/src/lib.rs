@@ -1,5 +1,6 @@
 //! JS API of the gestalts core. Wrapped by `packages/client`; not meant to be used directly.
 
+mod js;
 mod opfs;
 
 use std::cell::RefCell;
@@ -11,6 +12,7 @@ use gestalts_core::{Gestalts, IndexedNote, Note, Query, Repo, UpstreamReport, pu
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
+use crate::js::{HostStorage, JsStorage};
 use crate::opfs::Opfs;
 use gestalts_peer::{Peer, Static};
 
@@ -89,6 +91,13 @@ impl WasmRepo {
     pub async fn open_node(url: String, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
         let node = Rc::new(Peer::new(&url));
         Self::build(node.clone(), None, Some(node), decks, gestalts).await
+    }
+
+    /// Like `open`, but the notes are wherever `storage` keeps them (a native app's folder, over IPC): every write
+    /// goes straight to it, and the host syncs it, telling the page what changed (`reindex`).
+    #[wasm_bindgen(js_name = openWith)]
+    pub async fn open_with(storage: HostStorage, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
+        Self::build(Rc::new(JsStorage::new(storage)), None, None, decks, gestalts).await
     }
 
     async fn build(writable: Dyn, dir: Option<String>, node: Option<Rc<Peer>>, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {

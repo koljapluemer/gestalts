@@ -1095,6 +1095,48 @@ mod tests {
         assert!(!lan.view().listening);
     }
 
+    /// A phone's side of it (`gestalts_device`): pairing from the QR code's text, then syncing its own folder.
+    #[tokio::test(flavor = "multi_thread")]
+    async fn a_device_folder_pairs_and_syncs() {
+        use gestalts_peer::paired::PairingUri;
+
+        struct Quiet;
+        impl gestalts_device::Host for Quiet {
+            fn event(&self, _: gestalts_device::Event) {}
+        }
+
+        let dir = temp_dir("device-node");
+        let s = state(Some(Folder::open(&dir).unwrap()));
+        let lan = Arc::new(Lan::new(s.remember_in.as_ref().unwrap(), 0).unwrap());
+        let s = s.with_lan(lan.clone());
+        let app = app(s.clone());
+        let control = axum::http::Request::post("/control/pairing").header(CONTROL_HEADER, "secret").body(Body::empty()).unwrap();
+        let (status, body) = send(&app, control).await;
+        if status == StatusCode::CONFLICT && body.contains("isn't connected") {
+            eprintln!("skipped: no network here");
+            return;
+        }
+        let offer: Offer = serde_json::from_str(&body).unwrap();
+        let mut uri = PairingUri::parse(&offer.uri).unwrap();
+        uri.addrs = vec![format!("127.0.0.1:{}", lan.view().port)];
+        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\n").unwrap();
+
+        let phone = temp_dir("device-phone");
+        let device = gestalts_device::spawn(phone.clone(), Quiet).unwrap();
+        device.set_active(false).await.unwrap();
+        let paired = device.pair(uri.to_string(), "Phone".into()).await.unwrap();
+        assert_eq!(paired.node_id, lan.node_id());
+        assert!(std::fs::read_to_string(phone.join("paired.json")).unwrap().contains(&lan.pairing.devices()[0].id));
+        device.write_note("from-phone".into(), "id: from-phone\n".into()).await.unwrap();
+        // pairing syncs at once too: whichever sync ran first, both folders end up with both notes
+        device.run(|d| Box::pin(async move { d.sync().await.map_err(|e| e.to_string()) })).await.unwrap().unwrap();
+        assert!(dir.join("notes/from-phone.yml").exists());
+        assert!(phone.join("folder/notes/on-disk.yml").exists());
+        let status = device.status().await.unwrap();
+        assert_eq!(status.state, gestalts_device::SyncState::Ok);
+        assert!(status.last_sync.is_some() && status.folder.is_some());
+    }
+
     /// Needs multicast on a network interface, which CI and containers often lack: `cargo test -- --ignored mdns`.
     #[tokio::test(flavor = "multi_thread")]
     #[ignore]

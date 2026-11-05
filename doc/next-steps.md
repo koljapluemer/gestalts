@@ -55,6 +55,7 @@ crates/
   merge          symmetric 3-way merge of YAML values
   core fs wasm   as now
   peer           Storage over HTTP to another device's node, native and wasm (from wasm/http.rs)
+  device         a device's own folder synced with its paired node (the Gestalter's Android app embeds it)
   node           server, node API, pairing, worker host, plugin manifests (the Gestalter's desktop app embeds it)
 gestalts/        the core's gestalt definitions
 packages/
@@ -89,8 +90,9 @@ One plan session each. Each ends with a visual check in the app and `doc/` updat
 - [x] **Pairing** a device with the desktop ([node.md](node.md#pairing-and-the-home-network)): the node listens on
   the home network over TLS with its own key while a device is paired or a pairing code is shown; the QR code holds
   its addresses, key fingerprint and a one-time secret; devices get a token, pin the key, and find the node again by
-  mDNS. The device side (`gestalts_peer::paired`) awaits Android.
-- [ ] **Android** (gestalter). Here: `client`'s native backend (Tauri IPC) and the core with `FsStorage` on a phone.
+  mDNS. The device side is `crates/device`.
+- [x] **Android** (gestalter). Here: the core in the page over the app's folder (`WasmRepo.openWith`, `client`'s
+  `{native: 'tauri'}`), and `crates/device`: `FsStorage` in the app's storage, pairing, and foreground sync.
 - [x] **Decks per plugin, merged by key**, and the content plugins in gestalt-plugins (learn-world-map with two decks;
   greek-alphabet became alphabet-pronunciation-via-visual-cognates).
 - [ ] **Publish** `@gestalts/core` (wasm), `client`, `sdk`, `kit`, `learning`, `ui`, `vite` and the Python SDK, and
@@ -154,6 +156,8 @@ All of these sam-learns ports go into gestalt-plugins' `sam-learns/` and show in
   would make it cheaper for large folders.
 - Paired devices have no change events: `/events` isn't served on the home network (it would need a WebSocket over
   the pinned TLS), so they poll.
+- A paired device syncs only while its app is in the foreground. Background sync on Android (WorkManager, every 15
+  minutes at best) needs an entry point Kotlin calls without the WebView, with the gestalts `crates/device` keeps.
 
 ### Workers
 

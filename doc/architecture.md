@@ -6,7 +6,9 @@ crates/core           notes, gestalts, queries, sync, tombstones, blob collectio
 crates/fs             Storage adapter: a folder on disk
 crates/peer           Storage adapters over HTTP, native and wasm: another device's node, static decks; natively,
                       pairing with a node on the home network
-crates/wasm           the core in the browser: its JS API and OPFS storage
+crates/wasm           the core in the browser: its JS API, OPFS storage, and storage the page is handed (a native app's)
+crates/device         a device's own folder synced with the node it paired with: the native side of the Gestalter on
+                      a phone, on a thread of its own
 crates/node           gestalts-node: serves a folder on localhost (and to paired devices on the home network), hosts
                       workers, plugin manifests (plugin.yml, schema 2) and the gestalts of core + plugins; apps embed
                       it, `gestalts-node` is it headless
@@ -14,7 +16,8 @@ gestalts/             the core's gestalt definitions (data, embedded into the co
 packages/sdk          @gestalts/sdk: the perspective port (Repo interface, hooks, host capabilities, slots)
 packages/kit          @gestalts/kit: the public components, on the sdk only
 packages/learning     @gestalts/learning: FSRS by facet, practice sessions, learnable cards
-packages/client       the host's core in the browser: the wasm-backed Repo, opening, syncing
+packages/client       the host's core in the browser: the wasm-backed Repo, opening, syncing; over a native app's
+                      folder (`/tauri`: Tauri IPC)
 packages/ui           the host: panes from pane notes, plugin installs, the capability frame, connector settings
 packages/vite         @gestalts/vite: builds an app with its plugins (`virtual:gestalts-plugins`, decks, Tailwind sources)
 plugins/<id>/         domain bundles, each a package `@gestalts-plugin/<id>`: plugin.yml, their gestalts, decks, ui/ and worker/
@@ -23,7 +26,8 @@ plugins/<id>/         domain bundles, each a package `@gestalts-plugin/<id>`: pl
 The apps live in repos of their own, next to a checkout of this one (they link its packages and crates by path until
 they are published):
 - **gestalter**: the host with every plugin, panes as tabs (`distribution/`), and its desktop app around the node
-  (`desktop/`, `gestalter`), which serves that build.
+  (`desktop/`, `gestalter`), which serves that build. On Android (`android/`, `distribution-android/`) the same host
+  runs in the system WebView, its notes in the app's storage, synced with the paired desktop.
 - **loops-for-learning**: the host with the learning plugins, one pane at a time; hosted, for learning.
 
 Plugins that are content rather than a part of the paradigm (the learning mini tools) live in **gestalt-plugins**,
@@ -42,6 +46,15 @@ Where it goes from here (the repos, the apps, what isn't built yet): [next-steps
 - `blobs`: which blobs notes use, and collecting the rest ([node.md](node.md#sync)).
 
 The browser never parses YAML itself: `packages/client` calls the wasm core, which also lints drafts (`repo.inspect`) for the editor.
+
+Where the notes are (`NotesIn` in `packages/client/src/repo.ts`):
+- `{dir}`: in OPFS, synced with a connector if one is set (`mode: 'sync'`)
+- `{node}`: the folder a node serves, written over HTTP, its changes from `/events` (`mode: 'direct'`)
+- `{native: 'tauri'}`: the folder of the native app around the page (`mode: 'paired'`). The core in the page still
+  holds the index (the sdk port's reads are synchronous), over a `HostStorage` whose calls are the app's commands
+  (`WasmRepo.openWith`). The app (`crates/device`) syncs the folder with the node it paired with and sends what
+  changed, which the page rereads, as with `/events`. There are no node services there, so panes needing one are
+  hidden.
 
 ## Data flow in the apps
 
@@ -128,7 +141,7 @@ worker: …                                  # optional, see node.md
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
-  so it stays once released: `gestalter-desktop`, `loops-for-learning`, later `gestalter-android`. `@gestalts/vite` turns them into
+  so it stays once released: `gestalter-desktop`, `loops-for-learning`, `gestalter-android`. `@gestalts/vite` turns them into
   `virtual:gestalts-plugins`: each plugin's manifest, its gestalts, its decks (served under `decks/<plugin>/<deck>/`) and loaders
   for its UI modules. The app builds with any list. The same preset dedupes React (packages may be linked from a
   sibling checkout) and replaces `@gestalts-sources;` in the app's CSS with an `@source` per package, at its real

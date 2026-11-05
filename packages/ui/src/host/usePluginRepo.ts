@@ -22,7 +22,7 @@ function mountedDecks(dir: string, registry: Registry): string[] {
  * installs changed since (on another device, say), the repo opens once more with the right decks.
  */
 export function usePluginRepo(where: NotesIn, registry: Registry): { repo?: Repo; installed: PluginEntry[]; decks: string[]; error?: string } {
-  const dir = where.dir ?? `node:${where.node}`;
+  const dir = where.dir ?? (where.node !== undefined ? `node:${where.node}` : `native:${where.native}`);
   const [mounted, setMounted] = useState(() => mountedDecks(dir, registry));
   const whereKey = JSON.stringify(where);
   const source = useMemo(() => ({

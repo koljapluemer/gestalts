@@ -67,9 +67,11 @@ export function PaneTabs({ registry, title, end }: { registry: Registry; title: 
   const label = (t: Tab) => t.title ?? findPane(registry, t.pane)?.pane.title ?? t.pane;
 
   return (
-    <div className="flex h-dvh flex-col bg-base-200">
+    // clear of a phone's status and navigation bars when the page draws under them (viewport-fit=cover)
+    <div className="flex h-dvh flex-col bg-base-200 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]">
       <nav className="navbar min-h-0 gap-2 border-b border-base-300 bg-base-100 px-3 py-1">
-        <span className="font-semibold">{title}</span>
+        {/* on a phone the tabs need the room */}
+        <span className="hidden font-semibold sm:inline">{title}</span>
         <div className="flex flex-1 items-center gap-1 overflow-x-auto" role="tablist"
              onDragOver={(e) => e.preventDefault()} onDrop={() => { if (dragging) move(dragging, null); setDragging(null); }}>
           {tabs.map((t) => { const why = supportText(support(t.pane)); return (

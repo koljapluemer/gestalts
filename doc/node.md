@@ -208,6 +208,17 @@ trust the node's own certificate: this is for apps with native networking (`gest
   app's frontend. A paired device syncs like a browser does, with the node's folder, polling (no change events over
   the network yet).
 
+The device's side is `crates/device` (the Gestalter on Android uses it):
+- Its data folder holds `folder/` (the notes and blobs), `paired.json` (the `PairedNode`, token included: the folder
+  must be private to the app), a base per node and folder in `sync-base/`, the plugins' gestalts from the last start
+  (`gestalts.json`, for merging), and `blob-gc.json`.
+- It syncs on pairing, when the app comes to the foreground, 0.8 s after a write, and every 15 s while the app is in
+  the foreground. One sync at a time, one more if asked meanwhile.
+- The page's writes and a sync's merge take turns, so a merge never writes over a note the page wrote meanwhile. The
+  fetch and the push go over the network alongside the page's writes.
+- Forgetting the node removes `paired.json` and the bases, not the notes. The node keeps listing the device until
+  it's removed there.
+
 Caveats:
 - The educational app (loops-for-learning) pulls every note in the folder, and the blobs they use, into its OPFS layer. Of the shipped words, only those the learner rated (and their blobs) are in that layer, so only those reach the folder.
 - That app hosted on a public origin that calls `localhost` runs into Chrome's Private Network Access (now Local

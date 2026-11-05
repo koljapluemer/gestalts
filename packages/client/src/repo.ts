@@ -7,15 +7,20 @@ import {
   type SyncReport, type UpstreamReport,
 } from '@gestalts/sdk';
 import { coalesce } from './coalesce';
+import { nativeHost, type NativeHost, type NativeKind, type NativeStatus, type PairedNodeInfo } from './native';
 
 const log = logger('repo');
 
 /** A read-only deck published at `url` (a folder with `index.json`), under its `source` id and earlier ones. */
 export type DeckSource = { source: string; url: string };
 
-/** Where the user's notes live: in OPFS under `dir` (synced with a connector, if one is set), or in the folder the
- * node at `node` serves (the desktop app; written directly, nothing to sync). */
-export type NotesIn = { dir: string; node?: undefined } | { node: string; dir?: undefined };
+/** Where the user's notes live: in OPFS under `dir` (synced with a connector, if one is set), in the folder the
+ * node at `node` serves (the desktop app; written directly, nothing to sync), or in the folder of the native app
+ * around the page (`native`: Android), which syncs it with the node it paired with. */
+export type NotesIn =
+  | { dir: string; node?: undefined; native?: undefined }
+  | { node: string; dir?: undefined; native?: undefined }
+  | { native: NativeKind; dir?: undefined; node?: undefined };
 
 export type RepoSource = NotesIn & {
   /** read-only decks under them; a deck note is copied into the user's notes once those reference it */
@@ -45,8 +50,11 @@ function withSlash(url: string) {
 const RECONNECT_MS = [500, 1000, 2000, 5000];
 
 export type ConnectorStatus = {
-  /** `sync`: notes in this browser, synced with the connector at `url`; `direct`: the notes are the node's folder */
-  mode: 'sync' | 'direct';
+  /**
+   * `sync`: notes in this browser, synced with the connector at `url`; `direct`: the notes are the node's folder;
+   * `paired`: the notes are a native app's, which syncs them with the node it paired with (`node`, no `url`)
+   */
+  mode: 'sync' | 'direct' | 'paired';
   url: string | null;
   state: 'off' | 'syncing' | 'ok' | 'error';
   error?: string;
@@ -56,6 +64,8 @@ export type ConnectorStatus = {
   conflicts: string[];
   /** the folder the connector serves, as of the last sync (direct: as of opening) */
   folder?: string;
+  /** paired: the node, if the app is paired with one */
+  node?: PairedNodeInfo;
 };
 
 let ready: Promise<unknown> | null = null;
@@ -96,6 +106,8 @@ export class Repo implements Port {
   private pollTimer: ReturnType<typeof setInterval> | undefined;
   /** direct mode: the node's change events */
   private events: WebSocket | undefined;
+  /** paired mode: the native app, and what to undo on closing */
+  private native: { host: NativeHost; stop: (() => void)[] } | undefined;
   private closed = false;
   version = 0;
   /**
@@ -112,6 +124,13 @@ export class Repo implements Port {
     try {
       ready ??= init().then(provideCoreNatives);
       await ready;
+      if (source.native !== undefined) {
+        const host = await nativeHost(source.native);
+        await host.setGestalts(source.gestalts ?? []);
+        wasm = await WasmRepo.openWith(host, source.decks ?? [], source.gestalts ?? []);
+        span.end();
+        return await Repo.paired(wasm, host);
+      }
       wasm = source.node !== undefined
         ? await WasmRepo.openNode(source.node, source.decks ?? [], source.gestalts ?? [])
         : await WasmRepo.open(source.dir, source.decks ?? [], source.gestalts ?? []);
@@ -136,6 +155,33 @@ export class Repo implements Port {
     repo.setStatus({ mode: 'direct', url, state: 'ok', folder });
     repo.listen(0);
     void wasm.collectNodeBlobs().catch((e: unknown) => log.warn('collecting blobs failed', { error: e }));
+    return repo;
+  }
+
+  /**
+   * A repo on a native app's folder: the app syncs it and says what changed. Only visible pages sync on a timer. If
+   * the app is paired, `firstSync` waits for its first sync (or failure).
+   */
+  private static async paired(wasm: WasmRepo, host: NativeHost): Promise<Repo> {
+    const repo = new Repo(wasm, '');
+    const native: { host: NativeHost; stop: (() => void)[] } = { host, stop: [] };
+    repo.native = native;
+    repo.setStatus(nativeStatus(await host.status()));
+    let synced: () => void = () => {};
+    const first = new Promise<void>((resolve) => { synced = resolve; });
+    native.stop.push(await host.onChanged((c) => void repo.reindex(c.notes, c.blobs)));
+    native.stop.push(await host.onStatus((s) => {
+      repo.setStatus(nativeStatus(s));
+      if (s.state !== 'syncing') synced();
+    }));
+    const visible = () => void host.setActive(document.visibilityState === 'visible').catch((e: unknown) => log.warn('telling the app failed', { error: e }));
+    document.addEventListener('visibilitychange', visible);
+    native.stop.push(() => document.removeEventListener('visibilitychange', visible));
+    visible();
+    if (repo.status.node) {
+      repo.firstSync = Promise.race([first, new Promise<void>((r) => setTimeout(r, 20_000))]);
+      void host.sync();
+    }
     return repo;
   }
 
@@ -249,13 +295,13 @@ export class Repo implements Port {
 
   /** Returns undefined while offline. A declared service may still answer 503 while its worker starts. */
   service(id: string): ServiceClient | undefined {
-    return this.status.url ? new ServiceClient(this.status.url.replace(/\/$/, ''), id) : undefined;
+    return this.status.url && this.status.mode !== 'paired' ? new ServiceClient(this.status.url.replace(/\/$/, ''), id) : undefined;
   }
 
   /** The services the node offers and whether each is running; null without a node, or if it didn't answer. */
   async services(): Promise<ServiceStatus[] | null> {
     const url = this.status.url;
-    if (!url) return null;
+    if (!url || this.status.mode === 'paired') return null;
     try {
       const r = await fetch(new URL('services', withSlash(url)));
       return r.ok ? ((await r.json()) as ServiceStatus[]) : null;
@@ -360,7 +406,7 @@ export class Repo implements Port {
 
   /** Syncs with the connector at `url` now, then after each write and every 15 s. */
   async connect(url: string): Promise<void> {
-    if (this.status.mode === 'direct') return;
+    if (this.status.mode !== 'sync') return;
     log.info('connect', { url });
     try { localStorage.setItem(this.storageKey, url); } catch { /* not remembered */ }
     clearInterval(this.pollTimer);
@@ -375,11 +421,12 @@ export class Repo implements Port {
     clearTimeout(this.syncTimer);
     this.closed = true;
     this.events?.close();
+    this.native?.stop.forEach((f) => f());
     this.setStatus({ url: null, state: 'off' });
   }
 
   disconnect() {
-    if (this.status.mode === 'direct') return;
+    if (this.status.mode !== 'sync') return;
     log.info('disconnect');
     try { localStorage.removeItem(this.storageKey); } catch { /* nothing remembered */ }
     clearInterval(this.pollTimer);
@@ -394,6 +441,8 @@ export class Repo implements Port {
   sync = coalesce(() => this.runSync(), () => log.debug('sync: coalesced'));
 
   private async runSync(): Promise<SyncReport | undefined> {
+    // the native app syncs on its own; its status events tell how it went
+    if (this.native) return void (await this.native.host.sync().catch((e: unknown) => log.warn('asking the app to sync failed', { error: e })));
     const url = this.status.url;
     if (!url || this.status.mode === 'direct') return;
     this.setStatus({ state: 'syncing' });
@@ -420,6 +469,20 @@ export class Repo implements Port {
       this.setStatus({ state: 'error', error: e instanceof Error ? e.message : String(e) });
     }
   }
+}
+
+function nativeStatus(s: NativeStatus): Partial<ConnectorStatus> {
+  return {
+    mode: 'paired',
+    url: null,
+    node: s.paired ?? undefined,
+    state: s.state,
+    error: s.error ?? undefined,
+    lastSync: s.lastSync === null ? undefined : new Date(s.lastSync),
+    lastReport: (s.lastReport ?? undefined) as SyncReport | undefined,
+    folder: s.folder ?? undefined,
+    conflicts: s.conflicts,
+  };
 }
 
 const MIME: Record<string, string> = {
