@@ -18,6 +18,8 @@ const VIRTUAL = 'virtual:gestalts-plugins';
 const RESOLVED = '\0' + VIRTUAL;
 const PLUGIN_SCOPE = '@gestalts-plugin/';
 const SOURCES = /^@gestalts-sources;$/m;
+/** the perspective port the host offers (`HOST_API` in `@gestalts/sdk`) */
+const HOST_API = 2;
 
 type Manifest = {
   id: string;
@@ -26,6 +28,7 @@ type Manifest = {
   decks?: { id: string; title: string; path: string }[];
   panes?: { id: string; title: string; entry: string; requires?: { services?: string[] } }[];
   slots?: { slot: string; gestalt: string; entry: string }[];
+  lenses?: { gestalt: string; entry: string }[];
 };
 
 type Distribution = { id?: unknown; default_panes?: string[]; install_ui?: boolean };
@@ -73,7 +76,7 @@ function load(appRoot: string) {
     const root = packageRoot(appRoot, PLUGIN_SCOPE + id);
     const manifest = parse(readFileSync(join(root, 'plugin.yml'), 'utf8')) as Manifest;
     if (manifest.id !== id) throw new Error(`${PLUGIN_SCOPE}${id}'s plugin.yml has id ${manifest.id}`);
-    if (manifest.host_api !== 1) throw new Error(`${id} needs host API ${manifest.host_api}; this host offers 1`);
+    if (manifest.host_api !== HOST_API) throw new Error(`${id} needs host API ${manifest.host_api}; this host offers ${HOST_API}`);
     const gestalts = (manifest.gestalts ?? []).map((g) => {
       const [name, version] = g.split('@');
       return readFileSync(join(root, 'gestalts', name, `v${version}.yml`), 'utf8');
@@ -83,7 +86,7 @@ function load(appRoot: string) {
       if (!existsSync(join(dir, 'index.json'))) throw new Error(`${id}: its deck ${d.id} has no index.json; run \`mise run publish-data ${relative(process.cwd(), dir)}\``);
       return { id: d.id, title: d.title, dir };
     });
-    const modules = [...new Set([...(manifest.panes ?? []), ...(manifest.slots ?? [])].map((e) => e.entry.split('#')[0]))];
+    const modules = [...new Set([...(manifest.panes ?? []), ...(manifest.slots ?? []), ...(manifest.lenses ?? [])].map((e) => e.entry.split('#')[0]))];
     return { id, root, manifest, gestalts, decks, modules };
   });
   for (const ref of distribution.default_panes ?? []) {

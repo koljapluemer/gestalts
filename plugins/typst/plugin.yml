@@ -1,7 +1,7 @@
 schema: 2
 id: typst
 version: 0.2.0
-host_api: 1
+host_api: 2
 title: Typst
 description: Typst documents beside a note's canvas, compiled by the connector.
 gestalts: [typst-document@1]

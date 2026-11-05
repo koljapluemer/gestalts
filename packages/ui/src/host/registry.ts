@@ -15,6 +15,8 @@ export type PluginManifest = {
   uses?: string[];
   panes?: PaneManifest[];
   slots?: { slot: string; gestalt: string; entry: string }[];
+  /** a `defineLens` export per gestalt */
+  lenses?: { gestalt: string; entry: string }[];
   access?: { read?: Scope; write?: Scope };
   worker?: unknown;
 };
@@ -59,6 +61,16 @@ export function deckSources(decks: DeckEntry[]): DeckSource[] {
 type AnyComponent = ComponentType<any>;
 
 const loaded = new Map<string, LazyExoticComponent<AnyComponent>>();
+
+/** What a plugin exports at `entry` (`<module>#<export>`), loaded. */
+export async function entryExport<T>(plugin: PluginEntry, entry: string): Promise<T> {
+  const [module, name] = entry.split('#');
+  const load = plugin.modules[module];
+  if (!load) throw new Error(`${plugin.manifest.id}: no module ${module}`);
+  const exported = (await load())[name];
+  if (exported === undefined) throw new Error(`${plugin.manifest.id}: ${module} exports no ${name}`);
+  return exported as T;
+}
 
 /** The component a plugin exports at `entry` (`<module>#<export>`), loaded when first rendered. */
 export function entryComponent<P>(plugin: PluginEntry, entry: string): LazyExoticComponent<ComponentType<P>> {

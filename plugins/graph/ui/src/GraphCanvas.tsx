@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Background, Panel, ReactFlow, useReactFlow, type XYPosition } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { FilePlus, Layers, Maximize, Pin, PinOff, Search, Unplug, ZoomIn, ZoomOut } from 'lucide-react';
-import { noteLabel, useHost, type Repo } from '@gestalts/sdk';
-import { Modal, NewNote, NotePicker } from '@gestalts/kit';
+import { useHost, type Repo } from '@gestalts/sdk';
+import { NotePicker } from '@gestalts/kit';
 import { FloatingEdge } from './FloatingEdge';
 import { SCOPE, randomKey } from './graph';
 import { HiddenRelationsNode } from './HiddenRelationsNode';
@@ -30,7 +30,8 @@ const NOTICE_MS = 4000;
  */
 export function GraphCanvas({ repo, g, searchResults }: { repo: Repo; g: UseGraph; searchResults: string[] | null }) {
   const rf = useReactFlow();
-  const onOpen = useHost().openNote;
+  const host = useHost();
+  const onOpen = host.openNote;
   const [interaction, setInteraction] = useState<Interaction>(IDLE);
   const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => {
@@ -46,7 +47,7 @@ export function GraphCanvas({ repo, g, searchResults }: { repo: Repo; g: UseGrap
   const { committed, anchorKey, markInteraction, applyManualDrop } = useElkLayout({ graph: g.graph, pins: g.pins, manualPositionsRef: manualPositions, dragging });
   useFitViewOnReframe(committed);
 
-  const a = useGraphActions({ repo, g, setInteraction, markInteraction, onOpen });
+  const a = useGraphActions({ repo, g, setInteraction, markInteraction, onOpen, createNote: host.createNote, onError: setNotice });
   const { nodes, edges, onNodesChange, onNodeDragStart, onNodeDragStop } = useGraphNodes({
     graph: g.graph,
     notes: g.view.notes,
@@ -142,26 +143,12 @@ export function GraphCanvas({ repo, g, searchResults }: { repo: Repo; g: UseGrap
           </div>
         </Panel>
       )}
-      {interaction.type === 'create' && (
-        <Modal onClose={a.cancel}>
-          <div className="px-4 pb-4">
-            {interaction.source && <p className="mb-2 text-sm text-base-content/60">Related from <b>{labelOf(repo, interaction.source)}</b>.</p>}
-            <NewNote onCreated={(key) => void a.onCreated(key, interaction.source).catch((e: unknown) => setNotice(e instanceof Error ? e.message : String(e)))}
-                     onCancel={a.cancel} />
-          </div>
-        </Modal>
-      )}
       {interaction.type === 'search' && (
         <SearchMenu at={interaction.screenPosition} onPick={a.pinFromSearch} onClose={a.cancel} />
       )}
     </ReactFlow>
   );
 }
-
-const labelOf = (repo: Repo, key: string) => {
-  const n = repo.get(key);
-  return n ? noteLabel(n) : key;
-};
 
 function Tool({ title, onClick, disabled, children }: { title: string; onClick: () => void; disabled?: boolean; children: ReactNode }) {
   return <button type="button" className="btn btn-sm btn-square bg-base-100" title={title} disabled={disabled} onClick={onClick}>{children}</button>;

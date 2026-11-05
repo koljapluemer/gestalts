@@ -10,6 +10,9 @@ import { NODE_WIDTH, seedPosition, type GraphLayout } from './layout';
 import type { NoteCallbacks, NoteFlowNode } from './NoteNode';
 import { NODE_CLASS_NAME } from './nodeStyle';
 
+/** The card in edit, above the others (and the edges' labels). */
+const EDITING_Z_INDEX = 1000;
+
 /** Every node kind on the canvas, by React Flow's `type`. */
 export type GraphFlowNode = NoteFlowNode | HiddenRelationsFlowNode;
 
@@ -44,6 +47,7 @@ export function buildView(
     const note = notes.get(n.key);
     if (!note) return [];
     const slot = layout.slots.get(n.key);
+    const editing = interaction.type === 'edit' && interaction.key === n.key;
     // no `height`: the card sizes to its content and React Flow measures it
     return [{
       id: n.key,
@@ -52,12 +56,16 @@ export function buildView(
       width: slot?.width ?? NODE_WIDTH,
       className: slot ? NODE_CLASS_NAME : `${NODE_CLASS_NAME} invisible`,
       dragHandle: '.note-drag-handle',
+      // the card in edit: not dragged by a slip of the pointer, and above the cards it grows over
+      draggable: !editing,
+      ...(editing ? { zIndex: EDITING_Z_INDEX } : {}),
       data: {
         ...noteCallbacks,
         note,
         pinDepth: pins.get(n.key) ?? null,
         othersPinned: pins.size > 1,
         isAnchor: n.key === anchorKey,
+        editing,
       },
     }];
   });

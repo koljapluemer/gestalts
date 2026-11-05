@@ -1,7 +1,7 @@
 schema: 2
 id: canvas
 version: 1.0.0
-host_api: 1
+host_api: 2
 title: Canvas
 description: A note's canvas of free text and linked notes.
 uses: [canvas@1, canvas@2]

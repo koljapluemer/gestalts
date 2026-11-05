@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ClipboardPaste, Copy, Download, FileCode2, Plus, Search, Upload } from 'lucide-react';
-import { bib, noteLabel, relationships, str, useNote, type IndexedNote, type Json, type Query, type Repo, type SourceMatch, definePerspective } from '@gestalts/sdk';
-import { EditableNote, filterSources, saveRawSynced, sourceSummary } from '@gestalts/kit';
-import { asSource, citekeyFor, duplicateCitekeys, fieldText, fieldValue, model, withField } from './sourceModel';
+import { bib, noteLabel, str, useNote, type IndexedNote, type Query, type Repo, type SourceMatch, definePerspective } from '@gestalts/sdk';
+import { Note, filterSources, sourceSummary } from '@gestalts/kit';
+import { asSource, citekeyFor, duplicateCitekeys } from './sourceModel';
 
 type Props = {
   /** key of the source shown */
@@ -13,13 +13,14 @@ type Props = {
 };
 
 /**
- * Bibliographic sources (`source@1`): a filterable list, a form for the one open, BibTeX import that recognises
- * sources already there, updating one from BibTeX, and the whole list as a `.bib` download.
+ * Bibliographic sources (`source@1`): a filterable list, the one open as a note (its fields by the source lens, the
+ * notes citing it among its relationships), BibTeX import that recognises sources already there, updating one from
+ * BibTeX, and the whole list as a `.bib` download.
  */
-export const Sources = definePerspective<{ sources: Query; all: Query }, Props>({
+export const Sources = definePerspective<{ sources: Query }, Props>({
   id: 'sources',
   title: 'Sources',
-  data: { sources: { tagsAll: ['source'] }, all: {} },
+  data: { sources: { tagsAll: ['source'] } },
   Component: ({ data, repo, open, onSelect, onOpen }) => {
     const [filter, setFilter] = useState('');
     const [importing, setImporting] = useState(false);
@@ -73,7 +74,7 @@ export const Sources = definePerspective<{ sources: Query; all: Query }, Props>(
         </aside>
         <section className={`min-h-0 overflow-y-auto ${open ? '' : 'max-md:hidden'}`}>
           {open
-            ? <SourceDetail key={open} repo={repo} sourceKey={open} all={data.all} duplicate={duplicates} onOpen={onOpen} onBack={() => onSelect('')} />
+            ? <SourceDetail key={open} repo={repo} sourceKey={open} duplicate={duplicates} onOpen={onOpen} onBack={() => onSelect('')} />
             : <p className="p-8 text-center text-base-content/60">Pick a source, add one, or import BibTeX.</p>}
         </section>
       </div>
@@ -156,24 +157,13 @@ function BibtexImport({ repo, sources, onDone }: { repo: Repo; sources: IndexedN
 
 const labelOf = (repo: Repo, key: string) => { const n = repo.get(key); return n ? `${str(n, 'citekey') ?? ''} ${noteLabel(n)}` : key; };
 
-function SourceDetail({ repo, sourceKey, all, duplicate, onOpen, onBack }: {
-  repo: Repo; sourceKey: string; all: IndexedNote[]; duplicate: Set<string>; onOpen?: (key: string) => void; onBack: () => void;
+function SourceDetail({ repo, sourceKey, duplicate, onOpen, onBack }: {
+  repo: Repo; sourceKey: string; duplicate: Set<string>; onOpen?: (key: string) => void; onBack: () => void;
 }) {
   const note = useNote(sourceKey);
-  const [raw, setRaw] = useState(false);
   const [updating, setUpdating] = useState(false);
-  // fields added to the form, shown until filled in (an empty field isn't stored)
-  const [added, setAdded] = useState<string[]>([]);
-  const { entryTypes, fields } = useMemo(() => model(), []);
   if (!note) return <p className="p-8 text-center text-base-content/60">No source <code>{sourceKey}</code>.</p>;
-  const kinds = new Map(fields);
-  const entrytype = str(note, 'entrytype') ?? 'misc';
-  const shownFields = [...new Set([...(entryTypes.find(([t]) => t === entrytype)?.[1] ?? []), ...fields.map(([f]) => f).filter((f) => asSource(note)[f] !== undefined || added.includes(f))])];
-  const addable = fields.map(([f]) => f).filter((f) => !shownFields.includes(f));
-  const set = (field: string, next: Json | undefined) => void repo.putValue(note.key, withField(repo.get(note.key)?.value ?? null, field, next));
   const citekey = str(note, 'citekey') ?? '';
-  const citedBy = all.filter((n) => relationships(n).some((r) => r.label === 'cites' && r.target === note.id));
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -183,61 +173,10 @@ function SourceDetail({ repo, sourceKey, all, duplicate, onOpen, onBack }: {
         {duplicate.has(citekey) && <span className="badge badge-sm badge-warning">another source has this key</span>}
         <div className="flex-1" />
         <button type="button" className={`btn btn-xs ${updating ? 'btn-active' : ''}`} onClick={() => setUpdating(!updating)}>Update from BibTeX</button>
-        <button type="button" className={`btn btn-xs ${raw ? 'btn-active' : ''}`} onClick={() => setRaw(!raw)}>YAML</button>
       </div>
       {updating && <BibtexUpdate repo={repo} note={note} onDone={() => setUpdating(false)} />}
-      {raw ? (
-        <EditableNote note={note} inspect={(text) => repo.inspect(note.key, text)} save={(text) => saveRawSynced(repo, note.key, text)} />
-      ) : (
-        <div className="grid grid-cols-[8rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 text-sm">
-          <FieldRow label="title" value={str(note, 'title') ?? ''} onCommit={(t) => set('title', fieldValue(t, 'literal'))} />
-          <FieldRow label="citekey" value={citekey} onCommit={(t) => set('citekey', fieldValue(t, 'literal'))} mono />
-          <span className="pt-1 text-base-content/60">entrytype</span>
-          <select className="select select-sm" value={entrytype} onChange={(e) => set('entrytype', e.target.value)}>
-            {entryTypes.map(([t]) => <option key={t}>{t}</option>)}
-          </select>
-          {shownFields.map((f) => (
-            <FieldRow key={f} label={f} value={fieldText(asSource(note)[f], kinds.get(f))} multiline={kinds.get(f) === 'names' || kinds.get(f) === 'list'}
-                      mono={kinds.get(f) === 'verbatim'} onCommit={(t) => set(f, fieldValue(t, kinds.get(f)))} />
-          ))}
-          {addable.length > 0 && <>
-            <span />
-            <select className="select select-xs w-48" value="" onChange={(e) => { if (e.target.value) setAdded([...added, e.target.value]); }}>
-              <option value="">add a field…</option>
-              {addable.map((f) => <option key={f}>{f}</option>)}
-            </select>
-          </>}
-          <FieldRow label="notes" value={str(note, 'main') ?? ''} multiline onCommit={(t) => set('main', fieldValue(t, 'literal'))} />
-        </div>
-      )}
-      {note.lints.length > 0 && (
-        <ul className="text-xs text-warning">{note.lints.map((l, i) => <li key={i}>{l.path}: {l.message}</li>)}</ul>
-      )}
-      {citedBy.length > 0 && (
-        <div className="text-sm">
-          <p className="text-base-content/60">Cited by</p>
-          <ul className="menu menu-sm p-0">
-            {citedBy.map((n) => <li key={n.key}>{onOpen ? <button type="button" onClick={() => onOpen(n.key)}>{noteLabel(n)}</button> : <span>{noteLabel(n)}</span>}</li>)}
-          </ul>
-        </div>
-      )}
+      <Note noteKey={note.key} defaultMode="edit" persist="sources" lenses={['source@1']} onOpen={onOpen} onDeleted={onBack} />
     </div>
-  );
-}
-
-/** One field, written when focus leaves it. */
-function FieldRow({ label, value, onCommit, multiline, mono }: { label: string; value: string; onCommit: (text: string) => void; multiline?: boolean; mono?: boolean }) {
-  const [draft, setDraft] = useState<string | null>(null);
-  const commit = () => { if (draft !== null && draft !== value) onCommit(draft); setDraft(null); };
-  const cls = `w-full ${mono ? 'font-mono' : ''}`;
-  return (
-    <>
-      <span className="pt-1 text-base-content/60">{label}</span>
-      {multiline
-        ? <textarea className={`textarea textarea-sm min-h-16 ${cls}`} value={draft ?? value} onChange={(e) => setDraft(e.target.value)} onBlur={commit} />
-        : <input className={`input input-sm ${cls}`} value={draft ?? value} onChange={(e) => setDraft(e.target.value)} onBlur={commit}
-                 onKeyDown={(e) => { if (e.key === 'Enter') commit(); }} />}
-    </>
   );
 }
 

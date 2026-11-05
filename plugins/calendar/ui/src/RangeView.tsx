@@ -1,19 +1,18 @@
 import { Plus } from 'lucide-react';
 import { daysBetween, formatDayHeading, isDay, today, type Day } from './dates';
-import { AddAppointment, Entry, Ongoing, entriesOn, ongoingIn, type Entries } from './items';
+import { Entry, Ongoing, entriesOn, ongoingIn, type Entries } from './items';
 
 type Props = {
   entries: Entries;
   from: Day;
   to: Day;
   onRange: (from: Day, to: Day) => void;
-  adding: Day | null;
-  setAdding: (day: Day | null) => void;
-  onAdd: (day: Day, title: string) => Promise<void>;
+  /** a new appointment on `day` */
+  onAdd: (day: Day) => void;
 };
 
 /** Every day of From..To (inclusive) with its items, empty days included. */
-export function RangeView({ entries, from, to, onRange, adding, setAdding, onAdd }: Props) {
+export function RangeView({ entries, from, to, onRange, onAdd }: Props) {
   const now = today();
   // a From after To drags To along, and the other way round, so the range is never empty
   const pickFrom = (d: string) => { if (isDay(d)) onRange(d, d > to ? d : to); };
@@ -37,10 +36,9 @@ export function RangeView({ entries, from, to, onRange, adding, setAdding, onAdd
               <h3 className={`flex-1 font-medium ${day === now ? 'font-bold text-primary' : ''}`}>
                 {day === now ? `Today — ${formatDayHeading(day)}` : formatDayHeading(day)}
               </h3>
-              <button type="button" className="btn btn-square btn-ghost btn-xs" title="add an appointment" onClick={() => setAdding(day)}><Plus className="size-3.5" /></button>
+              <button type="button" className="btn btn-square btn-ghost btn-xs" title="add an appointment" onClick={() => onAdd(day)}><Plus className="size-3.5" /></button>
             </div>
-            {adding === day && <AddAppointment onAdd={(t) => onAdd(day, t)} onCancel={() => setAdding(null)} />}
-            {!items.length && adding !== day && <p className="py-2 text-base-content/50">Nothing</p>}
+            {!items.length && <p className="py-2 text-base-content/50">Nothing</p>}
             {items.map((n) => <Entry key={n.key} note={n} />)}
           </section>
         );

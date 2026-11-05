@@ -2,7 +2,7 @@ import type { IndexedNote, Json, Ref } from './types';
 
 /** Helpers for the conventional fields; all tolerate any YAML. */
 
-type JsonMap = { [key: string]: Json };
+export type JsonMap = { [key: string]: Json };
 
 export function asMap(v: Json | null | undefined): JsonMap | null {
   return v && typeof v === 'object' && !Array.isArray(v) ? v : null;

@@ -1,7 +1,7 @@
 schema: 2
 id: learn
 version: 1.0.0
-host_api: 1
+host_api: 2
 title: Learn
 description: Every flashcard of every note, reviewed by spaced repetition.
 uses: [cards@1, flashcard@1, fsrs-state@1, practice-session@1]

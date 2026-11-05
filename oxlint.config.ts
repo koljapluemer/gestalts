@@ -3,7 +3,7 @@ import { defineConfig } from 'oxlint';
 /**
  * Who may import whom (eslint-plugin-boundaries):
  * - `@gestalts/sdk` (the perspective port) imports nothing of ours; `@gestalts/learning` only the sdk.
- * - `@gestalts/kit` imports only the sdk, in layers: primitives < components < widgets < views.
+ * - `@gestalts/kit` imports only the sdk, in layers: primitives < components < widgets < note < views.
  * - plugins (`plugins/<id>/ui`) import only the sdk, the kit (its index) and learning, never another plugin, the
  *   client or the host. That keeps them movable to repos of their own.
  * - `@gestalts/client` (the core in the browser) builds on the sdk; the host (`packages/ui`) on client, sdk and kit.
@@ -17,8 +17,9 @@ const kitBelow: Record<string, string[]> = {
   primitive: [],
   component: ['primitive'],
   widget: ['component', 'primitive'],
-  view: ['widget', 'component', 'primitive'],
-  'kit-index': ['view', 'widget', 'component', 'primitive'],
+  note: ['widget', 'component', 'primitive'],
+  view: ['note', 'widget', 'component', 'primitive'],
+  'kit-index': ['view', 'note', 'widget', 'component', 'primitive'],
 };
 const allowed: Record<string, string[]> = {
   sdk: [],
@@ -47,6 +48,7 @@ export default defineConfig({
       { type: 'primitive', pattern: `${kit}/primitives` },
       { type: 'component', pattern: `${kit}/components` },
       { type: 'widget', pattern: `${kit}/widgets` },
+      { type: 'note', pattern: `${kit}/note` },
       { type: 'view', pattern: `${kit}/views` },
       // files directly in packages/kit/src: the index plugins import
       { type: 'kit-index', pattern: kit },

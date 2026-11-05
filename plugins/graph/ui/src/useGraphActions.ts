@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from 'react';
 import type { OnConnectEnd, OnConnectStart } from '@xyflow/react';
 import { addRelation, relabelRelation, removeRelation } from '@gestalts/kit';
-import { asMap, relationships, withTag, type Json, type Repo } from '@gestalts/sdk';
+import { asMap, relationships, withTag, type Host, type Json, type Repo } from '@gestalts/sdk';
 import { HIDE_TAG, type GraphEdge } from './graph';
 import { EXPAND_PIN_DEPTH } from './hiddenRelations';
 import { IDLE, connectionTarget, type ConnectingInteraction, type Interaction } from './interaction';
@@ -24,11 +24,11 @@ async function write(repo: Repo, key: string, change: (v: JsonMap) => JsonMap): 
 }
 
 /**
- * Every handler that changes notes from the canvas, and the gestures that start a new note, a connection or the
- * right-click search. The interaction itself is held by the caller, so the layout can read it. Deleting a note, hiding
+ * Every handler that changes notes from the canvas, and the gestures that start a new note, a card's editor, a
+ * connection or the right-click search. The interaction itself is held by the caller, so the layout can read it. Deleting a note, hiding
  * it and removing a relationship can be undone from a toast, the last one only.
  */
-export function useGraphActions({ repo, g, setInteraction, markInteraction, onOpen }: {
+export function useGraphActions({ repo, g, setInteraction, markInteraction, onOpen, createNote, onError }: {
   repo: Repo;
   g: UseGraph;
   setInteraction: Dispatch<SetStateAction<Interaction>>;
@@ -36,6 +36,9 @@ export function useGraphActions({ repo, g, setInteraction, markInteraction, onOp
   markInteraction: (key: string) => void;
   /** the host's editor */
   onOpen?: (key: string) => void;
+  /** the host's new note */
+  createNote?: Host['createNote'];
+  onError: (message: string) => void;
 }) {
   const { pin, unpin, unpinOthers, setDepth, pinAtLeast } = g;
   const [undo, setUndo] = useState<UndoAction | null>(null);
@@ -44,6 +47,15 @@ export function useGraphActions({ repo, g, setInteraction, markInteraction, onOp
     const timer = setTimeout(() => setUndo(null), UNDO_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [undo]);
+
+  /** A new note, the host's: related from the note it was dragged out of (written with it), and pinned as its own root. */
+  const create = useCallback((source: string | null) => {
+    if (!createNote) return;
+    setInteraction(IDLE);
+    createNote(source ? { relate: { from: source } } : {})
+      .then((key) => { if (key) pin(key, CREATED_PIN_DEPTH); })
+      .catch((e: unknown) => onError(e instanceof Error ? e.message : String(e)));
+  }, [createNote, pin, setInteraction, onError]);
 
   // not state: start and end come in one gesture, with nothing to render between
   const connectingFrom = useRef<string | null>(null);
@@ -54,26 +66,20 @@ export function useGraphActions({ repo, g, setInteraction, markInteraction, onOp
     if (!source) return;
     const target = connectionTarget(state.toNode);
     // dropped on the canvas: a new note, related from the dragged one
-    setInteraction(target && target !== source ? { type: 'connecting', source, target } : { type: 'create', source });
-  }, [setInteraction]);
+    if (target && target !== source) setInteraction({ type: 'connecting', source, target });
+    else create(source);
+  }, [setInteraction, create]);
 
   const onPaneDoubleClick = useCallback((e: ReactMouseEvent) => {
-    if ((e.target as HTMLElement).classList.contains('react-flow__pane')) setInteraction({ type: 'create', source: null });
-  }, [setInteraction]);
+    if ((e.target as HTMLElement).classList.contains('react-flow__pane')) create(null);
+  }, [create]);
   const onPaneContextMenu = useCallback((e: ReactMouseEvent | MouseEvent) => {
     e.preventDefault();
     setInteraction({ type: 'search', screenPosition: { x: e.clientX, y: e.clientY } });
   }, [setInteraction]);
-  const addNote = useCallback(() => setInteraction({ type: 'create', source: null }), [setInteraction]);
+  const addNote = useCallback(() => create(null), [create]);
   const cancel = useCallback(() => setInteraction(IDLE), [setInteraction]);
-
-  /** A note made in the new-note form: related from the note it was dragged out of, and pinned as its own root. */
-  const onCreated = useCallback(async (key: string, source: string | null) => {
-    setInteraction(IDLE);
-    const made = repo.get(key);
-    if (source && made) await write(repo, source, (v) => addRelation(v, made.id, null));
-    pin(key, CREATED_PIN_DEPTH);
-  }, [repo, pin, setInteraction]);
+  const onStartEdit = useCallback((key: string) => { markInteraction(key); setInteraction({ type: 'edit', key }); }, [markInteraction, setInteraction]);
 
   const onDelete = useCallback(async (key: string, pinDepth: number | null) => {
     const note = repo.get(key);
@@ -154,7 +160,9 @@ export function useGraphActions({ repo, g, setInteraction, markInteraction, onOp
     onConfirmConnection,
     onCancelInteraction: cancel,
     onExpandHiddenRelations,
-  }), [onOpen, pin, unpin, unpinOthers, setDepth, onHide, onDelete, onRelabel, onDeleteRelation, onOpenInline, onConfirmConnection, cancel, onExpandHiddenRelations]);
+    onStartEdit,
+    onStopEdit: cancel,
+  }), [onOpen, pin, unpin, unpinOthers, setDepth, onHide, onDelete, onRelabel, onDeleteRelation, onOpenInline, onConfirmConnection, cancel, onExpandHiddenRelations, onStartEdit]);
 
   return {
     callbacks,
@@ -167,7 +175,6 @@ export function useGraphActions({ repo, g, setInteraction, markInteraction, onOp
     onPaneContextMenu,
     addNote,
     cancel,
-    onCreated,
     /** the right-click search keeps open after a pick, so one search can pin several notes */
     pinFromSearch: useCallback((key: string) => pin(key, SEARCH_PIN_DEPTH), [pin]),
   };

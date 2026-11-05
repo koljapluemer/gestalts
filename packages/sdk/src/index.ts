@@ -3,7 +3,9 @@
  * third-party plugins use exactly this, plus `@gestalts/kit` and `@gestalts/learning`.
  */
 export { HOST_API, definePane, definePerspective, type DataSpec, type Pane, type PaneProps, type Perspective, type PerspectiveProps } from './perspective';
-export { HostProvider, Slot, useHost, type Host, type NoteDraft, type SlotProps } from './host';
+export { HostProvider, Slot, useHost, type Host, type NoteSeed, type SlotProps } from './host';
+export { defOf, gestaltId, noteGestalts, seedFor, type NoteGestalt } from './gestalts';
+export { defineLens, type FieldProps, type HostLens, type Lens, type LensField, type SaveContext } from './lens';
 export { RepoProvider, useBlobUrl, useData, useNote, useQuery, useRepo, useRepoVersion, useSettings } from './react';
 export { ServiceClient, type MergeResult, type Repo } from './port';
 export { bib, cardId, contentHash, hashing, newId, provideNatives, stableId, stateKey, type FieldKind, type Natives, type Source, type SourceMatch, type SourceMerge } from './natives';

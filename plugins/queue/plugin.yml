@@ -1,7 +1,7 @@
 schema: 2
 id: queue
 version: 1.0.0
-host_api: 1
+host_api: 2
 title: Queue
 description: A few random notes of yours to revisit, and Next to draw others.
 panes:

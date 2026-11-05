@@ -11,6 +11,8 @@ type Props = {
   repo: Repo;
   /** a related note was clicked; without it rows aren't clickable */
   onOpen?: (key: string) => void;
+  /** only the rows: nothing detached, relabelled or added */
+  readOnly?: boolean;
 };
 
 type JsonMap = { [key: string]: Json };
@@ -23,7 +25,7 @@ const INLINE_ARROW = { out: '⇢', in: '⇠' } as const;
  * either direction; each change is written at once, to whichever note holds the relationship. Inline references
  * (`⇢`, `⇠`) are read-only here: they're edited in the text.
  */
-export function Relationships({ note, repo, onOpen }: Props) {
+export function Relationships({ note, repo, onOpen, readOnly = false }: Props) {
   const backlinks = useBacklinks(note.key);
   const rows = rowsOf(note, backlinks, (id) => repo.keyOf(id), refsOf);
   const [adding, setAdding] = useState(false);
@@ -58,15 +60,16 @@ export function Relationships({ note, repo, onOpen }: Props) {
         <header className="flex items-center gap-2">
           <Link2 className="size-4" />
           <h3 className="flex-1 font-semibold">Relationships {rows.length > 0 && <span className="font-normal text-base-content/50">({rows.length})</span>}</h3>
-          {!adding && (
+          {!adding && !readOnly && (
             <button type="button" className="btn btn-ghost btn-xs" onClick={() => setAdding(true)}><Plus className="size-3.5" /> Relate</button>
           )}
         </header>
+        {rows.length === 0 && readOnly && <p className="text-xs text-base-content/50">None.</p>}
         {rows.length > 0 && (
           <ul className="flex flex-col gap-1">
             {rows.map((r, i) => (
               <RelationRow key={`${r.dir} ${r.inline} ${r.other} ${r.label ?? ''} ${i}`} row={r} repo={repo} onOpen={onOpen}
-                           onDetach={r.inline ? undefined : () => detach(r)} onRelabel={r.inline ? undefined : (l) => relabel(r, l)} />
+                           onDetach={r.inline || readOnly ? undefined : () => detach(r)} onRelabel={r.inline || readOnly ? undefined : (l) => relabel(r, l)} />
             ))}
           </ul>
         )}

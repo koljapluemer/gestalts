@@ -2,12 +2,12 @@ import type { InternalNode } from '@xyflow/react';
 
 /**
  * What the user is doing on the canvas beyond looking at it. One union, so the gestures exclude each other: there is
- * never a new note and a pending connection open at once.
+ * never a card in edit and a pending connection at once. (A new note is the host's, over the pane.)
  */
 export type Interaction =
   | { type: 'idle' }
-  /** a new note, in the new-note form; `source`: the note it starts related from (`source -> new`) */
-  | { type: 'create'; source: string | null }
+  /** the card of `key` shows its editor: one at a time */
+  | { type: 'edit'; key: string }
   | ConnectingInteraction
   /** the right-click search, at viewport (clientX/clientY) coordinates */
   | { type: 'search'; screenPosition: { x: number; y: number } };

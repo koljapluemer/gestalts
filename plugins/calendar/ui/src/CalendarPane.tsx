@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { definePane, definePerspective, noteLabel, str, type IndexedNote, type Query, type Repo } from '@gestalts/sdk';
+import { definePane, definePerspective, noteLabel, str, useHost, type IndexedNote, type Query, type Repo } from '@gestalts/sdk';
 import { setUrlParams, useUrlList } from '@gestalts/kit';
 import { addDays, daysBetween, isDay, isPast, startOfWeek, today, type Day } from './dates';
 import { DayView } from './DayView';
@@ -35,14 +35,13 @@ const Calendar = definePerspective<{ appointments: Query; recurring: Query }>({
     const day = useUrlDay('day') ?? now;
     const from = useUrlDay('from') ?? startOfWeek(now);
     const to = useUrlDay('to') ?? addDays(from, 6);
-    const [adding, setAdding] = useState<Day | null>(null);
+    const host = useHost();
 
     const setDay = (d: Day) => setUrlParams({ day: d === now ? null : d });
-    const setView = (v: 'day' | 'range') => { setAdding(null); setUrlParams({ view: v === 'range' ? 'range' : null }); };
-    const add = async (d: Day, title: string) => {
-      await repo.putValue(undefined, { title, date: d, tags: ['appointment'] });
-      setAdding(null);
-    };
+    const setView = (v: 'day' | 'range') => setUrlParams({ view: v === 'range' ? 'range' : null });
+    // the host's new note, with the appointment's fields and its date set
+    const add = (d: Day) => void host.createNote?.({ gestalt: 'appointment@1', value: { date: d }, preset: 'gestalt' });
+    const addRecurring = (weekday: string) => void host.createNote?.({ gestalt: 'recurring@1', value: { weekday }, preset: 'gestalt' });
     // a day back or forward, or the range by its own length
     const step = (n: number) => {
       if (!range) { setDay(addDays(day, n)); return; }
@@ -57,7 +56,7 @@ const Calendar = definePerspective<{ appointments: Query; recurring: Query }>({
           ArrowLeft: () => step(-1),
           ArrowRight: () => step(1),
           t: () => setUrlParams({ day: null, from: null, to: null }),
-          a: () => { if (!range) setAdding(day); },
+          a: () => { if (!range) add(day); },
           d: () => setView('day'),
           r: () => setView('range'),
         } as Record<string, (() => void) | undefined>)[e.key];
@@ -74,8 +73,8 @@ const Calendar = definePerspective<{ appointments: Query; recurring: Query }>({
           <button type="button" className={`btn btn-sm join-item ${range ? 'btn-active' : ''}`} title="r" onClick={() => setView('range')}>Range</button>
         </div>
         {range
-          ? <RangeView entries={data} from={from} to={to} onRange={(f, t) => setUrlParams({ from: f, to: t })} adding={adding} setAdding={setAdding} onAdd={add} />
-          : <DayView entries={data} day={day} onDay={setDay} adding={adding} setAdding={setAdding} onAdd={add} />}
+          ? <RangeView entries={data} from={from} to={to} onRange={(f, t) => setUrlParams({ from: f, to: t })} onAdd={add} />
+          : <DayView entries={data} day={day} onDay={setDay} onAdd={add} onAddRecurring={addRecurring} />}
         <PastAppointments repo={repo} notes={data.appointments.filter((n) => isPast(str(n, 'date'), now))} />
       </div>
     );

@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import { definePerspective, tags as tagsOf, type Query } from '@gestalts/sdk';
+import { definePerspective, tags as tagsOf, type NoteSeed, type Query } from '@gestalts/sdk';
 import { NoteResultList, buildIndex, search, type NoteAction } from '../widgets';
 
 export type { NoteAction };
@@ -11,8 +11,8 @@ const TOP_TAGS = 12;
 type Props = {
   /** a note was picked */
   onOpen: (key: string) => void;
-  /** given: a "+" asks for a new note, prefilled from the query and tag filter */
-  onCreate?: (prefill: { title?: string; tags: string[] }) => void;
+  /** given: a "+" asks for a new note, its seed from the query and tag filter */
+  onCreate?: (seed: NoteSeed) => void;
   /** keys currently open elsewhere, shown marked */
   openKeys?: string[];
   /** what the hosting pane can do with a result, besides opening it */
@@ -63,9 +63,9 @@ export const SearchSidebar = definePerspective<{ all: Query }, Props>({
     const reset = () => { setActive(0); setLimit(PAGE); };
 
     // the query becomes the title unless it's filters
-    const prefill = () => {
+    const prefill = (): NoteSeed => {
       const title = query.trim() && !query.includes(':') && !query.includes('#') ? query.trim() : undefined;
-      return { ...(title ? { title } : {}), tags: tagFilter };
+      return { value: { ...(title ? { title } : {}), ...(tagFilter.length ? { tags: tagFilter } : {}) }, preset: 'capture' };
     };
 
     return (

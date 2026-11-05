@@ -1,34 +1,48 @@
 import { useMemo, useSyncExternalStore } from 'react';
+import { asMap, type NoteSeed } from '@gestalts/sdk';
 import { setUrlParams, subscribeUrl as subscribe } from '@gestalts/kit';
 
 /** What a pane shows over itself: at most one thing. Opening another replaces it. */
 export type Overlay =
   | { kind: 'note'; key: string }
-  | { kind: 'new'; title?: string; tags?: string[] };
+  | { kind: 'new'; seed: NoteSeed };
 
 const PARAM = 'overlay';
-const TITLE = 'new-title';
-const TAGS = 'new-tags';
+/** a new note's seed, as JSON */
+const SEED = 'seed';
 /** history state of an entry made by `open`, so closing it can go back instead */
 const PUSHED = 'gestalts-overlay';
 
 /** The overlay's query params; `null` removes one. */
 export function encodeOverlay(o: Overlay | null): Record<string, string | null> {
-  const none = { [PARAM]: null, [TITLE]: null, [TAGS]: null };
+  const none = { [PARAM]: null, [SEED]: null };
   if (!o) return none;
   if (o.kind === 'note') return { ...none, [PARAM]: `note:${o.key}` };
-  return { ...none, [PARAM]: 'new', [TITLE]: o.title || null, [TAGS]: o.tags?.length ? o.tags.join(',') : null };
+  return { ...none, [PARAM]: 'new', [SEED]: Object.keys(o.seed).length ? JSON.stringify(o.seed) : null };
 }
 
 export function decodeOverlay(params: URLSearchParams): Overlay | null {
   const v = params.get(PARAM);
-  if (v === 'new') {
-    const title = params.get(TITLE) ?? undefined;
-    const tags = params.get(TAGS)?.split(',').filter(Boolean);
-    return { kind: 'new', ...(title ? { title } : {}), ...(tags?.length ? { tags } : {}) };
-  }
+  if (v === 'new') return { kind: 'new', seed: parseSeed(params.get(SEED)) };
   if (v?.startsWith('note:') && v.length > 5) return { kind: 'note', key: v.slice(5) };
   return null;
+}
+
+/** A seed from the URL; what isn't one (edited by hand, an old link) is dropped. */
+function parseSeed(text: string | null): NoteSeed {
+  if (!text) return {};
+  let raw: unknown;
+  try { raw = JSON.parse(text); } catch { return {}; }
+  const m = asMap(raw as never);
+  if (!m) return {};
+  const seed: NoteSeed = {};
+  const value = asMap(m.value);
+  if (value) seed.value = value;
+  if (typeof m.gestalt === 'string') seed.gestalt = m.gestalt;
+  const relate = asMap(m.relate);
+  if (relate && typeof relate.from === 'string') seed.relate = { from: relate.from, ...(typeof relate.label === 'string' ? { label: relate.label } : {}) };
+  if (m.preset === 'capture' || m.preset === 'gestalt' || m.preset === 'full') seed.preset = m.preset;
+  return seed;
 }
 
 export type OverlayControl = {

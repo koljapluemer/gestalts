@@ -1,14 +1,10 @@
 export { NoteResultList, type NoteAction } from './NoteResultList';
 export { Conflicts } from './Conflicts';
-export { EditableNote } from './EditableNote';
-export { NoteParts } from './NoteParts';
 export { NotePicker } from './NotePicker';
 export { SourcePicker, filterSources, sourceSummary } from './SourcePicker';
 export { buildIndex, parseQuery, search, type SearchIndex } from './noteSearch';
 export { MAX_VIDEO_BYTES, attachMedia, blobName, compressImage, detachMedia, isMedia, mediaOf, otherBlobs, type Media } from './media';
 export { MediaGallery, MediaPicker } from './MediaGallery';
-export { NoteBody, NoteView } from './NoteView';
-export { NoteTextEditor } from './NoteTextEditor';
 export { Relationships } from './Relationships';
 export { addRelation, relabelRelation, removeRelation } from './relationModel';
 export { refsOf, useBacklinks } from './backlinks';

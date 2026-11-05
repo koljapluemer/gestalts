@@ -11,7 +11,7 @@ use gestalts_core::{Gestalts, Note, Query};
 use serde::{Deserialize, Serialize};
 
 /// The version of the perspective port the apps offer (`HOST_API` in `@gestalts/sdk`).
-pub const HOST_API: u32 = 1;
+pub const HOST_API: u32 = 2;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ManifestError {
@@ -51,6 +51,9 @@ pub struct PluginManifest {
     pub panes: Vec<PaneManifest>,
     #[serde(default)]
     pub slots: Vec<SlotManifest>,
+    /// how the host's note component shows and edits a gestalt's fields
+    #[serde(default)]
+    pub lenses: Vec<LensManifest>,
     /// what its UI may read and write
     #[serde(default)]
     pub access: UiAccess,
@@ -91,6 +94,14 @@ pub struct PaneRequires {
 #[serde(deny_unknown_fields)]
 pub struct SlotManifest {
     pub slot: String,
+    pub gestalt: String,
+    pub entry: String,
+}
+
+/// A lens: a `defineLens` export (`@gestalts/sdk`) for one gestalt the plugin owns or uses.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct LensManifest {
     pub gestalt: String,
     pub entry: String,
 }
@@ -273,6 +284,12 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
         if gestalt_file(&s.gestalt).is_none() { return invalid(format!("slot gestalt {} is not name@N", s.gestalt)); }
     }
     let declared: BTreeSet<&String> = m.gestalts.iter().chain(&m.uses).collect();
+    let mut lenses = BTreeSet::new();
+    for l in &m.lenses {
+        valid_entry(&l.entry)?;
+        if !declared.contains(&l.gestalt) { return invalid(format!("lens for {}, which is neither in `gestalts` nor in `uses`", l.gestalt)); }
+        if !lenses.insert(&l.gestalt) { return invalid(format!("more than one lens for {}", l.gestalt)); }
+    }
     for scope in [&m.access.read, &m.access.write] {
         if let Scope::Some { gestalts, .. } = scope {
             for g in gestalts {
@@ -368,7 +385,7 @@ mod tests {
         let load = |decks: &str| {
             let dir = std::env::temp_dir().join(format!("gestalts-plugin-decks-{}-{}", std::process::id(), decks.len()));
             std::fs::create_dir_all(&dir).unwrap();
-            std::fs::write(dir.join("plugin.yml"), format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\ndecks: {decks}\n")).unwrap();
+            std::fs::write(dir.join("plugin.yml"), format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\ndecks: {decks}\n")).unwrap();
             let r = PluginBundle::load(&dir).map(|b| b.manifest.decks.len());
             std::fs::remove_dir_all(&dir).unwrap();
             r
@@ -382,16 +399,32 @@ mod tests {
     }
 
     #[test]
+    fn lenses_are_for_gestalts_the_plugin_owns_or_uses() {
+        let load = |lenses: &str| {
+            let dir = std::env::temp_dir().join(format!("gestalts-plugin-lenses-{}-{}", std::process::id(), lenses.len()));
+            std::fs::create_dir_all(&dir).unwrap();
+            std::fs::write(dir.join("plugin.yml"), format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\nuses: [appointment@1]\nlenses: {lenses}\n")).unwrap();
+            let r = PluginBundle::load(&dir).map(|b| b.manifest.lenses.len());
+            std::fs::remove_dir_all(&dir).unwrap();
+            r
+        };
+        assert_eq!(load("[{gestalt: appointment@1, entry: ui/a.ts#A}]").unwrap(), 1);
+        assert!(load("[{gestalt: quote@1, entry: ui/a.ts#Q}]").is_err());
+        assert!(load("[{gestalt: appointment@1, entry: ui/a.ts#A}, {gestalt: appointment@1, entry: ui/a.ts#B}]").is_err());
+        assert!(load("[{gestalt: appointment@1, entry: ../a.ts#A}]").is_err());
+    }
+
+    #[test]
     fn a_gestalt_has_one_owner() {
         let dir = std::env::temp_dir().join(format!("gestalts-plugin-owner-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("gestalts/flashcard")).unwrap();
-        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\ngestalts: [flashcard@1]\n").unwrap();
+        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\ngestalts: [flashcard@1]\n").unwrap();
         std::fs::write(dir.join("gestalts/flashcard/v1.yml"), "name: flashcard\nversion: 1\n").unwrap();
         let b = PluginBundle::load(&dir).unwrap();
         assert!(gestalts_with(&[&b]).unwrap_err().contains("owned by both"));
-        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\nuses: [nothing@1]\n").unwrap();
+        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\nuses: [nothing@1]\n").unwrap();
         assert!(gestalts_with(&[&PluginBundle::load(&dir).unwrap()]).unwrap_err().contains("nothing defines"));
-        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\naccess: {read: {gestalts: [term@1]}}\n").unwrap();
+        std::fs::write(dir.join("plugin.yml"), "schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\naccess: {read: {gestalts: [term@1]}}\n").unwrap();
         assert!(PluginBundle::load(&dir).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
     }
@@ -400,7 +433,7 @@ mod tests {
     fn panes_require_services() {
         let dir = std::env::temp_dir().join(format!("gestalts-plugin-requires-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        let manifest = |services: &str| format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 1\npanes:\n  - {{ id: p, title: P, entry: ui/a.ts#P, requires: {{ services: {services} }} }}\n");
+        let manifest = |services: &str| format!("schema: 2\nid: x\nversion: 1.0.0\nhost_api: 2\npanes:\n  - {{ id: p, title: P, entry: ui/a.ts#P, requires: {{ services: {services} }} }}\n");
         std::fs::write(dir.join("plugin.yml"), manifest("[typst@1]")).unwrap();
         assert_eq!(PluginBundle::load(&dir).unwrap().manifest.panes[0].requires.services, ["typst@1"]);
         for bad in ["[typst]", "[typst@1, typst@1]", "[Typst@1]"] {

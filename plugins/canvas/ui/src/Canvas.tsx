@@ -5,7 +5,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { ExternalLink, FilePlus2, GripVertical, Maximize, Pencil, Plus, RotateCcw, StickyNote, Trash2, Type, Undo2, Unlink } from 'lucide-react';
 import { noteLabel, str, useNote, type IndexedNote, type Json, type Query, type Repo, definePerspective } from '@gestalts/sdk';
-import { Markdown, NotePicker } from '@gestalts/kit';
+import { Markdown, Note, NotePicker, type ExtraTool } from '@gestalts/kit';
 import { OLD_CANVASES, canvasOf, resolveStale, saveCanvas } from './canvasNote';
 import { canvasReducer, fromWire, nodeId, sameNodes, toWire, type CanvasAction, type CanvasNode } from './model';
 import { CanvasSaver } from './saver';
@@ -290,8 +290,9 @@ function TextNode({ data }: NodeProps<Node<NodeData>>) {
   );
 }
 
+/** A linked note: the note component, read or edited (one node at a time, as the canvas has it); detaching leaves the note. */
 function NoteNode({ data }: NodeProps<Node<NodeData>>) {
-  const { repo, dispatch, readOnly, remove, onOpen } = useCanvas();
+  const { repo, dispatch, readOnly, editing, setEditing, remove, onOpen } = useCanvas();
   const node = data.node as Extract<CanvasNode, { kind: 'note' }>;
   const key = repo.keyOf(node.note);
   const note = useNote(key);
@@ -303,15 +304,17 @@ function NoteNode({ data }: NodeProps<Node<NodeData>>) {
     );
   }
   const main = str(note, 'main') ?? '';
+  const tools: ExtraTool[] = [
+    { key: 'grip', node: <span className="canvas-grip cursor-grab p-1 text-base-content/40" title="Drag"><GripVertical className="size-3.5" /></span> },
+    ...(!readOnly && main ? [{ key: 'toText', title: 'Copy its text into a text node', icon: <StickyNote className="size-3.5" />, onClick: () => dispatch({ type: 'toText', id: node.id, text: main }) }] : []),
+    ...(!readOnly ? [{ key: 'detach', title: 'Detach (the note stays)', icon: <Unlink className="size-3.5" />, onClick: () => remove(node.id) }] : []),
+  ];
+  const isEditing = editing === node.id && !readOnly;
   return (
-    <Frame tools={<>
-      {onOpen && <NodeTool title="Open" onClick={() => onOpen(note.key)}><ExternalLink className="size-3.5" /></NodeTool>}
-      {!readOnly && main && <NodeTool title="Copy its text into a text node" onClick={() => dispatch({ type: 'toText', id: node.id, text: main })}><StickyNote className="size-3.5" /></NodeTool>}
-      {!readOnly && <NodeTool title="Detach (the note stays)" onClick={() => remove(node.id)}><Unlink className="size-3.5" /></NodeTool>}
-    </>}>
-      {str(note, 'title') || !main ? <p className="font-semibold">{noteLabel(note)}</p> : null}
-      {main && <div className="nowheel mt-1 max-h-60 overflow-y-auto"><Markdown text={main} onOpen={onOpen} /></div>}
-    </Frame>
+    <div className="nowheel w-72 shadow-sm">
+      <Note noteKey={note.key} compact relationships="readonly" extraTools={tools} tools={{ delete: false }} modes={readOnly ? ['view'] : ['view', 'edit']}
+            mode={isEditing ? 'edit' : 'view'} onModeChange={(m) => setEditing(m === 'edit' ? node.id : null)} onEscape={() => setEditing(null)} onOpen={onOpen} />
+    </div>
   );
 }
 

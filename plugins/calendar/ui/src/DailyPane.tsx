@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { definePane, definePerspective, stableId, useHost, type Query } from '@gestalts/sdk';
-import { NoteTextEditor } from '@gestalts/kit';
+import { Note } from '@gestalts/kit';
 import { dailyDate, formatDayHeading, type Day } from './dates';
 
 /** how often an open tab checks whether a new day has begun, in ms */
@@ -32,7 +32,9 @@ const Daily = definePerspective<{ days: Query }, { date: Day }>({
       <div className="mx-auto flex max-w-4xl flex-col gap-3 p-3">
         <h2 className="font-semibold text-primary">{formatDayHeading(date)}</h2>
         {error && <p className="text-sm text-error">{error}</p>}
-        {note ? <NoteTextEditor key={note.key} note={note} repo={repo} onOpen={onOpen} /> : !error && <span className="loading loading-spinner loading-sm" />}
+        {note
+          ? <Note key={note.key} noteKey={note.key} defaultMode="edit" persist="daily" tools={{ delete: false }} lenses={['daily@1']} onOpen={onOpen} />
+          : !error && <span className="loading loading-spinner loading-sm" />}
       </div>
     );
   },

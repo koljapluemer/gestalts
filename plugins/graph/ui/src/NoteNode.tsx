@@ -1,8 +1,8 @@
-import { memo, useState, type ReactNode } from 'react';
+import { memo, useState } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { ExternalLink, EyeOff, Focus, GripVertical, Trash2 } from 'lucide-react';
-import { noteLabel, type IndexedNote } from '@gestalts/sdk';
-import { NoteView } from '@gestalts/kit';
+import { EyeOff, Focus, GripVertical } from 'lucide-react';
+import type { IndexedNote } from '@gestalts/sdk';
+import { Note, type ExtraTool } from '@gestalts/kit';
 import { NODE_WIDTH } from './layout';
 import { PinControl } from './PinControl';
 
@@ -15,6 +15,9 @@ export type NoteCallbacks = {
   onChangeDepth: (key: string, next: number) => void;
   onHide: (key: string, pinDepth: number | null) => Promise<void>;
   onDelete: (key: string, pinDepth: number | null) => Promise<void>;
+  /** the card shows its editor (one at a time) */
+  onStartEdit: (key: string) => void;
+  onStopEdit: () => void;
 };
 
 export type NoteNodeData = NoteCallbacks & {
@@ -25,6 +28,8 @@ export type NoteNodeData = NoteCallbacks & {
   othersPinned: boolean;
   /** the note new notes are placed next to: the one last acted on */
   isAnchor: boolean;
+  /** the card shows its editor */
+  editing: boolean;
 };
 
 export type NoteFlowNode = Node<NoteNodeData, 'note'>;
@@ -32,14 +37,28 @@ export type NoteFlowNode = Node<NoteNodeData, 'note'>;
 const CONNECT_HANDLES = [Position.Top, Position.Right, Position.Bottom, Position.Left];
 
 /**
- * A note on the canvas: its label, tools and body. Dragging a dot on its border onto another card relates the two;
- * dropping it on the canvas makes a new related note. Memoized: during a drag the other cards' `data` keep their
- * identity, so their Markdown isn't rendered again each frame.
+ * A note on the canvas: the note component, read or edited (one card at a time, as the graph's interaction has it),
+ * its relationships being the edges; the grip, pin, unpin-others and hide as its own tools, delete with the graph's
+ * undo. Dragging a dot on its border onto another card relates the two; dropping it on the canvas makes a new related
+ * note. Memoized: during a drag the other cards' `data` keep their identity, so their Markdown isn't rendered again.
  */
 export const NoteNode = memo(function NoteNode({ data }: NodeProps<NoteFlowNode>) {
   const { note, pinDepth } = data;
   const [error, setError] = useState<string | null>(null);
   const act = (work: Promise<void>) => { setError(null); work.catch((e: unknown) => setError(e instanceof Error ? e.message : String(e))); };
+  const tools: ExtraTool[] = [
+    {
+      key: 'grip',
+      // the only drag surface (`dragHandle` in the view model), so the rest of the card stays free for selecting text
+      node: <span className="note-drag-handle cursor-grab p-1 text-base-content/40 active:cursor-grabbing" title="Drag to move"><GripVertical className="size-4" /></span>,
+    },
+    {
+      key: 'pin',
+      node: <PinControl pinDepth={pinDepth} onPin={() => data.onPin(note.key)} onUnpin={() => data.onUnpin(note.key)} onChangeDepth={(next) => data.onChangeDepth(note.key, next)} />,
+    },
+    ...(pinDepth !== null && data.othersPinned ? [{ key: 'unpinOthers', title: 'Unpin everything else', icon: <Focus className="size-3.5" />, onClick: () => data.onUnpinOthers(note.key) }] : []),
+    { key: 'hide', title: 'Hide from the graph (tags it no-graph)', icon: <EyeOff className="size-3.5" />, onClick: () => act(data.onHide(note.key, pinDepth)) },
+  ];
   return (
     <>
       {/*
@@ -54,30 +73,14 @@ export const NoteNode = memo(function NoteNode({ data }: NodeProps<NoteFlowNode>
                 className="pointer-events-none size-3.5 rounded-full border-2 border-base-100 bg-primary opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-90" />
       ))}
       <article style={{ width: NODE_WIDTH }}
-               className={`cursor-auto select-text rounded-box border bg-base-100 text-left shadow-lg ${pinDepth !== null ? 'border-primary' : 'border-base-300'} ${data.isAnchor ? 'border-dashed' : ''}`}>
-        <header className="flex items-center gap-0.5 border-b border-base-200 px-1 py-0.5">
-          <span className="note-drag-handle cursor-grab p-1 text-base-content/40 active:cursor-grabbing" title="Drag to move"><GripVertical className="size-4" /></span>
-          {data.onOpen
-            ? <button type="button" className="nodrag min-w-0 flex-1 truncate text-left text-sm font-semibold hover:underline" title="Open" onClick={() => data.onOpen?.(note.key)}>{noteLabel(note)}</button>
-            : <span className="min-w-0 flex-1 truncate text-sm font-semibold">{noteLabel(note)}</span>}
-          <PinControl pinDepth={pinDepth} onPin={() => data.onPin(note.key)} onUnpin={() => data.onUnpin(note.key)}
-                      onChangeDepth={(next) => data.onChangeDepth(note.key, next)} />
-          {pinDepth !== null && data.othersPinned && (
-            <Tool title="Unpin everything else" onClick={() => data.onUnpinOthers(note.key)}><Focus className="size-3.5" /></Tool>
-          )}
-          {data.onOpen && <Tool title="Open" onClick={() => data.onOpen?.(note.key)}><ExternalLink className="size-3.5" /></Tool>}
-          <Tool title="Hide from the graph (tags it no-graph)" onClick={() => act(data.onHide(note.key, pinDepth))}><EyeOff className="size-3.5" /></Tool>
-          <Tool title="Delete the note" onClick={() => act(data.onDelete(note.key, pinDepth))}><Trash2 className="size-3.5" /></Tool>
-        </header>
-        <div className="nowheel max-h-96 overflow-y-auto px-3 py-2 text-sm">
-          <NoteView note={note} onOpen={data.onOpen} />
+               className={`cursor-auto select-text rounded-box shadow-lg ${pinDepth !== null ? '[&_.card]:border-primary' : ''} ${data.isAnchor || data.editing ? '[&_.card]:border-dashed' : ''}`}>
+        <div className={data.editing ? 'nowheel' : 'nowheel max-h-96 overflow-y-auto rounded-box'}>
+          <Note noteKey={note.key} compact relationships={false} extraTools={tools} mode={data.editing ? 'edit' : 'view'}
+                onModeChange={(next) => (next === 'edit' ? data.onStartEdit(note.key) : data.onStopEdit())} onEscape={data.onStopEdit}
+                onOpen={data.onOpen} onDelete={async () => { await data.onDelete(note.key, pinDepth); return true; }} />
         </div>
         {error && <p role="alert" className="px-3 pb-2 text-xs text-error">{error}</p>}
       </article>
     </>
   );
 });
-
-function Tool({ title, onClick, children }: { title: string; onClick: () => void; children: ReactNode }) {
-  return <button type="button" className="nodrag btn btn-ghost btn-xs btn-square" title={title} onClick={onClick}>{children}</button>;
-}

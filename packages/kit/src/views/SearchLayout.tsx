@@ -1,9 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { PanelRight } from 'lucide-react';
-import { useHost } from '@gestalts/sdk';
+import { useHost, type NoteSeed } from '@gestalts/sdk';
 import { SearchSidebar, type NoteAction } from './SearchSidebar';
-
-type Prefill = { title?: string; tags: string[] };
 
 type Props = {
   children: ReactNode;
@@ -11,8 +9,8 @@ type Props = {
   actions?: NoteAction[];
   /** a result was opened (or a note created); by default the host opens it (`openNote`, its editor over the pane) */
   onOpen?: (key: string) => void;
-  /** the "+" was pressed; by default the host's new-note form opens (`createNote`) */
-  onCreate?: (prefill: Prefill) => void;
+  /** the "+" was pressed; by default the host's new note opens (`createNote`), and the created one after it */
+  onCreate?: (seed: NoteSeed) => void;
   /** keys shown marked in the results */
   openKeys?: string[];
   /** the keys of every result while the search is filtering, else null */
@@ -24,9 +22,10 @@ export function SearchLayout({ children, actions, onOpen, onCreate, openKeys, on
   const host = useHost();
   const [drawer, setDrawer] = useState(false);
   const openWith = onOpen ?? host.openNote;
-  const createWith = onCreate ?? host.createNote;
   const open = openWith && ((key: string) => { setDrawer(false); openWith(key); });
-  const create = createWith && ((prefill: Prefill) => { setDrawer(false); createWith(prefill); });
+  const hostCreate = host.createNote;
+  const createWith = onCreate ?? (hostCreate && ((seed: NoteSeed) => void hostCreate(seed).then((key) => { if (key) openWith?.(key); })));
+  const create = createWith && ((seed: NoteSeed) => { setDrawer(false); createWith(seed); });
   const act = (actions ?? []).map((a) => ({ ...a, run: (key: string) => { setDrawer(false); a.run(key); } }));
   return (
     <div className="drawer drawer-end h-full lg:drawer-open">

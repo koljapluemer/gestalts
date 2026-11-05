@@ -1,7 +1,7 @@
 schema: 2
 id: graph
 version: 1.0.0
-host_api: 1
+host_api: 2
 title: Graph
 description: Pinned notes and their relationships on a canvas, to explore and relate them.
 uses: [settings@1]

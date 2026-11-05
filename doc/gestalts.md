@@ -41,6 +41,29 @@ Field options:
 - `min` and `max`: the value for numbers, the item count for lists.
 - `one_of`.
 
+## Lenses
+
+How the note component shows a gestalt's notes ([architecture.md](architecture.md#the-note-component)). Without a
+lens, a gestalt's fields show in a section of their own, each by its type; a plugin may add one per gestalt it owns
+or uses (`lenses` in `plugin.yml`, a `defineLens` export):
+
+```ts
+export const AppointmentLens = defineLens({
+  gestalt: 'appointment@1',
+  title: 'Appointment',
+  priority: 1,                                   // higher first among a note's lenses
+  fields: { date: { label: 'when', Field: DateField } },  // also `order`, `hidden`
+  offered: (note) => [...],                      // the unset fields offered while editing (default all)
+  seed: (value) => value,                        // a new note's value, once the required tags are added
+  Summary: ({ note }) => …,                      // one short line in compact and inline views
+  afterSave: async (repo, { key, before, after }) => {},  // with the plugin's own access
+});
+```
+
+Every note shows the lenses of all the gestalts it has or is a candidate for; a field claimed by several shows once,
+at the first. A new note seeded with a gestalt (`createNote({ gestalt })`) gets its required tags (`seedFor`) and
+its lens's `seed`.
+
 ## Merge
 
 How a gestalt's notes merge in sync, in its definition. Each strategy is a pure function of base and both sides
@@ -152,7 +175,7 @@ A note's canvas, template and cards were attached notes (`canvas@1` `canvas-of`,
 isn't rewritten. Readers take the note's key first, else the attached notes (`fold` in `@gestalts/sdk`). Every
 save through the new form writes the key and retires the attached notes: tag `retired` plus
 `folded: {into: <host id>, hash: <sha256 of the part as folded>, card: <id>}` (`card` for cards only). A retired
-note whose part no longer matches `hash` was edited after the fold (another device, the YAML editor), and the
+note whose part no longer matches `hash` was edited after the fold (another device, the source editor), and the
 editors offer it back: "Use that version" or "Keep this one".
 
 ## Sources

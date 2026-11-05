@@ -38,15 +38,41 @@ export type Query = {
   where?: Record<string, string | number | boolean | null>;
 };
 
+/** A field's type in a gestalt (`FieldType` in crates/core/src/gestalt.rs). */
+export type FieldType =
+  | 'any' | 'string' | 'text' | 'number' | 'integer' | 'bool' | 'date' | 'partial_date' | 'datetime' | 'url'
+  | 'string_list' | 'list' | 'map' | 'blob';
+
+/** What a gestalt asks of one field (`FieldRule` in crates/core/src/gestalt.rs). */
+export type FieldRule = {
+  type: FieldType;
+  required: boolean;
+  /** numeric bounds (inclusive), or item count bounds for lists */
+  min: number | null;
+  max: number | null;
+  one_of: Json[] | null;
+  /** for `map` */
+  fields: Record<string, FieldRule>;
+  /** for `list`: the rule every item follows */
+  items: FieldRule | null;
+  /** for `map`: the rule every value follows (maps keyed by data) */
+  values: FieldRule | null;
+};
+
+export type Count = { min: number | null; max: number | null; dies_with_target?: boolean };
+
 export type GestaltDef = {
   name: string;
   version: number;
   description: string | null;
   requires_tags: string[];
   trigger_fields: string[];
-  fields: Record<string, unknown>;
-  blobs: Record<string, { min: number | null; max: number | null }>;
-  relationships: Record<string, { min: number | null; max: number | null }>;
+  fields: Record<string, FieldRule>;
+  /** by label; `_` counts unlabelled ones */
+  blobs: Record<string, Count>;
+  relationships: Record<string, Count>;
+  /** how its notes merge in sync */
+  merge?: Json;
 };
 
 export type SyncReport = {

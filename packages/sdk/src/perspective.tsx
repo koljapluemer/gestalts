@@ -4,7 +4,7 @@ import type { Repo, ServiceClient } from './port';
 import type { IndexedNote, Query } from './types';
 
 /** The version of this port. A host refuses plugins built for one it doesn't support. */
-export const HOST_API = 1;
+export const HOST_API = 2;
 
 /** What a perspective works with: named queries, resolved to notes and kept current. */
 export type DataSpec = Record<string, Query>;

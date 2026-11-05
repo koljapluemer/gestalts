@@ -94,14 +94,14 @@ The repo's `upstreamReport()` says what the last check did; loops-for-learning l
 
 - `@gestalts/sdk` imports nothing of ours. It's the perspective port: the `Repo` interface (notes cross it parsed;
   only the host's core parses YAML), the hooks (`useQuery`, `useData`, `useNote`, `useBlobUrl`, `useSettings`),
-  `definePerspective`, `definePane`, host capabilities (`useHost`), `Slot`, the field and note helpers (`fold`,
-  `inline`, conflicts), and natives the host provides (ids, hashes, BibTeX). No wasm, so it can later run in a
+  `definePerspective`, `definePane`, host capabilities (`useHost`), `Slot`, `defineLens`, the field and note helpers
+  (`fold`, `inline`, conflicts, `noteGestalts`, `seedFor`), and natives the host provides (ids, hashes, BibTeX). No wasm, so it can later run in a
   sandboxed frame.
 - `@gestalts/kit` imports only the sdk, in layers, each from below: `primitives/` (CodeMirror, `Markdown`,
-  `MarkdownEditor`), `components/` (`NoteLine`, `GestaltBadges`, `YamlEditor`, `Modal`), `widgets/` (`NoteView`,
-  `NoteTextEditor`, `EditableNote`, `NoteParts`, `Relationships`, `MediaGallery`, `NotePicker`, `SourcePicker`,
-  `Conflicts`, the note search), `views/` (`SearchSidebar`, `UniversalEditor`, `NewNote`, `SearchLayout`,
-  `useUrlList`). Tailwind + daisyUI + lucide are the real primitives.
+  `MarkdownEditor`), `components/` (`NoteLine`, `YamlEditor`, `Modal`), `widgets/` (`Relationships`, `MediaGallery`,
+  `NotePicker`, `SourcePicker`, `Conflicts`, the note search), `note/` (`Note`, see [the note
+  component](#the-note-component)), `views/` (`SearchSidebar`, `SearchLayout`, `useUrlList`). Tailwind + daisyUI +
+  lucide are the real primitives.
 - `@gestalts/learning` imports only the sdk.
 - A plugin's UI (`plugins/<id>/ui/src`) imports only the sdk, the kit and learning: never another plugin, the client
   or the host. `mise run check-plugin-standalone <id>` builds one outside the workspace against the packed public
@@ -118,7 +118,7 @@ A plugin is a domain bundle in `plugins/<id>/` (or a repo of its own, as gestalt
 schema: 2
 id: alphabet-pronunciation-via-visual-cognates
 version: 1.0.0
-host_api: 1
+host_api: 2
 gestalts: [pronunciation-card@1]           # owned here, defined in gestalts/<name>/v<N>.yml
 uses: [fsrs-state@1, practice-session@1]   # owned elsewhere: a data dependency
 decks:                                     # starter content, published-deck format, mounted as <plugin>/<deck>
@@ -127,6 +127,8 @@ panes:
   - { id: practice, title: Alphabet pronunciation, entry: ui/src/index.ts#PracticePane }
   # a pane may need node services: `requires: { services: [typst@1] }` (Canvas2Typ)
 slots:                                     # e.g. canvas: { slot: note-view, gestalt: canvas@2, entry: … }
+lenses:                                    # how the note component shows a gestalt's fields (one per gestalt)
+  - { gestalt: pronunciation-card@1, entry: ui/src/index.ts#CardLens }
 access:
   read: { gestalts: [pronunciation-card@1, fsrs-state@1, practice-session@1] }   # or `all`; `tags_all` for plain notes
   write: { gestalts: [fsrs-state@1, practice-session@1] }
@@ -136,8 +138,9 @@ worker: …                                  # optional, see node.md
 - **Gestalts** have exactly one owner: the core, or one plugin. Those that more than one plugin uses are the core's;
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
-- **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
-  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), queue, graph, sources, learn, quotes. gestalt-plugins has the
+- **Built-in plugins**: explorer, canvas (Canvas; the `note-view` slot of `canvas@2`), typst (Canvas2Typ, and the
+  `typst@1` worker), calendar (Daily, Calendar; the appointment, recurring and daily lenses), queue, graph, sources
+  (the source lens), learn, quotes (the quote lens). gestalt-plugins has the
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
@@ -167,12 +170,13 @@ worker: …                                  # optional, see node.md
   node, isn't offered under +; one whose service isn't running is greyed there. An open tab that lacks one is
   dimmed and its pane runs under a line saying what's missing (Canvas2Typ still edits without `typst@1`).
 - **The capability frame** (`host/PaneFrame.tsx`) runs each pane with the host's capabilities (`useHost()`):
-  `openNote` and `createNote` (the host's editor or new-note form over the pane, kept in the URL as
-  `?overlay=note:<key>` or `new`, so Back closes it), `pickNote`, `navigate`, `setTitle`, and `slot`, the views
-  installed plugins registered (`<Slot name gestalt noteKey/>`). A perspective hides what the host doesn't offer.
+  `openNote` (the note over the pane) and `createNote(seed)` (a new one; it resolves to its key, or null when given
+  up), both kept in the URL as `?overlay=note:<key>` or `?overlay=new&seed=<json>`, so Back closes them; `pickNote`,
+  `navigate`, `setTitle`; `slot`, the views installed plugins registered (`<Slot name gestalt noteKey/>`); and
+  `lenses`, the installed plugins' lenses, loaded with the host. A perspective hides what the host doesn't offer.
 - **Access**: the pane's repo is scoped to its plugin's `access`. It reads only notes in `read`, and writes only
   notes that are in `write` before and after; a write scoped by gestalt must give a note that has the gestalt, so
-  one breaking its rules is refused. Slot views get their own plugin's scope.
+  one breaking its rules is refused. Slot views, and a lens's `afterSave`, get their own plugin's scope.
 - `debug/` (`@gestalts/ui/debug`): `ErrorBoundary` (around each pane), `DebugLogButton`. See [debugging.md](debugging.md).
 
 ## Canvas and Typst
@@ -181,12 +185,12 @@ A canvas is the `canvas` key of its host note (`canvas@2`); its linked notes are
 host, so they travel with it. An old `canvas@1` note (`canvas-of` the host) is shown until the first change folds it
 into the host and retires it ([gestalts.md](gestalts.md#folded-parts)). While it's open, the page's reducer is the
 only truth (`plugins/canvas/ui/src/model.ts`); `CanvasSaver` writes whole snapshots, debounced, one at a time, held
-while dragging. If the stored nodes change to something this page didn't write (a sync, the YAML editor), it stops
+while dragging. If the stored nodes change to something this page didn't write (a sync, the source editor), it stops
 writing and offers to reload; changes to the host's other keys don't count. A host whose YAML doesn't parse makes
 the canvas read-only.
 
-The note editor shows a note's cards and template below its YAML (kit `widgets/NoteParts.tsx`), folding attached ones in
-on the first save the same way. Since a note can now be written by these and by the YAML editor at once, the YAML
+The note component edits a note's cards and template (kit `note/Parts.tsx`), folding attached ones in on the first
+save the same way. Since a note can be written by these, by its fields and by the source editor at once, the source
 editor saves a draft as a 3-way merge against the text it started from (`repo.merge3`, the merge a sync does). If
 both changed the same value, it asks before overwriting.
 
@@ -195,32 +199,82 @@ document's `assets` (path → blob, fetched by the worker) and a bibliography of
 (`/sources.bib`). Without the service the document is still editable and shows its last built PDF. Build PDF stores
 the PDF as a content-addressed blob labelled `pdf`; saving adds a `cites` relationship to each source cited.
 
-## Note view
+## The note component
 
-The editor (kit `UniversalEditor`) shows a note in one of three modes, remembered per note for the browser session:
-- **Read** (kit `widgets/NoteView.tsx`): its images and videos (blobs labelled `image`/`video`, or unlabelled ones that
-  are by extension) in a gallery, then `tasks`, `main`, `extra` and its cards rendered, then its other blobs as links.
-- **Text** (kit `widgets/NoteTextEditor.tsx`): title, `main` and `extra` as Markdown, with a preview beside them (below
-  when narrow). `[[` completes a note from the search and inserts its id. Mod-click on a reference opens it, and on
-  touch screens a button above the reference under the cursor does. Saves on blur and Mod-s, field by field against
-  the note as it is by then. If the note changed one of the same fields meanwhile, it asks.
-- **YAML**: the raw note, as before.
+Wherever a note is shown or created, it's kit `Note` (`packages/kit/src/note/Note.tsx`); panes configure it and none
+renders a note on its own. Defaults are full capabilities: anything not switched off is there.
+
+| Parameter | Default | |
+|---|---|---|
+| `noteKey`, `seed` | | the note; without one, a new note from `seed` (`NoteSeed`: its value so far, a gestalt, a relationship from another note, a preset) |
+| `render` | `full` | `simple`: the label, media and text; `inline`: one line (`NoteLine`, the lenses' summaries, a lint icon, the tools) |
+| `modes` | view, edit | `split` also: the text's editor with it rendered beside it. The toggle hides when only one is offered; a new note only edits |
+| `defaultMode`, `mode`, `onModeChange` | view | the mode, when the caller keeps it (the Graph's and Canvas's one card in edit) |
+| `persist` | | a key keeping the mode for the browser tab's session; the caller picks the scope (`explorer:<key>`, `daily`) |
+| `commit` | `blur` | `blur`: edits are written as focus leaves the note, on Mod-s, and when it closes; `explicit`: Save and Discard. A new note is explicit: Create (Mod-Enter) |
+| `relationships` | on | `readonly`: the rows only; off: none (the Graph, whose edges are them) |
+| `lenses` | all | `name@version` of the gestalts whose fields show open; the note's others are behind "also" |
+| `tools`, `tagToggles`, `extraTools` | | switch tools off (or `edit` on in `full`); tag toggles (the Queue's `no-q`); the page's own tools, first in the row |
+| `compact` | | no properties beyond the gestalts, the label in the header: Graph and Canvas cards |
+| `onOpen`, `onEdit`, `onDelete`, `onDeleted`, `onCreated`, `onCancel`, `onClose`, `onEscape` | | `onDelete` replaces the repo's delete (the Graph's, with undo) |
+
+What it shows, top to bottom:
+- **Header**: the label (a button opening the note, where it's compact or simple), the lenses' summaries, the tools
+  (media, link a note, add a gestalt, tag toggles, edit, edit the source, delete, the page's own), the save state,
+  the mode toggle or Save/Discard, close.
+- **Gestalts**: the ones the note has, filled, and those it's a candidate for but breaks (`noteGestalts`), outlined,
+  their lints on hover.
+- **Properties** (`note/layout.ts`, `layoutOf`): tags, then a section per gestalt (focused ones first, then by lens
+  priority, the ones it has before candidates, then by name), each with the fields of its gestalt no earlier section
+  showed, then the fields no gestalt claims. A field claimed by several gestalts shows once. Read, a section shows the
+  fields the note has and the required ones missing (marked, with their lints); edited, every field, or those its
+  lens `offered` for the note (a source's, by its entry type), with "add a field". Each field is shown and edited by
+  its lens's `Field`, else by its type (`note/fields/DefaultField.tsx`: inputs for strings, numbers, dates and URLs,
+  a toggle, chips for string lists, a select for `one_of` and blobs, YAML read by the core for the rest).
+- **Media**, then the **text** (`note/Body.tsx`): `tasks`, `main`, `extra` (and the title, while edited) whichever
+  gestalts claim them; Markdown, `[[` completes a note and inserts its id, Mod-click (on touch screens a button)
+  opens a reference. Then cards and template (`note/Parts.tsx`), the other files, and the relationships.
+- **Edit the source**: the whole note as YAML with its parse errors and lints (`note/SourceEditor.tsx`), for what the
+  fields don't show; entered after the fields' draft is written, so there's one draft at a time.
+
+A note has one draft (`note/useNoteDraft.ts`): edits gather in it, and `commit` writes them onto the note as it is by
+then, field by field (`applyValueDraft`): a field the note changed meanwhile to something else isn't written over;
+it asks (Overwrite, Discard). A new note is written with its relationship from `seed.relate.from`, then its staged
+media. After a write, the lenses of the gestalts the note now has hear of it (`afterSave`: a quote whose words
+changed starts its practice over).
+
+Presets (`seed.preset`) are how much a new note shows: `capture` (the search's +: title and text), `gestalt` (the
+Calendar's new appointment: its lens open, the others behind "also"), `full`. "More…" turns a smaller one into
+`full`, keeping what was typed.
 
 Images and videos are attached from the toolbar (on touch screens also from the camera), or by pasting or dropping
-them into the text. They're written at once, as content-addressed blobs. Images are downscaled to 1920 px and
-re-encoded as WebP (lossless from PNG and BMP; GIF and SVG kept as they are). Videos up to 250 MB are stored as they
-are. Removing one takes it off `blobs`; the blob itself stays.
+them into the text: written at once for a stored note, after it for a new one, as content-addressed blobs. Images
+are downscaled to 1920 px and re-encoded as WebP (lossless from PNG and BMP; GIF and SVG kept as they are). Videos
+up to 250 MB are stored as they are. Removing one takes it off `blobs`; the blob itself stays.
 
-Every save of the text, of the YAML or of the cards keeps the note's `inline` relationships in step with the
-`[[references]]` in `main`, `extra` and its cards, and lists each `![[embed]]` in `blobs` (`syncInline`,
-`packages/sdk/src/inline.ts`). The copy-on-write closure and backlinks then follow prose links like any other
-relationship. A YAML save is written as typed unless that changes something.
+Every save keeps the note's `inline` relationships in step with the `[[references]]` in `main`, `extra` and its cards,
+and lists each `![[embed]]` in `blobs` (`syncInline`, `packages/sdk/src/inline.ts`). The copy-on-write closure and
+backlinks then follow prose links like any other relationship. A source save is written as typed unless that changes
+something.
 
 `Relationships` lists a note's own relationships (`→`), its inline references (`⇢`) and its backlinks (`←`, `⇠`).
 The backlinks come from one index per repo version, built from every note's relationships and from the references
 in their text, so notes edited elsewhere count too. Explicit rows can be detached and relabelled, and the adder
 relates a picked note in either direction. Each change is written at once, to whichever note holds the relationship.
 Inline rows are edited in the text.
+
+| Pane | Configuration |
+|---|---|
+| over any pane (`openNote`) | full, view/edit, persisted per note |
+| new note (`createNote`) | the seed's preset, Create, Cancel, "More…" |
+| Explorer | full, view/edit, persisted per note; the search's + is a capture |
+| Daily | full, edit first, persisted per view, no delete, the daily lens open |
+| Calendar | inline, with the lenses' summaries; + is a new appointment on the day, ↻ a recurring item on its weekday |
+| Graph | compact, view/edit with the mode from the graph's interaction (one card in edit), no relationships, its own delete (undo) and hide; grip, pin and unpin-others as extra tools. A new note (double-click, the toolbar, a drag onto empty canvas) is `createNote`; from a drag, related from the dragged note |
+| Canvas | linked notes compact, view/edit with the mode from the canvas, relationships read-only, no delete; grip, to-text and detach as extra tools |
+| Queue | simple or full (the toggle beside Next), the `no-q` tag toggle |
+| Sources | the open source: full, edit first, the source lens open; BibTeX update and the citekey beside it |
+| Quotes | added with the quote lens (`createNote`), edited over the pane |
 
 ## Learn
 
