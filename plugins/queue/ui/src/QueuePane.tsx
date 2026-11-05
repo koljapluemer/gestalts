@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { AlignLeft, EyeOff, LayoutList, SkipForward } from 'lucide-react';
-import { definePane, definePerspective, noteLabel, tags, useHost, type IndexedNote, type Query, type Repo } from '@gestalts/sdk';
+import { definePane, definePerspective, noteLabel, tags, useHost, withTag, type IndexedNote, type Query, type Repo } from '@gestalts/sdk';
 import { NoteView, UniversalEditor } from '@gestalts/kit';
-import { draw, HIDE_TAG, POOL, QUEUE_SIZE, withTag } from './queue';
+import { draw, HIDE_TAG, POOL, QUEUE_SIZE } from './queue';
 
 /** The batch on screen, kept outside the pane, so it stays while other tabs are open; null until the first draw. */
 let batch: string[] | null = null;

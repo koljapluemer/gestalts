@@ -10,5 +10,6 @@ export { MediaGallery, MediaPicker } from './MediaGallery';
 export { NoteBody, NoteView } from './NoteView';
 export { NoteTextEditor } from './NoteTextEditor';
 export { Relationships } from './Relationships';
+export { addRelation, relabelRelation, removeRelation } from './relationModel';
 export { refsOf, useBacklinks } from './backlinks';
 export { applyTextDraft, saveRawSynced, textFields, useReferenceTools, withInline } from './noteText';

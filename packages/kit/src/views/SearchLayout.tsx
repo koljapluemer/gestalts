@@ -15,10 +15,12 @@ type Props = {
   onCreate?: (prefill: Prefill) => void;
   /** keys shown marked in the results */
   openKeys?: string[];
+  /** the keys of every result while the search is filtering, else null */
+  onResults?: (keys: string[] | null) => void;
 };
 
 /** A pane's content with the search on the right (a drawer on small screens). */
-export function SearchLayout({ children, actions, onOpen, onCreate, openKeys }: Props) {
+export function SearchLayout({ children, actions, onOpen, onCreate, openKeys, onResults }: Props) {
   const host = useHost();
   const [drawer, setDrawer] = useState(false);
   const openWith = onOpen ?? host.openNote;
@@ -38,7 +40,7 @@ export function SearchLayout({ children, actions, onOpen, onCreate, openKeys }: 
       <div className="drawer-side z-40 h-full lg:h-auto">
         <label htmlFor="pane-search" aria-label="Close search" className="drawer-overlay" />
         <aside className="h-full w-[22rem] max-w-[85vw] border-l border-base-300 bg-base-100">
-          <SearchSidebar onOpen={open ?? (() => {})} onCreate={create} openKeys={openKeys} actions={act} />
+          <SearchSidebar onOpen={open ?? (() => {})} onCreate={create} openKeys={openKeys} actions={act} onResults={onResults} />
         </aside>
       </div>
     </div>

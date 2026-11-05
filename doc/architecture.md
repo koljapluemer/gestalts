@@ -137,7 +137,7 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer (Explorer, New note), canvas (Canvas; the `note-view` slot of `canvas@2`), typst
-  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), queue, sources, learn, quotes. gestalt-plugins has the
+  (Canvas2Typ, and the `typst@1` worker), calendar (Daily, Calendar), queue, graph, sources, learn, quotes. gestalt-plugins has the
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
@@ -258,6 +258,31 @@ leaves out what dsl's did (appointments, recurring items, sources, dailies, expl
 state, sessions, settings, installs, conflicts) and deck content (countries, terms, sentences, cards, quotes, …),
 which deck panes practise. Each note's hide toggle tags it `no-q`, which leaves it out of later draws; toggling
 again is the undo. A hidden note stays on screen until the next draw; a deleted one drops out.
+
+## Graph
+
+`plugins/graph`, as dsl's Graph tab was: pinned notes and their relationships on a canvas (React Flow, laid out by
+ELK), with the search beside it.
+- **The graph** is built in the page from the notes alone (`ui/src/graph.ts`): the notes in `SCOPE` (yours: as dsl's,
+  without appointments, recurring items, sources, dailies or explorations; without bookkeeping and deck content; nor
+  notes tagged `no-graph` or `retired`, nor ones whose YAML doesn't parse), and between them each explicit relationship
+  and each `[[reference]]` (an inline edge, dashed, left out where an explicit one goes the same way). A breadth-first
+  search from all pins at once shows each pin's notes within its depth, at most 28 relationships per pinned note, 12
+  per note further out and 140 notes, the farthest left out first; the graph says what it left out.
+- **Pins** (note key → depth) are kept in `settings@1`, scope `graph`, so they sync; the open pane's own state is the
+  truth, written back shortly after a change. A search result's pin button pins it with two hops; the toolbar pins a
+  random note, a random one without relationships, a random search result, or all results (the first 100, alone).
+  Right-click the canvas to search and pin there. A badge under a card counts its related notes not shown; clicking
+  it pins the note with one hop.
+- **Edits** are note writes: dragging a card's dot onto another card relates them (the label asked for; empty is
+  unlabelled), onto the canvas makes a new note related from it; double-click makes one alone. A label opens a form
+  to relabel or remove the relationship, written to the note holding it; an inline edge opens its note, where it's
+  edited in the text. A card's tools pin, step its depth, unpin the others, open it in the host's editor, hide it
+  (tag `no-graph`) and delete it. Delete, hide and removing a relationship can be undone from the toast, the last one
+  only; undoing a delete writes the note (and those that died with it) again, which brings it back.
+- **Layout** (`layout.ts`, `useElkLayout.ts`): cards are measured first, then ELK runs once, seeded with the previous
+  positions so unrelated cards stay put; new cards appear next to the note last acted on. A dragged card keeps its
+  spot and its neighbours move out of the way, without running ELK again.
 
 ## Search sidebar
 

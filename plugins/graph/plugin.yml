@@ -1,0 +1,13 @@
+schema: 2
+id: graph
+version: 1.0.0
+host_api: 1
+title: Graph
+description: Pinned notes and their relationships on a canvas, to explore and relate them.
+uses: [settings@1]
+panes:
+  - { id: graph, title: Graph, entry: ui/src/index.ts#GraphPane }
+access:
+  # it relates, hides and deletes any note, and keeps its pins in its settings
+  read: all
+  write: all

@@ -225,6 +225,28 @@ importers:
         specifier: 19.3.1
         version: 19.3.1
 
+  plugins/graph:
+    dependencies:
+      '@gestalts/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
+      '@gestalts/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@xyflow/react':
+        specifier: 12.12.0
+        version: 12.12.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      elkjs:
+        specifier: 0.12.0
+        version: 0.12.0
+      lucide-react:
+        specifier: 1.66.0
+        version: 1.66.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+
   plugins/learn:
     dependencies:
       '@gestalts/kit':
@@ -1369,6 +1391,9 @@ packages:
 
   electron-to-chromium@1.5.472:
     resolution: {integrity: sha512-s4+nfT29b0FKpVKoaIxl2pWsoNcn7A/nMPSrxayw4T3BsmPeV2lF9Y06BsAQeMGhCTQ4nYJ5XST7jkqe4ZEqFw==}
+
+  elkjs@0.12.0:
+    resolution: {integrity: sha512-YZcKynxVxYoKIOEpywEPwCFdg+BTbxQRNf3pbwdDCvc8O3kQD8bmIwSxKU1eOTVc4Xo+VG9Te+575mlfvOrhEQ==}
 
   enhanced-resolve@5.26.0:
     resolution: {integrity: sha512-9vhedylFonb2YGogzUKX6+Ja72gOJbN1QHAqdrvqLwhdl/QWbKopzoUC9EbQNVsAns/bx/4uyqalrQAoy1IByw==}
@@ -3048,6 +3073,8 @@ snapshots:
       '@types/trusted-types': 2.0.7
 
   electron-to-chromium@1.5.472: {}
+
+  elkjs@0.12.0: {}
 
   enhanced-resolve@5.26.0:
     dependencies:

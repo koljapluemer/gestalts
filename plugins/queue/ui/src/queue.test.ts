@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { draw, withTag } from './queue';
+import { withTag } from '@gestalts/sdk';
+import { draw } from './queue';
 
 describe('draw', () => {
   it('picks distinct keys, at most n', () => {

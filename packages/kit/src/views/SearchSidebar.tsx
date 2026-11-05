@@ -17,6 +17,8 @@ type Props = {
   openKeys?: string[];
   /** what the hosting pane can do with a result, besides opening it */
   actions?: NoteAction[];
+  /** the keys of every result while a query or tag filter is set, else null; for actions on all of them */
+  onResults?: (keys: string[] | null) => void;
 };
 
 /** Find any note by text, tag or gestalt; ask for new ones. `/` focuses the search. */
@@ -24,7 +26,7 @@ export const SearchSidebar = definePerspective<{ all: Query }, Props>({
   id: 'search-sidebar',
   title: 'Search',
   data: { all: {} },
-  Component: ({ data, onOpen, onCreate, openKeys = [], actions = [] }) => {
+  Component: ({ data, onOpen, onCreate, openKeys = [], actions = [], onResults }) => {
     const [query, setQuery] = useState('');
     const [tagFilter, setTagFilter] = useState<string[]>([]);
     const [active, setActive] = useState(0);
@@ -54,6 +56,9 @@ export const SearchSidebar = definePerspective<{ all: Query }, Props>({
       window.addEventListener('keydown', onKey);
       return () => window.removeEventListener('keydown', onKey);
     }, []);
+
+    const filtering = deferred.trim() !== '' || tagFilter.length > 0;
+    useEffect(() => { onResults?.(filtering ? result.notes.map((n) => n.key) : null); }, [onResults, filtering, result]);
 
     const reset = () => { setActive(0); setLimit(PAGE); };
 

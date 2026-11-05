@@ -55,3 +55,13 @@ export function noteLabel(n: IndexedNote): string {
   if (main) return main;
   return n.raw.trim().split('\n')[0] || n.key;
 }
+
+/** The note's value with `tag` added to its `tags` (or removed), the others kept in order; unchanged: the same value. */
+export function withTag(value: Json | null, tag: string, on: boolean): Json {
+  const note = asMap(value) ?? {};
+  const raw = note.tags;
+  const tags = typeof raw === 'string' ? [raw] : Array.isArray(raw) ? raw : [];
+  const has = tags.includes(tag);
+  if (on === has) return note;
+  return { ...note, tags: on ? [...tags, tag] : tags.filter((t) => t !== tag) };
+}

@@ -1,4 +1,4 @@
-import type { Json, Query } from '@gestalts/sdk';
+import type { Query } from '@gestalts/sdk';
 
 /** How many notes a draw shows. */
 export const QUEUE_SIZE = 3;
@@ -30,14 +30,4 @@ export function draw(keys: readonly string[], n: number, random: () => number = 
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   return pool.slice(0, count);
-}
-
-/** The note's value with `tag` added to its `tags` (or removed), the others kept in order. */
-export function withTag(value: Json | null, tag: string, on: boolean): Json {
-  const note = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  const raw = note.tags;
-  const tags = typeof raw === 'string' ? [raw] : Array.isArray(raw) ? raw : [];
-  const has = tags.includes(tag);
-  if (on === has) return note;
-  return { ...note, tags: on ? [...tags, tag] : tags.filter((t) => t !== tag) };
 }

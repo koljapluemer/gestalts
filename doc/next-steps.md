@@ -121,7 +121,7 @@ From dsl:
 - [ ] Desk, Explorations, Tags, Suggest
 - [x] Queue
 - [ ] Float, Questions (Ollama service)
-- [ ] Graph
+- [x] Graph
 - [ ] Published and the site export
 - [ ] Portfolio, card collages (`renders`, Chromium plugin), PDF export
 - [ ] Viz blocks (`viz`, claude CLI plugin)
