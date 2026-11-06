@@ -225,6 +225,22 @@ importers:
         specifier: 19.3.1
         version: 19.3.1
 
+  plugins/float:
+    dependencies:
+      '@gestalts/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
+      '@gestalts/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      lucide-react:
+        specifier: 1.66.0
+        version: 1.66.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+
   plugins/graph:
     dependencies:
       '@gestalts/kit':
@@ -255,6 +271,24 @@ importers:
       '@gestalts/learning':
         specifier: workspace:*
         version: link:../../packages/learning
+      '@gestalts/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      lucide-react:
+        specifier: 1.66.0
+        version: 1.66.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+
+  plugins/ollama: {}
+
+  plugins/questions:
+    dependencies:
+      '@gestalts/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
       '@gestalts/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk

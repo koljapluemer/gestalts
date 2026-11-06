@@ -120,7 +120,7 @@ From dsl:
 - [ ] Projects, Goals, Tasks
 - [ ] Desk, Explorations, Tags, Suggest
 - [x] Queue
-- [ ] Float, Questions (Ollama service)
+- [x] Float, Questions (the `ollama` plugin's `ollama@1` service picks the questions)
 - [x] Graph
 - [ ] Published and the site export
 - [ ] Portfolio, card collages (`renders`, Chromium plugin), PDF export
@@ -204,6 +204,9 @@ need an explicit approval or a container runtime.
   vibe-coding in the app; "promote to plugin"; each device asks before running one whose `access` widened.
 - Third-party plugins from a URL or registry, with the access shown on install and namespaced gestalts
   (`<publisher>/<name>@N`).
+- Services between plugins ([architecture.md](architecture.md#plugins)): a way to declare a service a pane uses when
+  it's there (Questions and `ollama@1`), so a distribution can't ship one without the other by accident; service
+  calls scoped by `access`; services for paired devices (a phone asks the desktop's LLM).
 
 ### Other
 

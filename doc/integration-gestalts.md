@@ -63,8 +63,9 @@ become plain deck notes (title, explanation in `main`), so `practice-state@1` ha
 | Tasks | `tasks` field, plus notes with lints |
 | Explorations, Goals, Tags, Suggest, Queue, Float, Questions, Desk | tags and relationships only. Hiding uses `gestaltsNone` in `Query` (e.g. Queue leaves out appointments, sources and dailies) |
 
-Not gestalts but connector plugins: semantic search (Ollama embeddings, a cache), the Questions LLM picker, PDF export
-and collages (Chromium), the continuous `.bib` / site / portfolio exports.
+Not gestalts but connector plugins: semantic search (Ollama embeddings, a cache; `ollama@1` would add `embed`), the
+Questions LLM picker (done: the `ollama` plugin's `ollama@1`), PDF export and collages (Chromium), the continuous
+`.bib` / site / portfolio exports.
 
 ## sam-learns-things apps
 

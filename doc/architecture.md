@@ -139,9 +139,16 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer, canvas (Canvas; the `note-view` slot of `canvas@2`), typst (Canvas2Typ, and the
-  `typst@1` worker), calendar (Daily, Calendar; the appointment, recurring and daily lenses), queue, graph, sources
-  (the source lens), learn, quotes (the quote lens). gestalt-plugins has the
+  `typst@1` worker), calendar (Daily, Calendar; the appointment, recurring and daily lenses), queue, float,
+  questions, graph, sources (the source lens), learn, quotes (the quote lens), ollama (no panes: the `ollama@1`
+  worker). gestalt-plugins has the
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
+- **Plugins use each other through services**, never by importing one another: a worker offers a service by a
+  versioned id (`typst@1`, `ollama@1`), whichever plugin ships it, and any pane can call it (`repo.service(id)`). A
+  pane needs one (`requires.services`, below) or uses it when it's there (`services` in `definePerspective`, a client
+  or `undefined`; Questions with `ollama@1`). Code they share goes in `@gestalts/kit` (its Ollama client and
+  `ModelDownload`). Not covered yet: a plugin can't declare a service it uses optionally, so the distribution has to
+  ship the plugin that offers it; service calls aren't scoped by `access`; and paired devices reach no services.
 - **Distributions**: an app is the host plus the plugins it depends on (`@gestalts-plugin/<id>` in its
   `package.json`) and `distribution.yml` (`id`, `default_panes`, `install_ui`). The `id` keys the local tabs,
   so it stays once released: `gestalter-desktop`, `loops-for-learning`, `gestalter-android`. `@gestalts/vite` turns them into
@@ -273,6 +280,8 @@ Inline rows are edited in the text.
 | Graph | compact, view/edit with the mode from the graph's interaction (one card in edit), no relationships, its own delete (undo) and hide; grip, pin and unpin-others as extra tools. A new note (double-click, the toolbar, a drag onto empty canvas) is `createNote`; from a drag, related from the dragged note |
 | Canvas | linked notes compact, view/edit with the mode from the canvas, relationships read-only, no delete; grip, to-text and detach as extra tools |
 | Queue | simple or full (the toggle beside Next), the `no-q` tag toggle |
+| Float | simple, the `no-float` tag toggle; its edit tool opens the note full in a modal, holding the stage |
+| Questions | full, the mode kept for the session (`e` edits) |
 | Sources | the open source: full, edit first, the source lens open; BibTeX update and the citekey beside it |
 | Quotes | added with the quote lens (`createNote`), edited over the pane |
 
@@ -312,6 +321,27 @@ leaves out what dsl's did (appointments, recurring items, sources, dailies, expl
 state, sessions, settings, installs, conflicts) and deck content (countries, terms, sentences, cards, quotes, …),
 which deck panes practise. Each note's hide toggle tags it `no-q`, which leaves it out of later draws; toggling
 again is the undo. A hidden note stays on screen until the next draw; a deleted one drops out.
+
+## Float
+
+`plugins/float`, as dsl's tab was: random notes of yours drifting across the stage, a new one every 2.5 s, each
+crossing in 12–25 s, drawn 20 at a time. The pool (`POOL` in `ui/src/float.ts`) is Queue's, without its
+explorations rule. The filter below (`/`) keeps the notes the search finds and starts a new draw. A card stops under
+the pointer; its edit tool opens the note in a modal, which holds the stage still, and the card is gone when it
+closes. The hide toggle tags a note `no-float`: it drifts on, and isn't drawn again.
+
+## Questions
+
+`plugins/questions`, as dsl's tab was: a random note of yours that states something (`>` or `~` in `main`) and is
+linked loosely (at most one relationship besides inline links), not tagged `no-questions`, with up to 3 of the 11
+questions in `ui/src/questions.ts`. Each answer relates the note, under the question's label (`solves`, `assumes`,
+`so:`, …), to a note picked from the search or a new one made from the text typed (`{main: text}`). The note shown
+stays, answered or not, until Skip (`s`), and the ones skipped aren't drawn again this session; Disable (`d`) tags it
+`no-questions`; `e` edits it.
+
+With `ollama@1` (the `ollama` plugin, on a node), `gemma3:4b` picks the 3 questions that fit the note best, prompted
+by `PROMPT` beside the questions; its picks are kept per note text for the page's life. Without the service, the
+server or the model, the first 3 are asked and a line says why; a missing model can be downloaded from there.
 
 ## Graph
 

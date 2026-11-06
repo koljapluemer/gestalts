@@ -77,7 +77,7 @@ downloads a pinned uv release (checksum-verified) into its data folder. uv in tu
 so users install nothing.
 
 `GET /plugins` reports worker health, `POST /plugins/{id}/runs` starts a manual run, `GET /services` discovers
-services, and `/services/{id}/…` proxies them (with the query string and `Content-Type`; a service gets 30 s before the
+services, and `/services/{id}/…` proxies them (with the query string and `Content-Type`; a service gets 180 s before the
 app sees a 504). A worker whose process has ended is restarted on the next run or service request, and its error
 says so meanwhile.
 
@@ -87,6 +87,11 @@ Plugins with workers:
   "svg" | "pdf"}` compiles in a fresh folder (assets at their paths, `bib` as `/sources.bib`, system fonts ignored)
   and answers SVG pages as JSON, the PDF, or 422 `{diagnostics, missing}`. It reads `typst-document@1` notes and the
   blobs they reference, and writes nothing.
+- `ollama` (built into the Gestalter's desktop): the `ollama@1` service, local language models through an Ollama
+  server on this computer (`OLLAMA_HOST`, else `127.0.0.1:11434`). `GET models`, `POST chat` `{model, system, user,
+  schema?}` → `{content}`, `POST pull` `{model}` (a background download) and `GET pull?model=` → `{pull}` (its
+  progress); 503 without the server, 404 `{missing_model}` without the model. Each caller names the model it was tuned
+  with. It reads and writes no notes. `@gestalts/kit`'s `ollama` (and `ModelDownload`) call it.
 
 ## Access
 

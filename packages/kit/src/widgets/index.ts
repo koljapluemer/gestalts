@@ -9,3 +9,5 @@ export { Relationships } from './Relationships';
 export { addRelation, relabelRelation, removeRelation } from './relationModel';
 export { refsOf, useBacklinks } from './backlinks';
 export { applyTextDraft, saveRawSynced, textFields, useReferenceTools, withInline } from './noteText';
+export { LlmUnavailable, OLLAMA_SERVICE, ollamaChat, ollamaModels, ollamaPull, ollamaPullStatus, pullRunning, type Pull } from './ollama';
+export { ModelDownload } from './ModelDownload';

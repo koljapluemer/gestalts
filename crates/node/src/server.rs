@@ -469,8 +469,9 @@ async fn list_services(State(s): State<AppState>) -> Json<Vec<ServiceView>> {
     Json(s.plugins.services().await.into_iter().map(|(id, available)| ServiceView { id, available }).collect())
 }
 
-/// How long a service may take to answer (a Typst compile, an OCR run) before the app gets a 504.
-const SERVICE_TIMEOUT: Duration = Duration::from_secs(30);
+/// How long a service may take to answer (a Typst compile, an OCR run, a local LLM's first reply while its model
+/// loads) before the app gets a 504.
+const SERVICE_TIMEOUT: Duration = Duration::from_secs(180);
 
 async fn proxy_service(State(s): State<AppState>, UrlPath((service, path)): UrlPath<(String, String)>, method: Method,
     uri: axum::http::Uri, headers: HeaderMap, body: Bytes) -> Response {
