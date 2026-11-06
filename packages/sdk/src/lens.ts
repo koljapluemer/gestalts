@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { JsonMap } from './fields';
+import type { GistPart } from './gist';
 import type { Repo } from './port';
 import type { FieldRule, Json } from './types';
 
@@ -54,6 +55,8 @@ export type Lens = {
   seed?: (value: JsonMap) => JsonMap;
   /** one short line about the note in compact and inline views (e.g. an appointment's date) */
   Summary?: ComponentType<{ note: JsonMap }>;
+  /** how the note reads (`noteGist`) and names itself in one line: shown before the built-in parts, using up its `keys` */
+  gist?: GistPart;
   /** after the note component wrote a note with this gestalt; the repo is the plugin's own (its `access`) */
   afterSave?: (repo: Repo, ctx: SaveContext) => Promise<void>;
 };

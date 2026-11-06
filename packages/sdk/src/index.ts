@@ -11,6 +11,7 @@ export { ServiceClient, type MergeResult, type Repo } from './port';
 export { bib, cardId, contentHash, hashing, newId, provideNatives, stableId, stateKey, type FieldKind, type Natives, type Source, type SourceMatch, type SourceMerge } from './natives';
 export { conflictRecord, conflicts, pathLabel, resolveConflict, resolveConflicts, setAt, type ConflictRecord, type PathSegment, type Resolution } from './conflicts';
 export * from './fields';
+export { gistMarkdown, noteGist, noteLine, plainLine, type GistBlock, type GistOptions, type GistPart } from './gist';
 export * as fold from './fold';
 export type { Card, Template, Part, Hashing, FoldWrites } from './fold';
 export { INLINE, inlineOutOfSync, inlineRefs, inlineTexts, syncInline, type RefsOf } from './inline';

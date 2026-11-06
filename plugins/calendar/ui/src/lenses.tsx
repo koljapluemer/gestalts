@@ -21,6 +21,7 @@ export const AppointmentLens = defineLens({
   title: 'Appointment',
   priority: 1,
   fields: { date: { label: 'when', Field: DateField } },
+  gist: { keys: ['date'], blocks: (n) => { const v = text(n.date); return v ? [{ kind: 'when', markdown: isDay(v) ? formatDayHeading(v) : v }] : []; } },
   Summary: ({ note }) => {
     const v = text(note.date);
     return v ? <span className="badge badge-sm badge-ghost shrink-0">{isDay(v) ? formatShortDate(v) : v}</span> : null;
@@ -32,6 +33,14 @@ export const RecurringLens = defineLens({
   title: 'Recurring',
   priority: 1,
   fields: { weekday: { label: 'every', order: 0 }, until: { label: 'until', order: 1 } },
+  gist: {
+    keys: ['weekday', 'until'],
+    blocks: (n) => {
+      const w = text(n.weekday);
+      const until = text(n.until);
+      return w ? [{ kind: 'when', markdown: `every ${weekdayName(w)}${until ? `, until ${isDay(until) ? formatDayHeading(until) : until}` : ''}` }] : [];
+    },
+  },
   Summary: ({ note }) => {
     const w = text(note.weekday);
     return w ? <span className="badge badge-sm badge-ghost shrink-0">every {weekdayName(w)}</span> : null;
@@ -43,4 +52,10 @@ export const DailyLens = defineLens({
   gestalt: 'daily@1',
   title: 'Daily',
   fields: { date: { label: 'day', Field: ({ value }) => <span>{isDay(text(value)) ? formatDayHeading(text(value)) : text(value)}</span> } },
+  // the day names a daily note in a list; read, it heads the entry
+  gist: {
+    keys: ['date'],
+    blocks: (n) => { const v = text(n.date); return v ? [{ kind: 'when', markdown: isDay(v) ? formatDayHeading(v) : v }] : []; },
+    line: (n) => { const v = text(n.date); return v ? (isDay(v) ? formatDayHeading(v) : v) : undefined; },
+  },
 });

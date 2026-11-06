@@ -1,32 +1,15 @@
 import { useState, type RefObject } from 'react';
 import type { EditorView } from '@codemirror/view';
-import { ListTodo, Plus } from 'lucide-react';
-import { useRepo, type Json, type Lint } from '@gestalts/sdk';
-import { Markdown, MarkdownEditor } from '../primitives';
+import { Plus } from 'lucide-react';
+import { useRepo, type Json, type JsonMap, type Lint } from '@gestalts/sdk';
+import { MarkdownEditor } from '../primitives';
+import { NoteGist } from '../components';
 import { useReferenceTools } from '../widgets/noteText';
 import type { NoteMode } from './mode';
 
 export type TextField = 'main' | 'extra' | 'tasks';
 
 const text = (v: Json | undefined) => (typeof v === 'string' ? v : '');
-
-/** The note's text as read: `tasks`, `main`, then `extra` below a rule. */
-export function BodyView({ value, onOpen, empty }: { value: Record<string, Json | undefined>; onOpen?: (key: string) => void; empty?: string }) {
-  const [tasks, main, extra] = [text(value.tasks), text(value.main), text(value.extra)];
-  if (!tasks.trim() && !main.trim() && !extra.trim()) return empty ? <p className="text-sm text-base-content/50">{empty}</p> : null;
-  return (
-    <div className="flex min-w-0 flex-col gap-3">
-      {tasks.trim() && (
-        <div className="flex gap-2 rounded-box bg-warning/10 p-2 text-sm">
-          <ListTodo className="mt-0.5 size-4 shrink-0" />
-          <Markdown text={tasks} onOpen={onOpen} className="min-w-0 flex-1" />
-        </div>
-      )}
-      {main.trim() && <Markdown text={main} onOpen={onOpen} />}
-      {extra.trim() && <><hr className="border-base-300" /><Markdown text={extra} onOpen={onOpen} /></>}
-    </div>
-  );
-}
 
 /**
  * The note's title and text edited as Markdown, with `[[` completion; in `split`, rendered beside the editors (below
@@ -93,7 +76,7 @@ export function BodyEditor({ noteKey, value, edit, mode, lints, onSave, onOpen, 
         </div>
         {mode === 'split' && (
           <div className="min-w-0 rounded-box border border-dashed border-base-300 p-3" aria-label="Preview">
-            <BodyView value={value} onOpen={onOpen} empty="Preview" />
+            <NoteGist value={value as JsonMap} opts={{ title: false, only: (k) => fields.includes(k as TextField) }} onOpen={onOpen} />
           </div>
         )}
       </div>

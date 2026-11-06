@@ -14,3 +14,6 @@
   92% { opacity: 1; }
   to { transform: translateX(100cqw); opacity: 0; }
 }
+/* a long note scrolls within its card, fading out where it's cut */
+.gestalts-float-scroll { max-height: min(20rem, 50vh); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.gestalts-float-scroll.more { mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent); }

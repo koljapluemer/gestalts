@@ -22,3 +22,8 @@
 .md audio { max-width: 100%; }
 /* in a card: sized as a card's picture */
 .md-card .md .md-embed { max-height: min(320px, 40vh); margin-inline: auto; }
+/* a note as read (NoteGist): its title a heading of the note's size, `extra` smaller and muted, as dsl's notes */
+.gist-title h2 { font-size: 1.1em; }
+.gist-extra { font-size: 0.9em; color: color-mix(in oklab, var(--color-base-content) 70%, transparent); }
+.gist-card hr, .gist-canvas hr { margin-block: 0.5em; }
+.gist-when { font-size: 0.9em; color: color-mix(in oklab, var(--color-base-content) 70%, transparent); }

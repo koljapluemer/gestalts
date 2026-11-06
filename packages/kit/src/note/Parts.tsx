@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { FileCode, Layers, Plus, Trash2 } from 'lucide-react';
 import { fold, hashing, useQuery, type Card, type IndexedNote, type Json, type JsonMap, type Repo, type Template } from '@gestalts/sdk';
-import { CodeMirrorHost, Markdown } from '../primitives';
+import { CodeMirrorHost } from '../primitives';
 
 /** The old, attached form of each part, retired notes included. */
 const OLD: Record<'cards' | 'template', { tagsAll: string[] }> = { cards: { tagsAll: [fold.ATTACHED_TAG.cards] }, template: { tagsAll: [fold.ATTACHED_TAG.template] } };
@@ -28,21 +28,6 @@ function toCards(v: Json): Card[] {
 function toTemplate(v: Json): Template | undefined {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined;
   return { format: str(v.format) || 'jinja-html', source: str(v.source), ...(typeof v.name === 'string' ? { name: v.name } : {}) };
-}
-
-/** Cards as read: front, a rule, back. */
-export function CardsView({ cards, onOpen }: { cards: Card[]; onOpen?: (key: string) => void }) {
-  return (
-    <>
-      {cards.map((c) => (
-        <div key={c.id || c.front} className="md-card rounded-box border border-base-300 p-3">
-          <Markdown text={c.front} onOpen={onOpen} />
-          <hr className="my-2 border-base-300" />
-          <Markdown text={c.back} onOpen={onOpen} />
-        </div>
-      ))}
-    </>
-  );
 }
 
 type EditProps = { edit: (patch: Record<string, Json | undefined>) => void; onSave: () => void };

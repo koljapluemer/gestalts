@@ -1,3 +1,4 @@
+import { noteLine } from './gist';
 import type { IndexedNote, Json, Ref } from './types';
 
 /** Helpers for the conventional fields; all tolerate any YAML. */
@@ -47,14 +48,13 @@ export function blob(n: IndexedNote, label: string): string | undefined {
   return blobs(n).find((b) => b.label === label)?.target;
 }
 
-/** What to call a note in one line: title, else first line of main, else its key. */
+/** What to call a note in one line (`noteLine`, without lenses' parts); never empty, never its YAML. */
 export function noteLabel(n: IndexedNote): string {
-  const title = str(n, 'title')?.trim();
-  if (title) return title;
-  const main = str(n, 'main')?.trim().split('\n')[0];
-  if (main) return main;
-  return n.raw.trim().split('\n')[0] || n.key;
+  return noteLine(asMap(n.value) ?? {}) || untitled(n);
 }
+
+/** A note with nothing to name it by: `Untitled`, and what it is (`Untitled canvas`). */
+export const untitled = (n: IndexedNote) => (n.gestalts[0] ? `Untitled ${n.gestalts[0].split('@')[0]}` : 'Untitled note');
 
 /** The note's value with `tag` added to its `tags` (or removed), the others kept in order; unchanged: the same value. */
 export function withTag(value: Json | null, tag: string, on: boolean): Json {

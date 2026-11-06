@@ -214,7 +214,7 @@ renders a note on its own. Defaults are full capabilities: anything not switched
 | Parameter | Default | |
 |---|---|---|
 | `noteKey`, `seed` | | the note; without one, a new note from `seed` (`NoteSeed`: its value so far, a gestalt, a relationship from another note, a preset) |
-| `render` | `full` | `simple`: the label, media and text; `inline`: one line (`NoteLine`, the lenses' summaries, a lint icon, the tools) |
+| `render` | `full` | `simple`: the note as read (its media and gist, see below), the tools floated beside it; `inline`: one line (`NoteLine`, the lenses' summaries, a lint icon, the tools), for list rows |
 | `modes` | view, edit | `split` also: the text's editor with it rendered beside it. The toggle hides when only one is offered; a new note only edits |
 | `defaultMode`, `mode`, `onModeChange` | view | the mode, when the caller keeps it (the Graph's and Canvas's one card in edit) |
 | `persist` | | a key keeping the mode for the browser tab's session; the caller picks the scope (`explorer:<key>`, `daily`) |
@@ -222,11 +222,12 @@ renders a note on its own. Defaults are full capabilities: anything not switched
 | `relationships` | on | `readonly`: the rows only; off: none (the Graph, whose edges are them) |
 | `lenses` | all | `name@version` of the gestalts whose fields show open; the note's others are behind "also" |
 | `tools`, `tagToggles`, `extraTools` | | switch tools off (or `edit` on in `full`); tag toggles (the Queue's `no-q`); the page's own tools, first in the row |
-| `compact` | | no properties beyond the gestalts, the label in the header: Graph and Canvas cards |
+| `compact` | | no properties beyond the gestalts; read, as `simple` (its title opens it), edited, its one line in the header: Graph and Canvas cards |
+| `gist` | | what the note as read shows (`GistOptions`): `{ tasks: false }` where they're beside the point (Float) |
 | `onOpen`, `onEdit`, `onDelete`, `onDeleted`, `onCreated`, `onCancel`, `onClose`, `onEscape` | | `onDelete` replaces the repo's delete (the Graph's, with undo) |
 
 What it shows, top to bottom:
-- **Header**: the label (a button opening the note, where it's compact or simple), the lenses' summaries, the tools
+- **Header**: the title, whole (read, in `full`), the lenses' summaries, the tools
   (media, link a note, add a gestalt, tag toggles, edit, edit the source, delete, the page's own), the save state,
   the mode toggle or Save/Discard, close.
 - **Gestalts**: the ones the note has, filled, and those it's a candidate for but breaks (`noteGestalts`), outlined,
@@ -238,9 +239,28 @@ What it shows, top to bottom:
   lens `offered` for the note (a source's, by its entry type), with "add a field". Each field is shown and edited by
   its lens's `Field`, else by its type (`note/fields/DefaultField.tsx`: inputs for strings, numbers, dates and URLs,
   a toggle, chips for string lists, a select for `one_of` and blobs, YAML read by the core for the rest).
-- **Media**, then the **text** (`note/Body.tsx`): `tasks`, `main`, `extra` (and the title, while edited) whichever
-  gestalts claim them; Markdown, `[[` completes a note and inserts its id, Mod-click (on touch screens a button)
-  opens a reference. Then cards and template (`note/Parts.tsx`), the other files, and the relationships.
+- **Media**, then the **text**: read, the gist's text parts (`tasks`, `main`, cards, `extra`; the others are
+  properties); edited (`note/Body.tsx`), `tasks`, `main`, `extra` and the title, whichever gestalts claim them, as
+  Markdown: `[[` completes a note and inserts its id, Mod-click (on touch screens a button) opens a reference; then
+  the cards and template (`note/Parts.tsx`). Then the other files, and the relationships.
+
+### The gist: a note as read
+
+`noteGist` (`packages/sdk/src/gist.ts`) is what a note reads as, whatever it has, as Markdown blocks in reading order
+and never cut: the title as a heading, `tasks`, then the parts its fields make (`main`; a `front` and `back`, a rule
+between; each of its `cards` so; a `url` as a link; `publish`; a canvas's text nodes), then `extra`, smaller below a
+rule. Parts go by the fields a note has, not by its gestalts. A lens adds its own (`Lens.gist`: the fields it uses
+up, its blocks, its line), ahead of the built-in ones: a quote reads as a blockquote with who said it, a source with
+its authors and year, an appointment, recurring item or daily note with its date. `GistOptions` leave out the title
+(the full view shows it in the header), `tasks` or `extra`, or keep to some fields (`only`: the full view's text, as
+the properties show the rest). Kit `NoteGist` renders it; a note with none of these shows nothing (Float doesn't draw
+it).
+
+`noteLine` is the gist in one line, for **list rows only** (search results, relationships, `inline`, the labels of
+`[[references]]`, sorting): the title, else a lens's line, else the first line of `main` as plain text, else a part's
+(a front, a link, a canvas's first text), else of `extra`. Never the note's YAML: `noteLabel` falls back to
+`Untitled <gestalt>`. Wherever a note is meant to be read (Float, Queue's simple cards, Graph and Canvas cards), it's
+the whole gist.
 - **Edit the source**: the whole note as YAML with its parse errors and lints (`note/SourceEditor.tsx`), for what the
   fields don't show; entered after the fields' draft is written, so there's one draft at a time.
 

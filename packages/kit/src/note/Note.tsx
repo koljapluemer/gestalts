@@ -2,8 +2,8 @@ import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'r
 import type { EditorView } from '@codemirror/view';
 import { Braces, Brackets, CircleAlert, FileQuestion, FileText, LoaderCircle, Maximize2, PenLine, Plus, Shapes, Trash2, X } from 'lucide-react';
 import {
-  noteGestalts, noteLabel, tags as tagsOf, useBlobUrl, useHost, useNote, useRepo, withTag,
-  type IndexedNote, type Json, type NoteSeed,
+  noteGestalts, noteLabel, tags as tagsOf, untitled, useBlobUrl, useHost, useNote, useRepo, withTag,
+  type GistOptions, type IndexedNote, type Json, type JsonMap, type NoteSeed,
 } from '@gestalts/sdk';
 import { insertReference } from '../primitives';
 import { NoteLine } from '../components';
@@ -11,10 +11,11 @@ import { Conflicts } from '../widgets/Conflicts';
 import { MediaGallery, MediaPicker } from '../widgets/MediaGallery';
 import { attachMedia, detachMedia, mediaOf, otherBlobs } from '../widgets/media';
 import { Relationships } from '../widgets/Relationships';
-import { BodyEditor, BodyView, Lints, type TextField } from './Body';
-import { layoutOf } from './layout';
+import { BodyEditor, Lints, type TextField } from './Body';
+import { NoteGist, useNoteLine } from '../components';
+import { BODY_KEYS, PART_KEYS, layoutOf } from './layout';
 import { isMode, resolveMode, type NoteMode } from './mode';
-import { CardsView, PartsEditor, StaleFolds, useParts } from './Parts';
+import { PartsEditor, StaleFolds, useParts } from './Parts';
 import { AddGestalt, GestaltLine, Properties } from './Properties';
 import { SourceEditor } from './SourceEditor';
 import { Extra, ModeToggle, ToolButton, type ExtraTool, type TagToggle, type ToolId } from './tools';
@@ -25,7 +26,7 @@ export type NoteProps = {
   noteKey?: string;
   /** a new note: its value so far, gestalt, relationship and preset (see `NoteSeed`) */
   seed?: NoteSeed;
-  /** `full` (default); `simple`: the label, media and text only; `inline`: one line */
+  /** `full` (default); `simple`: the note as read (`NoteGist`) and its media; `inline`: one line (`noteLine`), for list rows */
   render?: 'full' | 'simple' | 'inline';
   /** the modes offered (default view and edit; a new note only edits); the toggle hides when there's one */
   modes?: readonly NoteMode[];
@@ -47,8 +48,10 @@ export type NoteProps = {
   extraTools?: ExtraTool[];
   /** `name@version` of the gestalts whose fields show open (the others behind "also"); default all */
   lenses?: 'all' | string[];
-  /** smaller: no properties beyond the gestalts, the label in the header (Graph and Canvas cards) */
+  /** smaller: no properties beyond the gestalts; read, the note as `simple` shows it (Graph and Canvas cards) */
   compact?: boolean;
+  /** what the note as read shows (`noteGist`): e.g. `{ tasks: false }` where they're beside the point (Float) */
+  gist?: GistOptions;
   autofocus?: boolean;
   /** a linked or related note was clicked; without it links are inert */
   onOpen?: (key: string) => void;
@@ -92,6 +95,9 @@ export function Note(props: NoteProps) {
   return <LoadedNote {...props} note={note} />;
 }
 
+/** The fields the full view reads as text; its properties show the others. */
+const inBody = (key: string) => (BODY_KEYS as readonly string[]).includes(key) || (PART_KEYS as readonly string[]).includes(key);
+
 const modeKey = (persist: string) => `gestalts-note-mode:${persist}`;
 
 function storedMode(persist: string | undefined): NoteMode | undefined {
@@ -107,7 +113,7 @@ const DEFAULT_MODES: readonly NoteMode[] = ['view', 'edit'];
 function LoadedNote({
   note, seed, render = 'full', modes: modesAsked = DEFAULT_MODES, defaultMode = 'view', mode: modeAsked, onModeChange, persist,
   commit: commitPolicy = 'blur', relationships = true, tools = {}, tagToggles = [], extraTools = [], lenses: lensesAsked = 'all',
-  compact = false, autofocus = false, onOpen, onEdit, onDelete, onDeleted, onCreated, onCancel, onClose, onEscape, className = '',
+  compact = false, gist = {}, autofocus = false, onOpen, onEdit, onDelete, onDeleted, onCreated, onCancel, onClose, onEscape, className = '',
 }: NoteProps & { note: IndexedNote | undefined }) {
   const repo = useRepo();
   const host = useHost();
@@ -134,6 +140,7 @@ function LoadedNote({
   const parts = useParts(note, draft.value);
   const has = (id: ToolId, byDefault: boolean) => tools[id] ?? byDefault;
   const lensOf = (id: string) => hostLenses.find((l) => l.gestalt === id);
+  const line = useNoteLine(draft.value);
   const summaries = gestalts.flatMap((g) => { const S = lensOf(g.id)?.Summary; return S ? [<S key={g.id} note={draft.value} />] : []; });
 
   const setMode = async (next: NoteMode) => {
@@ -216,9 +223,43 @@ function LoadedNote({
       <CircleAlert className="size-3.5" aria-label={`${live.lints.length} problems`} />
     </span>
   );
-  const label = (cls: string) => (onOpen && !isNew && (compact || render !== 'full')
-    ? <button type="button" className={`nodrag min-w-0 flex-1 truncate text-left hover:underline ${cls}`} title="Open" onClick={() => onOpen(draft.key)}>{noteLabel(live)}</button>
-    : <span className={`min-w-0 flex-1 truncate ${cls}`}>{isNew ? 'New note' : noteLabel(live)}</span>);
+  const parseIcon = live.parse_error && (
+    <span className="shrink-0 text-error" title="This note's YAML doesn't parse; see its source.">
+      <CircleAlert className="size-3.5" aria-label="doesn't parse" />
+    </span>
+  );
+  // read in simple, or compact: the note as `NoteGist` shows it, its title a heading, the tools floated beside it
+  const reading = !source && (render === 'simple' || (compact && !editing && !isNew));
+  const title = typeof draft.value.title === 'string' ? draft.value.title.trim() : '';
+  const openThis = onOpen && !isNew ? () => onOpen(draft.key) : undefined;
+  const header = (() => {
+    if (isNew) return <span className="flex-1 text-sm text-base-content/60">New note</span>;
+    // compact, edited: one line naming it, as a list row would
+    if (compact) {
+      const text = line || untitled(live);
+      return openThis
+        ? <button type="button" className="nodrag min-w-0 flex-1 truncate text-left text-sm font-semibold hover:underline" title={text} onClick={openThis}>{text}</button>
+        : <span className="min-w-0 flex-1 truncate text-sm font-semibold" title={text}>{text}</span>;
+    }
+    // full: the title whole (the text below has the rest)
+    return <span className="min-w-0 flex-1 font-semibold break-words">{editing ? '' : title}</span>;
+  })();
+  const controls: ReactNode = (
+    <>
+      {summaries}
+      {parseIcon}
+      <div className="flex flex-wrap items-center justify-end gap-0.5">{toolRow}</div>
+      {status}
+      {render === 'full' && !(explicit && draft.dirty && !isNew) && <ModeToggle modes={modes} mode={mode} onMode={(m) => void setMode(m)} />}
+      {explicit && draft.dirty && !isNew && (
+        <>
+          <button type="button" className="btn btn-ghost btn-xs" onClick={draft.discard}>Discard</button>
+          <button type="button" className="btn btn-primary btn-xs" onClick={() => void draft.commit()}>Save</button>
+        </>
+      )}
+      {onClose && <ToolButton title="Close" onClick={onClose}><X className="size-4" /></ToolButton>}
+    </>
+  );
 
   if (render === 'inline') {
     return (
@@ -235,15 +276,19 @@ function LoadedNote({
 
   const files = otherBlobs(live);
   const media = mediaOf(live);
+  // cards still in attached notes read as the note's own
+  const gistValue: JsonMap = parts.cards && draft.value.cards === undefined
+    ? { ...draft.value, cards: parts.cards.map((c) => ({ id: c.id, front: c.front, back: c.back })) }
+    : draft.value;
   const body = (() => {
     if (source && note) return <SourceEditor note={note} autofocus onSaved={() => setSource(false)} />;
-    if (render === 'simple' || !editing) {
+    if (reading) return null;
+    if (!editing) {
       return (
         <>
-          <MediaGallery media={media} onRemove={render === 'full' && !compact ? (file) => act(detachMedia(repo, draft.key, file)) : undefined} />
-          <BodyView value={draft.value} onOpen={onOpen} empty={live.parse_error ? 'This note\'s YAML doesn\'t parse; see its source.' : parts.cards?.length ? undefined : 'Nothing to read here yet.'} />
-          {parts.cards && <CardsView cards={parts.cards} onOpen={onOpen} />}
-          {!compact && render === 'full' && <Lints lints={bodyLints.filter((l) => !l.path)} />}
+          <MediaGallery media={media} onRemove={(file) => act(detachMedia(repo, draft.key, file))} />
+          <NoteGist value={gistValue} opts={{ ...gist, title: false, only: inBody }} onOpen={onOpen} />
+          <Lints lints={bodyLints.filter((l) => !l.path)} />
         </>
       );
     }
@@ -276,22 +321,14 @@ function LoadedNote({
         onKeyDown={onKeyDown}
       >
         <div className={`card-body gap-2 ${compact ? 'p-2' : 'p-3'}`}>
-          <header className="flex items-center gap-1">
-            {render === 'simple' || compact || (!editing && !isNew)
-              ? label(compact ? 'text-sm font-semibold' : 'font-semibold')
-              : <span className="flex-1 text-sm text-base-content/60">{isNew ? 'New note' : ''}</span>}
-            {summaries}
-            <div className="flex flex-wrap items-center justify-end gap-0.5">{toolRow}</div>
-            {status}
-            {render === 'full' && !(explicit && draft.dirty && !isNew) && <ModeToggle modes={modes} mode={mode} onMode={(m) => void setMode(m)} />}
-            {explicit && draft.dirty && !isNew && (
-              <>
-                <button type="button" className="btn btn-ghost btn-xs" onClick={draft.discard}>Discard</button>
-                <button type="button" className="btn btn-primary btn-xs" onClick={() => void draft.commit()}>Save</button>
-              </>
-            )}
-            {onClose && <ToolButton title="Close" onClick={onClose}><X className="size-4" /></ToolButton>}
-          </header>
+          {reading ? (
+            // a block, not flex, so the text flows around the tools instead of being narrowed by them
+            <div className="min-w-0">
+              <header className="float-right mb-1 ml-2 flex items-center gap-0.5">{controls}</header>
+              <MediaGallery media={media} />
+              <NoteGist value={gistValue} opts={gist} onOpen={onOpen} onOpenNote={openThis} className={media.length ? 'mt-2' : ''} />
+            </div>
+          ) : <header className="flex items-start gap-1">{header}{controls}</header>}
           {!editing && !isNew && !compact && render === 'full' && <p className="-mt-2 truncate font-mono text-xs text-base-content/40">{draft.key}</p>}
           {render === 'full' && preset !== 'capture' && !source && <GestaltLine gestalts={gestalts} lints={live.lints} />}
           {render === 'full' && !compact && preset !== 'capture' && !source && (
