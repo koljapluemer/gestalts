@@ -139,7 +139,7 @@ worker: …                                  # optional, see node.md
   a plugin owns only its own domain (`pronunciation-card@1`, `quote@1`, `typst-document@1`). The apps and the
   connector load every plugin's gestalts, so their lints and merge rules apply, even for a plugin that's uninstalled.
 - **Built-in plugins**: explorer, canvas (Canvas; the `note-view` slot of `canvas@2`), typst (Canvas2Typ, and the
-  `typst@1` worker), calendar (Daily, Calendar; the appointment, recurring and daily lenses), queue, float,
+  `typst@1` worker), calendar (Daily, Calendar; the appointment, recurring and daily lenses), projects, queue, float,
   questions, graph, sources (the source lens), learn, quotes (the quote lens), ollama (no panes: the `ollama@1`
   worker). gestalt-plugins has the
   learning ones with decks (learn-world-map, alphabet-pronunciation-via-visual-cognates).
@@ -299,6 +299,7 @@ Inline rows are edited in the text.
 | Calendar | inline, with the lenses' summaries; + is a new appointment on the day, ↻ a recurring item on its weekday |
 | Graph | compact, view/edit with the mode from the graph's interaction (one card in edit), no relationships, its own delete (undo) and hide; grip, pin and unpin-others as extra tools. A new note (double-click, the toolbar, a drag onto empty canvas) is `createNote`; from a drag, related from the dragged note |
 | Canvas | linked notes compact, view/edit with the mode from the canvas, relationships read-only, no delete; grip, to-text and detach as extra tools |
+| Projects | inline: a project with its issue count and + issue (`createNote`, related to it) as extra tools; an issue with the think/build toggle (tag `suggest-think-and-sketch`, those first) |
 | Queue | simple or full (the toggle beside Next), the `no-q` tag toggle |
 | Float | simple, the `no-float` tag toggle; its edit tool opens the note full in a modal, holding the stage |
 | Questions | full, the mode kept for the session (`e` edits) |

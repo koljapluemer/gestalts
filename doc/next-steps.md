@@ -117,8 +117,7 @@ Generic note-taking features (Daily, Calendar, Projects, Graph…) are as much p
 From dsl:
 - [x] Learn
 - [x] Daily and Calendar (day/range views, past-appointment cleanup)
-- [ ] Projects, Goals, Tasks
-- [ ] Desk, Explorations, Tags, Suggest
+- [x] Projects
 - [x] Queue
 - [x] Float, Questions (the `ollama` plugin's `ollama@1` service picks the questions)
 - [x] Graph
