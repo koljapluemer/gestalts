@@ -1,6 +1,6 @@
 [package]
 name = "gestalts-device"
-description = "A device's own folder of notes, synced with the node it paired with: the native side of the Gestalter on a phone"
+description = "A device's own folder of notes, synced with the node it paired with: the native side of the gestalter on a phone"
 edition.workspace = true
 version.workspace = true
 

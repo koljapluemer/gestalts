@@ -1,6 +1,6 @@
 # Debugging
 
-The apps keep a **debug log**: structured events from the repo, the learning layer and the perspectives, recorded into an in-memory ring buffer (the last 2000 events) whether or not anyone looks. Nothing leaves the page. A reload empties it.
+The apps keep a **debug log**: structured events from the repo, the learning layer and the views, recorded into an in-memory ring buffer (the last 2000 events) whether or not anyone looks. Nothing leaves the page. A reload empties it.
 
 ## Reporting a problem
 
@@ -26,13 +26,13 @@ then reload. `delete localStorage['gestalts:debug']` turns it off.
 
 | scope | what |
 |---|---|
-| `repo` | `open`; every mutation (`putValue`, `putRaw`, `delete`, `writeBlob`, `sync`) as a span, with how long it `waitedMs` behind the ones before it; `changed` (version); connect, disconnect, sync failures; `sync done` with note counts, how many notes differed (`compared`) and ms per step (`health`, `open_base`, `remote_hashes`, `fetch_remote`, `local_hashes`, `merge_notes`, `pull_upstream`, `reindex`, `push`, `collect_blobs`); only `merge_notes` and what follows up to `reindex` wait in the write queue; `sync: coalesced` when a sync request joins one already waiting |
+| `repo` | `open`; every mutation (`put`, `delete`, `writeBlob`, `sync`) as a span, with how long it `waitedMs` behind the ones before it; `changed` (version); connect, disconnect, sync failures; `sync done` with note counts, how many notes differed (`compared`) and ms per step (`health`, `open_base`, `remote_hashes`, `fetch_remote`, `local_hashes`, `merge_notes`, `pull_upstream`, `reindex`, `push`, `collect_blobs`); only `merge_notes` and what follows up to `reindex` wait in the write queue; `sync: coalesced` when a sync request joins one already waiting |
 | `practice` | `saveReview` (state write + session trial) as a span |
 | `learn` | `rate`, `rated` (when the background save is done), each `pick` (slot, counts); a warning if the card just rated comes up again |
 | `pronunciation` | `rate`, `rated` (with the next card) |
 | `world-map` | `rated` (country, exercise, grade); geometry blobs that didn't load |
 | `loops` | deck updates found on open, and values decks disagree on (`decks disagree`) |
-| `ui` | render errors caught by a pane's error boundary, with the component stack |
+| `ui` | render errors caught by an error boundary, with the component stack |
 | `global` | uncaught errors and unhandled promise rejections |
 
 ## Spans and hangs
@@ -42,11 +42,11 @@ then reload. `delete localStorage['gestalts:debug']` turns it off.
 ## Adding logs
 
 ```ts
-import { logger } from '@gestalts/sdk'; // the host's code may also use @gestalts/client
+import { logger } from '@gestalts/view';
 const log = logger('my-scope');
 log.info('did a thing', { key });
 const span = log.span('slow thing', { key });
 try { await work(); span.end(); } catch (e) { span.fail(e); throw e; }
 ```
 
-Log decisions and the boundaries of async work, not every render. Pass keys, ids and counts, not note text.
+Log decisions and the boundaries of async work, not every render. Pass ids and counts, not note text.

@@ -1,5 +1,5 @@
 //! gestalts-node: serves a folder on this computer to the Gestalts apps over HTTP on 127.0.0.1, and hosts plugin
-//! workers. Apps embed it (the Gestalter's desktop app adds a tray, its built-in plugins and its web frontend, which
+//! workers. Apps embed it (the gestalter's desktop app adds a tray, its built-in plugins and its web frontend, which
 //! the node serves); `gestalts-node` is the same server headless.
 
 use std::path::PathBuf;

@@ -182,7 +182,7 @@ impl AppState {
 
     fn store(&self) -> Result<Arc<FsStorage>, Response> {
         self.folder().map(|f| f.store.clone())
-            .ok_or_else(|| (StatusCode::CONFLICT, "no folder open; choose one in the Gestalter desktop app").into_response())
+            .ok_or_else(|| (StatusCode::CONFLICT, "no folder open; choose one in the gestalter desktop app").into_response())
     }
 
     fn status(&self, plugins: Vec<PluginView>) -> StatusView {

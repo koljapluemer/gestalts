@@ -248,7 +248,7 @@ impl WasmRepo {
         let health = remote.health().await.map_err(err)?;
         let folder = &health["folder"];
         let (Some(folder_id), Some(folder_path)) = (folder["id"].as_str(), folder["path"].as_str()) else {
-            return Err(JsError::new("The desktop app has no folder open yet. Choose one in the Gestalter."));
+            return Err(JsError::new("The desktop app has no folder open yet. Choose one in the gestalter."));
         };
         marker(&mut timings, &mut last)("health");
         // the base is per folder: the same connector URL may serve a different folder later, and

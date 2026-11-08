@@ -1,5 +1,5 @@
 //! A device's own folder of notes, synced with the node it paired with (`doc/node.md#pairing-and-the-home-network`):
-//! the native side of the Gestalter on a phone. The app's page runs the core in wasm over this folder (its storage
+//! the native side of the gestalter on a phone. The app's page runs the core in wasm over this folder (its storage
 //! calls come in through [`Handle`]); this crate keeps the folder, the pairing and the sync, and tells the app what
 //! changed ([`Event`]).
 //!
@@ -293,7 +293,7 @@ impl Device {
         let health = peer.health().await?;
         let folder = &health["folder"];
         let (Some(folder_id), Some(path)) = (folder["id"].as_str(), folder["path"].as_str()) else {
-            return Err(io(format!("{} has no folder open yet: choose one in the Gestalter there", node.name)));
+            return Err(io(format!("{} has no folder open yet: choose one in the gestalter there", node.name)));
         };
         let base = self.dir.join("sync-base").join(paired::base_name(&node.node_id, folder_id));
         let report = self.sync_with(&peer, &base).await?;

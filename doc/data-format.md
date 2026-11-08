@@ -1,65 +1,73 @@
 # Data format
 
-```
-my-gestalt-data/
-  notes/<key>.yml
-  blobs/<name>
-  index.json        # only when published as a static site: {"notes": [keys], "blobs": [names]}
+A data folder holds `notes/<id>.yml`, `blobs/<name>`, and `.gestalts/` (its id, format and GC state).
+
+```yaml
+id: 3f2c...          # always equal to the file name
+gestalt: note@1      # exactly one, always with its version
+title: Anything the gestalt declares
 ```
 
-A note is any YAML. Conventions, all optional:
+A yml is one of:
 
-| field | meaning |
+| State | | Syncs | Queryable |
+|---|---|---|---|
+| valid | conforms to the gestalt it names | yes | yes |
+| tombstone | `{id, deleted}` | yes | no |
+| unknown | well-formed, but this device has no definition of its gestalt | yes | no |
+| invalid | no `gestalt`, wrong `id`, an undeclared prop, doesn't parse | yes, byte for byte | no |
+
+Writing through the app refuses anything but a valid yml.
+
+## Defining a gestalt
+
+`gestalts/<name>/v<N>.yml`, in this repo or in a plugin:
+
+```yaml
+name: concept
+version: 1
+fields:
+  name: { type: string, required: true }
+  parents: { type: ref_list, targets: [concept] }
+  practiced-by: { type: ref_map, min: 0, max: 1 }
+merge:                # optional, over what the field types imply
+  keys: { name: conflict }
+```
+
+Definitions are closed: a prop not listed makes a yml invalid. `id` and `gestalt` belong to every yml.
+
+| Type | Value |
 |---|---|
-| `id` | global uuid, normally also the file name |
-| `title` | one line |
-| `main` | the content, usually multi-line |
-| `extra` | more Markdown, shown below `main`; references in it count as in `main` |
-| `tasks` | a note about the note, e.g. what's left to do with it |
-| `aliases` | other names, list of strings |
-| `tags` | contexts the note is (not) used in; letters, digits, dashes |
-| `relationships` | list of `<uuid>` or `{to: <uuid>, label: <label>}`; label `inline` for each `[[uuid]]` in `main`, `extra` or a card, kept in step by the app |
-| `blobs` | list of `<file>` or `{file: <file>, label: <label>}`; images and videos attached to the note are labelled `image` / `video`; every `![[file]]` embedded in the text is listed |
-| `upstream` | where a copied note came from, see [Published decks](#published-decks) |
-| `canvas`, `template`, `cards` | the note's own canvas, template and flashcards ([gestalts.md](gestalts.md#folded-parts)) |
-| `folded` | on a retired note whose content moved into another note: `{into, hash}` ([gestalts.md](gestalts.md#folded-parts)) |
-| `deleted` | a **tombstone**: a note that is only `{id, deleted: <datetime>}` was deleted. It's kept forever, so the delete syncs; queries and the search skip it, and writing the note again brings it back |
+| `string`, `text`, `number`, `integer`, `bool`, `date`, `partial_date`, `datetime`, `url` | as named |
+| `string_list`, `list` (`items`), `map` (`fields`, `values`), `any` | |
+| `blob` | a blob name |
+| `ref`, `ref_list` | ids of ymls |
+| `ref_map` | `{id: number}` |
+| `relationships` | `[{to: id, label}]` |
+| `blobs` | `[{file: name, label}]` |
 
-How the core copes with missing or broken pieces:
-- A note without an `id` is addressed by its key, the file name without `.yml`.
-- A file name that isn't a uuid is fine.
-- Text that doesn't parse is kept as it is and reported as an error, so the universal editor can still fix it.
-- An empty file counts as an empty map.
+Reference types feed the reverse index. `targets` limits what a reference may point at; a reference to nothing is fine,
+since targets can be deleted. `labels` limits how many items each label may have.
 
-## Published decks
+Text merges by line, lists of references as sets, and everything else per key, conflicting at the leaves.
 
-A deck shipped read-only (one of a plugin's `decks`) follows a few more rules, so that copies in user space can
-follow it:
-- **Blobs are content-addressed**: `<first 16 hex digits of sha256>.<ext>`. A replaced image gets a new name, which changes the note that uses it.
-- **Notes are never deleted, they're retired**: tag them `retired` (publishing rejects tombstones). Perspectives skip retired notes, and copies pick the tag up like any other change.
-- **Note ids are the file names**, since relationships are resolved to keys in the deck.
-- **Keys say what a note is**, so the same thing has the same key in every deck: a country is
-  `stableId("country", <ISO alpha-3>)`, a group of them `stableId("country-group", <id>)`. Where several mounted decks
-  hold a key, it reads as the merge of their texts by the gestalts' rules, without a base (tags and relationships
-  unite); a value they disagree on is reported, and the merge's canonical winner kept. Decks holding the same note
-  should agree on everything but what they leave out (the Africa deck keeps only African look-alikes).
-- Deck notes have no `upstream` field. User-space copies get one, appended as the last lines:
+## The core gestalts
 
-  ```yaml
-  upstream:
-    sources: [learn-world-map/africa, learn-world-map/whole-world]   # the decks merged into it, <plugin>/<deck>
-    hash: <sha256 of the merged text as copied>
-  ```
+| Gestalt | |
+|---|---|
+| `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes), `blobs`; all optional |
+| `concept@1` | `name`, `parents`, `children`, `practiced-by`: what larger things a yml trains, in any domain |
+| `deck@1` | `name`, `title`, `members`: ymls that ship together |
+| `fsrs-data@1` | spaced-repetition state for a `target` |
+| `practice-session@1` | one session's timing and trials |
+| `plugin-install@1` | whether a plugin is on here |
+| `view@1` | a vibecoded view: `title`, `source`, `reads`, `writes` |
+| `conflict@1` | a value a sync couldn't settle |
 
-  A copy is untouched while the text before the trailer still has that hash.
+`concept@1` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
+deck or view that writes it.
 
-To publish after editing notes or overwriting blob files, run `mise run publish-data <folder>` (e.g.
-`plugins/<id>/decks/<deck>`; gestalt-plugins has its own task) and commit the result. It:
-1. renames blobs to their content hash and rewrites the notes that use them
-2. deletes blobs no note uses
-3. writes `index.json`
-4. lints
+## Publishing a deck
 
-Running it again changes nothing.
-
-Keys and blob names must not contain `/`, `\` or control characters, and must not start with `.`.
+`mise run publish-data <dir>` names blobs by content, deletes unused ones and writes `index.json`, the listing a static
+host needs. Every yml in a deck must be valid.

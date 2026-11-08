@@ -1,7 +1,7 @@
 /**
- * The Tauri app around the page (the Gestalter on Android): its commands and events, as the `NativeHost` the repo
+ * The Tauri app around the page (the gestalter on Android): its commands and events, as the `NativeHost` the repo
  * opens with, plus pairing for the app's settings. The Rust side is `gestalts_device`, behind the app's commands of
- * the same names (see the Gestalter's `doc/android.md`).
+ * the same names (see the gestalter's `doc/android.md`).
  */
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';

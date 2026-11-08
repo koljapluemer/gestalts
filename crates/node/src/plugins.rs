@@ -120,7 +120,8 @@ impl PluginHost {
     async fn start(&self, plugin: Arc<Mutex<HostedPlugin>>, uv: &std::path::Path) -> Result<(), String> {
         let mut p = plugin.lock().await;
         p.view.state = PluginState::Starting;
-        let script = p.bundle.backend().ok_or("this plugin has no backend")?;
+        // absolute: it runs from the plugin's own folder, and `--plugins-dir` may be relative
+        let script = std::fs::canonicalize(p.bundle.backend().ok_or("this plugin has no backend")?).map_err(|e| e.to_string())?;
         // the script's own environment, from its inline metadata; the interpreter runs directly (not via `uv run`), so
         // the process we stop is the backend itself rather than a uv parent whose child would outlive it
         let sync = self.uv_command(uv).args(["sync", "--script"]).arg(&script).stdout(Stdio::null()).stderr(Stdio::piped()).output().await

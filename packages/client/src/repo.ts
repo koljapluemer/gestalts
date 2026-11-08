@@ -221,7 +221,7 @@ export class Repo {
     };
     ws.onclose = () => {
       if (this.events !== ws || this.closed) return;
-      this.setStatus({ state: 'error', error: 'The Gestalter desktop app isn\'t running.' });
+      this.setStatus({ state: 'error', error: 'The gestalter desktop app isn\'t running.' });
       const next = opened ? 0 : failures + 1;
       setTimeout(() => this.listen(next), RECONNECT_MS[Math.min(next, RECONNECT_MS.length - 1)]);
     };
