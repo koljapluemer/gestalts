@@ -30,18 +30,12 @@ description = "The node headless with this repo's plugins (and gestalt-plugins',
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
 run = "cargo run -q -p gestalts-node -- --profile dev $(bash scripts/plugin-dirs.sh) serve --data {{usage.dir}}"
 
-[tasks.lint-data]
-description = "Print each note's gestalts and lints for a data folder"
+[tasks.health-data]
+description = "Print every yml in a data folder that can't be used, and why"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) lint {{usage.dir}}"
+run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health {{usage.dir}}"
 
 [tasks.publish-data]
-description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, lints"
+description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, checks"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
 run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
-
-[tasks.check-plugin-standalone]
-description = "Build a plugin outside the workspace, against the packed public packages only (as in a repo of its own)"
-usage = 'arg "<plugin>" help="a plugin here (its id, e.g. quotes) or a plugin folder elsewhere"'
-depends = ["setup"]
-run = "bash scripts/check-plugin-standalone.sh {{usage.plugin}}"
