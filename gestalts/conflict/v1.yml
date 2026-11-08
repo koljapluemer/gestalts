@@ -1,20 +1,17 @@
 name: conflict
 version: 1
 description: >-
-  A value both sides of a sync changed differently that no merge rule settled: in the note `note` (which it is
-  `conflict-of`), at `path` (keys, and `{by, id}` for an item of a list), with the `base` and both sides. The note
-  keeps `kept`; `lost` is the other side. A missing `base`, `kept` or `lost` means the value was absent there; `raw`
-  means they are whole note texts. Keyed `stableId("conflict", "<note>#<path>#<hash of the values>")`, so devices
-  recording the same conflict write one note. Resolving it (in the editor, or deterministically in code) writes the
-  chosen value into the note and deletes this one.
-requires_tags: [conflict]
+  A value two sides of a sync changed differently that no merge rule settled, in the yml `of`, at `path`. The yml keeps
+  `kept`; `lost` is the other side. A missing `base`, `kept` or `lost` was absent there; `raw` means they are whole
+  texts. Resolving it writes the chosen value into the yml and deletes this one.
 fields:
-  note: { type: string, required: true }
+  of: { type: ref, required: true }
   path: { type: list, required: true }
   raw: { type: bool }
   recorded: { type: datetime, required: true }
-relationships:
-  conflict-of: { min: 1, max: 1 }
+  base: { type: any }
+  kept: { type: any }
+  lost: { type: any }
 merge:
   keys:
     recorded: min

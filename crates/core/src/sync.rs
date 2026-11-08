@@ -1,7 +1,7 @@
 //! Syncing two storages against a base, the state both had after the last sync, note by note with
-//! [`merge_note`](crate::merge::merge_note).
+//! [`merge_yml`](crate::merge::merge_yml).
 //!
-//! A sync reads only what changed. Each side lists `{key: hash}` ([`Storage::note_hashes`]), the base keeps the
+//! A sync reads only what changed. Each side lists `{key: hash}` ([`Storage::yml_hashes`]), the base keeps the
 //! hashes it agreed on in a manifest ([`SyncBase`]), and only the notes whose three hashes differ are read. Unchanged
 //! notes cost nothing.
 //!
@@ -20,10 +20,9 @@ use serde::Serialize;
 
 use crate::blobs::referenced_blobs;
 use crate::gestalt::Gestalts;
-use crate::merge::{conflict_note, merge_note};
-use crate::note::Note;
+use crate::merge::{conflict_yml, merge_yml};
 use crate::storage::{Hashes, Result, Storage, StorageError};
-use crate::upstream::content_hash;
+use crate::yml::content_hash;
 
 #[derive(Debug, Default, Serialize)]
 pub struct SyncReport {
@@ -70,7 +69,7 @@ impl<B: Storage> SyncBase<B> {
         let mut base = match saved {
             Some(manifest) => SyncBase { store, manifest, dirty: false },
             None => {
-                let manifest = store.note_hashes().await?;
+                let manifest = store.yml_hashes().await?;
                 SyncBase { store, manifest, dirty: true }
             }
         };
@@ -86,7 +85,7 @@ impl<B: Storage> SyncBase<B> {
     /// (a sync stopped between writing the two): merging without a base is safer than against the wrong one.
     pub async fn text(&self, key: &str) -> Result<Option<String>> {
         let Some(hash) = self.manifest.get(key) else { return Ok(None) };
-        Ok(self.store.read_note(key).await?.filter(|t| content_hash(t.as_bytes()) == *hash))
+        Ok(self.store.read_yml(key).await?.filter(|t| content_hash(t.as_bytes()) == *hash))
     }
 
     /// Records `text` as agreed for `key`; [`save`](Self::save) writes the manifest.
@@ -95,7 +94,7 @@ impl<B: Storage> SyncBase<B> {
         if self.manifest.get(key) == Some(&hash) {
             return Ok(());
         }
-        self.store.write_note(key, text).await?;
+        self.store.write_yml(key, text).await?;
         self.manifest.insert(key.to_owned(), hash);
         self.dirty = true;
         Ok(())
@@ -123,15 +122,17 @@ pub struct Fetched {
 /// texts use that `local` lacks (written to `local`: blobs are content-addressed, so that can't clash with a write).
 pub async fn fetch_remote<B: Storage>(local: &dyn Storage, remote: &dyn Storage, base: &SyncBase<B>, gestalts: &Gestalts,
                                       step: &mut dyn FnMut(&str)) -> Result<Fetched> {
-    let remote_hashes = remote.note_hashes().await?;
+    let remote_hashes = remote.yml_hashes().await?;
     step("remote_hashes");
     let changed: Vec<String> = remote_hashes.iter().filter(|(k, h)| base.hashes().get(*k) != Some(*h)).map(|(k, _)| k.clone()).collect();
-    let texts: HashMap<String, String> = if changed.is_empty() { HashMap::new() } else { remote.read_notes(&changed).await?.into_iter().collect() };
+    let texts: HashMap<String, String> = if changed.is_empty() { HashMap::new() } else { remote.read_ymls(&changed).await?.into_iter().collect() };
     let mut blobs_pulled = Vec::new();
-    let used = referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts);
+    let used = referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts).used;
     if !used.is_empty() {
         let have: HashSet<String> = local.list_blobs().await?.into_iter().collect();
-        for name in used.iter().filter(|n| !have.contains(*n)) {
+        // a scanned yml names strings that aren't blobs: ask only for what the other side has
+        let there: HashSet<String> = remote.list_blobs().await?.into_iter().collect();
+        for name in used.iter().filter(|n| !have.contains(*n) && there.contains(*n)) {
             if let Some(bytes) = remote.read_blob(name).await? {
                 local.write_blob(name, &bytes).await?;
                 blobs_pulled.push(name.clone());
@@ -158,11 +159,11 @@ impl Pending {
 /// Phase 2, local only (but for a damaged base, see below): merges every note whose hashes differ, writes the
 /// results to `local`, and moves the base for notes the remote side already has.
 ///
-/// The local text of every note it merges is read anew, so a stale [`Storage::note_hashes`] never makes it write over
+/// The local text of every note it merges is read anew, so a stale [`Storage::yml_hashes`] never makes it write over
 /// a local change it hasn't seen.
 pub async fn merge_local<B: Storage>(local: &dyn Storage, remote: &dyn Storage, base: &mut SyncBase<B>, fetched: Fetched,
                                      gestalts: &Gestalts, now: &str, step: &mut dyn FnMut(&str)) -> Result<Pending> {
-    let local_hashes = local.note_hashes().await?;
+    let local_hashes = local.yml_hashes().await?;
     step("local_hashes");
     let base_hashes = base.hashes().clone();
     let remote_hashes = &fetched.remote;
@@ -182,7 +183,7 @@ pub async fn merge_local<B: Storage>(local: &dyn Storage, remote: &dyn Storage, 
             continue;
         }
         report.compared += 1;
-        let lt = local.read_note(key).await?;
+        let lt = local.read_yml(key).await?;
         let bt = base.text(key).await?;
         let rt = if r == b && (bt.is_some() || b.is_none()) {
             // unchanged there: the remote text is the base's
@@ -191,15 +192,15 @@ pub async fn merge_local<B: Storage>(local: &dyn Storage, remote: &dyn Storage, 
             Some(t.clone())
         } else if r.is_some() {
             // a base whose text doesn't match its manifest: ask for the remote text after all
-            remote.read_note(key).await?
+            remote.read_yml(key).await?
         } else {
             None
         };
         let (lt, bt, rt) = (lt.as_deref(), bt.as_deref(), rt.as_deref());
-        let m = merge_note(key, bt, lt, rt, gestalts, now);
+        let m = merge_yml(key, bt, lt, rt, gestalts, now);
         let Some(text) = m.text.as_deref() else { continue };
         if Some(text) != lt {
-            local.write_note(key, text).await?;
+            local.write_yml(key, text).await?;
             report.pulled.push(key.to_owned());
         }
         if Some(text) != rt {
@@ -208,12 +209,11 @@ pub async fn merge_local<B: Storage>(local: &dyn Storage, remote: &dyn Storage, 
         } else {
             base.set(key, text).await?;
         }
-        let id = Note::parse(key, text).id().to_owned();
         for c in &m.conflicts {
-            let (ck, ct) = conflict_note(key, &id, c, m.raw, now);
+            let (ck, ct) = conflict_yml(key, c, m.raw, now);
             // recorded earlier (by this or another device): keep that record
             if !known(&ck) && !push.iter().any(|(k, _)| *k == ck) {
-                local.write_note(&ck, &ct).await?;
+                local.write_yml(&ck, &ct).await?;
                 push.push((ck.clone(), ct));
                 report.conflicts.push(ck);
             }
@@ -230,17 +230,18 @@ pub async fn push<B: Storage>(local: &dyn Storage, remote: &dyn Storage, base: &
     let Pending { push, mut report } = pending;
     if !push.is_empty() {
         // only blobs a pushed note uses go over, so collecting on one side isn't undone by the other
-        let used = referenced_blobs(push.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts);
+        let used = referenced_blobs(push.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts).used;
         if !used.is_empty() {
             let have: HashSet<String> = remote.list_blobs().await?.into_iter().collect();
-            for name in used.iter().filter(|n| !have.contains(*n)) {
+            let here: HashSet<String> = local.list_blobs().await?.into_iter().collect();
+            for name in used.iter().filter(|n| !have.contains(*n) && here.contains(*n)) {
                 if let Some(bytes) = local.read_blob(name).await? {
                     remote.write_blob(name, &bytes).await?;
                     report.blobs_pushed.push(name.clone());
                 }
             }
         }
-        remote.write_notes(&push).await?;
+        remote.write_ymls(&push).await?;
         for (k, t) in &push {
             base.set(k, t).await?;
         }

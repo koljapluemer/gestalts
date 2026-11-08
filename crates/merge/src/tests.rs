@@ -98,16 +98,12 @@ fn max_and_min() {
 }
 
 #[test]
-fn parsing_and_combining() {
+fn parsing_and_overlaying() {
     let p = policy("keys: {events: {union_by: at}, active_ms: max}");
     assert_eq!(p, Policy::Map([("events".into(), Policy::UnionBy("at".into())), ("active_ms".into(), Policy::Max)].into()));
     assert_eq!(policy("whole: {newest_by: [card.lastReviewAt]}"), Policy::NewestBy(vec![vec!["card".into(), "lastReviewAt".into()]]));
     assert!(Policy::parse(&y("sometimes")).is_err());
     assert!(Policy::parse(&y("{union_by: at, extra: 1}")).is_err());
-    let a = policy("keys: {x: max, y: set}");
-    let b = policy("keys: {x: max, y: text, z: min}");
-    assert_eq!(a.combine(&b), policy("keys: {x: max, y: conflict, z: min}"));
-    assert_eq!(Policy::Max.combine(&a), Policy::Conflict);
     let default = policy("keys: {tags: set, main: text}");
     assert_eq!(default.overlay(&policy("keys: {main: max}")), policy("keys: {tags: set, main: max}"));
     assert_eq!(default.overlay(&Policy::Max), Policy::Max);

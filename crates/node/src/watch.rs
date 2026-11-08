@@ -94,7 +94,7 @@ fn classify(path: &Path, notes: &Path, blobs: &Path) -> Option<Change> {
     let name = path.file_name()?.to_str()?;
     if name.starts_with('.') { return None; }
     if dir == notes {
-        gestalts_core::storage::note_key_from_file(name).map(|k| Change::Note(k.to_owned()))
+        gestalts_core::storage::yml_id_from_file(name).map(|k| Change::Note(k.to_owned()))
     } else if dir == blobs {
         Some(Change::Blob(name.to_owned()))
     } else {

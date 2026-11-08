@@ -1,0 +1,8 @@
+name: view
+version: 1
+description: A vibecoded view, its whole React source in `source`, with the gestalts it may read and write.
+fields:
+  title: { type: string, required: true }
+  source: { type: text, required: true }
+  reads: { type: string_list, required: true }
+  writes: { type: string_list, required: true }

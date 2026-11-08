@@ -99,26 +99,6 @@ impl Policy {
         }
     }
 
-    /// Two declared policies for the same value: the same, or merged per key where both are maps; where they
-    /// disagree, `Conflict`.
-    pub fn combine(&self, other: &Policy) -> Policy {
-        match (self, other) {
-            (a, b) if a == b => a.clone(),
-            (Policy::Map(a), Policy::Map(b)) => {
-                let mut out = a.clone();
-                for (k, p) in b {
-                    let merged = match a.get(k) {
-                        Some(q) => q.combine(p),
-                        None => p.clone(),
-                    };
-                    out.insert(k.clone(), merged);
-                }
-                Policy::Map(out)
-            }
-            _ => Policy::Conflict,
-        }
-    }
-
     /// `top` laid over `self`, a default: maps per key, anything else replaced.
     pub fn overlay(&self, top: &Policy) -> Policy {
         match (self, top) {

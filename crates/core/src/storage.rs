@@ -6,8 +6,7 @@ use std::collections::BTreeMap;
 
 use async_trait::async_trait;
 
-use crate::note::valid_key;
-use crate::upstream::content_hash;
+use crate::yml::{content_hash, valid_key};
 
 /// `{key: content hash}` of notes (see [`content_hash`]).
 pub type Hashes = BTreeMap<String, String>;
@@ -18,6 +17,8 @@ pub enum StorageError {
     InvalidKey(String),
     #[error("storage is read-only")]
     ReadOnly,
+    #[error("rejected: {0}")]
+    Rejected(String),
     #[error("{0}")]
     Io(String),
 }
@@ -28,11 +29,11 @@ pub type Result<T> = std::result::Result<T, StorageError>;
 /// Not `Send`: the browser adapters live on the main thread.
 #[async_trait(?Send)]
 pub trait Storage {
-    async fn list_notes(&self) -> Result<Vec<String>>;
-    async fn read_note(&self, key: &str) -> Result<Option<String>>;
-    async fn write_note(&self, key: &str, text: &str) -> Result<()>;
+    async fn list_ymls(&self) -> Result<Vec<String>>;
+    async fn read_yml(&self, key: &str) -> Result<Option<String>>;
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()>;
     /// deleting a missing note is not an error
-    async fn delete_note(&self, key: &str) -> Result<()>;
+    async fn delete_yml(&self, key: &str) -> Result<()>;
     async fn list_blobs(&self) -> Result<Vec<String>>;
     async fn read_blob(&self, name: &str) -> Result<Option<Vec<u8>>>;
     async fn write_blob(&self, name: &str, bytes: &[u8]) -> Result<()>;
@@ -40,10 +41,10 @@ pub trait Storage {
     async fn delete_blob(&self, name: &str) -> Result<()>;
 
     /// Every note at once; adapters with a bulk endpoint override this.
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
         let mut out = Vec::new();
-        for key in self.list_notes().await? {
-            if let Some(text) = self.read_note(&key).await? {
+        for key in self.list_ymls().await? {
+            if let Some(text) = self.read_yml(&key).await? {
                 out.push((key, text));
             }
         }
@@ -51,15 +52,15 @@ pub trait Storage {
     }
 
     /// Every note's content hash; adapters that can answer without sending every text override this.
-    async fn note_hashes(&self) -> Result<Hashes> {
-        Ok(self.read_all_notes().await?.into_iter().map(|(k, t)| (k, content_hash(t.as_bytes()))).collect())
+    async fn yml_hashes(&self) -> Result<Hashes> {
+        Ok(self.read_all_ymls().await?.into_iter().map(|(k, t)| (k, content_hash(t.as_bytes()))).collect())
     }
 
     /// The given notes that exist; adapters with a bulk endpoint override this.
-    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+    async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
         let mut out = Vec::new();
         for key in keys {
-            if let Some(text) = self.read_note(key).await? {
+            if let Some(text) = self.read_yml(key).await? {
                 out.push((key.clone(), text));
             }
         }
@@ -67,9 +68,9 @@ pub trait Storage {
     }
 
     /// Writes several notes; adapters with a bulk endpoint override this.
-    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+    async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
         for (key, text) in notes {
-            self.write_note(key, text).await?;
+            self.write_yml(key, text).await?;
         }
         Ok(())
     }
@@ -80,7 +81,7 @@ pub fn check_key(key: &str) -> Result<()> {
 }
 
 /// Strips `.yml` from a file name in `notes/`; other files there are ignored.
-pub fn note_key_from_file(file: &str) -> Option<&str> {
+pub fn yml_id_from_file(file: &str) -> Option<&str> {
     file.strip_suffix(".yml").filter(|k| valid_key(k))
 }
 
@@ -90,12 +91,8 @@ pub struct Deck<B> {
     pub storage: B,
 }
 
-/// Reads from `top`, falling back to the decks; writes go to `top` only.
-/// Used for read-only shipped content (decks) plus the user's own notes (`top`). A tombstone in `top` hides the deck
-/// note under it. A key several decks hold is the merge of their texts, by `gestalts`' rules
-/// ([`crate::upstream::Decks`]).
-/// Copy-on-write: a note written to `top` pulls the deck notes it references into `top` (see [`crate::upstream`]),
-/// tagged with their decks' `source`s.
+/// Reads from `top`, falling back to the read-only decks; writes go to `top` only. A tombstone in `top` hides the deck
+/// yml under it. An id several decks hold is the merge of their texts ([`crate::decks::Decks`]).
 pub struct Layered<B, T> {
     pub decks: Vec<Deck<B>>,
     pub top: T,
@@ -109,9 +106,9 @@ impl<B: Storage, T> Layered<B, T> {
         Layered { decks, top, gestalts, deck_conflicts: Default::default() }
     }
 
-    pub fn deck_refs(&self) -> crate::upstream::Decks<'_> {
-        crate::upstream::Decks {
-            decks: self.decks.iter().map(|d| crate::upstream::DeckRef { source: &d.source, storage: &d.storage as &dyn Storage }).collect(),
+    pub fn deck_refs(&self) -> crate::decks::Decks<'_> {
+        crate::decks::Decks {
+            decks: self.decks.iter().map(|d| crate::decks::DeckRef { source: &d.source, storage: &d.storage as &dyn Storage }).collect(),
             gestalts: &self.gestalts,
         }
     }
@@ -119,33 +116,31 @@ impl<B: Storage, T> Layered<B, T> {
 
 #[async_trait(?Send)]
 impl<B: Storage, T: Storage> Storage for Layered<B, T> {
-    async fn list_notes(&self) -> Result<Vec<String>> {
-        let mut all = self.top.list_notes().await?;
+    async fn list_ymls(&self) -> Result<Vec<String>> {
+        let mut all = self.top.list_ymls().await?;
         for d in &self.decks {
-            all = union(all, d.storage.list_notes().await?);
+            all = union(all, d.storage.list_ymls().await?);
         }
         Ok(all)
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
-        if let Some(t) = self.top.read_note(key).await? {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
+        if let Some(t) = self.top.read_yml(key).await? {
             return Ok(Some(t));
         }
         Ok(self.deck_refs().read(key).await?.map(|m| m.text))
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
-        self.top.write_note(key, text).await?;
-        crate::upstream::copy_up_refs(&self.deck_refs(), &self.top, key, text).await?;
-        Ok(())
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
+        self.top.write_yml(key, text).await
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
-        if self.top.read_note(key).await?.is_none() {
+    async fn delete_yml(&self, key: &str) -> Result<()> {
+        if self.top.read_yml(key).await?.is_none() {
             for d in &self.decks {
-                if d.storage.read_note(key).await?.is_some() {
+                if d.storage.read_yml(key).await?.is_some() {
                     return Err(StorageError::ReadOnly);
                 }
             }
         }
-        self.top.delete_note(key).await
+        self.top.delete_yml(key).await
     }
     async fn list_blobs(&self) -> Result<Vec<String>> {
         let mut all = self.top.list_blobs().await?;
@@ -172,8 +167,8 @@ impl<B: Storage, T: Storage> Storage for Layered<B, T> {
     async fn delete_blob(&self, name: &str) -> Result<()> {
         self.top.delete_blob(name).await
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        let mut out = self.top.read_all_notes().await?;
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        let mut out = self.top.read_all_ymls().await?;
         let seen: std::collections::HashSet<String> = out.iter().map(|(k, _)| k.clone()).collect();
         let mut conflicts = Vec::new();
         for (k, m) in self.deck_refs().read_all().await? {
@@ -205,18 +200,18 @@ pub struct Memory {
 
 #[async_trait(?Send)]
 impl Storage for Memory {
-    async fn list_notes(&self) -> Result<Vec<String>> {
+    async fn list_ymls(&self) -> Result<Vec<String>> {
         Ok(self.notes.borrow().keys().cloned().collect())
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
         Ok(self.notes.borrow().get(key).cloned())
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
         check_key(key)?;
         self.notes.borrow_mut().insert(key.into(), text.into());
         Ok(())
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
+    async fn delete_yml(&self, key: &str) -> Result<()> {
         self.notes.borrow_mut().remove(key);
         Ok(())
     }
@@ -241,18 +236,18 @@ macro_rules! forward_storage {
     ($ty:ty) => {
         #[async_trait(?Send)]
         impl<S: Storage + ?Sized> Storage for $ty {
-            async fn list_notes(&self) -> Result<Vec<String>> { (**self).list_notes().await }
-            async fn read_note(&self, key: &str) -> Result<Option<String>> { (**self).read_note(key).await }
-            async fn write_note(&self, key: &str, text: &str) -> Result<()> { (**self).write_note(key, text).await }
-            async fn delete_note(&self, key: &str) -> Result<()> { (**self).delete_note(key).await }
+            async fn list_ymls(&self) -> Result<Vec<String>> { (**self).list_ymls().await }
+            async fn read_yml(&self, key: &str) -> Result<Option<String>> { (**self).read_yml(key).await }
+            async fn write_yml(&self, key: &str, text: &str) -> Result<()> { (**self).write_yml(key, text).await }
+            async fn delete_yml(&self, key: &str) -> Result<()> { (**self).delete_yml(key).await }
             async fn list_blobs(&self) -> Result<Vec<String>> { (**self).list_blobs().await }
             async fn read_blob(&self, name: &str) -> Result<Option<Vec<u8>>> { (**self).read_blob(name).await }
             async fn write_blob(&self, name: &str, bytes: &[u8]) -> Result<()> { (**self).write_blob(name, bytes).await }
             async fn delete_blob(&self, name: &str) -> Result<()> { (**self).delete_blob(name).await }
-            async fn read_all_notes(&self) -> Result<Vec<(String, String)>> { (**self).read_all_notes().await }
-            async fn note_hashes(&self) -> Result<Hashes> { (**self).note_hashes().await }
-            async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> { (**self).read_notes(keys).await }
-            async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> { (**self).write_notes(notes).await }
+            async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> { (**self).read_all_ymls().await }
+            async fn yml_hashes(&self) -> Result<Hashes> { (**self).yml_hashes().await }
+            async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> { (**self).read_ymls(keys).await }
+            async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> { (**self).write_ymls(notes).await }
         }
     };
 }
@@ -264,7 +259,7 @@ forward_storage!(&S);
 /// ([`crate::sync`]).
 ///
 /// It learns them as notes pass through: reading every note (which opening a repo does anyway) seeds it, and every
-/// read, write and delete keeps it current. Until seeded, `note_hashes` reads every note once.
+/// read, write and delete keeps it current. Until seeded, `yml_hashes` reads every note once.
 ///
 /// Writes from elsewhere (another browser tab on the same OPFS) can leave a hash stale. That's safe: a sync reads the
 /// real text of every note it merges or writes, so a stale hash only delays pushing that note until the tab that wrote
@@ -295,21 +290,21 @@ impl<S: Storage> Tracked<S> {
 
 #[async_trait(?Send)]
 impl<S: Storage> Storage for Tracked<S> {
-    async fn list_notes(&self) -> Result<Vec<String>> {
-        self.inner.list_notes().await
+    async fn list_ymls(&self) -> Result<Vec<String>> {
+        self.inner.list_ymls().await
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
-        let t = self.inner.read_note(key).await?;
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
+        let t = self.inner.read_yml(key).await?;
         self.note(key, t.as_deref());
         Ok(t)
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
-        self.inner.write_note(key, text).await?;
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
+        self.inner.write_yml(key, text).await?;
         self.note(key, Some(text));
         Ok(())
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
-        self.inner.delete_note(key).await?;
+    async fn delete_yml(&self, key: &str) -> Result<()> {
+        self.inner.delete_yml(key).await?;
         self.note(key, None);
         Ok(())
     }
@@ -325,27 +320,27 @@ impl<S: Storage> Storage for Tracked<S> {
     async fn delete_blob(&self, name: &str) -> Result<()> {
         self.inner.delete_blob(name).await
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        let all = self.inner.read_all_notes().await?;
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        let all = self.inner.read_all_ymls().await?;
         *self.hashes.borrow_mut() = Some(all.iter().map(|(k, t)| (k.clone(), content_hash(t.as_bytes()))).collect());
         Ok(all)
     }
-    async fn note_hashes(&self) -> Result<Hashes> {
+    async fn yml_hashes(&self) -> Result<Hashes> {
         if let Some(h) = self.hashes.borrow().as_ref() {
             return Ok(h.clone());
         }
-        self.read_all_notes().await?;
+        self.read_all_ymls().await?;
         Ok(self.hashes.borrow().clone().unwrap_or_default())
     }
-    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
-        let found = self.inner.read_notes(keys).await?;
+    async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+        let found = self.inner.read_ymls(keys).await?;
         for key in keys {
             self.note(key, found.iter().find(|(k, _)| k == key).map(|(_, t)| t.as_str()));
         }
         Ok(found)
     }
-    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
-        self.inner.write_notes(notes).await?;
+    async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
+        self.inner.write_ymls(notes).await?;
         for (k, t) in notes {
             self.note(k, Some(t));
         }
@@ -357,37 +352,32 @@ impl<S: Storage> Storage for Tracked<S> {
 mod tests {
     use super::*;
 
+    fn layered() -> Layered<Memory, Memory> {
+        Layered::new(vec![Deck { source: "p/demo".into(), storage: Memory::default() }], Memory::default(), crate::Gestalts::builtin())
+    }
+
     #[test]
-    fn layered_copies_referenced_base_notes_on_write() {
+    fn a_write_stays_in_top_and_copies_nothing_up() {
         pollster::block_on(async {
-            let base = Memory::default();
-            base.write_note("c", "title: x\nblobs: [a.mp3]\n").await.unwrap();
-            base.write_note("unused", "title: y\n").await.unwrap();
-            base.write_blob("a.mp3", &[1]).await.unwrap();
-            let l = Layered::new(vec![Deck { source: "p/demo".into(), storage: base }], Memory::default(), crate::Gestalts::builtin());
-            l.write_note("s", "relationships: [{to: c, label: reviews}]\n").await.unwrap();
-            assert_eq!(l.top.list_notes().await.unwrap(), vec!["c", "s"]);
-            assert_eq!(l.top.list_blobs().await.unwrap(), vec!["a.mp3"]);
-            assert!(l.read_note("c").await.unwrap().unwrap().contains("sources: [p/demo]"));
-            assert_eq!(l.list_notes().await.unwrap().len(), 3);
+            let l = layered();
+            l.decks[0].storage.write_yml("c", "id: c\ngestalt: note@1\n").await.unwrap();
+            l.write_yml("s", "id: s\ngestalt: fsrs-data@1\ntarget: c\n").await.unwrap();
+            assert_eq!(l.top.list_ymls().await.unwrap(), vec!["s"]);
+            assert_eq!(l.list_ymls().await.unwrap().len(), 2);
+            assert!(l.read_yml("c").await.unwrap().is_some());
         });
     }
 
     #[test]
-    fn a_tombstone_in_top_hides_the_deck_note() {
+    fn a_tombstone_in_top_hides_the_deck_yml() {
         pollster::block_on(async {
-            let base = Memory::default();
-            base.write_note("c", "title: x\n").await.unwrap();
-            let repo = crate::Repo::new(Layered::new(vec![Deck { source: "p/demo".into(), storage: base }], Memory::default(), crate::Gestalts::builtin()), crate::Gestalts::builtin());
+            let l = layered();
+            l.decks[0].storage.write_yml("c", "id: c\ngestalt: note@1\n").await.unwrap();
+            let repo = crate::Repo::new(l, crate::Gestalts::builtin());
             repo.load().await.unwrap();
             repo.delete("c", "2026-11-04T10:00:00Z").await.unwrap();
             repo.load().await.unwrap();
             assert!(repo.get("c").is_none());
-            // a note referencing it doesn't copy it back, and neither does pulling upstream
-            repo.put_raw("s", "relationships: [{to: c, label: reviews}]\n").await.unwrap();
-            let s = repo.storage();
-            crate::pull_upstream(&s.deck_refs(), &s.top).await.unwrap();
-            assert!(crate::is_tombstone_text(&s.top.read_note("c").await.unwrap().unwrap()));
         });
     }
 }

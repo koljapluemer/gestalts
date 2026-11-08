@@ -5,7 +5,7 @@ use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use async_trait::async_trait;
-use gestalts_core::storage::{Result, Storage, StorageError, check_key, note_key_from_file};
+use gestalts_core::storage::{Result, Storage, StorageError, check_key, yml_id_from_file};
 
 mod publish;
 pub use publish::{PublishReport, blob_name, publish};
@@ -79,7 +79,7 @@ impl FsStorage {
     }
 
     pub fn list_notes_sync(&self) -> Result<Vec<String>> {
-        Ok(list(&self.root.join("notes"))?.iter().filter_map(|f| note_key_from_file(f)).map(str::to_owned).collect())
+        Ok(list(&self.root.join("notes"))?.iter().filter_map(|f| yml_id_from_file(f)).map(str::to_owned).collect())
     }
 
     pub fn read_note_sync(&self, key: &str) -> Result<Option<String>> {
@@ -119,16 +119,16 @@ impl FsStorage {
 
 #[async_trait(?Send)]
 impl Storage for FsStorage {
-    async fn list_notes(&self) -> Result<Vec<String>> {
+    async fn list_ymls(&self) -> Result<Vec<String>> {
         self.list_notes_sync()
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
         self.read_note_sync(key)
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
         self.write_note_sync(key, text)
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
+    async fn delete_yml(&self, key: &str) -> Result<()> {
         self.delete_note_sync(key)
     }
     async fn list_blobs(&self) -> Result<Vec<String>> {

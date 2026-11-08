@@ -1,9 +1,8 @@
 name: plugin-install
 version: 1
 description: >-
-  A plugin installed in this folder: `plugin` (its id), where it came from (`source`: `built-in`, or a URL later),
-  the `version` installed, whether it's `enabled`, and `decks`: those switched off (`{<deck id>: false}`). Keyed `stableId("plugin", id)`. Uninstalling deletes the note.
-requires_tags: [plugin-install]
+  A plugin installed in this folder. `decks` holds those switched off, as `{<deck id>: false}`. Uninstalling deletes
+  it.
 fields:
   plugin: { type: string, required: true }
   source: { type: string, required: true }

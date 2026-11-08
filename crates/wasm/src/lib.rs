@@ -162,12 +162,12 @@ impl WasmRepo {
     async fn collect_blobs(&self, dir: &str) -> Result<Vec<String>, JsError> {
         let store = Opfs::open(&format!("{dir}-blob-gc")).await.map_err(err)?;
         let mut manifest: gestalts_core::GcManifest =
-            store.read_note("manifest").await.map_err(err)?.and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
+            store.read_yml("manifest").await.map_err(err)?.and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
         let texts = self.repo.texts();
         let referenced = gestalts_core::referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), self.repo.gestalts());
         let deleted = gestalts_core::collect_blobs(&*self.writable, &referenced, &mut manifest, js_sys::Date::now() as i64).await.map_err(err)?;
         let json = serde_json::to_string(&manifest).map_err(|e| JsError::new(&e.to_string()))?;
-        store.write_note("manifest", &json).await.map_err(err)?;
+        store.write_yml("manifest", &json).await.map_err(err)?;
         Ok(deleted)
     }
 

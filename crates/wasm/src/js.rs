@@ -33,21 +33,21 @@ extern "C" {
     pub type HostStorage;
 
     #[wasm_bindgen(method, catch, js_name = listNotes)]
-    fn list_notes(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn list_ymls(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = readNote)]
-    fn read_note(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn read_yml(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = readNotes)]
-    fn read_notes(this: &HostStorage, keys: Vec<String>) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn read_ymls(this: &HostStorage, keys: Vec<String>) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = readAllNotes)]
-    fn read_all_notes(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn read_all_ymls(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = noteHashes)]
-    fn note_hashes(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn yml_hashes(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = writeNote)]
-    fn write_note(this: &HostStorage, key: &str, text: &str) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn write_yml(this: &HostStorage, key: &str, text: &str) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = writeNotes)]
-    fn write_notes(this: &HostStorage, notes: JsValue) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn write_ymls(this: &HostStorage, notes: JsValue) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = deleteNote)]
-    fn delete_note(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
+    fn delete_yml(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = listBlobs)]
     fn list_blobs(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = readBlob)]
@@ -91,17 +91,17 @@ fn encode<T: serde::Serialize>(v: &T) -> Result<JsValue> {
 
 #[async_trait(?Send)]
 impl Storage for JsStorage {
-    async fn list_notes(&self) -> Result<Vec<String>> {
-        decode(call(self.0.list_notes()).await?)
+    async fn list_ymls(&self) -> Result<Vec<String>> {
+        decode(call(self.0.list_ymls()).await?)
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
-        Ok(call(self.0.read_note(key)).await?.as_string())
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
+        Ok(call(self.0.read_yml(key)).await?.as_string())
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
-        call(self.0.write_note(key, text)).await.map(drop)
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
+        call(self.0.write_yml(key, text)).await.map(drop)
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
-        call(self.0.delete_note(key)).await.map(drop)
+    async fn delete_yml(&self, key: &str) -> Result<()> {
+        call(self.0.delete_yml(key)).await.map(drop)
     }
     async fn list_blobs(&self) -> Result<Vec<String>> {
         decode(call(self.0.list_blobs()).await?)
@@ -119,22 +119,22 @@ impl Storage for JsStorage {
     async fn delete_blob(&self, name: &str) -> Result<()> {
         call(self.0.delete_blob(name)).await.map(drop)
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        decode(call(self.0.read_all_notes()).await?)
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        decode(call(self.0.read_all_ymls()).await?)
     }
-    async fn note_hashes(&self) -> Result<Hashes> {
-        decode(call(self.0.note_hashes()).await?)
+    async fn yml_hashes(&self) -> Result<Hashes> {
+        decode(call(self.0.yml_hashes()).await?)
     }
-    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+    async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
         if keys.is_empty() {
             return Ok(vec![]);
         }
-        decode(call(self.0.read_notes(keys.to_vec())).await?)
+        decode(call(self.0.read_ymls(keys.to_vec())).await?)
     }
-    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+    async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
         if notes.is_empty() {
             return Ok(());
         }
-        call(self.0.write_notes(encode(&notes)?)).await.map(drop)
+        call(self.0.write_ymls(encode(&notes)?)).await.map(drop)
     }
 }

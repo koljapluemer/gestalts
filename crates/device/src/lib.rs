@@ -158,23 +158,23 @@ impl Device {
         Ok(())
     }
 
-    pub async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+    pub async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
         let _w = self.writes.lock().await;
-        self.notes.write_note(key, text).await?;
+        self.notes.write_yml(key, text).await?;
         self.soon.notify_one();
         Ok(())
     }
 
-    pub async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+    pub async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
         let _w = self.writes.lock().await;
-        self.notes.write_notes(notes).await?;
+        self.notes.write_ymls(notes).await?;
         self.soon.notify_one();
         Ok(())
     }
 
-    pub async fn delete_note(&self, key: &str) -> Result<()> {
+    pub async fn delete_yml(&self, key: &str) -> Result<()> {
         let _w = self.writes.lock().await;
-        self.notes.delete_note(key).await?;
+        self.notes.delete_yml(key).await?;
         self.soon.notify_one();
         Ok(())
     }
@@ -329,7 +329,7 @@ impl Device {
     async fn collect_blobs(&self) -> Result<()> {
         let path = self.dir.join("blob-gc.json");
         let mut manifest: GcManifest = read_json(&path)?.unwrap_or_default();
-        let texts = self.notes.read_all_notes().await?;
+        let texts = self.notes.read_all_ymls().await?;
         let referenced = gestalts_core::referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), &self.gestalts.borrow());
         let deleted = {
             let _w = self.writes.lock().await;
@@ -466,36 +466,36 @@ impl Handle {
         self.try_run(move |d| Box::pin(async move { d.set_gestalts(yaml) })).await
     }
 
-    pub async fn list_notes(&self) -> Result<Vec<String>> {
-        self.try_run(|d| Box::pin(async move { d.notes.list_notes().await })).await
+    pub async fn list_ymls(&self) -> Result<Vec<String>> {
+        self.try_run(|d| Box::pin(async move { d.notes.list_ymls().await })).await
     }
 
-    pub async fn read_note(&self, key: String) -> Result<Option<String>> {
-        self.try_run(move |d| Box::pin(async move { d.notes.read_note(&key).await })).await
+    pub async fn read_yml(&self, key: String) -> Result<Option<String>> {
+        self.try_run(move |d| Box::pin(async move { d.notes.read_yml(&key).await })).await
     }
 
-    pub async fn read_notes(&self, keys: Vec<String>) -> Result<Vec<(String, String)>> {
-        self.try_run(move |d| Box::pin(async move { d.notes.read_notes(&keys).await })).await
+    pub async fn read_ymls(&self, keys: Vec<String>) -> Result<Vec<(String, String)>> {
+        self.try_run(move |d| Box::pin(async move { d.notes.read_ymls(&keys).await })).await
     }
 
-    pub async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        self.try_run(|d| Box::pin(async move { d.notes.read_all_notes().await })).await
+    pub async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        self.try_run(|d| Box::pin(async move { d.notes.read_all_ymls().await })).await
     }
 
-    pub async fn note_hashes(&self) -> Result<Hashes> {
-        self.try_run(|d| Box::pin(async move { d.notes.note_hashes().await })).await
+    pub async fn yml_hashes(&self) -> Result<Hashes> {
+        self.try_run(|d| Box::pin(async move { d.notes.yml_hashes().await })).await
     }
 
-    pub async fn write_note(&self, key: String, text: String) -> Result<()> {
-        self.try_run(move |d| Box::pin(async move { d.write_note(&key, &text).await })).await
+    pub async fn write_yml(&self, key: String, text: String) -> Result<()> {
+        self.try_run(move |d| Box::pin(async move { d.write_yml(&key, &text).await })).await
     }
 
-    pub async fn write_notes(&self, notes: Vec<(String, String)>) -> Result<()> {
-        self.try_run(move |d| Box::pin(async move { d.write_notes(&notes).await })).await
+    pub async fn write_ymls(&self, notes: Vec<(String, String)>) -> Result<()> {
+        self.try_run(move |d| Box::pin(async move { d.write_ymls(&notes).await })).await
     }
 
-    pub async fn delete_note(&self, key: String) -> Result<()> {
-        self.try_run(move |d| Box::pin(async move { d.delete_note(&key).await })).await
+    pub async fn delete_yml(&self, key: String) -> Result<()> {
+        self.try_run(move |d| Box::pin(async move { d.delete_yml(&key).await })).await
     }
 
     pub async fn list_blobs(&self) -> Result<Vec<String>> {

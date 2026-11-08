@@ -260,7 +260,7 @@ fn writable(access: &crate::manifest::Access, key: &str, text: &str) -> bool {
     note.parse_error.is_none() && !access.write.tags_all.is_empty() && access.write.tags_all.iter().all(|t| note.has_tag(t))
 }
 
-async fn list_notes(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<Vec<NoteEntry>>, Response> {
+async fn list_ymls(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<Vec<NoteEntry>>, Response> {
     let s = state.store()?;
     let access = worker_access(&headers, &state).await?;
     let mut out = Vec::new();
@@ -273,7 +273,7 @@ async fn list_notes(State(state): State<AppState>, headers: HeaderMap) -> Result
     Ok(Json(out))
 }
 
-async fn read_note(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<Response, Response> {
+async fn read_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<Response, Response> {
     let s = state.store()?;
     let access = worker_access(&headers, &state).await?;
     Ok(match api(s.read_note_sync(&key))? {
@@ -282,7 +282,7 @@ async fn read_note(State(state): State<AppState>, UrlPath(key): UrlPath<String>,
     })
 }
 
-async fn write_note(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap, body: String) -> Result<StatusCode, Response> {
+async fn write_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap, body: String) -> Result<StatusCode, Response> {
     let s = state.store()?;
     let access = worker_access(&headers, &state).await?;
     if let Some(a) = &access {
@@ -294,7 +294,7 @@ async fn write_note(State(state): State<AppState>, UrlPath(key): UrlPath<String>
     Ok(StatusCode::NO_CONTENT)
 }
 
-async fn delete_note(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<StatusCode, Response> {
+async fn delete_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<StatusCode, Response> {
     let s = state.store()?;
     let access = worker_access(&headers, &state).await?;
     if let Some(a) = &access {
@@ -724,8 +724,8 @@ pub fn app(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health))
         .route("/events", get(events))
-        .route("/notes", get(list_notes))
-        .route("/notes/{key}", get(read_note).put(write_note).delete(delete_note))
+        .route("/notes", get(list_ymls))
+        .route("/notes/{key}", get(read_yml).put(write_yml).delete(delete_yml))
         .route("/sync/hashes", get(sync_hashes))
         .route("/sync/read", post(sync_read))
         .route("/sync/write", post(sync_write))
@@ -791,8 +791,8 @@ async fn device_auth(State(s): State<AppState>, mut request: Request, next: Next
 /// `/events`, the plugins or the app's frontend. No CORS: its clients are apps, not web pages.
 pub fn lan_app(state: AppState) -> Router {
     let devices = Router::new()
-        .route("/notes", get(list_notes))
-        .route("/notes/{key}", get(read_note).put(write_note).delete(delete_note))
+        .route("/notes", get(list_ymls))
+        .route("/notes/{key}", get(read_yml).put(write_yml).delete(delete_yml))
         .route("/sync/hashes", get(sync_hashes))
         .route("/sync/read", post(sync_read))
         .route("/sync/write", post(sync_write))
@@ -1076,7 +1076,7 @@ mod tests {
 
         let peer = connect(&mut node).await.unwrap();
         let local = Memory::default();
-        local.write_note("from-phone", "id: from-phone\n").await.unwrap();
+        local.write_yml("from-phone", "id: from-phone\n").await.unwrap();
         std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\n").unwrap();
         let report = gestalts_core::sync(&local, &peer, &Memory::default(), &Gestalts::builtin(), "2026-01-01T00:00:00Z").await.unwrap();
         assert_eq!((report.pulled, report.pushed), (vec!["on-disk".to_owned()], vec!["from-phone".to_owned()]));
@@ -1128,7 +1128,7 @@ mod tests {
         let paired = device.pair(uri.to_string(), "Phone".into()).await.unwrap();
         assert_eq!(paired.node_id, lan.node_id());
         assert!(std::fs::read_to_string(phone.join("paired.json")).unwrap().contains(&lan.pairing.devices()[0].id));
-        device.write_note("from-phone".into(), "id: from-phone\n".into()).await.unwrap();
+        device.write_yml("from-phone".into(), "id: from-phone\n".into()).await.unwrap();
         // pairing syncs at once too: whichever sync ran first, both folders end up with both notes
         device.run(|d| Box::pin(async move { d.sync().await.map_err(|e| e.to_string()) })).await.unwrap().unwrap();
         assert!(dir.join("notes/from-phone.yml").exists());
@@ -1169,7 +1169,7 @@ mod tests {
         assert_eq!(health["folder"]["path"].as_str().map(Path::new), Some(dir.canonicalize().unwrap().as_path()));
 
         let local = Memory::default();
-        local.write_note("on-phone", "id: on-phone\nblobs: [phone.png]\n").await.unwrap();
+        local.write_yml("on-phone", "id: on-phone\nblobs: [phone.png]\n").await.unwrap();
         local.write_blob("phone.png", &[3]).await.unwrap();
         let base = Memory::default();
         let report = gestalts_core::sync_with(&local, &peer, &base, &Gestalts::builtin(), "2026-01-01T00:00:00Z", &mut |_| {}).await.unwrap();
@@ -1177,7 +1177,7 @@ mod tests {
         assert_eq!(report.pushed, ["on-phone"]);
         assert_eq!((report.blobs_pulled, report.blobs_pushed), (vec!["disk.png".to_owned()], vec!["phone.png".to_owned()]));
         assert!(std::fs::read_to_string(dir.join("notes/on-phone.yml")).unwrap().contains("phone.png"));
-        assert_eq!(local.read_note("on-disk").await.unwrap().unwrap(), "id: on-disk\nblobs: [disk.png]\n");
+        assert_eq!(local.read_yml("on-disk").await.unwrap().unwrap(), "id: on-disk\nblobs: [disk.png]\n");
         assert_eq!(std::fs::read(dir.join("blobs/phone.png")).unwrap(), [3]);
         assert_eq!(local.read_blob("disk.png").await.unwrap().unwrap(), [1, 2]);
 
@@ -1191,8 +1191,8 @@ edited: true
         let report = gestalts_core::sync(&local, &peer, &base, &Gestalts::builtin(), "2026-01-01T00:00:00Z").await.unwrap();
         assert_eq!((report.compared, report.pulled), (1, vec!["on-disk".to_owned()]));
 
-        assert_eq!(peer.read_note("missing").await.unwrap(), None);
-        peer.delete_note("on-phone").await.unwrap();
-        assert!(gestalts_core::is_tombstone_text(&peer.read_note("on-phone").await.unwrap().unwrap()));
+        assert_eq!(peer.read_yml("missing").await.unwrap(), None);
+        peer.delete_yml("on-phone").await.unwrap();
+        assert!(gestalts_core::is_tombstone_text(&peer.read_yml("on-phone").await.unwrap().unwrap()));
     }
 }

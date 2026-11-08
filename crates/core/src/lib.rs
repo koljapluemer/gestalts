@@ -1,23 +1,24 @@
-//! gestalts core: notes (YAML) and blobs behind a storage port, gestalts, querying and merging.
+//! gestalts core: ymls and blobs behind a storage port, the one gestalt each yml names, querying and merging.
 //! No IO here; adapters live in `gestalts-fs` (disk) and `gestalts-wasm` (browser).
 
-pub mod bib;
 pub mod blobs;
+pub mod decks;
 pub mod gestalt;
+pub mod index;
 pub mod merge;
-pub mod note;
 pub mod repo;
 pub mod storage;
 pub mod sync;
-pub mod upstream;
+pub mod yml;
 
-pub use blobs::{GcManifest, collect_blobs, referenced_blobs, used_blobs};
-pub use gestalt::{GestaltDef, Gestalts, Lint, card_id};
+pub use blobs::{BlobRefs, GcManifest, blobs_of, collect_blobs, referenced_blobs};
+pub use decks::{DeckRef, Decks, Merged};
+pub use gestalt::{Edge, GestaltDef, Gestalts, Problem, YmlState};
 pub use gestalts_merge::{Conflict, Policy, Segment};
-pub use merge::{NoteMerge, conflict_note, is_tombstone, iso_datetime, is_tombstone_text, merge_note, tombstone};
-pub use sync::{Fetched, NoteCounts, Pending, SYNC_STEPS, SyncBase, SyncReport, fetch_remote, merge_local, push, sync, sync_with};
-pub use note::{Note, ParseError, Ref};
-pub use repo::{IndexedNote, Query, Repo, new_id, stable_id, state_key};
+pub use index::{Item, Order, Page, Query, RefFilter, TagFilter};
+pub use merge::{YmlMerge, conflict_yml, is_tombstone, iso_datetime, is_tombstone_text, merge_yml, tombstone};
+pub use repo::{Delta, Health, Repo, SubId, new_id, stable_id, state_id};
 pub use storage::{Deck, Hashes, Layered, Memory, Storage, StorageError, Tracked};
-pub use upstream::{DeckRef, Decks, Merged, UpstreamReport, content_hash, copies_of, pull_upstream};
+pub use sync::{Fetched, NoteCounts, Pending, SYNC_STEPS, SyncBase, SyncReport, fetch_remote, merge_local, push, sync, sync_with};
+pub use yml::{ParseError, Yml, content_hash};
 pub use serde_yaml_ng::Value;

@@ -1,0 +1,11 @@
+name: note
+version: 1
+description: A note in the everyday sense. Every prop is optional; `id` and `gestalt` are all a note needs.
+fields:
+  title: { type: string }
+  main: { type: text }
+  extra: { type: text }
+  aliases: { type: string_list }
+  tags: { type: string_list }
+  relationships: { type: relationships, targets: [note] }
+  blobs: { type: blobs }

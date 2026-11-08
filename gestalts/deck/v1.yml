@@ -1,0 +1,7 @@
+name: deck
+version: 1
+description: A named list of ymls, of any gestalt, that ship together with a plugin.
+fields:
+  name: { type: string, required: true }
+  title: { type: string }
+  members: { type: ref_list, required: true }

@@ -1,9 +1,6 @@
 name: practice-session
 version: 1
-description: >-
-  One practice session in one perspective (`app`): when, how long the learner was active, how many trials, and the
-  app's own `events`. Written by one device only, under a random key, so the log never conflicts.
-requires_tags: [practice-session]
+description: One practice session in one view (`app`). Written by one device only, under a random id.
 fields:
   app: { type: string, required: true }
   started: { type: datetime, required: true }

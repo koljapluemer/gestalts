@@ -37,10 +37,10 @@ impl Static {
 
 #[async_trait(?Send)]
 impl Storage for Static {
-    async fn list_notes(&self) -> Result<Vec<String>> {
+    async fn list_ymls(&self) -> Result<Vec<String>> {
         Ok(self.index.notes.clone())
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
         check_key(key)?;
         // the index is complete: asking the server for anything else is a 404 per lookup (copy-on-write looks up
         // every key the user's notes reference)
@@ -52,10 +52,10 @@ impl Storage for Static {
             None => Ok(None),
         }
     }
-    async fn write_note(&self, _: &str, _: &str) -> Result<()> {
+    async fn write_yml(&self, _: &str, _: &str) -> Result<()> {
         Err(StorageError::ReadOnly)
     }
-    async fn delete_note(&self, _: &str) -> Result<()> {
+    async fn delete_yml(&self, _: &str) -> Result<()> {
         Err(StorageError::ReadOnly)
     }
     async fn list_blobs(&self) -> Result<Vec<String>> {
@@ -77,8 +77,8 @@ impl Storage for Static {
     async fn delete_blob(&self, _: &str) -> Result<()> {
         Err(StorageError::ReadOnly)
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        let texts = futures::future::try_join_all(self.index.notes.iter().map(|k| self.read_note(k))).await?;
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        let texts = futures::future::try_join_all(self.index.notes.iter().map(|k| self.read_yml(k))).await?;
         Ok(self.index.notes.iter().cloned().zip(texts).filter_map(|(k, t)| Some((k, t?))).collect())
     }
 }
@@ -149,19 +149,19 @@ impl Peer {
 
 #[async_trait(?Send)]
 impl Storage for Peer {
-    async fn list_notes(&self) -> Result<Vec<String>> {
-        Ok(self.read_all_notes().await?.into_iter().map(|(k, _)| k).collect())
+    async fn list_ymls(&self) -> Result<Vec<String>> {
+        Ok(self.read_all_ymls().await?.into_iter().map(|(k, _)| k).collect())
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
         match self.req(&format!("/notes/{}", enc(key)), "GET", None).await? {
             Some(r) => Ok(Some(r.text().await?)),
             None => Ok(None),
         }
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
         self.req(&format!("/notes/{}", enc(key)), "PUT", Some(Payload::Bytes(text.as_bytes()))).await.map(drop)
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
+    async fn delete_yml(&self, key: &str) -> Result<()> {
         self.req(&format!("/notes/{}", enc(key)), "DELETE", None).await.map(drop)
     }
     async fn list_blobs(&self) -> Result<Vec<String>> {
@@ -182,18 +182,18 @@ impl Storage for Peer {
     async fn delete_blob(&self, name: &str) -> Result<()> {
         self.req(&format!("/blobs/{}", enc(name)), "DELETE", None).await.map(drop)
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
         let r = self.req("/notes", "GET", None).await?.ok_or_else(|| StorageError::Io("no /notes".into()))?;
         let entries: Vec<NoteEntry> = json(r).await?;
         Ok(entries.into_iter().map(|e| (e.key, e.text)).collect())
     }
-    async fn note_hashes(&self) -> Result<Hashes> {
+    async fn yml_hashes(&self) -> Result<Hashes> {
         match self.batch_req("/sync/hashes", "GET", None).await? {
             Some(r) => json(r).await,
-            None => Ok(self.read_all_notes().await?.into_iter().map(|(k, t)| (k, gestalts_core::content_hash(t.as_bytes()))).collect()),
+            None => Ok(self.read_all_ymls().await?.into_iter().map(|(k, t)| (k, gestalts_core::content_hash(t.as_bytes()))).collect()),
         }
     }
-    async fn read_notes(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
+    async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
         let mut out = Vec::new();
         // in chunks, so a first sync of a large folder doesn't make one huge response
         for chunk in keys.chunks(500) {
@@ -202,7 +202,7 @@ impl Storage for Peer {
                 Some(r) => out.extend(json::<Vec<NoteEntry>>(r).await?.into_iter().map(|e| (e.key, e.text))),
                 None => {
                     for key in chunk {
-                        if let Some(t) = self.read_note(key).await? {
+                        if let Some(t) = self.read_yml(key).await? {
                             out.push((key.clone(), t));
                         }
                     }
@@ -211,13 +211,13 @@ impl Storage for Peer {
         }
         Ok(out)
     }
-    async fn write_notes(&self, notes: &[(String, String)]) -> Result<()> {
+    async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
         for chunk in notes.chunks(500) {
             let entries: Vec<NoteEntry> = chunk.iter().map(|(key, text)| NoteEntry { key: key.clone(), text: text.clone() }).collect();
             let body = serde_json::to_vec(&entries).map_err(|e| StorageError::Io(e.to_string()))?;
             if self.batch_req("/sync/write", "POST", Some(Payload::Json(body))).await?.is_none() {
                 for (k, t) in chunk {
-                    self.write_note(k, t).await?;
+                    self.write_yml(k, t).await?;
                 }
             }
         }

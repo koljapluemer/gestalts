@@ -2,7 +2,7 @@
 //! Layout as on disk: `<dir>/notes/<key>.yml`, `<dir>/blobs/<name>`.
 
 use async_trait::async_trait;
-use gestalts_core::storage::{Result, Storage, StorageError, check_key, note_key_from_file};
+use gestalts_core::storage::{Result, Storage, StorageError, check_key, yml_id_from_file};
 use js_sys::{Reflect, Uint8Array};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
@@ -101,18 +101,18 @@ async fn remove(dir: &FileSystemDirectoryHandle, name: &str) -> Result<()> {
 
 #[async_trait(?Send)]
 impl Storage for Opfs {
-    async fn list_notes(&self) -> Result<Vec<String>> {
-        Ok(names(&self.notes).await?.iter().filter_map(|f| note_key_from_file(f)).map(str::to_owned).collect())
+    async fn list_ymls(&self) -> Result<Vec<String>> {
+        Ok(names(&self.notes).await?.iter().filter_map(|f| yml_id_from_file(f)).map(str::to_owned).collect())
     }
-    async fn read_note(&self, key: &str) -> Result<Option<String>> {
+    async fn read_yml(&self, key: &str) -> Result<Option<String>> {
         check_key(key)?;
         Ok(read(&self.notes, &format!("{key}.yml")).await?.map(|b| String::from_utf8_lossy(&b).into_owned()))
     }
-    async fn write_note(&self, key: &str, text: &str) -> Result<()> {
+    async fn write_yml(&self, key: &str, text: &str) -> Result<()> {
         check_key(key)?;
         write(&self.notes, &format!("{key}.yml"), text.as_bytes()).await
     }
-    async fn delete_note(&self, key: &str) -> Result<()> {
+    async fn delete_yml(&self, key: &str) -> Result<()> {
         check_key(key)?;
         remove(&self.notes, &format!("{key}.yml")).await
     }
@@ -131,9 +131,9 @@ impl Storage for Opfs {
         check_key(name)?;
         remove(&self.blobs, name).await
     }
-    async fn read_all_notes(&self) -> Result<Vec<(String, String)>> {
-        let keys = self.list_notes().await?;
-        let texts = futures::future::try_join_all(keys.iter().map(|k| self.read_note(k))).await?;
+    async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        let keys = self.list_ymls().await?;
+        let texts = futures::future::try_join_all(keys.iter().map(|k| self.read_yml(k))).await?;
         Ok(keys.into_iter().zip(texts).filter_map(|(k, t)| Some((k, t?))).collect())
     }
 }

@@ -38,13 +38,13 @@ fn syncs_both_ways_and_tells_the_app() {
         let rec = Recorder::default();
         let device = Device::open(&dir, Box::new(rec.clone())).unwrap();
         let remote = Memory::default();
-        remote.write_note("from-desktop", "id: from-desktop\n").await.unwrap();
-        device.write_note("from-phone", "id: from-phone\n").await.unwrap();
+        remote.write_yml("from-desktop", "id: from-desktop\n").await.unwrap();
+        device.write_yml("from-phone", "id: from-phone\n").await.unwrap();
 
         let report = device.sync_with(&remote, &dir.join("base")).await.unwrap();
         assert_eq!((report.pulled.clone(), report.pushed.clone()), (vec!["from-desktop".to_owned()], vec!["from-phone".to_owned()]));
         assert!(dir.join("folder/notes/from-desktop.yml").exists());
-        assert_eq!(remote.read_note("from-phone").await.unwrap().as_deref(), Some("id: from-phone\n"));
+        assert_eq!(remote.read_yml("from-phone").await.unwrap().as_deref(), Some("id: from-phone\n"));
         assert_eq!(rec.changed(), vec!["from-desktop".to_owned()]);
 
         // nothing new: nothing to do, nothing read
@@ -60,16 +60,16 @@ fn a_conflict_is_recorded_on_both_sides() {
         let rec = Recorder::default();
         let device = Device::open(&dir, Box::new(rec.clone())).unwrap();
         let remote = Memory::default();
-        remote.write_note("n", "id: n\ntitle: base\n").await.unwrap();
+        remote.write_yml("n", "id: n\ntitle: base\n").await.unwrap();
         device.sync_with(&remote, &dir.join("base")).await.unwrap();
-        device.write_note("n", "id: n\ntitle: phone\n").await.unwrap();
-        remote.write_note("n", "id: n\ntitle: desktop\n").await.unwrap();
+        device.write_yml("n", "id: n\ntitle: phone\n").await.unwrap();
+        remote.write_yml("n", "id: n\ntitle: desktop\n").await.unwrap();
 
         let report = device.sync_with(&remote, &dir.join("base")).await.unwrap();
         assert_eq!(report.conflicts.len(), 1, "{report:?}");
         let ck = &report.conflicts[0];
-        assert!(remote.read_note(ck).await.unwrap().is_some());
-        assert!(device.notes().read_note(ck).await.unwrap().is_some());
+        assert!(remote.read_yml(ck).await.unwrap().is_some());
+        assert!(device.notes().read_yml(ck).await.unwrap().is_some());
         assert!(rec.changed().contains(ck));
     });
 }
@@ -102,16 +102,16 @@ fn a_handle_reaches_the_device_from_other_threads() {
     rt.block_on(async {
         let writes: Vec<_> = (0..20).map(|i| {
             let h = handle.clone();
-            tokio::spawn(async move { h.write_note(format!("n{i}"), format!("id: n{i}\n")).await })
+            tokio::spawn(async move { h.write_yml(format!("n{i}"), format!("id: n{i}\n")).await })
         }).collect();
         for w in writes {
             w.await.unwrap().unwrap();
         }
-        assert_eq!(handle.list_notes().await.unwrap().len(), 20);
-        assert_eq!(handle.read_notes(vec!["n3".into(), "missing".into()]).await.unwrap(), vec![("n3".into(), "id: n3\n".into())]);
+        assert_eq!(handle.list_ymls().await.unwrap().len(), 20);
+        assert_eq!(handle.read_ymls(vec!["n3".into(), "missing".into()]).await.unwrap(), vec![("n3".into(), "id: n3\n".into())]);
         handle.write_blob("b.png".into(), vec![1, 2, 3]).await.unwrap();
         assert_eq!(handle.read_blob("b.png".into()).await.unwrap(), Some(vec![1, 2, 3]));
-        assert_eq!(handle.note_hashes().await.unwrap().len(), 20);
+        assert_eq!(handle.yml_hashes().await.unwrap().len(), 20);
         assert!(handle.sync_soon().await.is_ok(), "not paired: nothing happens");
         assert_eq!(handle.status().await.unwrap().state, SyncState::Off);
     });

@@ -1,7 +1,0 @@
-name: appointment
-version: 1
-description: Something happening on a date, or within a month or year.
-requires_tags: [appointment]
-fields:
-  title: { type: string }
-  date: { type: partial_date, required: true }
