@@ -1,9 +1,14 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Repo } from '@gestalts/client';
-import { PROTOCOL, type FromView, type JsonMap, type ToView, type ViewError } from '@gestalts/view';
+import { PROTOCOL, logger, type FromView, type JsonMap, type ToView, type ViewError } from '@gestalts/view';
 import type { FrameRuntime } from '../registry';
 import { BOOT_HTML } from './boot';
 import { Bridge, type Scope, type ViewEnv } from './bridge';
+
+const log = logger('view');
+
+/** A frame that hasn't mounted its view by now says how far it got. */
+const STALLED_MS = 8000;
 
 export type RunnableView = {
   id: string;
@@ -32,6 +37,7 @@ type Props = {
 /** One view, in a sandboxed frame of its own. A new `view.js` gives a new frame. */
 export function FrameView({ repo, view, runtime, css, tailwind, params, state, env, onError, hidden }: Props) {
   const ref = useRef<HTMLIFrameElement>(null);
+  const [failure, setFailure] = useState<string>();
   const latest = useRef({ env, onError });
   useEffect(() => { latest.current = { env, onError }; }, [env, onError]);
   const scopeKey = JSON.stringify(view.scope);
@@ -44,6 +50,11 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
     if (!frame) return;
     let port: MessagePort | undefined;
     let bridge: Bridge | undefined;
+    let stage = 'frame created, not ready yet';
+    const stalled = setTimeout(() => {
+      log.warn('view has not started', { view: view.id, reached: stage });
+      setFailure(`This view didn't start (reached: ${stage}).`);
+    }, STALLED_MS);
     const envProxy: ViewEnv = {
       service: latest.current.env.service && ((...a) => latest.current.env.service!(...a)),
       setState: (s) => latest.current.env.setState(s),
@@ -52,6 +63,8 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
     };
     const onReady = (e: MessageEvent) => {
       if (e.source !== frame.contentWindow || e.data !== 'gestalts:ready') return;
+      stage = 'ready';
+      log.debug('frame ready', { view: view.id });
       port?.close();
       bridge?.close();
       const channel = new MessageChannel();
@@ -61,7 +74,19 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       bridge = b;
       port.onmessage = (m: MessageEvent<FromView>) => {
         const msg = m.data;
-        if (msg.type === 'error') { latest.current.onError?.(msg.error); return; }
+        if (msg.type === 'stage') {
+          stage = msg.stage;
+          log.debug('stage', { view: view.id, stage });
+          if (stage === 'mounted') clearTimeout(stalled);
+          return;
+        }
+        if (msg.type === 'error') {
+          log.error('view error', { view: view.id, kind: msg.error.kind, message: msg.error.message, stack: msg.error.stack, reached: stage });
+          // console.error from a view is its own business; these stop it working
+          if (msg.error.kind !== 'console') setFailure(msg.error.message);
+          latest.current.onError?.(msg.error);
+          return;
+        }
         b.handle(msg.call).then(
           (value) => post({ type: 'reply', id: msg.id, ok: true, value: value as object }),
           (err: unknown) => post({ type: 'reply', id: msg.id, ok: false, error: err instanceof Error ? err.message : String(err) }),
@@ -75,11 +100,18 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
     addEventListener('message', onReady);
     frame.srcdoc = BOOT_HTML;
     return () => {
+      clearTimeout(stalled);
+      setFailure(undefined);
       removeEventListener('message', onReady);
       bridge?.close();
       port?.close();
     };
   }, [repo, view.id, view.title, view.js, view.npm, scopeKey, paramsKey, runtime, css, tailwind, initial]);
 
-  return <iframe ref={ref} title={view.title} sandbox="allow-scripts allow-downloads" className={`block h-full w-full border-0 bg-base-100 ${hidden ? 'hidden' : ''}`} />;
+  return (
+    <div className={`flex h-full w-full flex-col ${hidden ? 'hidden' : ''}`}>
+      {failure && <div role="alert" className="alert alert-error rounded-none font-mono text-sm whitespace-pre-wrap">{view.title}: {failure}</div>}
+      <iframe ref={ref} title={view.title} sandbox="allow-scripts allow-downloads" className="block min-h-0 w-full flex-1 border-0 bg-base-100" />
+    </div>
+  );
 }

@@ -101,6 +101,9 @@ async function buildRuntime(appRoot: string): Promise<{ js: string; css: string 
     configFile: false,
     logLevel: 'warn',
     root: host,
+    // always, also under the dev server: its development JSX needs a development React, and this bundles the production one
+    mode: 'production',
+    oxc: { jsx: { runtime: 'automatic', development: false } },
     define: { 'process.env.NODE_ENV': JSON.stringify('production') },
     resolve: { dedupe: ['react', 'react-dom', 'lucide-react'] },
     build: {

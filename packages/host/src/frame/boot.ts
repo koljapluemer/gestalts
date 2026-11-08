@@ -6,14 +6,17 @@ const script = String.raw`
 addEventListener('message', async (first) => {
   if (first.source !== parent || !first.ports[0]) return;
   const port = first.ports[0];
-  const fail = (e) => port.postMessage({ type: 'error', error: { kind: 'error', message: String(e && e.message || e), stack: e && e.stack, at: new Date().toISOString() } });
+  const stage = (name) => port.postMessage({ type: 'stage', stage: name });
+  const fail = (e) => (console.error('view failed to start:', e), port.postMessage({ type: 'error', error: { kind: 'error', message: String(e && e.message || e), stack: e && e.stack, at: new Date().toISOString() } }));
   try {
+    stage('received');
     const { runtime, css, js, npm, tailwind, init } = first.data;
     const style = document.createElement('style');
     style.textContent = css;
     document.head.append(style);
     (0, eval)(runtime);
     const R = globalThis.__gestaltsRuntime;
+    stage('runtime evaluated');
     const blob = (text) => URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
     const imports = {};
     for (const [name, m] of Object.entries(R.modules)) {
@@ -31,7 +34,8 @@ addEventListener('message', async (first) => {
     map.type = 'importmap';
     map.textContent = JSON.stringify({ imports });
     document.head.append(map);
-    globalThis.__gestaltsStart = (view) => R.mount(view, port, init);
+    stage('import map ready');
+    globalThis.__gestaltsStart = (view) => { stage('module imported'); R.mount(view, port, init); stage('mounted'); };
     globalThis.__gestaltsFail = fail;
     const run = document.createElement('script');
     run.type = 'module';

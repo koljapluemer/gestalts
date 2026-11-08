@@ -55,7 +55,9 @@ export type ViewError = { kind: 'error' | 'rejection' | 'render' | 'console' | '
 
 export type FromView =
   | { type: 'call'; id: number; call: Call }
-  | { type: 'error'; error: ViewError };
+  | { type: 'error'; error: ViewError }
+  /** how far the frame has got starting the view, for the log */
+  | { type: 'stage'; stage: string };
 
 export type ToView =
   | { type: 'reply'; id: number; ok: true; value: Json | Uint8Array | object }
