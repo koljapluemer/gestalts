@@ -21,8 +21,8 @@ const MAX_DELAY: Duration = Duration::from_secs(1);
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Event {
-    /// notes (keys) and blobs (names) that were written or removed
-    Changed { notes: Vec<String>, blobs: Vec<String> },
+    /// ymls (ids) and blobs (names) that were written or removed
+    Changed { ymls: Vec<String>, blobs: Vec<String> },
     /// another folder is open now (or none)
     Folder(Option<FolderInfo>),
     /// this client missed events: reread everything
@@ -30,7 +30,7 @@ pub enum Event {
 }
 
 enum Change {
-    Note(String),
+    Yml(String),
     Blob(String),
 }
 
@@ -94,7 +94,7 @@ fn classify(path: &Path, notes: &Path, blobs: &Path) -> Option<Change> {
     let name = path.file_name()?.to_str()?;
     if name.starts_with('.') { return None; }
     if dir == notes {
-        gestalts_core::storage::yml_id_from_file(name).map(|k| Change::Note(k.to_owned()))
+        gestalts_core::storage::yml_id_from_file(name).map(|k| Change::Yml(k.to_owned()))
     } else if dir == blobs {
         Some(Change::Blob(name.to_owned()))
     } else {
@@ -104,9 +104,9 @@ fn classify(path: &Path, notes: &Path, blobs: &Path) -> Option<Change> {
 
 fn debounce(rx: &mpsc::Receiver<Change>, out: &broadcast::Sender<Event>) {
     while let Ok(first) = rx.recv() {
-        let (mut notes, mut blobs) = (BTreeSet::new(), BTreeSet::new());
+        let (mut ymls, mut blobs) = (BTreeSet::new(), BTreeSet::new());
         let mut add = |c: Change| match c {
-            Change::Note(k) => { notes.insert(k); }
+            Change::Yml(k) => { ymls.insert(k); }
             Change::Blob(b) => { blobs.insert(b); }
         };
         add(first);
@@ -114,6 +114,6 @@ fn debounce(rx: &mpsc::Receiver<Change>, out: &broadcast::Sender<Event>) {
         let until = std::time::Instant::now() + MAX_DELAY;
         while let Some(left) = until.checked_duration_since(std::time::Instant::now())
             && let Ok(more) = rx.recv_timeout(left.min(DEBOUNCE)) { add(more); }
-        let _ = out.send(Event::Changed { notes: notes.into_iter().collect(), blobs: blobs.into_iter().collect() });
+        let _ = out.send(Event::Changed { ymls: ymls.into_iter().collect(), blobs: blobs.into_iter().collect() });
     }
 }

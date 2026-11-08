@@ -8,18 +8,18 @@ use wasm_bindgen_futures::JsFuture;
 
 #[wasm_bindgen(typescript_custom_section)]
 const TS: &'static str = r#"
-/** Notes and blobs somewhere the page can't reach itself (a native app's folder). Keys and names as in `Storage`. */
+/** Ymls and blobs somewhere the page can't reach itself (a native app's folder). Ids and names as in `Storage`. */
 export interface HostStorage {
-  listNotes(): Promise<string[]>;
-  readNote(key: string): Promise<string | null>;
-  /** the given notes that exist, as `[key, text]` */
-  readNotes(keys: string[]): Promise<[string, string][]>;
-  readAllNotes(): Promise<[string, string][]>;
-  /** `{key: content hash}` of every note */
-  noteHashes(): Promise<Record<string, string>>;
-  writeNote(key: string, text: string): Promise<void>;
-  writeNotes(notes: [string, string][]): Promise<void>;
-  deleteNote(key: string): Promise<void>;
+  listYmls(): Promise<string[]>;
+  readYml(key: string): Promise<string | null>;
+  /** the given ymls that exist, as `[key, text]` */
+  readYmls(keys: string[]): Promise<[string, string][]>;
+  readAllYmls(): Promise<[string, string][]>;
+  /** `{key: content hash}` of every yml */
+  ymlHashes(): Promise<Record<string, string>>;
+  writeYml(key: string, text: string): Promise<void>;
+  writeYmls(ymls: [string, string][]): Promise<void>;
+  deleteYml(key: string): Promise<void>;
   listBlobs(): Promise<string[]>;
   readBlob(name: string): Promise<Uint8Array | null>;
   writeBlob(name: string, bytes: Uint8Array): Promise<void>;
@@ -32,21 +32,21 @@ extern "C" {
     #[wasm_bindgen(typescript_type = "HostStorage")]
     pub type HostStorage;
 
-    #[wasm_bindgen(method, catch, js_name = listNotes)]
+    #[wasm_bindgen(method, catch, js_name = listYmls)]
     fn list_ymls(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = readNote)]
+    #[wasm_bindgen(method, catch, js_name = readYml)]
     fn read_yml(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = readNotes)]
+    #[wasm_bindgen(method, catch, js_name = readYmls)]
     fn read_ymls(this: &HostStorage, keys: Vec<String>) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = readAllNotes)]
+    #[wasm_bindgen(method, catch, js_name = readAllYmls)]
     fn read_all_ymls(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = noteHashes)]
+    #[wasm_bindgen(method, catch, js_name = ymlHashes)]
     fn yml_hashes(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = writeNote)]
+    #[wasm_bindgen(method, catch, js_name = writeYml)]
     fn write_yml(this: &HostStorage, key: &str, text: &str) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = writeNotes)]
+    #[wasm_bindgen(method, catch, js_name = writeYmls)]
     fn write_ymls(this: &HostStorage, notes: JsValue) -> std::result::Result<js_sys::Promise, JsValue>;
-    #[wasm_bindgen(method, catch, js_name = deleteNote)]
+    #[wasm_bindgen(method, catch, js_name = deleteYml)]
     fn delete_yml(this: &HostStorage, key: &str) -> std::result::Result<js_sys::Promise, JsValue>;
     #[wasm_bindgen(method, catch, js_name = listBlobs)]
     fn list_blobs(this: &HostStorage) -> std::result::Result<js_sys::Promise, JsValue>;

@@ -43,7 +43,7 @@ fn syncs_both_ways_and_tells_the_app() {
 
         let report = device.sync_with(&remote, &dir.join("base")).await.unwrap();
         assert_eq!((report.pulled.clone(), report.pushed.clone()), (vec!["from-desktop".to_owned()], vec!["from-phone".to_owned()]));
-        assert!(dir.join("folder/notes/from-desktop.yml").exists());
+        assert!(dir.join("data/notes/from-desktop.yml").exists());
         assert_eq!(remote.read_yml("from-phone").await.unwrap().as_deref(), Some("id: from-phone\n"));
         assert_eq!(rec.changed(), vec!["from-desktop".to_owned()]);
 

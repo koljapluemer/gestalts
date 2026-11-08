@@ -53,9 +53,8 @@ pub struct Embedded {
     pub name: &'static str,
     /// the web frontend (a static build) served at `/`
     pub app: Option<&'static include_dir::Dir<'static>>,
-    /// the plugins (manifests, gestalts, workers; one folder each) and the Python SDK their workers depend on by
-    /// relative path (`../../../sdk/python`), unpacked in that layout
-    pub builtin: Option<(&'static include_dir::Dir<'static>, &'static include_dir::Dir<'static>)>,
+    /// the plugins, one folder each
+    pub builtin: Option<&'static include_dir::Dir<'static>>,
     pub origins: &'static [&'static str],
 }
 
@@ -72,17 +71,17 @@ pub enum NodeCommand {
         #[arg(long)]
         data: Option<PathBuf>,
     },
-    /// print each note's gestalts and lints; exits non-zero on lints
-    Lint { dir: PathBuf },
+    /// print every yml that can't be used and why; exits non-zero if there is one
+    Health { dir: PathBuf },
     /// prepare a folder as a published deck (content-addressed blobs, unreferenced ones deleted,
-    /// index.json), then lint; exits non-zero on problems
+    /// index.json), then check it; exits non-zero on problems
     Publish { dir: PathBuf },
 }
 
 pub fn run_command(command: NodeCommand, opts: &Opts, embedded: Embedded) -> Result<(), String> {
     match command {
         NodeCommand::Serve { data } => serve(opts, embedded, data),
-        NodeCommand::Lint { dir } => all_gestalts(opts, embedded).map(|g| std::process::exit(i32::from(lint(&FsStorage::new(&dir), &g) > 0))),
+        NodeCommand::Health { dir } => all_gestalts(opts, embedded).map(|g| std::process::exit(i32::from(health(&FsStorage::new(&dir), &g) > 0))),
         NodeCommand::Publish { dir } => all_gestalts(opts, embedded).map(|g| std::process::exit(i32::from(publish(&dir, &g) > 0))),
     }
 }
@@ -154,14 +153,14 @@ fn plugin_dirs(opts: &Opts, embedded: Embedded, paths: &Paths) -> Result<Vec<Pat
         return Ok(opts.plugins_dir.clone());
     }
     let mut dirs = Vec::new();
-    if let Some((builtin, sdk)) = embedded.builtin {
-        dirs.push(plugins::unpack_builtin(paths, builtin, sdk).map_err(|e| format!("cannot unpack the built-in plugins: {e}"))?);
+    if let Some(builtin) = embedded.builtin {
+        dirs.push(plugins::unpack_builtin(paths, builtin).map_err(|e| format!("cannot unpack the built-in plugins: {e}"))?);
     }
     dirs.push(paths.user_plugins());
     Ok(dirs)
 }
 
-/// The core's gestalts and those of every plugin `opts` finds, for `lint` and `publish`.
+/// The core's gestalts and those of every plugin `opts` finds, for `health` and `publish`.
 fn all_gestalts(opts: &Opts, embedded: Embedded) -> Result<gestalts_core::Gestalts, String> {
     let paths = Paths::new(opts.profile.as_deref())?;
     plugins::load_gestalts(&plugin_dirs(opts, embedded, &paths)?)
@@ -204,33 +203,25 @@ pub fn serve(opts: &Opts, embedded: Embedded, data: Option<PathBuf>) -> Result<(
     Ok(())
 }
 
-/// Prints `key: gestalts` per note and any lints; returns the number of lints.
-fn lint(store: &FsStorage, gestalts: &gestalts_core::Gestalts) -> usize {
+/// Prints every yml that can't be used; returns how many there are.
+fn health(store: &FsStorage, gestalts: &gestalts_core::Gestalts) -> usize {
     let mut count = 0;
-    for key in store.list_notes_sync().expect("can list notes") {
-        let raw = store.read_note_sync(&key).ok().flatten().unwrap_or_default();
-        if gestalts_core::is_tombstone_text(&raw) {
-            continue;
-        }
-        let note = gestalts_core::Note::parse(key.clone(), raw);
-        println!("{key}: {}", gestalts.of(&note).join(", "));
-        if let Some(e) = &note.parse_error {
-            println!("  ! {}", e.message);
+    for id in store.list_ymls_sync().expect("can list ymls") {
+        let yml = gestalts_core::Yml::parse(id.clone(), store.read_yml_sync(&id).ok().flatten().unwrap_or_default());
+        if let gestalts_core::YmlState::Invalid(problems) = gestalts.classify(&yml) {
             count += 1;
-        }
-        for l in gestalts.lint(&note) {
-            println!("  ! {} {}: {}", l.gestalt, l.path, l.message);
-            count += 1;
+            println!("{id}");
+            problems.iter().for_each(|p| println!("  ! {} {}", p.path, p.message));
         }
     }
-    eprintln!("{count} problem(s)");
+    eprintln!("{count} invalid yml(s)");
     count
 }
 
 fn publish(dir: &std::path::Path, gestalts: &gestalts_core::Gestalts) -> usize {
-    let r = gestalts_fs::publish(dir).expect("can publish the folder");
+    let r = gestalts_fs::publish(dir, gestalts).expect("can publish the folder");
     r.renamed.iter().for_each(|(a, b)| println!("renamed {a} -> {b}"));
     r.removed.iter().for_each(|b| println!("removed unreferenced {b}"));
     r.problems.iter().for_each(|p| println!("! {p}"));
-    r.problems.len() + lint(&FsStorage::new(dir), gestalts)
+    r.problems.len()
 }

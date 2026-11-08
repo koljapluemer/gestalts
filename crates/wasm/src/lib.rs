@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use gestalts_core::storage::{Deck, Layered, Storage, StorageError, Tracked};
 use gestalts_core::sync::{Fetched, Pending, SyncBase};
-use gestalts_core::{Gestalts, IndexedNote, Note, Query, Repo, UpstreamReport, pull_upstream};
+use gestalts_core::{Gestalts, Query, Repo};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -39,7 +39,6 @@ pub struct WasmRepo {
     node: Option<Rc<Peer>>,
     /// the storage with its decks, when it has any
     layered: Option<Rc<Layered<Dyn, Dyn>>>,
-    upstream_report: RefCell<UpstreamReport>,
     /// the sync between `syncFetch` and `syncPush`
     sync_run: RefCell<Option<SyncRun>>,
 }
@@ -75,10 +74,8 @@ fn marker(timings: &mut serde_json::Map<String, serde_json::Value>, last: &mut f
 
 #[wasm_bindgen]
 impl WasmRepo {
-    /// Notes in OPFS under `dir`, over read-only decks (`[{source, url}]`, published folders, see `Static`), with the
-    /// core's gestalts plus `gestalts` (YAML definitions from plugins). Decks holding the same key are merged by those
-    /// gestalts' rules. Copy-on-write: deck notes the user's notes reference are copied into OPFS, and untouched
-    /// copies follow deck changes (`gestalts_core::upstream`).
+    /// Ymls in OPFS under `dir`, over read-only decks (`[{source, url}]`, published folders, see `Static`), with the
+    /// core's gestalts plus `gestalts` (YAML definitions from plugins).
     pub async fn open(dir: String, decks: JsValue, gestalts: Vec<String>) -> Result<WasmRepo, JsError> {
         // tracked, so a sync knows which notes changed without reading them all
         let writable: Dyn = Rc::new(Tracked::new(Opfs::open(&dir).await.map_err(err)?));
@@ -121,24 +118,16 @@ impl WasmRepo {
             (layered.clone() as Dyn, Some(layered))
         };
         let repo = Rc::new(Repo::new(storage, g));
-        let this = WasmRepo { repo, writable, dir, node, layered, upstream_report: RefCell::default(), sync_run: RefCell::default() };
-        this.pull_upstream().await?;
+        let this = WasmRepo { repo, writable, dir, node, layered, sync_run: RefCell::default() };
         this.repo.load().await.map_err(err)?;
         Ok(this)
     }
 
-    /// Rereads `keys` from storage, after something else changed them (a node's change events), then brings deck
-    /// copies up to date. Returns every key reread, including copies that pulling upstream wrote.
-    pub async fn reindex(&self, keys: Vec<String>) -> Result<Vec<String>, JsError> {
-        self.pull_upstream().await?;
-        let mut changed = keys;
-        {
-            let up = self.upstream_report.borrow();
-            changed.extend(up.copied.iter().chain(&up.updated).cloned());
-        }
+    /// Rereads `ids` from storage, after something else changed them (a node's change events). Only subscriptions
+    /// these concern get a delta.
+    pub async fn reindex(&self, ids: Vec<String>) -> Result<(), JsError> {
         let repo = self.repo.clone();
-        repo.reindex(&changed).await.map_err(err)?;
-        Ok(changed)
+        repo.reindex(&ids).await.map_err(err)
     }
 
     /// For a repo on a node's folder: asks the node to collect the folder's unreferenced blobs (`POST
@@ -151,104 +140,69 @@ impl WasmRepo {
         }
     }
 
-    /// The keys of the notes copied from the decks `sources` alone (every deck in their trailer is one of them).
-    #[wasm_bindgen(js_name = copiesOf)]
-    pub async fn copies_of(&self, sources: Vec<String>) -> Result<Vec<String>, JsError> {
-        gestalts_core::copies_of(&*self.writable, &sources).await.map_err(err)
-    }
-
     /// Collects this browser's unreferenced blobs, after a successful sync (`gestalts_core::blobs`). The manifest
     /// lives in OPFS next to the data.
     async fn collect_blobs(&self, dir: &str) -> Result<Vec<String>, JsError> {
         let store = Opfs::open(&format!("{dir}-blob-gc")).await.map_err(err)?;
         let mut manifest: gestalts_core::GcManifest =
             store.read_yml("manifest").await.map_err(err)?.and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
-        let texts = self.repo.texts();
-        let referenced = gestalts_core::referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), self.repo.gestalts());
-        let deleted = gestalts_core::collect_blobs(&*self.writable, &referenced, &mut manifest, js_sys::Date::now() as i64).await.map_err(err)?;
+        let now = js_sys::Date::now() as i64;
+        if !manifest.due(now) {
+            return Ok(vec![]);
+        }
+        let deleted = gestalts_core::collect_blobs(&*self.writable, &self.repo.blob_refs(), &mut manifest, now).await.map_err(err)?;
         let json = serde_json::to_string(&manifest).map_err(|e| JsError::new(&e.to_string()))?;
         store.write_yml("manifest", &json).await.map_err(err)?;
         Ok(deleted)
     }
 
-    async fn pull_upstream(&self) -> Result<(), JsError> {
-        if let Some(l) = &self.layered {
-            *self.upstream_report.borrow_mut() = pull_upstream(&l.deck_refs(), &*self.writable).await.map_err(err)?;
-        }
-        Ok(())
+    /// What mounted decks disagree on, as `id: path`, from the last full read.
+    #[wasm_bindgen(js_name = deckConflicts)]
+    pub fn deck_conflicts(&self) -> Vec<String> {
+        self.layered.as_ref().map(|l| l.deck_conflicts.borrow().clone()).unwrap_or_default()
     }
 
-    /// What the last check against upstream did: `{copied, updated, diverged, deck_conflicts}`, all empty for a plain
-    /// OPFS repo. `deck_conflicts` (`key: path`) are values mounted decks disagree on, from the last full read.
-    #[wasm_bindgen(js_name = upstreamReport)]
-    pub fn upstream_report(&self) -> Result<JsValue, JsError> {
-        let r = self.upstream_report.borrow();
-        let deck_conflicts = self.layered.as_ref().map(|l| l.deck_conflicts.borrow().clone()).unwrap_or_default();
-        to_js(&UpstreamReport { copied: r.copied.clone(), updated: r.updated.clone(), diverged: r.diverged.clone(), deck_conflicts })
-    }
-
-    /// Rereads everything from storage.
-    pub async fn reload(&self) -> Result<(), JsError> {
-        let repo = self.repo.clone();
-        repo.load().await.map_err(err)
-    }
-
-    /// `query`: `{gestalt?, gestaltsNone?, tagsAll?, tagsNone?, keys?, where?}`
+    /// One page of what `query` asks for (`gestalts_core::Query`): `{items, next}`.
     pub fn query(&self, query: JsValue) -> Result<JsValue, JsError> {
-        let q: Query = if query.is_undefined() || query.is_null() {
-            Query::default()
-        } else {
-            serde_wasm_bindgen::from_value(query).map_err(|e| JsError::new(&e.to_string()))?
-        };
-        to_js(&self.repo.query(&q))
+        to_js(&self.repo.query(&from_js::<Query>(query)?))
     }
 
-    pub fn get(&self, key: &str) -> Result<JsValue, JsError> {
-        to_js(&self.repo.get(key))
+    pub fn get(&self, id: &str) -> Result<JsValue, JsError> {
+        to_js(&self.repo.get(id))
     }
 
-    #[wasm_bindgen(js_name = keyOf)]
-    pub fn key_of(&self, id: &str) -> Option<String> {
-        self.repo.key_of(id)
+    /// Starts a live query: `{sub, page}`. Changes come out of `takeDeltas`.
+    pub fn subscribe(&self, query: JsValue) -> Result<JsValue, JsError> {
+        let (sub, page) = self.repo.subscribe(from_js::<Query>(query)?);
+        to_js(&serde_json::json!({ "sub": sub, "page": page }))
     }
 
-    #[wasm_bindgen(js_name = putRaw)]
-    pub async fn put_raw(&self, key: String, raw: String) -> Result<JsValue, JsError> {
-        let repo = self.repo.clone();
-        to_js(&repo.put_raw(&key, &raw).await.map_err(err)?)
+    pub fn unsubscribe(&self, sub: f64) {
+        self.repo.unsubscribe(sub as u64);
     }
 
-    /// `json`: the note as JSON text; without `key`, a new uuid key/id is assigned.
-    #[wasm_bindgen(js_name = putValue)]
-    pub async fn put_value(&self, key: Option<String>, json: String) -> Result<JsValue, JsError> {
+    /// The deltas since last asked: `[{sub, upsert, remove, order, next}]`.
+    #[wasm_bindgen(js_name = takeDeltas)]
+    pub fn take_deltas(&self) -> Result<JsValue, JsError> {
+        to_js(&self.repo.take_deltas())
+    }
+
+    /// `json`: the yml as JSON text. Refused unless valid by its gestalt; without `id`, it gets a new uuid.
+    pub async fn put(&self, json: String) -> Result<JsValue, JsError> {
         let value: gestalts_core::Value = serde_json::from_str(&json).map_err(|e| JsError::new(&e.to_string()))?;
         let repo = self.repo.clone();
-        to_js(&repo.put_value(key.as_deref(), value).await.map_err(err)?)
+        to_js(&repo.put(value).await.map_err(err)?)
     }
 
-    /// Deletes a note by writing its tombstone, and the notes that die with it. Returns every key deleted.
-    pub async fn delete(&self, key: String) -> Result<Vec<String>, JsError> {
+    /// Deletes a yml by writing its tombstone. Returns whether there was one to delete.
+    pub async fn delete(&self, id: String) -> Result<bool, JsError> {
         let repo = self.repo.clone();
-        repo.delete(&key, &now()).await.map_err(err)
+        repo.delete(&id, &now()).await.map_err(err)
     }
 
-    /// Whether `key` is a tombstone.
-    #[wasm_bindgen(js_name = isDeleted)]
-    pub fn is_deleted(&self, key: &str) -> bool {
-        self.repo.is_deleted(key)
-    }
-
-    /// Three-way merge of one note's text as a sync does it, by this repo's gestalts: `{text, conflicts, raw}`, `text`
-    /// null when the note is absent, `conflicts` the values no rule settled (`{path, base?, kept?, lost?}`; the text
-    /// holds `kept`).
-    pub fn merge3(&self, key: &str, base: Option<String>, local: Option<String>, remote: Option<String>) -> Result<JsValue, JsError> {
-        let m = gestalts_core::merge_note(key, base.as_deref(), local.as_deref(), remote.as_deref(), self.repo.gestalts(), &now());
-        let conflicts: Vec<gestalts_core::Value> = m
-            .conflicts
-            .iter()
-            .map(|c| gestalts_core::note::parse_yaml(&gestalts_core::conflict_note(key, key, c, m.raw, &now()).1).unwrap_or_default())
-            .collect();
-        to_js(&serde_json::json!({ "text": m.text, "conflicts": conflicts, "raw": m.raw }))
+    /// Every yml that can't be used, and why: `[{id, problems}]`.
+    pub fn health(&self) -> Result<JsValue, JsError> {
+        to_js(&self.repo.health())
     }
 
     #[wasm_bindgen(js_name = readBlob)]
@@ -268,27 +222,12 @@ impl WasmRepo {
         to_js(&self.repo.gestalts().defs())
     }
 
-    /// What saving `raw` would give, without saving: `{id, gestalts, lints, parse_error, ...}`.
-    pub fn inspect(&self, key: &str, raw: &str) -> Result<JsValue, JsError> {
-        let note = Note::parse(key, raw);
-        let g = self.repo.gestalts();
-        to_js(&IndexedNote::new(note, g))
-    }
-
-    /// What writing `json` (a note as JSON) under `key` would index as, without saving it.
-    #[wasm_bindgen(js_name = inspectValue)]
-    pub fn inspect_value(&self, key: Option<String>, json: String) -> Result<JsValue, JsError> {
-        let value: gestalts_core::Value = serde_json::from_str(&json).map_err(|e| JsError::new(&e.to_string()))?;
-        let key = key.unwrap_or_else(|| value.get("id").and_then(|v| v.as_str()).unwrap_or("new").to_owned());
-        self.inspect(&key, &gestalts_core::note::to_yaml(&value))
-    }
-
     /// Sync, phase 1 (`gestalts_core::sync`), network only: asks the connector at `connector_url` what changed since
     /// the last sync, and fetches it. Runs alongside the app's writes; `syncMerge` and `syncPush` finish it.
     #[wasm_bindgen(js_name = syncFetch)]
     pub async fn sync_fetch(&self, connector_url: String) -> Result<(), JsError> {
         let Some(dir) = &self.dir else {
-            return Err(JsError::new("these notes are the node's folder already: there is nothing to sync"));
+            return Err(JsError::new("these ymls are the node's folder already: there is nothing to sync"));
         };
         self.sync_run.borrow_mut().take();
         let mut timings = serde_json::Map::new();
@@ -322,14 +261,8 @@ impl WasmRepo {
         let pending = gestalts_core::merge_local(&*self.writable, &run.remote, &mut run.base, fetched, self.repo.gestalts(), &now(),
                                                  &mut marker(&mut timings, &mut last)).await.map_err(err)?;
         (run.timings, run.last) = (timings, last);
-        self.pull_upstream().await?;
-        run.mark("pull_upstream");
-        // only what sync and pull_upstream wrote: the repo's own writes are indexed already
-        let mut changed: Vec<String> = pending.report().pulled.iter().chain(&pending.report().conflicts).cloned().collect();
-        {
-            let up = self.upstream_report.borrow();
-            changed.extend(up.copied.iter().chain(&up.updated).cloned());
-        }
+        // only what sync wrote: the repo's own writes are indexed already
+        let changed: Vec<String> = pending.report().pulled.iter().chain(&pending.report().conflicts).cloned().collect();
         let repo = self.repo.clone();
         repo.reindex(&changed).await.map_err(err)?;
         run.mark("reindex");
@@ -375,69 +308,15 @@ pub fn stable_id(namespace: &str, name: &str) -> String {
     gestalts_core::stable_id(namespace, name)
 }
 
-#[wasm_bindgen(js_name = stateKey)]
-pub fn state_key(gestalt: &str, target: &str, facet: Option<String>) -> String {
-    gestalts_core::state_key(gestalt, target, facet.as_deref())
-}
-
-/// What identifies a card within its note (dsl's `card_id`).
-#[wasm_bindgen(js_name = cardId)]
-pub fn card_id(front: &str) -> String {
-    gestalts_core::card_id(front)
+#[wasm_bindgen(js_name = stateId)]
+pub fn state_id(gestalt: &str, target: &str, facet: Option<String>) -> String {
+    gestalts_core::state_id(gestalt, target, facet.as_deref())
 }
 
 /// Hex sha256 of a text.
 #[wasm_bindgen(js_name = contentHash)]
 pub fn content_hash(text: &str) -> String {
     gestalts_core::content_hash(text.as_bytes())
-}
-
-/// BibTeX text as sources: `[{source, warnings}]`.
-#[wasm_bindgen(js_name = bibParse)]
-pub fn bib_parse(text: &str) -> Result<JsValue, JsError> {
-    to_js(&gestalts_core::bib::parse(text).map_err(|e| JsError::new(&e))?)
-}
-
-/// Sources (note values) as biblatex text.
-#[wasm_bindgen(js_name = bibWrite)]
-pub fn bib_write(sources: JsValue) -> Result<String, JsError> {
-    Ok(gestalts_core::bib::write(&from_js::<Vec<serde_json::Map<String, serde_json::Value>>>(sources)?))
-}
-
-/// The existing sources (`[{key, source}]`) that may be `entry`, best first: `[{key, level, reasons}]`.
-#[wasm_bindgen(js_name = bibMatches)]
-pub fn bib_matches(entry: JsValue, sources: JsValue, limit: usize) -> Result<JsValue, JsError> {
-    #[derive(serde::Deserialize)]
-    struct Existing {
-        key: String,
-        source: serde_json::Map<String, serde_json::Value>,
-    }
-    let existing: Vec<Existing> = from_js(sources)?;
-    let existing: Vec<_> = existing.into_iter().map(|e| (e.key, e.source)).collect();
-    to_js(&gestalts_core::bib::matches(&from_js(entry)?, &existing, limit))
-}
-
-/// `current` updated from `incoming`: `{source, filled, conflicts}`; fields in `take` are replaced.
-#[wasm_bindgen(js_name = bibMerge)]
-pub fn bib_merge(current: JsValue, incoming: JsValue, take: Vec<String>) -> Result<JsValue, JsError> {
-    to_js(&gestalts_core::bib::merge(&from_js(current)?, &from_js(incoming)?, &take))
-}
-
-#[wasm_bindgen(js_name = bibUniqueCitekey)]
-pub fn bib_unique_citekey(key: &str, taken: Vec<String>) -> String {
-    gestalts_core::bib::unique_citekey(key, &taken.into_iter().collect())
-}
-
-/// The keys a Typst document cites, in order.
-#[wasm_bindgen(js_name = bibCitedKeys)]
-pub fn bib_cited_keys(text: &str) -> Vec<String> {
-    gestalts_core::bib::cited_keys(text)
-}
-
-/// `{entryTypes: [[type, [field…]]…], fields: [[field, kind]…]}`
-#[wasm_bindgen(js_name = bibModel)]
-pub fn bib_model() -> Result<JsValue, JsError> {
-    to_js(&serde_json::json!({ "entryTypes": gestalts_core::bib::ENTRY_TYPES, "fields": gestalts_core::bib::FIELDS }))
 }
 
 fn from_js<T: serde::de::DeserializeOwned>(v: JsValue) -> Result<T, JsError> {

@@ -17,6 +17,7 @@ use crate::yml::{Yml, valid_key};
 
 pub const GC_MIN_DAYS: i64 = 7;
 pub const GC_MIN_SYNCS: u32 = 3;
+const GC_MIN_INTERVAL_MS: i64 = 3_600_000;
 
 /// `![[name]]` and `![[name|label]]` outside fenced code.
 pub fn embeds(text: &str) -> Vec<String> {
@@ -112,6 +113,17 @@ pub fn referenced_blobs<'a>(ymls: impl IntoIterator<Item = (&'a str, &'a str)>, 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GcManifest {
     pub pending: BTreeMap<String, Pending>,
+    /// when it last ran, unix ms
+    #[serde(default)]
+    pub last_run_ms: i64,
+}
+
+impl GcManifest {
+    /// Whether to collect now. Working out what's in use can mean reading every yml, syncs run every few seconds, and
+    /// collecting needs days anyway.
+    pub fn due(&self, now_ms: i64) -> bool {
+        now_ms - self.last_run_ms >= GC_MIN_INTERVAL_MS
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -124,6 +136,7 @@ pub struct Pending {
 /// and [`GC_MIN_SYNCS`] calls; run it once after each successful sync. Does nothing while `refs` is incomplete, nor
 /// does that time count towards collecting anything. Returns the deleted names.
 pub async fn collect_blobs(storage: &dyn Storage, refs: &BlobRefs, manifest: &mut GcManifest, now_ms: i64) -> Result<Vec<String>> {
+    manifest.last_run_ms = now_ms;
     if !refs.complete {
         manifest.pending.clear();
         return Ok(Vec::new());
@@ -203,6 +216,17 @@ mod tests {
             }
             assert_eq!(s.list_blobs().await.unwrap(), vec!["old.png"]);
             assert!(m.pending.is_empty(), "time paused must not count");
+        });
+    }
+
+    #[test]
+    fn collecting_is_due_hourly() {
+        pollster::block_on(async {
+            let mut m = GcManifest::default();
+            assert!(m.due(DAY));
+            collect_blobs(&Memory::default(), &BlobRefs::new(), &mut m, DAY).await.unwrap();
+            assert!(!m.due(DAY + 1000));
+            assert!(m.due(DAY + 3_600_000));
         });
     }
 

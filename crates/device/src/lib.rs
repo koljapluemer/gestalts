@@ -8,7 +8,7 @@
 //! wrote while it read it. Fetching and pushing go over the network alongside the app's writes.
 //!
 //! In the data folder:
-//! - `folder/notes/<key>.yml`, `folder/blobs/<name>`: the notes, as on any device
+//! - `data/notes/<id>.yml`, `data/blobs/<name>`: the ymls, as on any device
 //! - `paired.json`: the node paired with, its token included (keep the folder private)
 //! - `sync-base/<base_name>/`: what the notes were at the last sync, per node and folder
 //! - `gestalts.json`: the plugins' gestalt definitions, from the last time the app opened, for merging
@@ -110,7 +110,7 @@ pub struct Device {
 impl Device {
     /// The device whose data is in `dir` (an app's private storage), created if new.
     pub fn open(dir: &Path, host: Box<dyn Host>) -> Result<Device> {
-        std::fs::create_dir_all(dir.join("folder")).map_err(io)?;
+        std::fs::create_dir_all(dir.join("data")).map_err(io)?;
         let saved: Vec<String> = read_json(&dir.join("gestalts.json"))?.unwrap_or_default();
         // definitions an older or newer app saved that this core can't read: merge by the core's own until it opens
         let gestalts = Gestalts::builtin_with(&saved.iter().map(String::as_str).collect::<Vec<_>>()).unwrap_or_else(|_| Gestalts::builtin());
@@ -126,7 +126,7 @@ impl Device {
         };
         Ok(Device {
             dir: dir.to_owned(),
-            notes: Tracked::new(FsStorage::new(dir.join("folder"))),
+            notes: Tracked::new(FsStorage::new(dir.join("data"))),
             gestalts: RefCell::new(gestalts),
             paired: RefCell::new(paired),
             status: RefCell::new(status),
@@ -141,7 +141,7 @@ impl Device {
 
     /// The folder with the notes and blobs (`notes/`, `blobs/`).
     pub fn folder(&self) -> PathBuf {
-        self.dir.join("folder")
+        self.dir.join("data")
     }
 
     /// The notes, as the app's page reads and writes them.
@@ -329,6 +329,9 @@ impl Device {
     async fn collect_blobs(&self) -> Result<()> {
         let path = self.dir.join("blob-gc.json");
         let mut manifest: GcManifest = read_json(&path)?.unwrap_or_default();
+        if !manifest.due(now_ms()) {
+            return Ok(());
+        }
         let texts = self.notes.read_all_ymls().await?;
         let referenced = gestalts_core::referenced_blobs(texts.iter().map(|(k, t)| (k.as_str(), t.as_str())), &self.gestalts.borrow());
         let deleted = {

@@ -25,6 +25,7 @@ use tower_http::cors::{AllowOrigin, CorsLayer};
 use crate::lan::{Lan, LanView};
 use crate::pairing::{DeviceView, Offer, Refused};
 use crate::paths::{Config, Paths};
+use crate::manifest::AccessPolicy;
 use crate::plugins::{PluginHost, PluginView};
 use crate::uv::UvState;
 use crate::watch::{Event, Events};
@@ -35,6 +36,8 @@ pub const CONTROL_HEADER: &str = "x-gestalts-control";
 /// socket counts every 20 s).
 const CONNECTED_FOR: Duration = Duration::from_secs(60);
 const EVENTS_PING: Duration = Duration::from_secs(20);
+/// What `.gestalts/format` says in a data folder of ymls that each name one gestalt.
+const FOLDER_FORMAT: &str = "1";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FolderInfo {
@@ -49,8 +52,22 @@ pub struct Folder {
 }
 
 impl Folder {
-    /// Opens (and if needed creates) a data folder with `notes/`, `blobs/` and `.gestalts/folder-id`.
+    /// Opens (and if needed creates) a data folder with `notes/`, `blobs/` and `.gestalts/folder-id`. Refuses a folder
+    /// that holds ymls but isn't marked as one of ours in this format: opening it would mean treating every file in it
+    /// as invalid, and syncing that to other devices.
     pub fn open(path: &Path) -> Result<Folder, String> {
+        let marker = path.join(".gestalts").join("format");
+        match std::fs::read_to_string(&marker) {
+            Ok(format) if format.trim() == FOLDER_FORMAT => {}
+            Ok(format) => return Err(format!("{} is in format {}, this app needs {FOLDER_FORMAT}", path.display(), format.trim())),
+            Err(_) => {
+                let holds_ymls = std::fs::read_dir(path.join("notes")).is_ok_and(|mut d| d.any(|e| e.is_ok_and(|e| e.path().extension().is_some_and(|x| x == "yml"))));
+                if holds_ymls {
+                    return Err(format!("{} holds files from before this format; choose a new, empty folder", path.display()));
+                }
+                crate::paths::write_atomic(&marker, FOLDER_FORMAT.as_bytes()).map_err(|e| format!("cannot write {}: {e}", marker.display()))?;
+            }
+        }
         for sub in ["notes", "blobs"] {
             std::fs::create_dir_all(path.join(sub)).map_err(|e| format!("cannot use {}: {e}", path.display()))?;
         }
@@ -187,6 +204,7 @@ impl IntoResponse for ApiError {
         let status = match self.0 {
             StorageError::InvalidKey(_) => StatusCode::BAD_REQUEST,
             StorageError::ReadOnly => StatusCode::FORBIDDEN,
+            StorageError::Rejected(_) => StatusCode::UNPROCESSABLE_ENTITY,
             StorageError::Io(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
         (status, self.0.to_string()).into_response()
@@ -196,8 +214,8 @@ impl IntoResponse for ApiError {
 /// Storage results as handler results.
 fn api<T>(r: Result<T, StorageError>) -> Result<T, Response> { r.map_err(|e| ApiError(e).into_response()) }
 
-/// The node API's version, in `/health`: a peer checks it before it syncs. 2 added `/sync/*`.
-pub const API_VERSION: u32 = 2;
+/// The node API's version, in `/health`: a peer checks it before it syncs.
+pub const API_VERSION: u32 = 3;
 
 #[derive(Serialize)]
 struct Health {
@@ -233,8 +251,8 @@ pub struct StatusView {
 }
 
 #[derive(Serialize, Deserialize)]
-struct NoteEntry {
-    key: String,
+struct YmlEntry {
+    id: String,
     text: String,
 }
 
@@ -242,80 +260,55 @@ async fn health(State(s): State<AppState>) -> Json<Health> {
     Json(Health { app: s.identity.name, version: env!("CARGO_PKG_VERSION"), api: API_VERSION, folder: s.folder().map(|f| f.info.clone()) })
 }
 
-async fn worker_access(headers: &HeaderMap, state: &AppState) -> Result<Option<crate::manifest::Access>, Response> {
+async fn backend_access(headers: &HeaderMap, state: &AppState) -> Result<Option<AccessPolicy>, Response> {
     let Some(value) = headers.get(header::AUTHORIZATION) else { return Ok(None) };
     let value = value.to_str().map_err(|_| StatusCode::UNAUTHORIZED.into_response())?;
     let token = value.strip_prefix("Bearer ").ok_or_else(|| StatusCode::UNAUTHORIZED.into_response())?;
     state.plugins.policy_for_token(token).await.map(Some).ok_or_else(|| StatusCode::UNAUTHORIZED.into_response())
 }
 
-fn readable(gestalts: &gestalts_core::Gestalts, access: &crate::manifest::Access, key: &str, text: &str) -> bool {
-    let note = gestalts_core::Note::parse(key, text);
-    let gs = gestalts.of(&note);
-    access.read.gestalts.iter().any(|g| gs.contains(g)) && access.read.tags_all.iter().all(|t| note.has_tag(t))
-}
-
-fn writable(access: &crate::manifest::Access, key: &str, text: &str) -> bool {
-    let note = gestalts_core::Note::parse(key, text);
-    note.parse_error.is_none() && !access.write.tags_all.is_empty() && access.write.tags_all.iter().all(|t| note.has_tag(t))
-}
-
-async fn list_ymls(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<Vec<NoteEntry>>, Response> {
+async fn read_yml(State(state): State<AppState>, UrlPath(id): UrlPath<String>, headers: HeaderMap) -> Result<Response, Response> {
     let s = state.store()?;
-    let access = worker_access(&headers, &state).await?;
-    let mut out = Vec::new();
-    for key in api(s.list_notes_sync())? {
-        if let Some(text) = api(s.read_note_sync(&key))?
-            && access.as_ref().is_none_or(|a| readable(state.plugins.gestalts(), a, &key, &text)) {
-            out.push(NoteEntry { key, text });
-        }
-    }
-    Ok(Json(out))
-}
-
-async fn read_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<Response, Response> {
-    let s = state.store()?;
-    let access = worker_access(&headers, &state).await?;
-    Ok(match api(s.read_note_sync(&key))? {
-        Some(t) if access.as_ref().is_none_or(|a| readable(state.plugins.gestalts(), a, &key, &t)) => ([(header::CONTENT_TYPE, "application/yaml; charset=utf-8")], t).into_response(),
+    let access = backend_access(&headers, &state).await?;
+    Ok(match api(s.read_yml_sync(&id))? {
+        Some(t) if access.as_ref().is_none_or(|a| a.can_read(&id, &t, state.plugins.gestalts())) => ([(header::CONTENT_TYPE, "application/yaml; charset=utf-8")], t).into_response(),
         _ => StatusCode::NOT_FOUND.into_response(),
     })
 }
 
-async fn write_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap, body: String) -> Result<StatusCode, Response> {
+/// An existing yml a backend may replace or delete: none, a tombstone, or one of a gestalt it writes.
+fn may_replace(a: &AccessPolicy, id: &str, old: Option<&str>, g: &gestalts_core::Gestalts) -> bool {
+    old.is_none_or(|t| gestalts_core::is_tombstone_text(t) || a.can_write(id, t, g))
+}
+
+async fn write_yml(State(state): State<AppState>, UrlPath(id): UrlPath<String>, headers: HeaderMap, body: String) -> Result<StatusCode, Response> {
     let s = state.store()?;
-    let access = worker_access(&headers, &state).await?;
-    if let Some(a) = &access {
-        if !writable(a, &key, &body) { return Err(StatusCode::FORBIDDEN.into_response()); }
-        if let Some(old) = api(s.read_note_sync(&key))? && !writable(a, &key, &old) { return Err(StatusCode::FORBIDDEN.into_response()); }
+    if let Some(a) = backend_access(&headers, &state).await? {
+        let g = state.plugins.gestalts();
+        let old = api(s.read_yml_sync(&id))?;
+        if !a.can_write(&id, &body, g) || !may_replace(&a, &id, old.as_deref(), g) { return Err(StatusCode::FORBIDDEN.into_response()); }
     }
-    api(s.write_note_sync(&key, &body))?;
-    state.plugins.note_changed(&key, &body).await;
+    api(s.write_yml_sync(&id, &body))?;
     Ok(StatusCode::NO_CONTENT)
 }
 
-async fn delete_yml(State(state): State<AppState>, UrlPath(key): UrlPath<String>, headers: HeaderMap) -> Result<StatusCode, Response> {
+async fn delete_yml(State(state): State<AppState>, UrlPath(id): UrlPath<String>, headers: HeaderMap) -> Result<StatusCode, Response> {
     let s = state.store()?;
-    let access = worker_access(&headers, &state).await?;
-    if let Some(a) = &access {
-        let old = api(s.read_note_sync(&key))?;
-        if old.as_ref().is_none_or(|text| !writable(a, &key, text)) { return Err(StatusCode::FORBIDDEN.into_response()); }
+    let Some(old) = api(s.read_yml_sync(&id))? else { return Ok(StatusCode::NO_CONTENT) };
+    if let Some(a) = backend_access(&headers, &state).await?
+        && !may_replace(&a, &id, Some(&old), state.plugins.gestalts()) { return Err(StatusCode::FORBIDDEN.into_response()); }
+    // a delete is a tombstone, so it syncs like any other change
+    if !gestalts_core::is_tombstone_text(&old) {
+        api(s.write_yml_sync(&id, &gestalts_core::tombstone(&id, &now_iso())))?;
     }
-    // a delete is a tombstone, so it syncs like any other change (doc/node.md#sync)
-    let Some(old) = api(s.read_note_sync(&key))? else { return Ok(StatusCode::NO_CONTENT) };
-    if gestalts_core::is_tombstone_text(&old) { return Ok(StatusCode::NO_CONTENT); }
-    let id = gestalts_core::Note::parse(key.clone(), old).id().to_owned();
-    let tomb = gestalts_core::tombstone(&id, &now_iso());
-    api(s.write_note_sync(&key, &tomb))?;
-    state.plugins.note_changed(&key, &tomb).await;
     Ok(StatusCode::NO_CONTENT)
 }
 
-// --- sync: what a syncing app reads and writes, so it fetches only the notes that differ (doc/node.md#sync) ---
+// --- sync: what a syncing app reads and writes, so it fetches only the ymls that differ ---
 
-/// Apps only: a worker reads and writes through `/notes`, where its access is checked.
+/// Apps only: a backend reads and writes through `/ymls`, where its access is checked.
 async fn app_only(headers: &HeaderMap, state: &AppState) -> Result<(), Response> {
-    match worker_access(headers, state).await? {
+    match backend_access(headers, state).await? {
         Some(_) => Err(StatusCode::FORBIDDEN.into_response()),
         None => Ok(()),
     }
@@ -327,46 +320,37 @@ async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T, StorageError>
     api(r)
 }
 
-/// `{key: hash}` of every note.
+/// `{id: hash}` of every yml, reading only the files that changed since the last call.
 async fn sync_hashes(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<gestalts_core::Hashes>, Response> {
     let s = state.store()?;
     app_only(&headers, &state).await?;
-    Ok(Json(blocking(move || {
-        let mut out = gestalts_core::Hashes::new();
-        for key in s.list_notes_sync()? {
-            if let Some(text) = s.read_note_sync(&key)? {
-                out.insert(key, gestalts_core::content_hash(text.as_bytes()));
-            }
-        }
-        Ok(out)
-    }).await?))
+    Ok(Json(blocking(move || s.yml_hashes_sync()).await?))
 }
 
 #[derive(Deserialize)]
-struct Keys { keys: Vec<String> }
+struct Ids { ids: Vec<String> }
 
-/// The given notes that exist.
-async fn sync_read(State(state): State<AppState>, headers: HeaderMap, Json(req): Json<Keys>) -> Result<Json<Vec<NoteEntry>>, Response> {
+/// The given ymls that exist.
+async fn sync_read(State(state): State<AppState>, headers: HeaderMap, Json(req): Json<Ids>) -> Result<Json<Vec<YmlEntry>>, Response> {
     let s = state.store()?;
     app_only(&headers, &state).await?;
     Ok(Json(blocking(move || {
         let mut out = Vec::new();
-        for key in req.keys {
-            if let Some(text) = s.read_note_sync(&key)? { out.push(NoteEntry { key, text }); }
+        for id in req.ids {
+            if let Some(text) = s.read_yml_sync(&id)? { out.push(YmlEntry { id, text }); }
         }
         Ok(out)
     }).await?))
 }
 
-/// Writes several notes.
-async fn sync_write(State(state): State<AppState>, headers: HeaderMap, Json(notes): Json<Vec<NoteEntry>>) -> Result<StatusCode, Response> {
+/// Writes several ymls.
+async fn sync_write(State(state): State<AppState>, headers: HeaderMap, Json(ymls): Json<Vec<YmlEntry>>) -> Result<StatusCode, Response> {
     let s = state.store()?;
     app_only(&headers, &state).await?;
-    let written = blocking(move || {
-        for n in &notes { s.write_note_sync(&n.key, &n.text)?; }
-        Ok(notes)
+    blocking(move || {
+        for y in &ymls { s.write_yml_sync(&y.id, &y.text)?; }
+        Ok(())
     }).await?;
-    for n in &written { state.plugins.note_changed(&n.key, &n.text).await; }
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -375,30 +359,15 @@ pub(crate) fn now_iso() -> String {
     gestalts_core::iso_datetime(ms)
 }
 
-/// Blobs referenced by notes this worker may read.
-fn referenced_blobs(s: &FsStorage, gestalts: &gestalts_core::Gestalts, access: &crate::manifest::Access) -> Result<std::collections::BTreeSet<String>, Response> {
-    let mut names = std::collections::BTreeSet::new();
-    if access.blobs.read != crate::manifest::BlobRead::Referenced { return Ok(names); }
-    for key in api(s.list_notes_sync())? {
-        if let Some(text) = api(s.read_note_sync(&key))? && readable(gestalts, access, &key, &text) {
-            names.extend(gestalts_core::Note::parse(key, text).blobs().into_iter().map(|b| b.target));
-        }
-    }
-    Ok(names)
-}
-
 async fn list_blobs(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<Vec<String>>, Response> {
     let s = state.store()?;
-    Ok(Json(match worker_access(&headers, &state).await? {
-        Some(access) => referenced_blobs(&s, state.plugins.gestalts(), &access)?.into_iter().collect(),
-        None => api(s.list_blobs_sync())?,
-    }))
+    if backend_access(&headers, &state).await?.is_some_and(|a| !a.can_read_blobs()) { return Err(StatusCode::FORBIDDEN.into_response()); }
+    Ok(Json(api(s.list_blobs_sync())?))
 }
 
 async fn read_blob(State(state): State<AppState>, UrlPath(name): UrlPath<String>, headers: HeaderMap) -> Result<Response, Response> {
     let s = state.store()?;
-    if let Some(access) = worker_access(&headers, &state).await?
-        && !referenced_blobs(&s, state.plugins.gestalts(), &access)?.contains(&name) { return Err(StatusCode::NOT_FOUND.into_response()); }
+    if backend_access(&headers, &state).await?.is_some_and(|a| !a.can_read_blobs()) { return Err(StatusCode::NOT_FOUND.into_response()); }
     Ok(match api(s.read_blob_sync(&name))? {
         Some(b) => ([(header::CONTENT_TYPE, mime_guess::from_path(&name).first_or_octet_stream().to_string())], b).into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
@@ -407,15 +376,15 @@ async fn read_blob(State(state): State<AppState>, UrlPath(name): UrlPath<String>
 
 async fn write_blob(State(state): State<AppState>, UrlPath(name): UrlPath<String>, headers: HeaderMap, body: Bytes) -> Result<StatusCode, Response> {
     let s = state.store()?;
-    if worker_access(&headers, &state).await?.is_some_and(|a| !a.blobs.write) { return Err(StatusCode::FORBIDDEN.into_response()); }
+    if backend_access(&headers, &state).await?.is_some_and(|a| !a.can_write_blobs()) { return Err(StatusCode::FORBIDDEN.into_response()); }
     api(s.write_blob_sync(&name, &body))?;
     Ok(StatusCode::NO_CONTENT)
 }
 
-/// Apps only: workers never delete blobs. Deleting one a note still uses is the caller's mistake to avoid.
+/// Apps only: backends never delete blobs. Deleting one a yml still uses is the caller's mistake to avoid.
 async fn delete_blob(State(state): State<AppState>, UrlPath(name): UrlPath<String>, headers: HeaderMap) -> Result<StatusCode, Response> {
     let s = state.store()?;
-    if worker_access(&headers, &state).await?.is_some() { return Err(StatusCode::FORBIDDEN.into_response()); }
+    if backend_access(&headers, &state).await?.is_some() { return Err(StatusCode::FORBIDDEN.into_response()); }
     api(s.delete_blob_sync(&name))?;
     Ok(StatusCode::NO_CONTENT)
 }
@@ -427,7 +396,7 @@ struct Collected { deleted: Vec<String> }
 /// The manifest of what has been unreferenced since when is `.gestalts/blob-gc.json`.
 async fn collect_blobs(State(state): State<AppState>, headers: HeaderMap) -> Result<Json<Collected>, Response> {
     let s = state.store()?;
-    if worker_access(&headers, &state).await?.is_some() { return Err(StatusCode::FORBIDDEN.into_response()); }
+    if backend_access(&headers, &state).await?.is_some() { return Err(StatusCode::FORBIDDEN.into_response()); }
     let plugins = state.plugins.clone();
     let deleted = tokio::task::spawn_blocking(move || collect_folder(&s, plugins.gestalts()))
         .await
@@ -436,16 +405,15 @@ async fn collect_blobs(State(state): State<AppState>, headers: HeaderMap) -> Res
 }
 
 fn collect_folder(s: &FsStorage, gestalts: &gestalts_core::Gestalts) -> gestalts_core::storage::Result<Vec<String>> {
-    let mut notes = Vec::new();
-    for key in s.list_notes_sync()? {
-        if let Some(text) = s.read_note_sync(&key)? {
-            notes.push((key, text));
-        }
-    }
-    let referenced = gestalts_core::referenced_blobs(notes.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts);
     let file = s.root().join(".gestalts").join("blob-gc.json");
     let mut manifest: gestalts_core::GcManifest = std::fs::read(&file).ok().and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default();
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_millis() as i64);
+    if !manifest.due(now) { return Ok(vec![]); }
+    let mut ymls = Vec::new();
+    for id in s.list_ymls_sync()? {
+        if let Some(text) = s.read_yml_sync(&id)? { ymls.push((id, text)); }
+    }
+    let referenced = gestalts_core::referenced_blobs(ymls.iter().map(|(k, t)| (k.as_str(), t.as_str())), gestalts);
     let deleted = pollster::block_on(gestalts_core::collect_blobs(s, &referenced, &mut manifest, now))?;
     let json = serde_json::to_vec_pretty(&manifest).map_err(|e| StorageError::Io(e.to_string()))?;
     crate::paths::write_atomic(&file, &json).map_err(|e| StorageError::Io(e.to_string()))?;
@@ -453,14 +421,6 @@ fn collect_folder(s: &FsStorage, gestalts: &gestalts_core::Gestalts) -> gestalts
 }
 
 async fn list_plugins(State(s): State<AppState>) -> Json<Vec<PluginView>> { Json(s.plugins.views().await) }
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct RunStarted { run_id: String }
-
-async fn run_plugin(State(s): State<AppState>, UrlPath(id): UrlPath<String>) -> Result<Json<RunStarted>, (StatusCode, String)> {
-    s.plugins.run(&id).await.map(|run_id| Json(RunStarted { run_id })).map_err(|e| (StatusCode::CONFLICT, e))
-}
 
 #[derive(Serialize)]
 struct ServiceView { id: String, available: bool }
@@ -724,8 +684,7 @@ pub fn app(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health))
         .route("/events", get(events))
-        .route("/notes", get(list_ymls))
-        .route("/notes/{key}", get(read_yml).put(write_yml).delete(delete_yml))
+        .route("/ymls/{id}", get(read_yml).put(write_yml).delete(delete_yml))
         .route("/sync/hashes", get(sync_hashes))
         .route("/sync/read", post(sync_read))
         .route("/sync/write", post(sync_write))
@@ -733,7 +692,6 @@ pub fn app(state: AppState) -> Router {
         .route("/blobs/collect", post(collect_blobs))
         .route("/blobs/{name}", get(read_blob).put(write_blob).delete(delete_blob))
         .route("/plugins", get(list_plugins))
-        .route("/plugins/{id}/runs", post(run_plugin))
         .route("/services", get(list_services))
         .route("/services/{service}/{*path}", any(proxy_service))
         .nest("/control", control)
@@ -791,8 +749,7 @@ async fn device_auth(State(s): State<AppState>, mut request: Request, next: Next
 /// `/events`, the plugins or the app's frontend. No CORS: its clients are apps, not web pages.
 pub fn lan_app(state: AppState) -> Router {
     let devices = Router::new()
-        .route("/notes", get(list_ymls))
-        .route("/notes/{key}", get(read_yml).put(write_yml).delete(delete_yml))
+        .route("/ymls/{id}", get(read_yml).put(write_yml).delete(delete_yml))
         .route("/sync/hashes", get(sync_hashes))
         .route("/sync/read", post(sync_read))
         .route("/sync/write", post(sync_write))
@@ -870,10 +827,30 @@ mod tests {
         assert_ne!(a.info.id, Folder::open(&temp_dir("other")).unwrap().info.id);
     }
 
+    #[test]
+    fn a_folder_of_old_files_is_refused_and_left_alone() {
+        let dir = temp_dir("old");
+        std::fs::create_dir_all(dir.join("notes")).unwrap();
+        std::fs::write(dir.join("notes/a.yml"), "tags: [flashcard]\n").unwrap();
+        assert!(Folder::open(&dir).err().unwrap().contains("before this format"));
+        assert!(!dir.join(".gestalts").exists(), "nothing written");
+        assert_eq!(std::fs::read_to_string(dir.join("notes/a.yml")).unwrap(), "tags: [flashcard]\n");
+    }
+
+    #[test]
+    fn a_new_folder_is_marked_and_keeps_opening() {
+        let dir = temp_dir("marked");
+        Folder::open(&dir).unwrap();
+        std::fs::write(dir.join("notes/a.yml"), "id: a\ngestalt: note@1\n").unwrap();
+        Folder::open(&dir).unwrap();
+        std::fs::write(dir.join(".gestalts/format"), "99").unwrap();
+        assert!(Folder::open(&dir).is_err());
+    }
+
     #[tokio::test]
     async fn no_folder_means_conflict_not_empty() {
         let app = app(state(None));
-        assert_eq!(send(&app, get_req("/notes")).await.0, StatusCode::CONFLICT);
+        assert_eq!(send(&app, get_req("/sync/hashes")).await.0, StatusCode::CONFLICT);
         let (status, body) = send(&app, get_req("/health")).await;
         assert_eq!(status, StatusCode::OK);
         assert!(body.contains("\"folder\":null"), "{body}");
@@ -946,19 +923,19 @@ mod tests {
         let s = state(Some(Folder::open(&dir).unwrap()));
         let mut rx = s.events.subscribe();
         let app = app(s.clone());
-        let put = axum::http::Request::put("/notes/through-api").body(Body::from("id: through-api\n")).unwrap();
+        let put = axum::http::Request::put("/ymls/through-api").body(Body::from("id: through-api\n")).unwrap();
         assert_eq!(send(&app, put).await.0, StatusCode::NO_CONTENT);
         let next = |rx: &mut tokio::sync::broadcast::Receiver<Event>| {
             let mut rx = rx.resubscribe();
             async move { tokio::time::timeout(Duration::from_secs(5), rx.recv()).await.expect("an event in time").unwrap() }
         };
         let got = tokio::time::timeout(Duration::from_secs(5), rx.recv()).await.expect("an event in time").unwrap();
-        assert_eq!(got, Event::Changed { notes: vec!["through-api".into()], blobs: vec![] });
+        assert_eq!(got, Event::Changed { ymls: vec!["through-api".into()], blobs: vec![] });
         let waiting = next(&mut rx);
         std::fs::write(dir.join("notes/by-hand.yml"), "id: by-hand\n").unwrap();
         std::fs::write(dir.join("blobs/pic.png"), [1]).unwrap();
         std::fs::write(dir.join("notes/.ignored.yml.tmp"), "x").unwrap();
-        assert_eq!(waiting.await, Event::Changed { notes: vec!["by-hand".into()], blobs: vec!["pic.png".into()] });
+        assert_eq!(waiting.await, Event::Changed { ymls: vec!["by-hand".into()], blobs: vec!["pic.png".into()] });
 
         let other = temp_dir("events-other");
         let waiting = next(&mut rx);
@@ -966,7 +943,7 @@ mod tests {
         assert!(matches!(waiting.await, Event::Folder(Some(_))));
         let waiting = next(&mut rx);
         std::fs::write(other.join("notes/in-other.yml"), "id: in-other\n").unwrap();
-        assert_eq!(waiting.await, Event::Changed { notes: vec!["in-other".into()], blobs: vec![] });
+        assert_eq!(waiting.await, Event::Changed { ymls: vec!["in-other".into()], blobs: vec![] });
     }
 
     #[tokio::test]
@@ -975,15 +952,15 @@ mod tests {
         let paths = s.remember_in.clone().unwrap();
         let app = app(s);
         let dir = temp_dir("chosen");
-        std::fs::create_dir_all(dir.join("notes")).unwrap();
+        Folder::open(&dir).unwrap();
         std::fs::write(dir.join("notes/a.yml"), "title: A\n").unwrap();
         let choose = axum::http::Request::post("/control/folder").header(CONTROL_HEADER, "secret")
             .header(header::CONTENT_TYPE, "application/json")
             .body(Body::from(serde_json::json!({ "path": dir }).to_string())).unwrap();
         assert_eq!(send(&app, choose).await.0, StatusCode::OK);
-        let (status, body) = send(&app, get_req("/notes")).await;
+        let (status, body) = send(&app, get_req("/sync/hashes")).await;
         assert_eq!(status, StatusCode::OK);
-        assert!(body.contains("title: A"), "{body}");
+        assert!(body.contains("\"a\""), "{body}");
         assert_eq!(Config::load(&paths).folder.unwrap(), dir.canonicalize().unwrap());
     }
 
@@ -1004,10 +981,10 @@ mod tests {
     async fn deletes_are_tombstones_and_blobs_are_collected_later() {
         let dir = temp_dir("gc");
         let app = app(state(Some(Folder::open(&dir).unwrap())));
-        std::fs::write(dir.join("notes/a.yml"), "id: a\nblobs: [used.png]\n").unwrap();
+        std::fs::write(dir.join("notes/a.yml"), "id: a\ngestalt: note@1\nblobs: [{file: used.png, label: pic}]\n").unwrap();
         std::fs::write(dir.join("blobs/used.png"), [1]).unwrap();
         std::fs::write(dir.join("blobs/unused.png"), [2]).unwrap();
-        let del = axum::http::Request::delete("/notes/a").body(Body::empty()).unwrap();
+        let del = axum::http::Request::delete("/ymls/a").body(Body::empty()).unwrap();
         assert_eq!(send(&app, del).await.0, StatusCode::NO_CONTENT);
         assert!(gestalts_core::is_tombstone_text(&std::fs::read_to_string(dir.join("notes/a.yml")).unwrap()));
         let collect = || axum::http::Request::post("/blobs/collect").body(Body::empty()).unwrap();
@@ -1030,12 +1007,12 @@ mod tests {
         assert_eq!(body, format!("{{\"a\":\"{}\"}}", gestalts_core::content_hash(b"x: 1\n")));
         let post = |uri: &str, json: serde_json::Value| axum::http::Request::post(uri).header(header::CONTENT_TYPE, "application/json")
             .body(Body::from(json.to_string())).unwrap();
-        let write = post("/sync/write", serde_json::json!([{ "key": "b", "text": "y: 2\n" }, { "key": "c", "text": "z: 3\n" }]));
+        let write = post("/sync/write", serde_json::json!([{ "id": "b", "text": "y: 2\n" }, { "id": "c", "text": "z: 3\n" }]));
         assert_eq!(send(&app, write).await.0, StatusCode::NO_CONTENT);
-        let (status, body) = send(&app, post("/sync/read", serde_json::json!({ "keys": ["b", "missing", "a"] }))).await;
+        let (status, body) = send(&app, post("/sync/read", serde_json::json!({ "ids": ["b", "missing", "a"] }))).await;
         assert_eq!(status, StatusCode::OK);
-        assert_eq!(body, r#"[{"key":"b","text":"y: 2\n"},{"key":"a","text":"x: 1\n"}]"#);
-        let bad = post("/sync/write", serde_json::json!([{ "key": "../escape", "text": "" }]));
+        assert_eq!(body, r#"[{"id":"b","text":"y: 2\n"},{"id":"a","text":"x: 1\n"}]"#);
+        let bad = post("/sync/write", serde_json::json!([{ "id": "../escape", "text": "" }]));
         assert_eq!(send(&app, bad).await.0, StatusCode::BAD_REQUEST);
     }
 
@@ -1085,7 +1062,7 @@ mod tests {
         // without the token, or for anything but the notes: refused
         let client = gestalts_peer::paired::pinned_client(lan.node_id()).unwrap();
         let get = |path: &str| client.get(format!("https://127.0.0.1:{port}{path}")).send();
-        assert_eq!(get("/notes").await.unwrap().status(), 401);
+        assert_eq!(get("/sync/hashes").await.unwrap().status(), 401);
         assert_eq!(get("/control/status").await.unwrap().status(), 404);
         assert_eq!(get("/health").await.unwrap().status(), 200);
 
@@ -1132,7 +1109,7 @@ mod tests {
         // pairing syncs at once too: whichever sync ran first, both folders end up with both notes
         device.run(|d| Box::pin(async move { d.sync().await.map_err(|e| e.to_string()) })).await.unwrap().unwrap();
         assert!(dir.join("notes/from-phone.yml").exists());
-        assert!(phone.join("folder/notes/on-disk.yml").exists());
+        assert!(phone.join("data/notes/on-disk.yml").exists());
         let status = device.status().await.unwrap();
         assert_eq!(status.state, gestalts_device::SyncState::Ok);
         assert!(status.last_sync.is_some() && status.folder.is_some());
@@ -1161,7 +1138,7 @@ mod tests {
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let url = format!("http://{}", listener.local_addr().unwrap());
         tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
-        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\nblobs: [disk.png]\n").unwrap();
+        std::fs::write(dir.join("notes/on-disk.yml"), "id: on-disk\ngestalt: note@1\nblobs: [{file: disk.png, label: pic}]\n").unwrap();
         std::fs::write(dir.join("blobs/disk.png"), [1, 2]).unwrap();
 
         let peer = Peer::new(&url);
@@ -1177,7 +1154,7 @@ mod tests {
         assert_eq!(report.pushed, ["on-phone"]);
         assert_eq!((report.blobs_pulled, report.blobs_pushed), (vec!["disk.png".to_owned()], vec!["phone.png".to_owned()]));
         assert!(std::fs::read_to_string(dir.join("notes/on-phone.yml")).unwrap().contains("phone.png"));
-        assert_eq!(local.read_yml("on-disk").await.unwrap().unwrap(), "id: on-disk\nblobs: [disk.png]\n");
+        assert_eq!(local.read_yml("on-disk").await.unwrap().unwrap(), "id: on-disk\ngestalt: note@1\nblobs: [{file: disk.png, label: pic}]\n");
         assert_eq!(std::fs::read(dir.join("blobs/phone.png")).unwrap(), [3]);
         assert_eq!(local.read_blob("disk.png").await.unwrap().unwrap(), [1, 2]);
 

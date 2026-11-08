@@ -1,16 +1,16 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::net::Ipv4Addr;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::Arc;
 use std::time::Duration;
 
-use gestalts_core::{Gestalts, Note};
+use gestalts_core::Gestalts;
 use serde::{Deserialize, Serialize};
 use tokio::process::{Child, Command};
 use tokio::sync::{Mutex, RwLock};
 
-use crate::manifest::{PluginBundle, Runtime, Trigger, WorkerManifest};
+use crate::manifest::{AccessPolicy, PluginBundle};
 use crate::paths::Paths;
 use crate::uv::{self, UvState};
 
@@ -20,18 +20,15 @@ pub struct PluginView {
     pub id: String,
     pub version: String,
     pub state: PluginState,
-    pub services: Vec<String>,
     pub error: Option<String>,
-    pub current_run: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
-pub enum PluginState { Stopped, Starting, Ready, Running, Error }
+pub enum PluginState { Stopped, Starting, Ready, Error }
 
 pub struct HostedPlugin {
     pub bundle: PluginBundle,
-    pub worker: WorkerManifest,
     pub view: PluginView,
     pub token: String,
     pub worker_url: Option<String>,
@@ -49,13 +46,8 @@ pub struct PluginHost {
     gestalts: Arc<Gestalts>,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct RunRequest<'a> { run_id: &'a str, trigger: TriggerRequest, note_keys: Vec<String> }
-
-#[derive(Debug, Serialize)]
-#[serde(tag = "kind", rename_all = "lowercase")]
-enum TriggerRequest { Manual, Change }
+/// What a `backend.py` imports; written next to it at start, so a plugin needs nothing installed.
+const BACKEND_SDK: &str = include_str!("../../../sdk/python/gestalts_backend.py");
 
 #[derive(Debug, Deserialize)]
 struct Health { protocol: u32 }
@@ -63,7 +55,6 @@ struct Health { protocol: u32 }
 impl PluginHost {
     pub fn discover(dirs: &[PathBuf], connector_url: String, paths: Paths) -> Result<Self, String> {
         let mut found = BTreeMap::new();
-        let mut services = BTreeSet::new();
         let mut bundles: Vec<PluginBundle> = Vec::new();
         for dir in dirs {
             if !dir.exists() { continue; }
@@ -73,29 +64,25 @@ impl PluginHost {
                 let bundle = PluginBundle::load(entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?;
                 if bundles.iter().any(|b| b.manifest.id == bundle.manifest.id) { return Err(format!("duplicate plugin {}", bundle.manifest.id)); }
                 bundles.push(bundle.clone());
-                // only plugins with a worker run here; the others are UI and data, for the apps
-                let Some(worker) = bundle.manifest.worker.clone() else { continue };
-                for service in &worker.services {
-                    if !services.insert(service.clone()) { return Err(format!("duplicate service {service}")); }
-                }
+                // only plugins with a backend run here; the others are a view and data, for the apps
+                if bundle.backend().is_none() { continue; }
                 let id = bundle.manifest.id.clone();
-                let view = PluginView { id: id.clone(), version: bundle.manifest.version.clone(), state: PluginState::Stopped,
-                    services: worker.services.clone(), error: None, current_run: None };
-                found.insert(id, Arc::new(Mutex::new(HostedPlugin { bundle, worker, view, token: uuid::Uuid::new_v4().to_string(), worker_url: None, child: None })));
+                let view = PluginView { id: id.clone(), version: bundle.manifest.version.clone(), state: PluginState::Stopped, error: None };
+                found.insert(id, Arc::new(Mutex::new(HostedPlugin { bundle, view, token: uuid::Uuid::new_v4().to_string(), worker_url: None, child: None })));
             }
         }
         let gestalts = crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())?;
         Ok(Self { inner: Arc::new(RwLock::new(found)), connector_url, paths, uv: Arc::new(std::sync::RwLock::new(UvState::Locating)), client: reqwest::Client::new(), gestalts: Arc::new(gestalts) })
     }
 
-    /// The core's gestalts and those of every plugin found, for lints, triggers, access checks and merging.
+    /// The core's gestalts and those of every plugin found, for access checks and merging.
     pub fn gestalts(&self) -> &Gestalts { &self.gestalts }
 
     pub fn uv_state(&self) -> UvState { self.uv.read().expect("uv state lock").clone() }
 
     fn set_uv(&self, state: UvState) { *self.uv.write().expect("uv state lock") = state; }
 
-    /// Finds (or downloads) uv, then starts every plugin's worker.
+    /// Finds (or downloads) uv, then starts every plugin's backend.
     pub async fn start_all(&self) {
         let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
         if plugins.is_empty() { return; }
@@ -120,7 +107,7 @@ impl PluginHost {
         }
     }
 
-    /// Stops every worker (on quit; dropping the host alone doesn't, since the process may exit first).
+    /// Stops every backend (on quit; dropping the host alone doesn't, since the process may exit first).
     pub async fn stop_all(&self) {
         let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
         for plugin in plugins {
@@ -133,32 +120,31 @@ impl PluginHost {
     async fn start(&self, plugin: Arc<Mutex<HostedPlugin>>, uv: &std::path::Path) -> Result<(), String> {
         let mut p = plugin.lock().await;
         p.view.state = PluginState::Starting;
-        if p.worker.runtime != Runtime::Uv { return Err("unsupported runtime".into()); }
-        let project = p.bundle.root.join(&p.worker.project);
-        let environment = self.paths.cache.join("plugins").join(&p.bundle.manifest.id).join("venv");
-        std::fs::create_dir_all(environment.parent().unwrap()).map_err(|e| e.to_string())?;
-        let sync = self.uv_command(uv).args(["sync", "--locked", "--project"]).arg(&project)
-            .env("UV_PROJECT_ENVIRONMENT", &environment).stdout(Stdio::null()).stderr(Stdio::piped()).output().await.map_err(|e| format!("cannot run uv: {e}"))?;
+        let script = p.bundle.backend().ok_or("this plugin has no backend")?;
+        // the script's own environment, from its inline metadata; the interpreter runs directly (not via `uv run`), so
+        // the process we stop is the backend itself rather than a uv parent whose child would outlive it
+        let sync = self.uv_command(uv).args(["sync", "--script"]).arg(&script).stdout(Stdio::null()).stderr(Stdio::piped()).output().await
+            .map_err(|e| format!("cannot run uv: {e}"))?;
         if !sync.status.success() { return Err(format!("uv sync failed: {}", String::from_utf8_lossy(&sync.stderr).trim())); }
+        let python = self.uv_command(uv).args(["python", "find", "--script"]).arg(&script).stderr(Stdio::piped()).output().await
+            .map_err(|e| format!("cannot run uv: {e}"))?;
+        if !python.status.success() { return Err(format!("uv python find failed: {}", String::from_utf8_lossy(&python.stderr).trim())); }
+        let python = PathBuf::from(String::from_utf8_lossy(&python.stdout).trim());
+        let sdk = self.paths.cache.join("backend-sdk");
+        std::fs::create_dir_all(&sdk).map_err(|e| e.to_string())?;
+        std::fs::write(sdk.join("gestalts_backend.py"), BACKEND_SDK).map_err(|e| e.to_string())?;
         let listener = std::net::TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).map_err(|e| e.to_string())?;
         let port = listener.local_addr().map_err(|e| e.to_string())?.port();
         drop(listener);
-        // run the synced environment's executables directly (not via `uv run`), so the process we
-        // stop is the worker itself rather than a uv parent whose child would outlive it
-        let command = &p.worker.command;
-        let bin = environment.join(if cfg!(windows) { "Scripts" } else { "bin" });
-        let program = [bin.join(&command[0]), bin.join(format!("{}.exe", command[0]))].into_iter().find(|p| p.is_file())
-            .unwrap_or_else(|| PathBuf::from(&command[0]));
-        let path = std::env::join_paths(std::iter::once(bin.clone()).chain(std::env::var_os("PATH").iter().flat_map(std::env::split_paths)))
-            .map_err(|e| e.to_string())?;
-        let mut cmd = Command::new(program);
-        cmd.args(&command[1..])
-            .current_dir(&project)
-            .env("VIRTUAL_ENV", &environment).env("PATH", path).stdin(Stdio::null())
-            .env("GESTALTS_CONNECTOR_URL", &self.connector_url).env("GESTALTS_PLUGIN_TOKEN", &p.token)
+        let mut cmd = Command::new(python);
+        cmd.arg(&script)
+            .current_dir(&p.bundle.root)
+            .stdin(Stdio::null())
+            .env("PYTHONPATH", &sdk).env("PYTHONDONTWRITEBYTECODE", "1")
+            .env("GESTALTS_NODE_URL", &self.connector_url).env("GESTALTS_PLUGIN_TOKEN", &p.token)
             .env("GESTALTS_PLUGIN_ID", &p.bundle.manifest.id).env("GESTALTS_WORKER_PORT", port.to_string())
             .stdout(Stdio::inherit()).stderr(Stdio::inherit()).kill_on_drop(true);
-        p.child = Some(cmd.spawn().map_err(|e| format!("cannot start worker: {e}"))?);
+        p.child = Some(cmd.spawn().map_err(|e| format!("cannot start the backend: {e}"))?);
         let url = format!("http://127.0.0.1:{port}");
         p.worker_url = Some(url.clone());
         drop(p);
@@ -169,7 +155,7 @@ impl PluginHost {
             }
             tokio::time::sleep(Duration::from_millis(100)).await;
         }
-        Err("worker readiness timed out".into())
+        Err("the backend did not become ready".into())
     }
 
     /// uv with its Python installs and download cache kept inside the app's own folders.
@@ -187,74 +173,30 @@ impl PluginHost {
         out
     }
 
-    pub async fn run(&self, id: &str) -> Result<String, String> {
-        self.run_with(id, TriggerRequest::Manual, vec![]).await
-    }
-
-    async fn run_with(&self, id: &str, trigger: TriggerRequest, note_keys: Vec<String>) -> Result<String, String> {
-        let plugin = self.inner.read().await.get(id).cloned().ok_or_else(|| "unknown plugin".to_string())?;
-        self.revive(&plugin).await;
-        let (url, run_id) = {
-            let mut p = plugin.lock().await;
-            if p.view.state != PluginState::Ready { return Err("plugin is not ready".into()); }
-            let run_id = uuid::Uuid::new_v4().to_string();
-            p.view.state = PluginState::Running; p.view.current_run = Some(run_id.clone());
-            (p.worker_url.clone().unwrap(), run_id)
-        };
-        let host = self.clone(); let id = id.to_owned(); let returned = run_id.clone();
-        tokio::spawn(async move {
-            let result = host.client.post(format!("{url}/_gestalts/runs"))
-                .json(&RunRequest { run_id: &run_id, trigger, note_keys }).send().await;
-            if let Some(plugin) = host.inner.read().await.get(&id).cloned() {
-                let mut p = plugin.lock().await; p.view.current_run = None;
-                match result { Ok(r) if r.status().is_success() => p.view.state = PluginState::Ready,
-                    Ok(r) => { p.view.state = PluginState::Error; p.view.error = Some(format!("run returned {}", r.status())); },
-                    Err(e) => { p.view.state = PluginState::Error; p.view.error = Some(e.to_string()); } }
-            }
-        });
-        Ok(returned)
-    }
-
-    pub async fn note_changed(&self, key: &str, text: &str) {
-        let note = Note::parse(key, text);
-        let gestalts = self.gestalts.of(&note);
-        let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
-        for plugin in plugins {
-            let id = {
-                let p = plugin.lock().await;
-                let matched = p.worker.triggers.iter().any(|t| match t {
-                    Trigger::Change { query } => query.matches(&note, &gestalts),
-                    Trigger::Schedule { .. } => false,
-                });
-                matched.then(|| p.bundle.manifest.id.clone())
-            };
-            if let Some(id) = id { let _ = self.run_with(&id, TriggerRequest::Change, vec![key.to_owned()]).await; }
-        }
-    }
-
+    /// Each backend's plugin id, and whether it's up.
     pub async fn services(&self) -> Vec<(String, bool)> {
-        let plugins: Vec<_> = self.inner.read().await.values().cloned().collect(); let mut out = vec![];
-        for p in plugins { let p = p.lock().await; for s in &p.view.services { out.push((s.clone(), matches!(p.view.state, PluginState::Ready | PluginState::Running))); } }
+        let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
+        let mut out = vec![];
+        for p in plugins {
+            let p = p.lock().await;
+            out.push((p.view.id.clone(), p.view.state == PluginState::Ready));
+        }
         out
     }
 
-    /// The worker serving `service`, restarted first if its process has ended.
+    /// The backend of the plugin `service`, restarted first if its process has ended.
     pub async fn service_url(&self, service: &str) -> Option<String> {
-        let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
-        for plugin in plugins {
-            if !plugin.lock().await.view.services.iter().any(|s| s == service) { continue; }
-            self.revive(&plugin).await;
-            let p = plugin.lock().await;
-            return matches!(p.view.state, PluginState::Ready | PluginState::Running).then(|| p.worker_url.clone()).flatten();
-        }
-        None
+        let plugin = self.inner.read().await.get(service).cloned()?;
+        self.revive(&plugin).await;
+        let p = plugin.lock().await;
+        (p.view.state == PluginState::Ready).then(|| p.worker_url.clone()).flatten()
     }
 
     /// The HTTP client for talking to workers.
     pub fn client(&self) -> &reqwest::Client { &self.client }
 
-    /// Restarts a worker whose process has ended (crashed, killed), so one failure doesn't leave its runs and
-    /// services dead until the connector restarts. Its view says what happened meanwhile.
+    /// Restarts a backend whose process has ended (crashed, killed), so one failure doesn't leave it dead until the
+    /// node restarts. Its view says what happened meanwhile.
     async fn revive(&self, plugin: &Arc<Mutex<HostedPlugin>>) {
         {
             let mut p = plugin.lock().await;
@@ -271,9 +213,9 @@ impl PluginHost {
         }
     }
 
-    pub async fn policy_for_token(&self, token: &str) -> Option<crate::manifest::Access> {
+    pub async fn policy_for_token(&self, token: &str) -> Option<AccessPolicy> {
         let plugins: Vec<_> = self.inner.read().await.values().cloned().collect();
-        for p in plugins { let p = p.lock().await; if p.token == token { return Some(p.worker.access.clone()); } }
+        for p in plugins { let p = p.lock().await; if p.token == token { return Some(AccessPolicy::of(&p.bundle.manifest)); } }
         None
     }
 }
@@ -290,11 +232,10 @@ pub fn load_gestalts(dirs: &[PathBuf]) -> Result<Gestalts, String> {
     crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())
 }
 
-pub fn unpack_builtin(paths: &Paths, builtin: &include_dir::Dir<'_>, sdk: &include_dir::Dir<'_>) -> std::io::Result<PathBuf> {
+pub fn unpack_builtin(paths: &Paths, builtin: &include_dir::Dir<'_>) -> std::io::Result<PathBuf> {
     use sha2::{Digest, Sha256};
     let mut files = Vec::new();
     collect(builtin, Path::new("plugins"), &mut files);
-    collect(sdk, Path::new("sdk/python"), &mut files);
     let mut hash = Sha256::new();
     for (path, f) in &files { hash.update(path.to_string_lossy().as_bytes()); hash.update([0]); hash.update(f.contents()); }
     let id: String = hash.finalize().iter().take(8).map(|b| format!("{b:02x}")).collect();
