@@ -1,28 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { logger, newId, stateKey, useRepo, type Repo } from '@gestalts/sdk';
-import { fsrsStateValue, isAhead, withLocal, type Facet, type FsrsStates, type LocalReview, type ReviewState } from './learning';
+import { logger, useWrite } from '@gestalts/view';
+import { fsrsDataValue, isAhead, withLocal, type Facet, type FsrsStates, type LocalReview, type ReviewState } from './learning';
 import { PracticeSession, type SessionEvent } from './session';
 
 const plog = logger('practice');
 
-/** What a perspective logs its practice with; see `PracticeSession`. */
+const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
+
+type Write = ReturnType<typeof useWrite>;
+
+/** What a view logs its practice with; see `PracticeSession`. */
 export type PracticeLog = {
   /** something to answer appeared (measures the next trial's `ms`) */
   shown(): void;
-  /** one answer; writes the session note */
+  /** one answer; writes the session yml */
   trial(event?: SessionEvent): Promise<void>;
 };
 
 /**
- * The practice log of perspective `app`: `practice-session@1` notes, one per session, written by this page only.
+ * The practice log of view `app`: `practice-session@1` ymls, one per session, written by this page only.
  * Activity is any key or pointer press on the page while it's visible.
  */
 export function usePracticeSession(app: string): PracticeLog {
-  const repo = useRepo();
+  const write = useWrite();
   const [session] = useState(() => new PracticeSession(app, newId));
 
   useEffect(() => {
-    const flush = () => { for (const w of session.takeWrites()) void repo.putValue(w.key, w.value); };
+    const flush = () => { for (const w of session.takeWrites()) void write.put(w); };
     const act = () => session.activity(Date.now());
     const visibility = () => {
       if (document.visibilityState === 'hidden') { session.hide(Date.now()); flush(); } else act();
@@ -39,15 +43,15 @@ export function usePracticeSession(app: string): PracticeLog {
       session.activity(Date.now());
       flush();
     };
-  }, [repo, session]);
+  }, [write, session]);
 
   return useMemo(() => ({
     shown: () => session.shown(Date.now()),
     trial: async (event?: SessionEvent) => {
       session.trial(Date.now(), event);
-      await Promise.all(session.takeWrites().map((w) => repo.putValue(w.key, w.value)));
+      await Promise.all(session.takeWrites().map((w) => write.put(w)));
     },
-  }), [repo, session]);
+  }), [write, session]);
 }
 
 /**
@@ -67,23 +71,22 @@ export function useLocalReviews(stored: FsrsStates): { states: FsrsStates; put: 
 }
 
 /**
- * Saves `next` as the FSRS state of `f` (under `prev`'s key if it has one, else `stateKey`) and, with a `log`,
- * records an `fsrs-review` trial. Returns `next` with its saved key.
+ * Saves `next` as the FSRS state of `f` and, with a `log`, records an `fsrs-review` trial. Returns `next` with its id.
  *
  * The trial is recorded synchronously, before the first await: its `ms` counts from when this card was shown, so it
  * must be taken before the next card is.
  */
-export async function saveReview(repo: Repo, f: Facet, prev: ReviewState | undefined, next: ReviewState, log?: PracticeLog): Promise<ReviewState> {
-  const key = prev?.key ?? stateKey('fsrs-state', f.target, f.facet);
-  const span = plog.span('saveReview', { target: f.target, facet: f.facet, key, rating: next.lastRating, dueAt: next.card.dueAt });
+export async function saveReview(write: Write, f: Facet, prev: ReviewState | undefined, next: ReviewState, log?: PracticeLog): Promise<ReviewState> {
   const trial = log?.trial({ kind: 'fsrs-review', target: f.target, ...(f.facet ? { facet: f.facet } : {}), rating: next.lastRating });
   // handled where it's awaited below; this keeps a failure meanwhile from counting as unhandled
   trial?.catch(() => {});
+  const span = plog.span('saveReview', { target: f.target, facet: f.facet, rating: next.lastRating, dueAt: next.card.dueAt });
   try {
-    const saved = await repo.putValue(key, fsrsStateValue(key, f, next));
+    const id = prev?.id ?? await write.stateId('fsrs-data', f.target, f.facet);
+    const saved = await write.put(fsrsDataValue(id, f, next));
     await trial;
     span.end();
-    return { ...next, key: saved.key };
+    return { ...next, id: saved.id };
   } catch (e) {
     span.fail(e);
     throw e;

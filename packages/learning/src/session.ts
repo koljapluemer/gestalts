@@ -1,14 +1,14 @@
-import type { Json } from '@gestalts/sdk';
+import type { Json, JsonMap } from '@gestalts/view';
 
 /**
- * One perspective's practice, as `practice-session@1` notes. Pure: times come in as milliseconds, and writes go out
+ * One view's practice, as `practice-session@1` ymls. Pure: times come in as milliseconds, and writes go out
  * through `takeWrites` (see `usePracticeSession`).
  *
  * - Active time: a gap between two activities counts, up to `IDLE_MS`. A gap that began with the page hidden
  *   counts nothing.
- * - A session starts at its first trial, so opening a perspective writes nothing. Its `started` is the first
+ * - A session starts at its first trial, so opening a view writes nothing. Its `started` is the first
  *   activity before that trial, and its active time includes the time spent before it.
- * - After a gap of more than `SESSION_GAP_MS` the session is over, and the next trial starts a new note.
+ * - After a gap of more than `SESSION_GAP_MS` the session is over, and the next trial starts a new yml.
  * - `ended` is the last activity, kept current, so a closed tab still leaves a finished session.
  */
 
@@ -90,18 +90,18 @@ export class PracticeSession {
     this.shownAt = null;
   }
 
-  /** The notes to write, of sessions changed since the last call. */
-  takeWrites(): { key: string; value: Json }[] {
+  /** The ymls to write, of sessions changed since the last call. */
+  takeWrites(): JsonMap[] {
     const changed = [...this.closed, ...(this.current?.dirty ? [this.current] : [])];
     this.closed = [];
     for (const s of changed) s.dirty = false;
-    return changed.map((s) => ({ key: s.key, value: this.value(s) }));
+    return changed.map((s) => this.value(s));
   }
 
-  private value(s: Open): Json {
+  private value(s: Open): JsonMap {
     return {
       id: s.key,
-      tags: ['practice-session'],
+      gestalt: 'practice-session@1',
       app: this.app,
       started: new Date(s.started).toISOString(),
       ended: new Date(s.ended).toISOString(),

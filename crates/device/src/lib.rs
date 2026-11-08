@@ -75,7 +75,7 @@ pub struct Status {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Event {
     /// notes and blobs a sync changed in the folder (blobs: pulled, or collected)
-    Changed { notes: Vec<String>, blobs: Vec<String> },
+    Changed { ymls: Vec<String>, blobs: Vec<String> },
     Status(Status),
 }
 
@@ -316,7 +316,7 @@ impl Device {
         let r = pending.report();
         let notes: Vec<String> = r.pulled.iter().chain(&r.conflicts).cloned().collect();
         if !notes.is_empty() || !r.blobs_pulled.is_empty() {
-            self.host.event(Event::Changed { notes, blobs: r.blobs_pulled.clone() });
+            self.host.event(Event::Changed { ymls: notes, blobs: r.blobs_pulled.clone() });
         }
         let report = gestalts_core::push(&self.notes, remote, &mut base, pending, &g, &mut |_| {}).await?;
         if changed_anything(&report) || !self.collected.get() {
@@ -341,7 +341,7 @@ impl Device {
         write_json(&path, &manifest)?;
         self.collected.set(true);
         if !deleted.is_empty() {
-            self.host.event(Event::Changed { notes: vec![], blobs: deleted });
+            self.host.event(Event::Changed { ymls: vec![], blobs: deleted });
         }
         Ok(())
     }

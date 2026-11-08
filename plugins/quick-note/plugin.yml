@@ -1,0 +1,6 @@
+id: quick-note
+version: 1.0.0
+title: Quick note
+description: Write a note down fast, with files attached.
+reads: [note@1]
+writes: [note@1]

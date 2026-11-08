@@ -25,21 +25,21 @@ let host: NativeHost | undefined;
 
 export function tauriHost(): NativeHost {
   host ??= {
-    listNotes: () => invoke('notes_list'),
-    readNote: (key) => invoke('note_read', { key }),
-    readNotes: (keys) => invoke('notes_read', { keys }),
-    readAllNotes: () => invoke('notes_read_all'),
-    noteHashes: () => invoke('notes_hashes'),
-    writeNote: (key, text) => invoke('note_write', { key, text }),
-    writeNotes: (notes) => invoke('notes_write', { notes }),
-    deleteNote: (key) => invoke('note_delete', { key }),
+    listYmls: () => invoke('ymls_list'),
+    readYml: (key) => invoke('yml_read', { key }),
+    readYmls: (keys) => invoke('ymls_read', { keys }),
+    readAllYmls: () => invoke('ymls_read_all'),
+    ymlHashes: () => invoke('ymls_hashes'),
+    writeYml: (key, text) => invoke('yml_write', { key, text }),
+    writeYmls: (notes) => invoke('ymls_write', { notes }),
+    deleteYml: (key) => invoke('yml_delete', { key }),
     listBlobs: () => invoke('blobs_list'),
     readBlob: async (name) => blob(await invoke<ArrayBuffer>('blob_read', { name })),
     writeBlob: (name, bytes) => invoke('blob_write', bytes, { headers: { 'x-blob-name': encodeURIComponent(name) } }),
     deleteBlob: (name) => invoke('blob_delete', { name }),
     setGestalts: (yaml) => invoke('gestalts_set', { yaml }),
     status: () => invoke('sync_status'),
-    onChanged: (f) => listen<{ notes: string[]; blobs: string[] }>(CHANGED_EVENT, (e) => f(e.payload)),
+    onChanged: (f) => listen<{ ymls: string[]; blobs: string[] }>(CHANGED_EVENT, (e) => f(e.payload)),
     onStatus: (f) => listen<NativeStatus>(STATUS_EVENT, (e) => f(e.payload)),
     sync: () => invoke('sync_now'),
     setActive: (active) => invoke('set_active', { active }),
@@ -55,7 +55,7 @@ export function pair(uri: string, deviceName?: string): Promise<PairedNodeInfo> 
   return invoke('pair', { uri, deviceName });
 }
 
-/** Forgets the paired computer on this device; the notes stay. */
+/** Forgets the paired computer on this device; the ymls stay. */
 export function forget(): Promise<void> {
   return invoke('forget');
 }

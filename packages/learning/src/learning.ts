@@ -1,8 +1,8 @@
 import { DefaultScheduler, Rating, type Grade } from 'ts-fsrs';
-import { asMap, field, relationships, type IndexedNote, type Json } from '@gestalts/sdk';
+import type { Item, Json, JsonMap } from '@gestalts/view';
 
 /**
- * FSRS learner state, per reviewed note or one facet of it, stored as `fsrs-state@1` notes.
+ * FSRS learner state, per reviewed note or one facet of it, stored as `fsrs-data@1` ymls.
  * Pure: the repo side (keys, writes, the session log) is in `practice.tsx`.
  */
 
@@ -18,27 +18,24 @@ export function getScheduler(): Promise<Scheduler> {
   return scheduler;
 }
 
-/** What is reviewed: the note `target` (its id, as in `reviews`), or one `facet` of it (a card id, a cloze level). */
+/** What is reviewed: the yml `target`, or one `facet` of it. */
 export type Facet = { target: string; facet?: string };
 
 /** A learner's state as stored: the ts-fsrs card with dates as ISO strings. */
 export type ReviewState = {
-  /** key of the fsrs-state note, if saved */
-  key?: string;
+  /** id of the fsrs-data yml, if saved */
+  id?: string;
   lastRating: Grade;
   card: { [k: string]: Json } & { dueAt: string; lastReviewAt?: Json; reps?: Json };
 };
 
-export function stateFromNote(n: IndexedNote): (Facet & { state: ReviewState }) | null {
-  const target = relationships(n).find((r) => r.label === 'reviews')?.target;
-  const card = asMap(field(n, 'card'));
-  const lastRating = field(n, 'last_rating');
-  if (!target || !card || typeof card.dueAt !== 'string' || typeof lastRating !== 'number') return null;
-  const facet = field(n, 'facet');
+export function stateFromItem(n: Item): (Facet & { state: ReviewState }) | null {
+  const { target, card, last_rating: lastRating, facet } = n.value;
+  if (typeof target !== 'string' || typeof card !== 'object' || card === null || Array.isArray(card) || typeof card.dueAt !== 'string' || typeof lastRating !== 'number') return null;
   return {
     target,
     ...(typeof facet === 'string' && facet ? { facet } : {}),
-    state: { key: n.key, lastRating: lastRating as Grade, card: card as ReviewState['card'] },
+    state: { id: n.id, lastRating: lastRating as Grade, card: card as ReviewState['card'] },
   };
 }
 
@@ -47,11 +44,11 @@ const slot = (f: Facet) => `${f.target}\u0000${f.facet ?? ''}`;
 const reviewedAt = (s: ReviewState) => (typeof s.card.lastReviewAt === 'string' ? Date.parse(s.card.lastReviewAt) || 0 : 0);
 const reps = (s: ReviewState) => (typeof s.card.reps === 'number' ? s.card.reps : 0);
 
-/** The later review wins; then more reps, then the key, so every device picks the same note. */
+/** The later review wins; then more reps, then the id, so every device picks the same yml. */
 function newer(a: ReviewState, b: ReviewState): boolean {
   if (reviewedAt(a) !== reviewedAt(b)) return reviewedAt(a) > reviewedAt(b);
   if (reps(a) !== reps(b)) return reps(a) > reps(b);
-  return (a.key ?? '') > (b.key ?? '');
+  return (a.id ?? '') > (b.id ?? '');
 }
 
 export type FsrsStates = {
@@ -69,14 +66,11 @@ function makeStates(m: Map<string, ReviewState>): FsrsStates {
   };
 }
 
-/**
- * The states of `fsrs-state@1` notes by what they review. Facets of one note are kept apart, and a state without a
- * facet is the whole note's. Two notes for the same facet (a legacy random key next to the stable one): see `newer`.
- */
-export function fsrsStates(notes: IndexedNote[]): FsrsStates {
+/** The states of `fsrs-data@1` ymls by what they review. Facets of one yml are kept apart. */
+export function fsrsStates(items: Item[]): FsrsStates {
   const m = new Map<string, ReviewState>();
-  for (const n of notes) {
-    const s = stateFromNote(n);
+  for (const n of items) {
+    const s = stateFromItem(n);
     if (!s) continue;
     const prev = m.get(slot(s));
     if (!prev || newer(s.state, prev)) m.set(slot(s), s.state);
@@ -107,19 +101,19 @@ function toStoredCard(card: SchedulerCard): ReviewState['card'] {
   return JSON.parse(JSON.stringify(card)) as ReviewState['card'];
 }
 
-/** The state after rating `grade` at `now`; a new card if there's no `prev`. Keeps `prev`'s key. */
+/** The state after rating `grade` at `now`; a new card if there's no `prev`. Keeps `prev`'s id. */
 export function review(s: Scheduler, prev: ReviewState | undefined, grade: Grade, now: Date): ReviewState {
   const card = prev ? toSchedulerCard(prev.card) : (s.newCard({ now }) as SchedulerCard);
   const reviewed = s.review({ card, grade, now }).card as SchedulerCard;
-  return { key: prev?.key, lastRating: grade, card: toStoredCard(reviewed) };
+  return { id: prev?.id, lastRating: grade, card: toStoredCard(reviewed) };
 }
 
-/** The `fsrs-state@1` note for `f` in state `s`, under `key` (also its `id`). */
-export function fsrsStateValue(key: string, f: Facet, s: ReviewState): Json {
+/** The `fsrs-data@1` yml for `f` in state `s`, under `id`. */
+export function fsrsDataValue(id: string, f: Facet, s: ReviewState): JsonMap {
   return {
-    id: key,
-    tags: ['fsrs-state'],
-    relationships: [{ to: f.target, label: 'reviews' }],
+    id,
+    gestalt: 'fsrs-data@1',
+    target: f.target,
     model: MODEL,
     ...(f.facet ? { facet: f.facet } : {}),
     last_rating: s.lastRating,

@@ -1,0 +1,6 @@
+id: note-crud
+version: 1.0.0
+title: Notes
+description: List, search, edit and delete notes.
+reads: [note@1]
+writes: [note@1]

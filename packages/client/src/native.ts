@@ -17,15 +17,15 @@ export type NativeStatus = {
 };
 
 /**
- * A native app around the page (Android): it keeps the notes in its own folder, which the page's core reads and
+ * A native app around the page (Android): it keeps the ymls in its own folder, which the page's core reads and
  * writes through `HostStorage`, and syncs that folder with the node it paired with, telling the page what changed.
  */
 export interface NativeHost extends HostStorage {
   /** the plugins' gestalt definitions, which the app's own merges need too */
   setGestalts(yaml: string[]): Promise<void>;
   status(): Promise<NativeStatus>;
-  /** Calls `f` with the notes and blobs a sync changed in the folder; returns a function to stop. */
-  onChanged(f: (changed: { notes: string[]; blobs: string[] }) => void): Promise<() => void>;
+  /** Calls `f` with the ymls and blobs a sync changed in the folder; returns a function to stop. */
+  onChanged(f: (changed: { ymls: string[]; blobs: string[] }) => void): Promise<() => void>;
   onStatus(f: (status: NativeStatus) => void): Promise<() => void>;
   /** asks for a sync now; the status tells how it goes */
   sync(): Promise<void>;
@@ -33,7 +33,7 @@ export interface NativeHost extends HostStorage {
   setActive(active: boolean): Promise<void>;
 }
 
-/** The native apps `NotesIn` can name. */
+/** The native apps `YmlsIn` can name. */
 export type NativeKind = 'tauri';
 
 export async function nativeHost(kind: NativeKind): Promise<NativeHost> {

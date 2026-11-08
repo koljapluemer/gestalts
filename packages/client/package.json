@@ -10,7 +10,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@gestalts/sdk": "workspace:*",
+    "@gestalts/view": "workspace:*",
     "@tauri-apps/api": "2.12.4"
   },
   "peerDependencies": {

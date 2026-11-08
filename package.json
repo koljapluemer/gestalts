@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "lint": "oxlint packages plugins",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -r typecheck && tsc -p plugins",
     "test": "vitest run"
   },
   "devDependencies": {
@@ -23,6 +23,11 @@
     "typescript": "7.0.2",
     "vite": "8.3.5",
     "vitest": "5.0.5",
-    "yaml": "2.8.1"
+    "yaml": "2.8.1",
+    "@gestalts/kit": "workspace:*",
+    "@gestalts/learning": "workspace:*",
+    "@gestalts/view": "workspace:*",
+    "lucide-react": "1.66.0",
+    "react": "19.3.1"
   }
 }

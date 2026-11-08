@@ -156,15 +156,27 @@ impl WasmRepo {
         Ok(deleted)
     }
 
+    /// Rereads everything from storage.
+    pub async fn reload(&self) -> Result<(), JsError> {
+        let repo = self.repo.clone();
+        repo.load().await.map_err(err)
+    }
+
+    /// Whether `id` is a tombstone.
+    #[wasm_bindgen(js_name = isDeleted)]
+    pub fn is_deleted(&self, id: &str) -> bool {
+        self.repo.is_deleted(id)
+    }
+
     /// What mounted decks disagree on, as `id: path`, from the last full read.
     #[wasm_bindgen(js_name = deckConflicts)]
     pub fn deck_conflicts(&self) -> Vec<String> {
         self.layered.as_ref().map(|l| l.deck_conflicts.borrow().clone()).unwrap_or_default()
     }
 
-    /// One page of what `query` asks for (`gestalts_core::Query`): `{items, next}`.
-    pub fn query(&self, query: JsValue) -> Result<JsValue, JsError> {
-        to_js(&self.repo.query(&from_js::<Query>(query)?))
+    /// One page of what `query` (JSON text of a `gestalts_core::Query`) asks for: `{items, next}`.
+    pub fn query(&self, query: String) -> Result<JsValue, JsError> {
+        to_js(&self.repo.query(&parse_query(&query)?))
     }
 
     pub fn get(&self, id: &str) -> Result<JsValue, JsError> {
@@ -172,8 +184,8 @@ impl WasmRepo {
     }
 
     /// Starts a live query: `{sub, page}`. Changes come out of `takeDeltas`.
-    pub fn subscribe(&self, query: JsValue) -> Result<JsValue, JsError> {
-        let (sub, page) = self.repo.subscribe(from_js::<Query>(query)?);
+    pub fn subscribe(&self, query: String) -> Result<JsValue, JsError> {
+        let (sub, page) = self.repo.subscribe(parse_query(&query)?);
         to_js(&serde_json::json!({ "sub": sub, "page": page }))
     }
 
@@ -317,6 +329,11 @@ pub fn state_id(gestalt: &str, target: &str, facet: Option<String>) -> String {
 #[wasm_bindgen(js_name = contentHash)]
 pub fn content_hash(text: &str) -> String {
     gestalts_core::content_hash(text.as_bytes())
+}
+
+/// As JSON text, so a number in a query stays the integer or float it is.
+fn parse_query(json: &str) -> Result<Query, JsError> {
+    serde_json::from_str(json).map_err(|e| JsError::new(&e.to_string()))
 }
 
 fn from_js<T: serde::de::DeserializeOwned>(v: JsValue) -> Result<T, JsError> {

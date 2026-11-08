@@ -24,9 +24,9 @@ describe('PracticeSession', () => {
     p.shown(s(5));
     p.trial(s(12), { kind: 'x' });
     const [w] = p.takeWrites();
-    expect(w.key).toBe('key-1');
-    expect(w.value).toEqual({
-      id: 'key-1', tags: ['practice-session'], app: 'test-app',
+    expect(w.id).toBe('key-1');
+    expect(w).toEqual({
+      id: 'key-1', gestalt: 'practice-session@1', app: 'test-app',
       started: new Date(s(0)).toISOString(), ended: new Date(s(12)).toISOString(),
       active_ms: 12_000, trials: 1, events: [{ at: new Date(s(12)).toISOString(), ms: 7000, kind: 'x' }],
     });
@@ -42,10 +42,10 @@ describe('PracticeSession', () => {
     p.activity(s(500)); // hidden: counts nothing
     p.trial(s(502));
     const [w] = p.takeWrites();
-    expect(w.value).toMatchObject({ active_ms: IDLE_MS + 10_000 + 2000, trials: 3, ended: new Date(s(502)).toISOString() });
+    expect(w).toMatchObject({ active_ms: IDLE_MS + 10_000 + 2000, trials: 3, ended: new Date(s(502)).toISOString() });
   });
 
-  it('starts a new note after a long gap, writing the end of the old one', () => {
+  it('starts a new session after a long gap, writing the end of the old one', () => {
     const p = session();
     p.trial(s(0));
     p.takeWrites();
@@ -53,9 +53,9 @@ describe('PracticeSession', () => {
     const resume = s(30) + SESSION_GAP_MS + 1;
     p.trial(resume);
     const writes = p.takeWrites();
-    expect(writes.map((w) => w.key)).toEqual(['key-1', 'key-2']);
-    expect(writes[0].value).toMatchObject({ active_ms: 30_000, trials: 1, ended: new Date(s(30)).toISOString() });
-    expect(writes[1].value).toMatchObject({ active_ms: 0, trials: 1, started: new Date(resume).toISOString() });
+    expect(writes.map((w) => w.id)).toEqual(['key-1', 'key-2']);
+    expect(writes[0]).toMatchObject({ active_ms: 30_000, trials: 1, ended: new Date(s(30)).toISOString() });
+    expect(writes[1]).toMatchObject({ active_ms: 0, trials: 1, started: new Date(resume).toISOString() });
   });
 
   it('keeps the caller’s ms and does not reuse a shown time', () => {
@@ -63,7 +63,7 @@ describe('PracticeSession', () => {
     p.shown(s(0));
     p.trial(s(4), { ms: 1 });
     p.trial(s(6));
-    const events = (p.takeWrites()[0].value as { events: object[] }).events;
+    const events = (p.takeWrites()[0] as { events: object[] }).events;
     expect(events).toEqual([{ at: new Date(s(4)).toISOString(), ms: 1 }, { at: new Date(s(6)).toISOString() }]);
   });
 });

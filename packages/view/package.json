@@ -1,0 +1,25 @@
+{
+  "name": "@gestalts/view",
+  "version": "0.1.0",
+  "description": "What a view gets from the app around it",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./compile": "./src/compile.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1"
+  },
+  "dependencies": {
+    "sucrase": "3.35.1"
+  }
+}

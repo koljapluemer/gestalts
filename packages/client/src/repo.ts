@@ -1,29 +1,23 @@
-import init, {
-  WasmRepo, bibCitedKeys, bibMatches, bibMerge, bibModel, bibParse, bibUniqueCitekey, bibWrite, cardId as wasmCardId,
-  contentHash as wasmContentHash, newId as wasmNewId, stableId as wasmStableId, stateKey as wasmStateKey,
-} from '../wasm/gestalts.js';
-import {
-  ServiceClient, logger, provideNatives, type GestaltDef, type IndexedNote, type Json, type MergeResult, type Query, type Repo as Port,
-  type SyncReport, type UpstreamReport,
-} from '@gestalts/sdk';
+import { logger, type Delta, type Health, type Item, type JsonMap, type Page, type Query } from '@gestalts/view';
+import init, { WasmRepo, contentHash as wasmContentHash, newId as wasmNewId, stableId as wasmStableId, stateId as wasmStateId } from '../wasm/gestalts.js';
 import { coalesce } from './coalesce';
 import { nativeHost, type NativeHost, type NativeKind, type NativeStatus, type PairedNodeInfo } from './native';
 
 const log = logger('repo');
 
-/** A read-only deck published at `url` (a folder with `index.json`), under its `source` id and earlier ones. */
+/** A read-only deck published at `url` (a folder with `index.json`), under its `source` id. */
 export type DeckSource = { source: string; url: string };
 
 /** Where the user's notes live: in OPFS under `dir` (synced with a connector, if one is set), in the folder the
  * node at `node` serves (the desktop app; written directly, nothing to sync), or in the folder of the native app
  * around the page (`native`: Android), which syncs it with the node it paired with. */
-export type NotesIn =
+export type YmlsIn =
   | { dir: string; node?: undefined; native?: undefined }
   | { node: string; dir?: undefined; native?: undefined }
   | { native: NativeKind; dir?: undefined; node?: undefined };
 
-export type RepoSource = NotesIn & {
-  /** read-only decks under them; a deck note is copied into the user's notes once those reference it */
+export type RepoSource = YmlsIn & {
+  /** read-only decks under them */
   decks?: DeckSource[];
   /** gestalt definitions (YAML) beyond the core's, from plugins */
   gestalts?: string[];
@@ -60,7 +54,7 @@ export type ConnectorStatus = {
   error?: string;
   lastSync?: Date;
   lastReport?: SyncReport;
-  /** `conflict@1` notes recorded since connecting */
+  /** `conflict@1` ymls recorded since connecting */
   conflicts: string[];
   /** the folder the connector serves, as of the last sync (direct: as of opening) */
   folder?: string;
@@ -68,47 +62,59 @@ export type ConnectorStatus = {
   node?: PairedNodeInfo;
 };
 
+export type SyncReport = {
+  pulled: string[];
+  pushed: string[];
+  conflicts: string[];
+  blobs_pulled: string[];
+  blobs_pushed: string[];
+  /** the connector's open folder */
+  folder: string;
+  blobs_collected?: { local: string[]; remote: string[] };
+  /** how many ymls each side had: local, remote, base */
+  notes?: { local: number; remote: number; base: number };
+  /** how many ymls differed, so their texts were read and merged */
+  compared?: number;
+  /** ms per step of the sync, for the debug log */
+  timings?: Record<string, number>;
+};
+
+/** A gestalt definition, as the core has it. */
+export type GestaltDef = { name: string; version: number; description: string | null; fields: Record<string, unknown>; merge?: unknown };
+
 let ready: Promise<unknown> | null = null;
 
-/**
- * Loads the core and provides its natives to `@gestalts/sdk`, without opening a repo: for code that runs the sdk
- * away from the host's repo (a sandboxed frame), whose ids and hashes must match the host's.
- */
-export async function loadNatives(): Promise<void> {
-  ready ??= init().then(provideCoreNatives);
+/** Loads the core. Everything below needs it; opening a repo does it. */
+export async function loadCore(): Promise<void> {
+  ready ??= init();
   await ready;
 }
 
-/** The core's ids, hashes and BibTeX, for `@gestalts/sdk`; usable once the wasm is loaded. */
-function provideCoreNatives() {
-  provideNatives({
-    newId: () => wasmNewId(),
-    stableId: (ns, name) => wasmStableId(ns, name),
-    stateKey: (gestalt, target, facet) => wasmStateKey(gestalt, target, facet),
-    cardId: (front) => wasmCardId(front),
-    contentHash: (text) => wasmContentHash(text),
-    bib: {
-      parse: (text) => bibParse(text),
-      write: (sources) => bibWrite(sources),
-      matches: (entry, existing, limit) => bibMatches(entry, existing, limit),
-      merge: (current, incoming, take) => bibMerge(current, incoming, take),
-      uniqueCitekey: (key, taken) => bibUniqueCitekey(key, taken),
-      citedKeys: (typst) => bibCitedKeys(typst),
-      model: () => bibModel(),
-    },
-  });
-}
+/** A fresh uuid. */
+export const newId = () => wasmNewId();
+/** The same id for the same `name` within `namespace`. */
+export const stableId = (namespace: string, name: string) => wasmStableId(namespace, name);
+/** The id of a learner-state yml for `target`, or one `facet` of it. */
+export const stateId = (gestalt: string, target: string, facet?: string) => wasmStateId(gestalt, target, facet);
+/** Hex sha256 of a text. */
+export const contentHash = (text: string) => wasmContentHash(text);
+
+/** The query as the core reads it: JSON text, without anything left undefined. */
+const asJson = (q: Query) => JSON.stringify(q);
+
+/** A running live query. */
+export type Live = { page: Page; stop: () => void };
 
 /**
- * The notes and blobs an app works with, backed by the Rust core.
- * Subscribe to learn about any change (own writes or a sync); `version` increases on each.
+ * The ymls and blobs an app works with, backed by the Rust core. Views never touch this: they go through the bridge.
+ * A live query (`live`) hears about the changes that concern it, and nothing else.
  */
-export class Repo implements Port {
-  private listeners = new Set<() => void>();
+export class Repo {
   private queue: Promise<unknown> = Promise.resolve();
   /** mutations queued or running, for the log */
   private pending = 0;
-  private blobUrls = new Map<string, Promise<string | null>>();
+  private lives = new Map<number, (d: Delta) => void>();
+  private blobListeners = new Set<(names: string[]) => void>();
   private status: ConnectorStatus = { mode: 'sync', url: null, state: 'off', conflicts: [] };
   private statusListeners = new Set<() => void>();
   private syncTimer: ReturnType<typeof setTimeout> | undefined;
@@ -118,10 +124,9 @@ export class Repo implements Port {
   /** paired mode: the native app, and what to undo on closing */
   private native: { host: NativeHost; stop: (() => void)[] } | undefined;
   private closed = false;
-  version = 0;
   /**
-   * Settles once the first sync after opening is done (or failed), right away without a connector. Seed notes (default
-   * panes, installs) only after it, so a new device doesn't recreate what another one deleted.
+   * Settles once the first sync after opening is done (or failed), right away without a connector. Seed ymls (installs)
+   * only after it, so a new device doesn't recreate what another one deleted.
    */
   firstSync: Promise<void> = Promise.resolve();
 
@@ -131,7 +136,7 @@ export class Repo implements Port {
     const span = log.span('open', { dir: source.dir, decks: (source.decks ?? []).map((d) => d.source) });
     let wasm: WasmRepo;
     try {
-      await loadNatives();
+      await loadCore();
       if (source.native !== undefined) {
         const host = await nativeHost(source.native);
         await host.setGestalts(source.gestalts ?? []);
@@ -177,7 +182,7 @@ export class Repo implements Port {
     repo.setStatus(nativeStatus(await host.status()));
     let synced: () => void = () => {};
     const first = new Promise<void>((resolve) => { synced = resolve; });
-    native.stop.push(await host.onChanged((c) => void repo.reindex(c.notes, c.blobs)));
+    native.stop.push(await host.onChanged((c) => void repo.reindex(c.ymls, c.blobs)));
     native.stop.push(await host.onStatus((s) => {
       repo.setStatus(nativeStatus(s));
       if (s.state !== 'syncing') synced();
@@ -207,10 +212,10 @@ export class Repo implements Port {
       this.setStatus({ state: 'ok', error: undefined });
     };
     ws.onmessage = (m) => {
-      let event: { changed?: { notes: string[]; blobs: string[] }; folder?: unknown } | 'reload';
+      let event: { changed?: { ymls: string[]; blobs: string[] }; folder?: unknown } | 'reload';
       try { event = JSON.parse(String(m.data)) as typeof event; } catch { return; }
       if (event === 'reload') void this.reload();
-      else if (event.changed) void this.reindex(event.changed.notes, event.changed.blobs);
+      else if (event.changed) void this.reindex(event.changed.ymls, event.changed.blobs);
       // another folder: everything the app holds (installs, decks, panes) belongs to the old one
       else if ('folder' in event) location.reload();
     };
@@ -222,35 +227,28 @@ export class Repo implements Port {
     };
   }
 
-  private async reindex(notes: string[], blobs: string[]) {
+  private async reindex(ymls: string[], blobs: string[]) {
     try {
-      if (notes.length) await this.serial('reindex', () => this.wasm.reindex(notes), { notes: notes.length });
-      blobs.forEach((b) => this.blobUrls.delete(b));
-      if (notes.length || blobs.length) this.changed();
+      if (ymls.length) await this.serial('reindex', () => this.wasm.reindex(ymls), { ymls: ymls.length });
+      this.pump();
+      if (blobs.length) this.blobListeners.forEach((l) => l(blobs));
     } catch (e) {
-      log.warn('rereading changed notes failed', { error: e });
+      log.warn('rereading changed ymls failed', { error: e });
     }
   }
 
   private async reload() {
     try {
       await this.serial('reload', () => this.wasm.reload());
-      this.blobUrls.clear();
-      this.changed();
+      this.pump();
     } catch (e) {
       log.warn('rereading the folder failed', { error: e });
     }
   }
 
-  subscribe = (l: () => void) => {
-    this.listeners.add(l);
-    return () => { this.listeners.delete(l); };
-  };
-
-  private changed() {
-    this.version++;
-    log.debug('changed', { version: this.version });
-    this.listeners.forEach((l) => l());
+  /** Hands the core's deltas to the live queries they're for. */
+  private pump() {
+    for (const d of this.wasm.takeDeltas() as Delta[]) this.lives.get(d.sub)?.(d);
   }
 
   /**
@@ -279,34 +277,50 @@ export class Repo implements Port {
     return run;
   }
 
-  query(q: Query = {}): IndexedNote[] {
-    return this.wasm.query(q) as IndexedNote[];
+  /** One page of what `q` asks for. */
+  query(q: Query): Page {
+    return this.wasm.query(asJson(q)) as Page;
   }
 
-  get(key: string): IndexedNote | undefined {
-    return (this.wasm.get(key) as IndexedNote | null) ?? undefined;
+  /** The yml, if it's valid. */
+  get(id: string): Item | undefined {
+    return (this.wasm.get(id) as Item | null) ?? undefined;
   }
 
-  /** The key of the note with this `id` (or key). */
-  keyOf(id: string): string | undefined {
-    return this.wasm.keyOf(id);
+  /** Whether `id` was deleted (is a tombstone); `get` returns nothing for it. */
+  isDeleted(id: string): boolean {
+    return (this.wasm.isDeleted(id));
   }
 
-  /** For a layered repo: what the last check against upstream (on open, after each sync) did. */
-  upstreamReport(): UpstreamReport {
-    return this.wasm.upstreamReport() as UpstreamReport;
+  /** The first page of `q`, then `onDelta` with each change to it, until `stop`. */
+  live(q: Query, onDelta: (d: Delta) => void): Live {
+    const { sub, page } = this.wasm.subscribe(asJson(q)) as { sub: number; page: Page };
+    this.lives.set(sub, onDelta);
+    return { page, stop: () => { this.lives.delete(sub); this.wasm.unsubscribe(sub); } };
+  }
+
+  /** Every yml that can't be used, and why. */
+  health(): Health[] {
+    return this.wasm.health() as Health[];
   }
 
   gestalts(): GestaltDef[] {
     return this.wasm.gestalts() as GestaltDef[];
   }
 
-  /** Returns undefined while offline. A declared service may still answer 503 while its worker starts. */
-  service(id: string): ServiceClient | undefined {
-    return this.status.url && this.status.mode !== 'paired' ? new ServiceClient(this.status.url.replace(/\/$/, ''), id) : undefined;
+  /** Calls `f` with the names of blobs that changed outside this repo. */
+  onBlobsChanged(f: (names: string[]) => void): () => void {
+    this.blobListeners.add(f);
+    return () => { this.blobListeners.delete(f); };
   }
 
-  /** The services the node offers and whether each is running; null without a node, or if it didn't answer. */
+  /** Answers a request to the backend of plugin `id`; `undefined` where this app has no node. */
+  service(id: string, path: string, init?: RequestInit): Promise<Response> | undefined {
+    if (!this.status.url || this.status.mode === 'paired') return undefined;
+    return fetch(`${withSlash(this.status.url)}services/${encodeURIComponent(id)}/${path.replace(/^\//, '')}`, init);
+  }
+
+  /** The backends the node offers and whether each is running; null without a node, or if it didn't answer. */
   async services(): Promise<ServiceStatus[] | null> {
     const url = this.status.url;
     if (!url || this.status.mode === 'paired') return null;
@@ -318,55 +332,18 @@ export class Repo implements Port {
     }
   }
 
-  /** What `raw` would index as, without saving it. */
-  inspect(key: string, raw: string): IndexedNote {
-    return this.wasm.inspect(key, raw) as IndexedNote;
-  }
-
-  /** What writing `value` under `key` would index as, without saving it. */
-  inspectValue(key: string | undefined, value: Json): IndexedNote {
-    return this.wasm.inspectValue(key, JSON.stringify(value)) as IndexedNote;
-  }
-
-  async putRaw(key: string, raw: string): Promise<IndexedNote> {
-    const n = await this.serial('putRaw', () => this.wasm.putRaw(key, raw) as Promise<IndexedNote>, { key });
+  /** Refused unless `value` is valid by the gestalt it names. Without an `id`, it gets a new one. */
+  async put(value: JsonMap): Promise<Item> {
+    const item = await this.serial('put', () => this.wasm.put(JSON.stringify(value)) as Promise<Item>, { id: value.id });
     this.afterWrite();
-    return n;
+    return item;
   }
 
-  /** Without a key, a new uuid becomes key and `id`. */
-  async putValue(key: string | undefined, value: Json): Promise<IndexedNote> {
-    const n = await this.serial('putValue', () => this.wasm.putValue(key, JSON.stringify(value)) as Promise<IndexedNote>, { key });
+  /** Writes the yml's tombstone, so the delete syncs. Writing it again brings it back. */
+  async delete(id: string): Promise<boolean> {
+    const deleted = await this.serial('delete', () => this.wasm.delete(id), { id });
     this.afterWrite();
-    return n;
-  }
-
-  /**
-   * Deletes a note: writes its tombstone, so the delete syncs, and the tombstones of notes that die with it (learner
-   * state of a deleted card). Returns every key deleted. Writing the note again brings it back.
-   */
-  async delete(key: string): Promise<string[]> {
-    const keys = await this.serial('delete', () => this.wasm.delete(key) as Promise<string[]>, { key });
-    this.afterWrite();
-    return keys;
-  }
-
-  /** The keys of the notes copied from the decks `sources` alone (every deck they came from is one of them). */
-  copiesOf(sources: string[]): Promise<string[]> {
-    return this.wasm.copiesOf(sources) as Promise<string[]>;
-  }
-
-  /** Whether `key` was deleted (is a tombstone); `get` returns nothing for it. */
-  isDeleted(key: string): boolean {
-    return this.wasm.isDeleted(key);
-  }
-
-  /**
-   * Three-way merge of one note's text as a sync does it, by the note's gestalts' merge rules. `text` is null when the
-   * note is absent; `conflicts` lists what no rule settled (the text keeps one side of each).
-   */
-  merge3(key: string, base: string | null, local: string | null, remote: string | null): MergeResult {
-    return this.wasm.merge3(key, base ?? undefined, local ?? undefined, remote ?? undefined) as MergeResult;
+    return deleted;
   }
 
   async readBlob(name: string): Promise<Uint8Array | undefined> {
@@ -375,22 +352,11 @@ export class Repo implements Port {
 
   async writeBlob(name: string, bytes: Uint8Array): Promise<void> {
     await this.serial('writeBlob', () => this.wasm.writeBlob(name, bytes), { name, bytes: bytes.length });
-    this.blobUrls.delete(name);
     this.afterWrite();
   }
 
-  /** An object URL for a blob, cached; `null` if missing. */
-  blobUrl(name: string): Promise<string | null> {
-    let url = this.blobUrls.get(name);
-    if (!url) {
-      url = this.readBlob(name).then((b) => (b ? URL.createObjectURL(new Blob([b as Uint8Array<ArrayBuffer>], { type: mimeOf(name) })) : null));
-      this.blobUrls.set(name, url);
-    }
-    return url;
-  }
-
   private afterWrite() {
-    this.changed();
+    this.pump();
     if (this.status.mode === 'sync' && this.status.url) {
       clearTimeout(this.syncTimer);
       this.syncTimer = setTimeout(() => void this.sync(), 800);
@@ -458,7 +424,7 @@ export class Repo implements Port {
       // only the merge waits in the write queue; the network parts run alongside the app's writes
       await this.wasm.syncFetch(url);
       const merged = await this.serial('sync', () => this.wasm.syncMerge());
-      if (merged.length && this.status.url === url) this.changed();
+      if (merged.length && this.status.url === url) this.pump();
       const report = (await this.wasm.syncPush()) as SyncReport;
       if (this.status.url !== url) return report;
       log.info('sync done', {
@@ -466,11 +432,7 @@ export class Repo implements Port {
         notes: report.notes, compared: report.compared, timings: report.timings,
       });
       this.setStatus({ state: 'ok', lastSync: new Date(), lastReport: report, folder: report.folder, conflicts: [...this.status.conflicts, ...report.conflicts] });
-      // blobs arrived before the merge; a name looked up earlier may be cached as missing
-      if (report.blobs_pulled.length) {
-        report.blobs_pulled.forEach((b) => this.blobUrls.delete(b));
-        this.changed();
-      }
+      if (report.blobs_pulled.length) this.blobListeners.forEach((l) => l(report.blobs_pulled));
       return report;
     } catch (e) {
       log.error('sync failed', { error: e });
@@ -491,13 +453,4 @@ function nativeStatus(s: NativeStatus): Partial<ConnectorStatus> {
     folder: s.folder ?? undefined,
     conflicts: s.conflicts,
   };
-}
-
-const MIME: Record<string, string> = {
-  webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml',
-  mp3: 'audio/mpeg', ogg: 'audio/ogg', wav: 'audio/wav', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm', pdf: 'application/pdf',
-};
-
-function mimeOf(name: string): string {
-  return MIME[name.split('.').pop()?.toLowerCase() ?? ''] ?? 'application/octet-stream';
 }

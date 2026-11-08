@@ -13,14 +13,14 @@ function memoryHost() {
   const blobs = new Map<string, Uint8Array>();
   const calls: string[] = [];
   const host: HostStorage = {
-    listNotes: async () => { calls.push('listNotes'); return [...notes.keys()]; },
-    readNote: async (k) => { calls.push('readNote'); return notes.get(k) ?? null; },
-    readNotes: async (ks) => { calls.push('readNotes'); return ks.filter((k) => notes.has(k)).map((k) => [k, notes.get(k)!]); },
-    readAllNotes: async () => { calls.push('readAllNotes'); return [...notes]; },
-    noteHashes: async () => Object.fromEntries([...notes].map(([k, t]) => [k, contentHash(t)])),
-    writeNote: async (k, t) => { calls.push('writeNote'); notes.set(k, t); },
-    writeNotes: async (ns) => { ns.forEach(([k, t]) => notes.set(k, t)); },
-    deleteNote: async (k) => { notes.delete(k); },
+    listYmls: async () => { calls.push('listYmls'); return [...notes.keys()]; },
+    readYml: async (k) => { calls.push('readYml'); return notes.get(k) ?? null; },
+    readYmls: async (ks) => { calls.push('readYmls'); return ks.filter((k) => notes.has(k)).map((k) => [k, notes.get(k)!]); },
+    readAllYmls: async () => { calls.push('readAllYmls'); return [...notes]; },
+    ymlHashes: async () => Object.fromEntries([...notes].map(([k, t]) => [k, contentHash(t)])),
+    writeYml: async (k, t) => { calls.push('writeYml'); notes.set(k, t); },
+    writeYmls: async (ns) => { ns.forEach(([k, t]) => notes.set(k, t)); },
+    deleteYml: async (k) => { notes.delete(k); },
     listBlobs: async () => [...blobs.keys()],
     readBlob: async (n) => blobs.get(n) ?? null,
     writeBlob: async (n, b) => { blobs.set(n, b.slice()); },
@@ -31,12 +31,12 @@ function memoryHost() {
 
 test('a repo over a host storage opens with one read and writes through', async () => {
   const { host, notes, blobs, calls } = memoryHost();
-  notes.set('a', 'id: a\ntitle: first\n');
+  notes.set('a', 'id: a\ngestalt: note@1\ntitle: first\n');
   const repo = await WasmRepo.openWith(host, [], []);
-  expect(calls).toEqual(['readAllNotes']);
+  expect(calls).toEqual(['readAllYmls']);
   expect((repo.get('a') as { value: { title: string } }).value.title).toBe('first');
 
-  await repo.putValue('b', JSON.stringify({ id: 'b', title: 'second' }));
+  await repo.put(JSON.stringify({ id: 'b', gestalt: 'note@1', title: 'second' }));
   expect(notes.get('b')).toContain('title: second');
   await repo.writeBlob('x.png', new Uint8Array([1, 2]));
   expect([...blobs.get('x.png')!]).toEqual([1, 2]);
@@ -44,13 +44,13 @@ test('a repo over a host storage opens with one read and writes through', async 
   expect(await repo.readBlob('missing.png')).toBeUndefined();
 
   // the app synced: it changed `a`, and the repo rereads it when told
-  notes.set('a', 'id: a\ntitle: from the desktop\n');
+  notes.set('a', 'id: a\ngestalt: note@1\ntitle: from the desktop\n');
   await repo.reindex(['a']);
   expect((repo.get('a') as { value: { title: string } }).value.title).toBe('from the desktop');
 });
 
 test('a host that fails says why', async () => {
   const { host } = memoryHost();
-  const repo = await WasmRepo.openWith({ ...host, writeNote: () => Promise.reject(new Error('disk full')) }, [], []);
-  await expect(repo.putRaw('c', 'id: c\n')).rejects.toThrow('disk full');
+  const repo = await WasmRepo.openWith({ ...host, writeYml: () => Promise.reject(new Error('disk full')) }, [], []);
+  await expect(repo.put(JSON.stringify({ id: 'c', gestalt: 'note@1' }))).rejects.toThrow('disk full');
 });

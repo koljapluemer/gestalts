@@ -22,7 +22,7 @@ impl Host for Recorder {
 
 impl Recorder {
     fn changed(&self) -> Vec<String> {
-        self.0.lock().unwrap().iter().filter_map(|e| match e { Event::Changed { notes, .. } => Some(notes.clone()), _ => None }).flatten().collect()
+        self.0.lock().unwrap().iter().filter_map(|e| match e { Event::Changed { ymls, .. } => Some(ymls.clone()), _ => None }).flatten().collect()
     }
 }
 

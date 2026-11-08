@@ -1,0 +1,5 @@
+id: note-queue
+version: 1.0.0
+title: Queue
+description: A few notes at random, to come back to what you wrote. Tag a note no-queue to keep it out.
+reads: [note@1]

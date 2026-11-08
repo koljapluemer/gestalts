@@ -1,7 +1,7 @@
 {
   "name": "@gestalts/vite",
   "version": "0.1.0",
-  "description": "Builds an app with its plugins: the `virtual:gestalts-plugins` registry, their decks, one React",
+  "description": "Builds an app with its plugins: the `virtual:gestalts-plugins` registry, their decks, the frame runtime",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -15,10 +15,11 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "yaml": "2.8.1"
+    "yaml": "2.8.1",
+    "@gestalts/view": "workspace:*"
   },
   "peerDependencies": {
-    "@gestalts/ui": "workspace:*",
-    "vite": "8.3.5"
+    "vite": "8.3.5",
+    "@gestalts/host": "workspace:*"
   }
 }

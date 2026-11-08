@@ -1,1 +1,0 @@
-export { FloatPane } from './FloatPane';

@@ -2,35 +2,33 @@ import { defineConfig } from 'oxlint';
 
 /**
  * Who may import whom (eslint-plugin-boundaries):
- * - `@gestalts/sdk` (the perspective port) imports nothing of ours; `@gestalts/learning` only the sdk.
- * - `@gestalts/kit` imports only the sdk, in layers: primitives < components < widgets < note < views.
- * - plugins (`plugins/<id>/ui`) import only the sdk, the kit (its index) and learning, never another plugin, the
- *   client or the host. That keeps them movable to repos of their own.
- * - `@gestalts/client` (the core in the browser) builds on the sdk; the host (`packages/ui`) on client, sdk and kit.
- * - `@gestalts/vite` (the build preset, run by Node) imports nothing of ours.
- * Apps (in their own repos) use the host, and load plugins only through `virtual:gestalts-plugins`.
+ * - `@gestalts/view` (what a view gets from the app) imports nothing of ours; `@gestalts/learning` only the view package.
+ * - `@gestalts/kit` imports only the view package, in layers: primitives < components < widgets < perspectives.
+ * - a plugin's `view.tsx` imports only the view package, the kit (its index) and learning, never another plugin, the
+ *   client or the host.
+ * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit and learning
+ *   (learning and the kit only for the runtime frames load).
+ * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
  * External packages are always fine.
  */
 const kit = 'packages/kit/src';
-const host = 'packages/ui/src';
+const host = 'packages/host/src';
 const kitBelow: Record<string, string[]> = {
   primitive: [],
   component: ['primitive'],
   widget: ['component', 'primitive'],
-  note: ['widget', 'component', 'primitive'],
-  view: ['note', 'widget', 'component', 'primitive'],
-  'kit-index': ['view', 'note', 'widget', 'component', 'primitive'],
+  perspective: ['widget', 'component', 'primitive'],
+  'kit-index': ['perspective', 'widget', 'component', 'primitive'],
 };
 const allowed: Record<string, string[]> = {
-  sdk: [],
-  vite: [],
-  learning: ['sdk'],
-  client: ['sdk'],
-  ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['sdk', ...below]])),
-  plugin: ['sdk', 'kit-index', 'learning'],
-  debug: ['client', 'sdk'],
-  host: ['client', 'sdk', 'kit-index', 'debug'],
-  'host-perspective': ['client', 'sdk', 'kit-index'],
+  view: [],
+  vite: ['view'],
+  learning: ['view'],
+  client: ['view'],
+  ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['view', ...below]])),
+  plugin: ['view', 'kit-index', 'learning'],
+  debug: ['client', 'view'],
+  host: ['client', 'view', 'kit-index', 'learning', 'debug'],
 };
 
 export default defineConfig({
@@ -39,23 +37,21 @@ export default defineConfig({
   jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }, 'eslint-plugin-boundaries'],
   categories: { correctness: 'error' },
   settings: {
-    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/*/tsconfig.json'] }, node: true },
+    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json'] }, node: true },
     'boundaries/elements': [
-      { type: 'sdk', pattern: 'packages/sdk/src' },
+      { type: 'view', pattern: 'packages/view/src' },
       { type: 'vite', pattern: 'packages/vite/src' },
       { type: 'learning', pattern: 'packages/learning/src' },
       { type: 'client', pattern: 'packages/client/src' },
       { type: 'primitive', pattern: `${kit}/primitives` },
       { type: 'component', pattern: `${kit}/components` },
       { type: 'widget', pattern: `${kit}/widgets` },
-      { type: 'note', pattern: `${kit}/note` },
-      { type: 'view', pattern: `${kit}/views` },
-      // files directly in packages/kit/src: the index plugins import
+      { type: 'perspective', pattern: `${kit}/perspectives` },
+      // files directly in packages/kit/src: the index views import
       { type: 'kit-index', pattern: kit },
-      { type: 'plugin', pattern: 'plugins/*/ui/src', capture: ['plugin'] },
+      { type: 'plugin', pattern: 'plugins/*', capture: ['plugin'] },
       { type: 'debug', pattern: `${host}/debug` },
-      { type: 'host', pattern: `${host}/host` },
-      { type: 'host-perspective', pattern: `${host}/perspectives` },
+      { type: 'host', pattern: host },
     ],
   },
   rules: {
@@ -66,7 +62,7 @@ export default defineConfig({
     'react-hooks-js/refs': 'error',
   },
   overrides: [{
-    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/ui/src/**/*.{ts,tsx}'],
+    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/*.{ts,tsx}'],
     rules: {
       'boundaries/no-unknown-files': 'error',
       'boundaries/dependencies': ['error', {

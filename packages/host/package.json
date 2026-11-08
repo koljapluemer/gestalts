@@ -1,0 +1,28 @@
+{
+  "name": "@gestalts/host",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./frame-runtime": "./src/frame/runtime.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@gestalts/client": "workspace:*",
+    "@gestalts/kit": "workspace:*",
+    "lucide-react": "1.66.0",
+    "@gestalts/view": "workspace:*",
+    "@gestalts/learning": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "description": "The host: running views in frames, tabs, plugins and their installs, connector settings"
+}
