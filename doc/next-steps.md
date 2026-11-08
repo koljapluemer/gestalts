@@ -200,7 +200,7 @@ need an explicit approval or a container runtime.
   capabilities shown outside the frame.
 - Slots in iframes, one frame rendering a whole list (not one frame per canvas node).
 - `perspective@1` notes: a perspective's source in a note, compiled in the browser (sucrase or esbuild-wasm), for
-  vibe-coding in the app; "promote to plugin"; each device asks before running one whose `access` widened.
+  vibe-coding in the app (prototyped in the gestalt-workshop repo: `workshop-plugin@1`, a frame runtime, the claude CLI as a worker); "promote to plugin"; each device asks before running one whose `access` widened.
 - Third-party plugins from a URL or registry, with the access shown on install and namespaced gestalts
   (`<publisher>/<name>@N`).
 - Services between plugins ([architecture.md](architecture.md#plugins)): a way to declare a service a pane uses when

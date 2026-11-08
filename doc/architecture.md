@@ -96,7 +96,7 @@ The repo's `upstreamReport()` says what the last check did; loops-for-learning l
   only the host's core parses YAML), the hooks (`useQuery`, `useData`, `useNote`, `useBlobUrl`, `useSettings`),
   `definePerspective`, `definePane`, host capabilities (`useHost`), `Slot`, `defineLens`, the field and note helpers
   (`fold`, `inline`, conflicts, `noteGestalts`, `seedFor`), and natives the host provides (ids, hashes, BibTeX). No wasm, so it can later run in a
-  sandboxed frame.
+  sandboxed frame; there, `loadNatives()` from `@gestalts/client` provides them without opening a repo.
 - `@gestalts/kit` imports only the sdk, in layers, each from below: `primitives/` (CodeMirror, `Markdown`,
   `MarkdownEditor`), `components/` (`NoteLine`, `YamlEditor`, `Modal`), `widgets/` (`Relationships`, `MediaGallery`,
   `NotePicker`, `SourcePicker`, `Conflicts`, the note search), `note/` (`Note`, see [the note

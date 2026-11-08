@@ -70,6 +70,15 @@ export type ConnectorStatus = {
 
 let ready: Promise<unknown> | null = null;
 
+/**
+ * Loads the core and provides its natives to `@gestalts/sdk`, without opening a repo: for code that runs the sdk
+ * away from the host's repo (a sandboxed frame), whose ids and hashes must match the host's.
+ */
+export async function loadNatives(): Promise<void> {
+  ready ??= init().then(provideCoreNatives);
+  await ready;
+}
+
 /** The core's ids, hashes and BibTeX, for `@gestalts/sdk`; usable once the wasm is loaded. */
 function provideCoreNatives() {
   provideNatives({
@@ -122,8 +131,7 @@ export class Repo implements Port {
     const span = log.span('open', { dir: source.dir, decks: (source.decks ?? []).map((d) => d.source) });
     let wasm: WasmRepo;
     try {
-      ready ??= init().then(provideCoreNatives);
-      await ready;
+      await loadNatives();
       if (source.native !== undefined) {
         const host = await nativeHost(source.native);
         await host.setGestalts(source.gestalts ?? []);
