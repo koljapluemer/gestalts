@@ -1,0 +1,7 @@
+id: flashcards
+version: 1.0.0
+title: Flashcards
+description: Practice your flashcards by spaced repetition.
+reads: [flashcard@1, fsrs-data@1, practice-session@1, concept-practice-event@1, note@1]
+writes: [fsrs-data@1, practice-session@1, concept-practice-event@1]
+tags: [learning]

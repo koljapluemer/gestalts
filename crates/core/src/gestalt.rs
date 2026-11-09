@@ -451,6 +451,8 @@ pub struct Gestalts {
 const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/note/v1.yml"),
     include_str!("../../../gestalts/concept/v1.yml"),
+    include_str!("../../../gestalts/concept-practice-event/v1.yml"),
+    include_str!("../../../gestalts/flashcard/v1.yml"),
     include_str!("../../../gestalts/deck/v1.yml"),
     include_str!("../../../gestalts/fsrs-data/v1.yml"),
     include_str!("../../../gestalts/practice-session/v1.yml"),
@@ -589,20 +591,38 @@ mod tests {
     }
 
     #[test]
-    fn a_concept_holds_strengths_from_0_to_1() {
-        let ok = "id: c\ngestalt: concept@1\nname: 'grc:θ'\nparents: [p]\nchildren: []\npracticed-by: {e1: 0.25, e2: 1}\n";
-        assert!(matches!(state("c", ok), YmlState::Valid(_)));
-        assert!(invalid("c", "id: c\ngestalt: concept@1\nname: x\npracticed-by: {e1: 1.5}\n").contains("practiced-by.e1"));
-        invalid("c", "id: c\ngestalt: concept@1\nname: x\npracticed-by: [e1]\n");
+    fn a_concept_has_a_name_and_no_practicers() {
+        assert!(matches!(state("c", "id: c\ngestalt: concept@1\nname: 'grc:θ'\nparents: [p]\nchildren: []\n"), YmlState::Valid(_)));
+        assert!(invalid("c", "id: c\ngestalt: concept@1\nname: x\npracticed-by: {e1: 1}\n").contains("not a prop of concept@1"));
         invalid("c", "id: c\ngestalt: concept@1\n");
+    }
+
+    #[test]
+    fn a_flashcard_practices_concepts_from_0_to_1() {
+        let ok = "id: f\ngestalt: flashcard@1\nfront: q\nback: a\ntags: [t]\naliases: [x]\nblobs: [{file: a.png, label: front}, {file: b.mp3, label: audio}]\nconcepts: {c1: 0.25, c2: 1}\n";
+        assert!(matches!(state("f", ok), YmlState::Valid(_)));
+        assert!(matches!(state("f", "id: f\ngestalt: flashcard@1\nfront: q\n"), YmlState::Valid(_)));
+        invalid("f", "id: f\ngestalt: flashcard@1\nback: a\n");
+        assert!(invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c1: 1.5}\n").contains("concepts.c1"));
+        invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nblobs: [{file: a.png, label: front}, {file: b.png, label: front}]\n");
+    }
+
+    #[test]
+    fn a_practice_event_rates_from_minus_2_to_2() {
+        let event = |rating: &str| format!("id: e\ngestalt: concept-practice-event@1\nconcept: c\norigin: f\nat: 2026-11-01T12:00:00Z\nrating: {rating}\n");
+        for ok in ["-2", "-1", "0", "1", "2"] {
+            assert!(matches!(state("e", &event(ok)), YmlState::Valid(_)), "{ok}");
+        }
+        invalid("e", &event("3"));
+        invalid("e", "id: e\ngestalt: concept-practice-event@1\nconcept: c\nat: 2026-11-01T12:00:00Z\nrating: 0\n");
     }
 
     #[test]
     fn edges_blobs_and_text() {
         let g = Gestalts::builtin();
-        let c = Yml::parse("c", "id: c\ngestalt: concept@1\nname: x\nparents: [p]\npracticed-by: {e1: 0.5}\n");
-        let edges = g.get("concept@1").unwrap().edges(c.map().unwrap());
-        assert_eq!(edges.iter().map(|e| (e.field.as_str(), e.target.as_str())).collect::<Vec<_>>(), vec![("parents", "p"), ("practiced-by", "e1")]);
+        let c = Yml::parse("f", "id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {p: 0.5}\n");
+        let edges = g.get("flashcard@1").unwrap().edges(c.map().unwrap());
+        assert_eq!(edges.iter().map(|e| (e.field.as_str(), e.target.as_str())).collect::<Vec<_>>(), vec![("concepts", "p")]);
         assert_eq!(edges[0].targets, vec!["concept"]);
         let n = Yml::parse("n", "id: n\ngestalt: note@1\ntitle: T\nmain: see ![[a.png]]\ntags: [z]\nblobs: [{file: b.png, label: pic}]\n");
         let def = g.get("note@1").unwrap();

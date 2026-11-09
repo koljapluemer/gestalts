@@ -33,11 +33,17 @@ describe('nextItem', () => {
   it('prefers due cards, else unseen, never the last one', () => {
     const states = fsrsStates([stateNote('a', '2026-11-01T00:00:00Z'), stateNote('b', '2026-12-01T00:00:00Z')]);
     // random < 0.7: due first
-    expect(nextItem(cards, states, null, now, () => 0)?.id).toBe('a');
+    expect(nextItem(cards, states, null, now, { random: () => 0 })?.id).toBe('a');
     // random >= 0.7: unseen first
-    expect(nextItem(cards, states, null, now, () => 0.9)?.id).toBe('c');
+    expect(nextItem(cards, states, null, now, { random: () => 0.9 })?.id).toBe('c');
     // the due one was just shown: fall back to unseen
-    expect(nextItem(cards, states, 'a', now, () => 0)?.id).toBe('c');
+    expect(nextItem(cards, states, 'a', now, { random: () => 0 })?.id).toBe('c');
+  });
+
+  it('honours a given due preference', () => {
+    const states = fsrsStates([stateNote('a', '2026-11-01T00:00:00Z'), stateNote('b', '2026-12-01T00:00:00Z')]);
+    expect(nextItem(cards, states, null, now, { duePreference: 0.9, random: () => 0.89 })?.id).toBe('a');
+    expect(nextItem(cards, states, null, now, { duePreference: 0.9, random: () => 0.91 })?.id).toBe('c');
   });
 
   it('returns null when nothing is due or unseen', () => {

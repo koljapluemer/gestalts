@@ -375,9 +375,9 @@ mod tests {
     fn a_concepts_practicers_are_found_through_the_reverse_index() {
         pollster::block_on(async {
             let r = repo();
-            r.put(parse_yaml("id: c\ngestalt: concept@1\nname: x\npracticed-by: {e1: 0.5}\n").unwrap()).await.unwrap();
-            let q = Query { refs: Some(RefFilter { to: "e1".into(), field: Some("practiced-by".into()) }), ..Default::default() };
-            assert_eq!(ids(&r.query(&q)), vec!["c"]);
+            r.put(parse_yaml("id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c: 0.5}\n").unwrap()).await.unwrap();
+            let q = Query { refs: Some(RefFilter { to: "c".into(), field: Some("concepts".into()) }), ..Default::default() };
+            assert_eq!(ids(&r.query(&q)), vec!["f"]);
         });
     }
 

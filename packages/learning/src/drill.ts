@@ -5,6 +5,7 @@ import { Rating, review, type Facet, type FsrsStates, type Grade, type ReviewSta
  */
 
 export const DUE_PREFERENCE = 0.7;
+export const FLASHCARD_DUE_PREFERENCE = 0.9;
 
 /** An item is reviewed as a whole yml, without a facet. */
 export const facetOf = (id: string): Facet => ({ target: id });
@@ -22,14 +23,14 @@ export function rate(s: Scheduler, prev: ReviewState | undefined, grade: Grade, 
 }
 
 /**
- * Due items with probability DUE_PREFERENCE, else unseen ones (falling back to the other group). Never the previous
+ * Due items with probability `duePreference`, else unseen ones (falling back to the other group). Never the previous
  * item; seen items that aren't due are skipped. `null`: nothing to practise now.
  */
-export function nextItem<C extends { id: string }>(items: C[], states: FsrsStates, lastId: string | null, now: Date, random: () => number = Math.random): C | null {
+export function nextItem<C extends { id: string }>(items: C[], states: FsrsStates, lastId: string | null, now: Date, { duePreference = DUE_PREFERENCE, random = Math.random }: { duePreference?: number; random?: () => number } = {}): C | null {
   const candidates = items.filter((c) => c.id !== lastId);
   const due = candidates.filter((c) => { const s = states.get(facetOf(c.id)); return s && new Date(s.card.dueAt) <= now; });
   const unseen = candidates.filter((c) => !states.has(facetOf(c.id)));
-  const [preferred, fallback] = random() < DUE_PREFERENCE ? [due, unseen] : [unseen, due];
+  const [preferred, fallback] = random() < duePreference ? [due, unseen] : [unseen, due];
   const pool = preferred.length ? preferred : fallback;
   return pool.length ? pool[Math.floor(random() * pool.length)] : null;
 }

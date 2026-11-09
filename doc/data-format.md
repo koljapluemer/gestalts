@@ -29,7 +29,7 @@ version: 1
 fields:
   name: { type: string, required: true }
   parents: { type: ref_list, targets: [concept] }
-  practiced-by: { type: ref_map, min: 0, max: 1 }
+  children: { type: ref_list, targets: [concept] }
 merge:                # optional, over what the field types imply
   keys: { name: conflict }
 ```
@@ -56,7 +56,9 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | Gestalt | |
 |---|---|
 | `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes), `blobs`; all optional |
-| `concept@1` | `name`, `parents`, `children`, `practiced-by`: what larger things a yml trains, in any domain |
+| `concept@1` | `name`, `parents`, `children`: what larger things a yml trains, in any domain |
+| `concept-practice-event@1` | a `concept` came up through `origin` at `at`, with a `rating` from -2 to 2 |
+| `flashcard@1` | Markdown `front`; optional `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`) |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
 | `practice-session@1` | one session's timing and trials |
@@ -65,7 +67,8 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | `conflict@1` | a value a sync couldn't settle |
 
 `concept@1` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
-deck or view that writes it.
+deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
+the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
 
 ## Publishing a deck
 

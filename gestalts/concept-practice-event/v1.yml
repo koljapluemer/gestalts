@@ -1,0 +1,10 @@
+name: concept-practice-event
+version: 1
+description: >-
+  A `concept` came up in practice at `at`, through the yml `origin` (a flashcard, say). `rating` runs from -2 (went very
+  badly) over 0 (came up, no score) to 2 (went very well).
+fields:
+  concept: { type: ref, required: true, targets: [concept] }
+  origin: { type: ref, required: true }
+  at: { type: datetime, required: true }
+  rating: { type: integer, required: true, one_of: [-2, -1, 0, 1, 2] }
