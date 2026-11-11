@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
-import { BibtexPaste, MarkdownEditor, Modal, SourceSearch, byline, sourceTitle } from '@gestalts/kit';
+import { BibtexPaste, Modal, SourceSearch, byline, sourceTitle } from '@gestalts/kit';
 import { useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const CONCEPT = 'concept@1';
@@ -223,7 +223,10 @@ function NoteGroup({ id, note, concept, onCreated, onGone, onError }: {
     <section className="flex flex-col gap-2 rounded-box border border-base-300 p-3">
       <input className="input input-sm w-full" aria-label="How this relates to the concept" placeholder={LABEL} value={label}
              onChange={(e) => edit({ label: e.target.value })} />
-      <MarkdownEditor value={main} onChange={(m: string) => edit({ main: m })} placeholder={written ? '' : 'Something about this concept…'} minHeight="6rem" />
+      {main.includes('\n')
+        // written elsewhere over several lines: an input would drop the line breaks on the first edit
+        ? <textarea className="textarea textarea-lg w-full" aria-label="The note" rows={main.split('\n').length} value={main} onChange={(e) => edit({ main: e.target.value })} />
+        : <input className="input input-lg w-full" aria-label="The note" placeholder={written ? '' : 'Something about this concept…'} value={main} onChange={(e) => edit({ main: e.target.value })} />}
       <Sources relationships={rels} concept={concept} onChange={(r) => void save(r)} onError={onError} />
       <div className="flex items-center gap-1">
         <button type="button" className="btn btn-ghost btn-sm" title="Add a source" onClick={() => setAdding(true)}><BookPlus className="size-4" /> Source</button>
