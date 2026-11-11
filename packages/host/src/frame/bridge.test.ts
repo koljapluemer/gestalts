@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Delta, Item, JsonMap } from '@gestalts/view';
+import type { BeliefDelta, Delta, Item, JsonMap } from '@gestalts/view';
+import type { Pushed } from './bridge';
 
 vi.mock('@gestalts/client', () => ({ stableId: () => 's', stateId: () => 't', contentHash: () => 'h' }));
 const { AccessError, Bridge } = await import('./bridge');
@@ -10,18 +11,23 @@ function setup(existing: Item[] = []) {
   const stops: number[] = [];
   const store = new Map(existing.map((i) => [i.id, i]));
   let listener: ((d: Delta) => void) | undefined;
+  let beliefListener: ((d: BeliefDelta) => void) | undefined;
   const repo = {
     query: () => ({ items: [...store.values()], next: null }),
     live: (_q: unknown, f: (d: Delta) => void) => { listener = f; return { page: { items: [], next: null }, stop: () => stops.push(1) }; },
+    liveBeliefs: (concepts: string[], f: (d: BeliefDelta) => void) => {
+      beliefListener = f;
+      return { beliefs: concepts.map((concept) => ({ concept, mean: 0, sd: 1.5, p: 0.5, evidence: 0 })), stop: () => stops.push(2) };
+    },
     get: (id: string) => store.get(id),
     put: async (value: JsonMap) => { const i = { id: String(value.id), gestalt: String(value.gestalt), value }; store.set(i.id, i); return i; },
     delete: async (id: string) => store.delete(id),
     readBlob: async () => new Uint8Array([1]),
     writeBlob: async () => {},
   };
-  const out: Delta[] = [];
-  const bridge = new Bridge(repo as never, { reads: ['note@1', 'concept@1'], writes: ['note@1'] }, env, (d) => out.push(d));
-  return { bridge, stops, out, fire: (d: Delta) => listener?.(d), store };
+  const out: Pushed[] = [];
+  const bridge = new Bridge(repo as never, { reads: ['note@1', 'concept@1'], writes: ['note@1'] }, env, (m) => out.push(m));
+  return { bridge, stops, out, fire: (d: Delta) => listener?.(d), fireBeliefs: (d: BeliefDelta) => beliefListener?.(d), store };
 }
 
 const concept: Item = { id: 'c', gestalt: 'concept@1', value: { id: 'c', gestalt: 'concept@1', name: 'x' } };
@@ -62,7 +68,9 @@ describe('the bridge', () => {
       await expect(bridge.handle({ op: 'net', request: { url } })).rejects.toBeInstanceOf(AccessError);
     }
     expect(seen).toEqual(['https://www.youtube.com/watch?v=x']);
-    await expect(bridge.handle({ op: 'capabilities' })).resolves.toEqual({ net: true, llm: false, backend: false });
+    await expect(bridge.handle({ op: 'capabilities' })).resolves.toEqual({ net: true, llm: false, backend: false, microphone: false });
+    const granted = new Bridge({} as never, { reads: [], writes: [], microphone: true }, env, () => {});
+    await expect(granted.handle({ op: 'capabilities' })).resolves.toMatchObject({ microphone: true });
     const offline = new Bridge({} as never, { reads: [], writes: [], network: ['www.youtube.com'] }, env, () => {});
     await expect(offline.handle({ op: 'net', request: { url: 'https://www.youtube.com/' } })).rejects.toBeInstanceOf(AccessError);
   });
@@ -90,9 +98,21 @@ describe('the bridge', () => {
     const { bridge, stops, out, fire } = setup();
     const { sub } = await bridge.handle({ op: 'subscribe', query: { gestalt: 'note@1' } });
     fire({ sub: 999, upsert: [], remove: [], order: [], next: null });
-    expect(out[0].sub).toBe(sub);
+    expect(out[0]).toMatchObject({ type: 'delta', delta: { sub } });
     bridge.close();
     expect(stops).toHaveLength(1);
+  });
+
+  it('follows beliefs for a view that reads concepts, under its own numbering', async () => {
+    const { bridge, stops, out, fireBeliefs } = setup();
+    const { sub, beliefs } = await bridge.handle({ op: 'beliefs', concepts: ['x'] });
+    expect(beliefs.map((b) => b.concept)).toEqual(['x']);
+    fireBeliefs({ sub: 999, beliefs: [{ concept: 'x', mean: 1, sd: 1, p: 0.7, evidence: 1 }] });
+    expect(out[0]).toMatchObject({ type: 'beliefs', delta: { sub, beliefs: [{ concept: 'x', mean: 1 }] } });
+    await bridge.handle({ op: 'unsubscribe', sub });
+    expect(stops).toEqual([2]);
+    const blind = new Bridge({} as never, { reads: ['note@1'], writes: [] }, env, () => {});
+    await expect(blind.handle({ op: 'beliefs', concepts: ['x'] })).rejects.toBeInstanceOf(AccessError);
   });
 
   it('keeps where a view put itself only as a map of strings, and says whether another view showed', async () => {

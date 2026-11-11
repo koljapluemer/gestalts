@@ -2,5 +2,5 @@ id: note-crud
 version: 1.0.0
 title: Notes
 description: List, search, edit and delete notes, with what they relate to and the sources they draw on.
-reads: [note@1, source@1, concept@1]
+reads: [note@1, source@1, concept@2]
 writes: [note@1, source@1]

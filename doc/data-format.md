@@ -25,12 +25,10 @@ Writing through the app refuses anything but a valid yml.
 
 ```yaml
 name: concept
-version: 1
+version: 2
 fields:
   name: { type: string, required: true }
   aliases: { type: string_list }
-  parents: { type: ref_list, targets: [concept] }
-  children: { type: ref_list, targets: [concept] }
 merge:                # optional, over what the field types imply
   keys: { name: conflict }
 ```
@@ -57,10 +55,11 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | Gestalt | |
 |---|---|
 | `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes, sources and concepts), `blobs`; all optional |
-| `concept@1` | `name`, `aliases`, `parents`, `children`: what larger things a yml trains, in any domain |
-| `concept-practice-event@1` | a `concept` came up through `origin` at `at`, with a `rating` from -2 to 2 |
-| `flashcard@1` | Markdown `front`; optional `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`) |
-| `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `aliases`, `tags`, `extra`, `blobs` |
+| `concept@2` | `name`, `aliases`: something that can be learned, in any domain, at any level of abstraction |
+| `concept-link@1` | `from`, `to` (concepts), `weight` 0..1: evidence about `from` says this much about `to`; optional `kind`, `source` |
+| `practice-event@1` | `subject` (what was practised: an item, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin` |
+| `flashcard@1` | Markdown `front`; optional `context` (small print with the front), `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`), `sources` (credits, to sources) |
+| `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `license` (SPDX), `aliases`, `tags`, `extra`, `blobs` |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
 | `practice-session@1` | one session's timing and trials |
@@ -68,9 +67,24 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | `view@1` | a vibecoded view: `title`, `source`, `reads`, `writes` |
 | `conflict@1` | a value a sync couldn't settle |
 
-`concept@1` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
+`concept@1` (with `parents` and `children`) and `concept-practice-event@1` are still defined, so ymls of them stay valid,
+but nothing uses them: concepts form no tree, and events don't copy conclusions.
+
+## Concepts, practice and what a learner knows
+
+`concept@2` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
 deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
 the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
+
+Concepts form no hierarchy. How they relate is said by `concept-link`s: directed (knowing how to say a word is good
+evidence of recognising it, not the other way round), weighted, cycles allowed, any number of them, and each a claim
+by its `source` (a deck, the user, a model), so several can stand about one pair; they count as their mean.
+
+Practice is logged as it happened, one `practice-event` per answer (or per thing that came up), never as conclusions
+about concepts. What it says about concepts is worked out by the core (`crates/core/src/mastery.rs`) from the events,
+the `concepts` of their subjects and the links as they are now, so a better graph or model reinterprets all past
+practice. Views get beliefs (a mean and spread per concept) for the concepts they show, live, with `useBeliefs`; they
+never load the events. The model and how it keeps up are described in that file.
 
 A note relating to a `concept` says something about it, labelled `sheds light on` by default. A claim about a `source`
 is a note relating to it, labelled `source` by default; a locator goes in the label (`source p. 34`). Names in `author` and `editor` are `family, given` (`family, suffix, given`; without a comma, one

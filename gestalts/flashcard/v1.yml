@@ -1,14 +1,18 @@
 name: flashcard
 version: 1
 description: >-
-  A card to learn by spaced repetition: `front` and `back` are Markdown. `blobs` may hold one each of `front`, `back`
-  (images) and `audio` (played with the back). `concepts` maps the concepts this card practices to how strongly, from
-  0 to 1. The tag `no-generic-practice` keeps a card to the views made for it.
+  A card to learn by spaced repetition: `front` and `back` are Markdown, and `context` (Markdown too) is small print
+  shown with the front, like which "you" a phrase is for. `blobs` may hold one each of `front`, `back` (images) and
+  `audio` (played with the back). `concepts` maps the concepts this card practices to how strongly, from 0 to 1.
+  `sources` credits where it comes from, labelled how (`adapted from`), and travels with the card. The tag
+  `no-generic-practice` keeps a card to the views made for it.
 fields:
   front: { type: text, required: true }
+  context: { type: text }
   back: { type: text }
   extra: { type: text }
   blobs: { type: blobs, labels: { front: { max: 1 }, back: { max: 1 }, audio: { max: 1 } } }
   tags: { type: string_list }
   aliases: { type: string_list }
   concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  sources: { type: relationships, targets: [source] }

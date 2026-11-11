@@ -1,6 +1,6 @@
 import type { ViewHost } from './connection';
 import type { Answers, Call, ViewError } from './protocol';
-import type { Delta, Item, JsonMap, Page, Query } from './types';
+import type { Belief, BeliefDelta, Delta, Item, JsonMap, Page, Query } from './types';
 
 const words = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
@@ -49,10 +49,20 @@ export type Fixture = ViewHost & {
   opened: { view: string; params?: Record<string, string> }[];
   /** moves the view elsewhere, as the app would */
   move(params: Record<string, string>): void;
+  /** changes what is believed, as practice elsewhere would */
+  setBeliefs(beliefs: Belief[]): void;
 };
 
-/** A host that holds `ymls` in memory, for running a view with no app around it: in a test, or in a bare iframe. */
-export function fixtureHost(ymls: JsonMap[] = []): Fixture {
+/** What a fixture says about a concept it has no belief for: the app's prior (no model runs in a fixture). */
+const priorBelief = (concept: string): Belief => ({ concept, mean: 0, sd: 1.5, p: 0.5, evidence: 0 });
+
+/**
+ * A host that holds `ymls` in memory, for running a view with no app around it: in a test, or in a bare iframe.
+ * No model of what the learner knows runs here: `beliefs` are given, and `setBeliefs` changes them.
+ */
+export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixture {
+  const known = new Map(beliefs.map((b) => [b.concept, b]));
+  const beliefSubs = new Map<number, { concepts: string[]; listener?: (d: BeliefDelta) => void }>();
   const store = new Map<string, Item>();
   const put = (value: JsonMap) => {
     const id = typeof value.id === 'string' ? value.id : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -87,7 +97,12 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
         subs.set(sub, { query: c.query, order: p.items.map((i) => i.id) });
         return { sub, page: p };
       }
-      case 'unsubscribe': subs.delete(c.sub); return null;
+      case 'beliefs': {
+        const sub = nextSub++;
+        beliefSubs.set(sub, { concepts: c.concepts });
+        return { sub, beliefs: c.concepts.map((id) => known.get(id) ?? priorBelief(id)) };
+      }
+      case 'unsubscribe': subs.delete(c.sub); beliefSubs.delete(c.sub); return null;
       case 'put': { const item = put(c.value); changed(); return item; }
       case 'delete': { const had = store.delete(c.id); changed(); return had; }
       case 'readBlob': return blobs.get(c.name) ?? null;
@@ -97,7 +112,7 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       case 'contentHash': return Array.from(c.bytes).reduce((h, b) => (Math.imul(31, h) + b) | 0, 0).toString(16);
       case 'service': return { status: 503, contentType: 'text/plain', body: new TextEncoder().encode('no backend in a fixture') };
       case 'net': case 'llm': throw new Error(`${c.op} isn't available in a fixture`);
-      case 'capabilities': return { net: false, llm: false, backend: false };
+      case 'capabilities': return { net: false, llm: false, backend: false, microphone: false };
       case 'setState': case 'setTitle': return null;
       case 'setParams': params = c.params; return null;
       // nothing else runs here to show
@@ -111,6 +126,11 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       if (s) s.listener = f;
       return () => { if (s) s.listener = undefined; };
     },
+    onBeliefs(sub, f) {
+      const s = beliefSubs.get(sub);
+      if (s) s.listener = f;
+      return () => { if (s) s.listener = undefined; };
+    },
     onParams(f) { moved.add(f); return () => { moved.delete(f); }; },
     report: (e) => { errors.push(e); },
     items: () => [...store.values()],
@@ -119,5 +139,12 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
     params: () => params,
     opened,
     move(p) { params = p; moved.forEach((f) => f(p)); },
+    setBeliefs(bs) {
+      bs.forEach((b) => known.set(b.concept, b));
+      for (const [sub, s] of beliefSubs) {
+        const changed = bs.filter((b) => s.concepts.includes(b.concept));
+        if (changed.length) s.listener?.({ sub, beliefs: changed });
+      }
+    },
   };
 }

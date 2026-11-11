@@ -1,7 +1,7 @@
 import { createContext, use, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { ViewHost } from './connection';
 import type { Call, Capabilities, LlmRequest, NetReply, NetRequest, ViewInit } from './protocol';
-import type { Item, Json, JsonMap, Page, Query } from './types';
+import type { Belief, Item, Json, JsonMap, Page, Query } from './types';
 
 const SAVE_DELAY_MS = 300;
 
@@ -158,6 +158,79 @@ const noSubscribe = () => () => {};
 const NOTHING: QueryResult = { ...LOADING, loading: false };
 const idle = () => NOTHING;
 
+export type BeliefsResult = { beliefs: Map<string, Belief>; loading: boolean; error?: string };
+
+const NO_BELIEFS: BeliefsResult = { beliefs: new Map(), loading: false };
+const LOADING_BELIEFS: BeliefsResult = { beliefs: new Map(), loading: true };
+
+/** Beliefs about some concepts kept current: one subscription, stopped when nobody watches. */
+class LiveBeliefs {
+  private listeners = new Set<() => void>();
+  private snapshot = LOADING_BELIEFS;
+  private generation = 0;
+  private sub: { id: number; stop: () => void } | null = null;
+
+  constructor(private host: ViewHost, private concepts: string[]) {}
+
+  get = () => this.snapshot;
+
+  subscribe = (l: () => void) => {
+    this.listeners.add(l);
+    if (this.listeners.size === 1) this.start();
+    return () => {
+      this.listeners.delete(l);
+      if (this.listeners.size === 0) this.stop();
+    };
+  };
+
+  private start() {
+    const generation = ++this.generation;
+    this.snapshot = LOADING_BELIEFS;
+    this.host.call({ op: 'beliefs', concepts: this.concepts }).then(({ sub, beliefs }) => {
+      if (generation !== this.generation) {
+        void this.host.call({ op: 'unsubscribe', sub });
+        return;
+      }
+      const map = new Map(beliefs.map((b) => [b.concept, b]));
+      const stop = this.host.onBeliefs(sub, (d) => {
+        d.beliefs.forEach((b) => map.set(b.concept, b));
+        this.publish({ beliefs: new Map(map), loading: false });
+      });
+      this.sub = { id: sub, stop };
+      this.publish({ beliefs: new Map(map), loading: false });
+    }, (e: unknown) => {
+      if (generation === this.generation) this.publish({ beliefs: new Map(), loading: false, error: e instanceof Error ? e.message : String(e) });
+    });
+  }
+
+  private stop() {
+    this.generation++;
+    if (this.sub) {
+      this.sub.stop();
+      void this.host.call({ op: 'unsubscribe', sub: this.sub.id });
+      this.sub = null;
+    }
+  }
+
+  private publish(r: BeliefsResult) {
+    this.snapshot = r;
+    this.listeners.forEach((l) => l());
+  }
+}
+
+/**
+ * What is believed about how well the learner knows `concepts` (ids), worked out by the app from all practice and
+ * kept current: only changes about these concepts reach the view, never the practice behind them. Every concept asked
+ * for gets a belief, at the prior when nothing reached it. `null` asks for nothing yet. The view must read `concept`.
+ */
+export function useBeliefs(concepts: string[] | null): BeliefsResult {
+  const { host } = useContext_();
+  const key = concepts === null ? null : JSON.stringify([...new Set(concepts)].sort());
+  const live = useMemo(() => (key === null ? null : new LiveBeliefs(host, JSON.parse(key) as string[])), [host, key]);
+  return useSyncExternalStore(live?.subscribe ?? noSubscribe, live?.get ?? idleBeliefs);
+}
+const idleBeliefs = () => NO_BELIEFS;
+
 /** One yml by id, kept current; `undefined` while loading or when there's none. */
 export function useDoc(gestalt: string, id: string | null): Item | undefined {
   return useQuery(id === null ? null : { gestalt, ids: [id], limit: 1 }).items[0];
@@ -294,7 +367,7 @@ export function useCapabilities(): { capabilities: Capabilities | undefined; ref
   const [round, setRound] = useState(0);
   useEffect(() => {
     let live = true;
-    host.call({ op: 'capabilities' }).then((c) => { if (live) setCapabilities(c); }, () => { if (live) setCapabilities({ net: false, llm: false, backend: false }); });
+    host.call({ op: 'capabilities' }).then((c) => { if (live) setCapabilities(c); }, () => { if (live) setCapabilities({ net: false, llm: false, backend: false, microphone: false }); });
     return () => { live = false; };
   }, [host, round]);
   return { capabilities, refresh: useMemo(() => () => setRound((r) => r + 1), []) };

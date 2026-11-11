@@ -1,9 +1,9 @@
 import type { Live, Repo } from '@gestalts/client';
 import { stableId, stateId } from '@gestalts/client';
-import type { Answers, Call, Capabilities, Delta, Item, JsonMap, LlmReply, LlmRequest, NetReply, NetRequest, Query, ServiceReply } from '@gestalts/view';
+import type { Answers, Call, Capabilities, Item, JsonMap, LlmReply, LlmRequest, NetReply, NetRequest, Query, ServiceReply, ToView } from '@gestalts/view';
 
-/** What a view may touch: its `reads` and `writes`, the hosts it may reach, whether it may ask an LLM. */
-export type Scope = { reads: string[]; writes: string[]; network?: string[]; llm?: boolean };
+/** What a view may touch: its `reads` and `writes`, the hosts it may reach, whether it may ask an LLM or record. */
+export type Scope = { reads: string[]; writes: string[]; network?: string[]; llm?: boolean; microphone?: boolean };
 
 /** What the bridge needs of the app, beyond the repo. */
 export type ViewEnv = {
@@ -13,8 +13,8 @@ export type ViewEnv = {
   net?: (request: NetRequest) => Promise<NetReply>;
   /** completions through the node; absent where there's none */
   llm?: (request: LlmRequest) => Promise<LlmReply>;
-  /** what `net` and `llm` can do right now (a node connected, a provider set up) */
-  capabilities?: () => Promise<Capabilities>;
+  /** what `net`, `llm` and the backend can do right now (a node connected, a provider set up); `microphone` is the grant */
+  capabilities?: () => Promise<Omit<Capabilities, 'microphone'>>;
   setState(state: JsonMap): void;
   setTitle(title: string): void;
   /** where the view put itself, kept so it comes back there */
@@ -33,7 +33,10 @@ function checkParams(params: unknown): Record<string, string> {
 
 export class AccessError extends Error {}
 
-export type BridgeRepo = Pick<Repo, 'query' | 'live' | 'get' | 'put' | 'delete' | 'readBlob' | 'writeBlob'>;
+export type BridgeRepo = Pick<Repo, 'query' | 'live' | 'liveBeliefs' | 'get' | 'put' | 'delete' | 'readBlob' | 'writeBlob'>;
+
+/** What the host sends a view unasked: changes to what it follows. */
+export type Pushed = Extract<ToView, { type: 'delta' | 'beliefs' }>;
 
 /** Sha256 in the page around the frame: a sandboxed frame isn't a secure context, so it has no `crypto.subtle`. */
 async function sha256(bytes: Uint8Array): Promise<string> {
@@ -46,10 +49,10 @@ async function sha256(bytes: Uint8Array): Promise<string> {
  * manifest declared. A query must name one gestalt the view reads, so nothing can be asked for wholesale.
  */
 export class Bridge {
-  private lives = new Map<number, Live>();
+  private lives = new Map<number, Pick<Live, 'stop'>>();
   private nextSub = 1;
 
-  constructor(private repo: BridgeRepo, private scope: Scope, private env: ViewEnv, private onDelta: (d: Delta) => void) {}
+  constructor(private repo: BridgeRepo, private scope: Scope, private env: ViewEnv, private push: (m: Pushed) => void) {}
 
   private checkQuery(q: Query) {
     if (!q.gestalt) throw new AccessError('a query must name the gestalt it asks for');
@@ -86,9 +89,18 @@ export class Bridge {
       case 'subscribe': {
         this.checkQuery(c.query);
         const sub = this.nextSub++;
-        const live = this.repo.live(c.query, (d) => this.onDelta({ ...d, sub }));
+        const live = this.repo.live(c.query, (d) => this.push({ type: 'delta', delta: { ...d, sub } }));
         this.lives.set(sub, live);
         return { sub, page: live.page };
+      }
+      case 'beliefs': {
+        // beliefs say how well concepts are known, not what happened: reading concepts is enough
+        if (!this.scope.reads.some((g) => g.startsWith('concept@'))) throw new AccessError('this view doesn\'t declare that it reads concept');
+        if (!Array.isArray(c.concepts) || !c.concepts.every((x) => typeof x === 'string')) throw new AccessError('concepts are a list of ids');
+        const sub = this.nextSub++;
+        const live = this.repo.liveBeliefs(c.concepts, (d) => this.push({ type: 'beliefs', delta: { ...d, sub } }));
+        this.lives.set(sub, live);
+        return { sub, beliefs: live.beliefs };
       }
       case 'unsubscribe':
         this.lives.get(c.sub)?.stop();
@@ -128,7 +140,7 @@ export class Bridge {
         return this.env.llm(c.request);
       case 'capabilities': {
         const c_ = (await this.env.capabilities?.()) ?? { net: false, llm: false, backend: false };
-        return { net: c_.net && !!this.scope.network?.length, llm: c_.llm && !!this.scope.llm, backend: c_.backend && !!this.env.service };
+        return { net: c_.net && !!this.scope.network?.length, llm: c_.llm && !!this.scope.llm, backend: c_.backend && !!this.env.service, microphone: !!this.scope.microphone };
       }
       case 'setState': this.env.setState(c.state); return null;
       case 'setTitle': this.env.setTitle(c.title); return null;

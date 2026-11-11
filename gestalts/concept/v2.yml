@@ -1,0 +1,11 @@
+name: concept
+version: 2
+description: >-
+  Something that can be learned, in any domain, at any level of abstraction: a letter, a word, "greeting someone", the
+  pronoun system of a language, a proof technique. Concepts form no tree: how they relate is said by `concept-link`
+  ymls, directed and weighted, and what practices a concept says so itself, through a `concepts` prop. What a concept
+  means inside a domain belongs to the deck or view that creates it. `aliases` are other names it goes by, and find it
+  too.
+fields:
+  name: { type: string, required: true }
+  aliases: { type: string_list }

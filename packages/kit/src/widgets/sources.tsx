@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ClipboardPaste } from 'lucide-react';
 import { bibOf, match, mergeSource, normalise, parseBibtex, titleWords, type Bib, type Candidate } from '@gestalts/sources';
-import { useQuery, useRead, useWrite, type JsonMap, type Query } from '@gestalts/view';
+import { useDoc, useQuery, useRead, useWrite, type JsonMap, type Query } from '@gestalts/view';
 import { Modal } from '../components';
 import { useDebounced } from '../primitives';
 
@@ -181,4 +181,39 @@ export function AddSource({ attached, onAdd, onClose }: { attached: Set<string>;
       </div>
     </Modal>
   );
+}
+
+/** An SPDX id as people write it: `CC-BY-SA-4.0` is "CC BY-SA 4.0"; anything else as it is. */
+export function licenseLabel(spdx: string): string {
+  const cc = /^CC-([A-Z-]+?)-(\d+\.\d+)$/.exec(spdx);
+  return cc ? `CC ${cc[1]} ${cc[2]}` : spdx;
+}
+
+type Credit = { to: string; label: string };
+const creditsOf = (v: unknown): Credit[] => (Array.isArray(v) ? v.filter((c): c is Credit => !!c && typeof c === 'object' && typeof (c as Credit).to === 'string') : []);
+
+function CreditLine({ credit }: { credit: Credit }) {
+  const source = useDoc(SOURCE, credit.to);
+  if (!source) return null;
+  const v = source.value;
+  const how = credit.label ? credit.label[0].toUpperCase() + credit.label.slice(1) : 'From';
+  const by = strings(v.organization)[0] || byline(v);
+  const url = str(v.url);
+  const title = <cite>{sourceTitle(v)}</cite>;
+  return (
+    <span className="block">
+      {how} {url ? <a href={url} target="_blank" rel="noreferrer" className="link">{title}</a> : title}
+      {by && `, ${by}`}{str(v.license) && `, ${licenseLabel(str(v.license))}`}
+    </span>
+  );
+}
+
+/**
+ * Where a yml comes from, from its `sources` (`[{to: source id, label}]`): "Adapted from *Vietnamese phrasebook*,
+ * Wikivoyage, CC BY-SA 4.0". The view needs to read `source@1`. Nothing when there are none.
+ */
+export function Credits({ sources, className = '' }: { sources: unknown; className?: string }) {
+  const list = creditsOf(sources);
+  if (!list.length) return null;
+  return <small className={`text-xs opacity-70 ${className}`}>{list.map((c) => <CreditLine key={c.to + c.label} credit={c} />)}</small>;
 }

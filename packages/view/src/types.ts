@@ -35,6 +35,16 @@ export type Page = { items: Item[]; next: string | null };
 /** What changed in one live query's page. */
 export type Delta = { sub: number; upsert: Item[]; remove: string[]; order: string[]; next: string | null };
 
+/**
+ * What is believed about how well the learner knows a concept, worked out by the app from all practice: `mean` on the
+ * logit scale (0 is a coin flip), `sd` how unsure that is, `p` the chance of getting something on it right, `evidence`
+ * how many events were on it directly, `lastAt` the last one that reached it.
+ */
+export type Belief = { concept: string; mean: number; sd: number; p: number; evidence: number; lastAt?: string };
+
+/** What changed about one belief subscription's concepts. */
+export type BeliefDelta = { sub: number; beliefs: Belief[] };
+
 export type Problem = { path: string; message: string };
 /** A yml that can't be used, and why. */
 export type Health = { id: string; problems: Problem[] };

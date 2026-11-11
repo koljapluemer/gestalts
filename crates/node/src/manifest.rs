@@ -48,9 +48,9 @@ pub struct PluginManifest {
     pub tags: Vec<String>,
     #[serde(default)]
     pub requires: Vec<Requirement>,
-    /// asks to run in the app's origin; the distribution decides whether it does
+    /// what its frame asks to be allowed; the distribution decides what it gets
     #[serde(default)]
-    pub frame: Option<FrameMode>,
+    pub permissions: Vec<Permission>,
     /// hosts its view may reach through the node's `/net`, exactly
     #[serde(default)]
     pub network: Vec<String>,
@@ -59,10 +59,14 @@ pub struct PluginManifest {
     pub llm: bool,
 }
 
+/// What a view's frame may be allowed beyond the strict sandbox. Only the distribution grants these.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
-pub enum FrameMode {
-    #[serde(rename = "same-origin")]
+#[serde(rename_all = "kebab-case")]
+pub enum Permission {
+    /// runs in the app's origin, so frames it embeds (a video player) work
     SameOrigin,
+    /// records audio; needs `same-origin`, as a sandboxed frame isn't a secure context
+    Microphone,
 }
 
 #[derive(Debug, Clone)]
@@ -142,6 +146,9 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     }
     if let Some(g) = m.writes.iter().find(|g| !m.reads.contains(g)) {
         return invalid(format!("{} writes {g} but doesn't read it", m.id));
+    }
+    if m.permissions.contains(&Permission::Microphone) && !m.permissions.contains(&Permission::SameOrigin) {
+        return invalid(format!("{}: `microphone` needs `same-origin` too, as a sandboxed frame can't record", m.id));
     }
     if let Some(h) = m.network.iter().find(|h| !valid_host(h)) {
         return invalid(format!("{}: network host {h} is not a plain host name (like www.example.com)", m.id));
@@ -229,10 +236,16 @@ mod tests {
     const BASE: &str = "id: x\nversion: 1.0.0\ntitle: X\n";
 
     #[test]
-    fn frame_network_and_llm_are_read_and_hosts_checked() {
-        let (_d, b) = bundle("caps", &format!("{BASE}frame: same-origin\nnetwork: [www.youtube.com]\nllm: true\n"), &[]);
+    fn permissions_network_and_llm_are_read_and_checked() {
+        let (_d, b) = bundle("caps", &format!("{BASE}permissions: [same-origin, microphone]\nnetwork: [www.youtube.com]\nllm: true\n"), &[]);
         let m = b.unwrap().manifest;
-        assert_eq!(m.frame, Some(FrameMode::SameOrigin));
+        assert_eq!(m.permissions, vec![Permission::SameOrigin, Permission::Microphone]);
+        for bad in ["[microphone]", "[camera]", "same-origin"] {
+            let (_d, b) = bundle("perm-bad", &format!("{BASE}permissions: {bad}\n"), &[]);
+            assert!(b.is_err(), "permissions: {bad} should be refused");
+        }
+        let (_d, b) = bundle("frame-gone", &format!("{BASE}frame: same-origin\n"), &[]);
+        assert!(b.is_err(), "`frame` is no longer a key");
         assert_eq!(m.network, vec!["www.youtube.com".to_owned()]);
         assert!(m.llm);
         for bad in ["https://www.youtube.com", "*.youtube.com", "localhost", "www.youtube.com:443"] {

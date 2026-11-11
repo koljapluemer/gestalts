@@ -19,6 +19,16 @@ fn iso_datetimes() {
     assert_eq!(iso_datetime(0), "1970-01-01T00:00:00.000Z");
     assert_eq!(iso_datetime(1_793_786_400_123), "2026-11-04T10:00:00.123Z");
     assert_eq!(iso_datetime(951_782_400_000), "2000-02-29T00:00:00.000Z");
+    for ms in [0, 1_793_786_400_123, 951_782_400_000, -86_400_001] {
+        assert_eq!(parse_iso_datetime(&iso_datetime(ms)), Some(ms));
+    }
+    assert_eq!(parse_iso_datetime("2026-11-04T10:00:00Z"), Some(1_793_786_400_000));
+    assert_eq!(parse_iso_datetime("2026-11-04T10:00"), Some(1_793_786_400_000));
+    assert_eq!(parse_iso_datetime("2026-11-04T12:00:00+02:00"), Some(1_793_786_400_000));
+    assert_eq!(parse_iso_datetime("2026-11-04T10:00:00.5Z"), Some(1_793_786_400_500));
+    for bad in ["2026-11-04", "2026-13-04T10:00", "2026-11-04T10:00:00Q", "2026-11-04T10:00:00.Z", "nonsense"] {
+        assert_eq!(parse_iso_datetime(bad), None, "{bad}");
+    }
 }
 
 #[test]

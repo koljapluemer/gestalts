@@ -7,7 +7,7 @@ import { blobsOf, type BlobRef } from './NoteCard';
 
 const NOTE = 'note@1';
 const SOURCE = 'source@1';
-const CONCEPT = 'concept@1';
+const CONCEPT = 'concept@2';
 /** a relationship's label when nothing more specific is said */
 export const RELATED = 'related';
 
@@ -127,7 +127,7 @@ function Relationships({ self, value, onChange }: { self?: string; value: Relati
 }
 
 /**
- * Edits every prop of a `note`; `note` absent makes a new one. It reads `note@1`, `source@1` and `concept@1` (what a
+ * Edits every prop of a `note`; `note` absent makes a new one. It reads `note@1`, `source@1` and `concept@2` (what a
  * note relates to) and writes `note@1` and `source@1` (sources pasted in as BibTeX).
  */
 export function NoteEditor({ note, onDone }: { note?: Item; onDone: (saved?: Item) => void }) {

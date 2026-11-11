@@ -196,6 +196,11 @@ impl Index {
         self.entries.values()
     }
 
+    /// The valid ymls of the gestalt `name@version`.
+    pub fn of_gestalt<'a>(&'a self, gestalt: &str) -> impl Iterator<Item = &'a Entry> + 'a {
+        self.by_gestalt.get(gestalt).into_iter().flatten().filter_map(|id| self.entries.get(id))
+    }
+
     /// Puts `e` in, returning what it replaced.
     pub fn insert(&mut self, e: Entry) -> Option<Entry> {
         let old = self.remove(&e.yml.id);

@@ -1,11 +1,13 @@
 import type { Answers, Call, FromView, ToView, ViewError } from './protocol';
-import type { Delta } from './types';
+import type { BeliefDelta, Delta } from './types';
 
 /** What a view talks to: the app around it, or a fixture. */
 export interface ViewHost {
   call<C extends Call>(call: C): Promise<Answers[C['op']]>;
   /** Calls `f` with each delta of the live query `sub`. */
   onDelta(sub: number, f: (d: Delta) => void): () => void;
+  /** Calls `f` with each change to the belief subscription `sub`. */
+  onBeliefs(sub: number, f: (d: BeliefDelta) => void): () => void;
   /** Calls `f` with the view's params each time the app moves it elsewhere. */
   onParams(f: (params: Record<string, string>) => void): () => void;
   report(error: ViewError): void;
@@ -18,6 +20,8 @@ export function connect(port: MessagePort): ViewHost {
   const listeners = new Map<number, (d: Delta) => void>();
   // a delta can arrive before `subscribe`'s reply has been handled
   const early = new Map<number, Delta[]>();
+  const beliefListeners = new Map<number, (d: BeliefDelta) => void>();
+  const earlyBeliefs = new Map<number, BeliefDelta[]>();
   const moved = new Set<(params: Record<string, string>) => void>();
   // a move can arrive before anything listens (while the view mounts): the last one is handed over then
   let unheard: Record<string, string> | undefined;
@@ -28,6 +32,12 @@ export function connect(port: MessagePort): ViewHost {
       const l = listeners.get(m.delta.sub);
       if (l) l(m.delta);
       else early.set(m.delta.sub, [...(early.get(m.delta.sub) ?? []), m.delta]);
+      return;
+    }
+    if (m.type === 'beliefs') {
+      const l = beliefListeners.get(m.delta.sub);
+      if (l) l(m.delta);
+      else earlyBeliefs.set(m.delta.sub, [...(earlyBeliefs.get(m.delta.sub) ?? []), m.delta]);
       return;
     }
     if (m.type === 'params') {
@@ -51,6 +61,12 @@ export function connect(port: MessagePort): ViewHost {
       early.get(sub)?.forEach(f);
       early.delete(sub);
       return () => { listeners.delete(sub); };
+    },
+    onBeliefs(sub, f) {
+      beliefListeners.set(sub, f);
+      earlyBeliefs.get(sub)?.forEach(f);
+      earlyBeliefs.delete(sub);
+      return () => { beliefListeners.delete(sub); };
     },
     onParams(f) {
       moved.add(f);

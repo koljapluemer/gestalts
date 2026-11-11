@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Markdown } from '@gestalts/kit';
-import { FLASHCARD_DUE_PREFERENCE, facetOf, fsrsStates, getScheduler, logConceptPractice, nextItem, Rating, review, saveReview, useLocalReviews, usePracticeSession, type ConceptStrengths, type FsrsStates, type Grade } from '@gestalts/learning';
+import { Credits, Markdown } from '@gestalts/kit';
+import { FLASHCARD_DUE_PREFERENCE, facetOf, fsrsStates, getScheduler, logPractice, nextItem, Rating, ratingOf, review, saveReview, useLocalReviews, usePracticeSession, type FsrsStates, type Grade } from '@gestalts/learning';
 import { useBlobUrl, useDoc, useQuery, useWrite, type Item, type QueryResult } from '@gestalts/view';
 
 const GRADES: { grade: Grade; label: string; className: string }[] = [
@@ -48,7 +48,7 @@ export default function Flashcards() {
     put(f, next);
     const fail = (e: unknown) => setSaveError(e instanceof Error ? e.message : String(e));
     saveReview(write, f, prev, next, log).catch(fail);
-    logConceptPractice(write, card.id, card.value.concepts as ConceptStrengths | undefined, grade, now).catch(fail);
+    logPractice(write, card.id, 'flashcards', ratingOf(grade), now).catch(fail);
     pick(states.with(f, next), card.id, now);
   };
 
@@ -86,10 +86,12 @@ function Card({ id, onShown, onRate }: { id: string; onShown: () => void; onRate
   if (!card) return <div className="flex justify-center p-8"><span className="loading loading-spinner" /></div>;
   const back = text(card.value.back);
   const extra = text(card.value.extra);
+  const context = text(card.value.context);
   return (
     <div className="card card-border mx-auto w-full max-w-xl bg-base-100">
       <div className="card-body gap-4">
         <Markdown text={String(card.value.front)} />
+        {context && <Markdown text={context} className="text-sm text-base-content/70" />}
         {frontImage && <img src={frontImage} alt="" className="rounded-box max-h-72 self-center object-contain" />}
         {!revealed ? (
           <button type="button" className="btn btn-primary" onClick={() => setRevealed(true)}>Reveal</button>
@@ -100,6 +102,7 @@ function Card({ id, onShown, onRate }: { id: string; onShown: () => void; onRate
             {backImage && <img src={backImage} alt="" className="rounded-box max-h-72 self-center object-contain" />}
             {audio && <audio controls src={audio} className="w-full" />}
             {extra && <Markdown text={extra} className="text-sm text-base-content/70" />}
+            <Credits sources={card.value.sources} />
             <div className="grid w-full grid-cols-4 gap-2">
               {GRADES.map((g) => (
                 <button key={g.grade} type="button" disabled={busy} className={`btn btn-sm btn-soft ${g.className}`}

@@ -1,5 +1,8 @@
 import type { DeckSource } from '@gestalts/client';
 
+/** What a view's frame may be allowed beyond the strict sandbox; only the distribution grants it (`grants`). */
+export type Permission = 'same-origin' | 'microphone';
+
 /** A plugin's `plugin.yml`. */
 export type PluginManifest = {
   id: string;
@@ -10,8 +13,8 @@ export type PluginManifest = {
   writes?: string[];
   tags?: string[];
   requires?: 'backend'[];
-  /** asks to run in the app's origin; only the distribution can grant it (`same_origin` in `distribution.yml`) */
-  frame?: 'same-origin';
+  /** what its frame asks to be allowed; only the distribution grants it (`grants` in `distribution.yml`) */
+  permissions?: Permission[];
   /** hosts it may reach through the node, exactly */
   network?: string[];
   /** asks for completions from the user's LLM providers */
@@ -33,8 +36,8 @@ export type PluginEntry = {
   npm: string[];
   /** can't be uninstalled here */
   core: boolean;
-  /** its frame runs in the app's origin: it declared `frame: same-origin` and the distribution granted it */
-  sameOrigin: boolean;
+  /** what the distribution granted of what it asked for */
+  granted: Permission[];
   /** it has a `backend.py`: required when the manifest says `requires: [backend]`, else optional */
   backend: boolean;
 };

@@ -199,6 +199,25 @@ impl WasmRepo {
         to_js(&self.repo.take_deltas())
     }
 
+    /// What is believed about `concepts` now: `[{concept, mean, sd, p, evidence, lastAt?}]`, in that order.
+    pub fn beliefs(&self, concepts: Vec<String>) -> Result<JsValue, JsError> {
+        to_js(&self.repo.beliefs(&concepts, now_ms()))
+    }
+
+    /// Starts following the beliefs about `concepts`: `{sub, beliefs}`. Changes come out of `takeBeliefDeltas`;
+    /// `unsubscribe` ends it.
+    #[wasm_bindgen(js_name = subscribeBeliefs)]
+    pub fn subscribe_beliefs(&self, concepts: Vec<String>) -> Result<JsValue, JsError> {
+        let (sub, beliefs) = self.repo.subscribe_beliefs(concepts, now_ms());
+        to_js(&serde_json::json!({ "sub": sub, "beliefs": beliefs }))
+    }
+
+    /// The beliefs that changed since last asked: `[{sub, beliefs}]`.
+    #[wasm_bindgen(js_name = takeBeliefDeltas)]
+    pub fn take_belief_deltas(&self) -> Result<JsValue, JsError> {
+        to_js(&self.repo.take_belief_deltas(now_ms()))
+    }
+
     /// `json`: the yml as JSON text. Refused unless valid by its gestalt; without `id`, it gets a new uuid.
     pub async fn put(&self, json: String) -> Result<JsValue, JsError> {
         let value: gestalts_core::Value = serde_json::from_str(&json).map_err(|e| JsError::new(&e.to_string()))?;
@@ -308,6 +327,10 @@ impl WasmRepo {
 /// The current time as an ISO datetime, for tombstones and conflict records.
 fn now() -> String {
     String::from(js_sys::Date::new_0().to_iso_string())
+}
+
+fn now_ms() -> i64 {
+    js_sys::Date::now() as i64
 }
 
 #[wasm_bindgen(js_name = newId)]

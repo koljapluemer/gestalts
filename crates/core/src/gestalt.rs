@@ -451,6 +451,9 @@ pub struct Gestalts {
 const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/note/v1.yml"),
     include_str!("../../../gestalts/concept/v1.yml"),
+    include_str!("../../../gestalts/concept/v2.yml"),
+    include_str!("../../../gestalts/concept-link/v1.yml"),
+    include_str!("../../../gestalts/practice-event/v1.yml"),
     include_str!("../../../gestalts/concept-practice-event/v1.yml"),
     include_str!("../../../gestalts/flashcard/v1.yml"),
     include_str!("../../../gestalts/source/v1.yml"),
@@ -601,10 +604,28 @@ mod tests {
     }
 
     #[test]
+    fn concepts_relate_through_links_not_a_tree() {
+        assert!(matches!(state("c", "id: c\ngestalt: concept@2\nname: 'vie: address as anh'\naliases: [anh]\n"), YmlState::Valid(_)));
+        assert!(invalid("c", "id: c\ngestalt: concept@2\nname: x\nparents: [p]\n").contains("not a prop of concept@2"));
+        assert!(matches!(state("l", "id: l\ngestalt: concept-link@1\nfrom: a\nto: b\nweight: 0.5\nkind: similar\nsource: deck\n"), YmlState::Valid(_)));
+        invalid("l", "id: l\ngestalt: concept-link@1\nfrom: a\nto: b\nweight: 1.5\n");
+        invalid("l", "id: l\ngestalt: concept-link@1\nfrom: a\nweight: 0.5\n");
+    }
+
+    #[test]
+    fn a_practice_event_names_its_subject_and_view() {
+        assert!(matches!(state("e", "id: e\ngestalt: practice-event@1\nsubject: f\nview: flashcards\nat: 2026-11-11T10:00:00Z\nrating: -2\n"), YmlState::Valid(_)));
+        assert!(matches!(state("e", "id: e\ngestalt: practice-event@1\nsubject: c\norigin: v\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 0\n"), YmlState::Valid(_)));
+        invalid("e", "id: e\ngestalt: practice-event@1\nsubject: f\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 3\n");
+        invalid("e", "id: e\ngestalt: practice-event@1\nsubject: f\nat: 2026-11-11T10:00:00Z\nrating: 1\n");
+    }
+
+    #[test]
     fn a_flashcard_practices_concepts_from_0_to_1() {
         let ok = "id: f\ngestalt: flashcard@1\nfront: q\nback: a\ntags: [t]\naliases: [x]\nblobs: [{file: a.png, label: front}, {file: b.mp3, label: audio}]\nconcepts: {c1: 0.25, c2: 1}\n";
         assert!(matches!(state("f", ok), YmlState::Valid(_)));
         assert!(matches!(state("f", "id: f\ngestalt: flashcard@1\nfront: q\n"), YmlState::Valid(_)));
+        assert!(matches!(state("f", "id: f\ngestalt: flashcard@1\nfront: q\ncontext: '*formal*'\nsources: [{to: s, label: adapted from}]\n"), YmlState::Valid(_)));
         invalid("f", "id: f\ngestalt: flashcard@1\nback: a\n");
         assert!(invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c1: 1.5}\n").contains("concepts.c1"));
         invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nblobs: [{file: a.png, label: front}, {file: b.png, label: front}]\n");

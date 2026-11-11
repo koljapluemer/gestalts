@@ -4,7 +4,7 @@ import { MarkdownEditor, storeFile } from '@gestalts/kit';
 import { useBlobUrl, useDoc, useQuery, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 type Blob = { file: string; label: string };
-type Draft = { front: string; back: string; extra: string; tags: string; aliases: string; blobs: Blob[]; concepts: Record<string, number> };
+type Draft = { front: string; context: string; back: string; extra: string; sources: unknown[]; tags: string; aliases: string; blobs: Blob[]; concepts: Record<string, number> };
 
 const PAGE = 40;
 const SLOTS: { label: string; title: string; accept: string }[] = [
@@ -20,7 +20,7 @@ const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 function draftOf(v: JsonMap): Draft {
   return {
-    front: str(v.front), back: str(v.back), extra: str(v.extra), tags: list(v.tags), aliases: list(v.aliases),
+    front: str(v.front), context: str(v.context), back: str(v.back), extra: str(v.extra), sources: Array.isArray(v.sources) ? v.sources : [], tags: list(v.tags), aliases: list(v.aliases),
     blobs: (v.blobs ?? []) as Blob[], concepts: (v.concepts ?? {}) as Record<string, number>,
   };
 }
@@ -33,12 +33,15 @@ function cardValue(id: string | undefined, d: Draft): JsonMap {
     ...(id ? { id } : {}),
     gestalt: 'flashcard@1',
     front: d.front,
+    ...(d.context.trim() ? { context: d.context } : {}),
     ...(d.back.trim() ? { back: d.back } : {}),
     ...(d.extra.trim() ? { extra: d.extra } : {}),
     ...(d.blobs.length ? { blobs: d.blobs } : {}),
     ...(tags.length ? { tags } : {}),
     ...(aliases.length ? { aliases } : {}),
     ...(Object.keys(d.concepts).length ? { concepts: d.concepts } : {}),
+    // kept as they are: credits aren't edited here
+    ...(d.sources.length ? { sources: d.sources as JsonMap[] } : {}),
   };
 }
 
@@ -100,10 +103,10 @@ function Concepts({ value, onChange, onError }: { value: Record<string, number>;
   const [search, setSearch] = useState('');
   const text = useDebounced(search, 150).trim();
   const ids = Object.keys(value);
-  const attached = useQuery(ids.length ? { gestalt: 'concept@1', ids, fields: ['name'], limit: ids.length } : null).items;
-  const found = useQuery(text ? { gestalt: 'concept@1', text, fields: ['name'], limit: 8 } : null).items;
+  const attached = useQuery(ids.length ? { gestalt: 'concept@2', ids, fields: ['name'], limit: ids.length } : null).items;
+  const found = useQuery(text ? { gestalt: 'concept@2', text, fields: ['name'], limit: 8 } : null).items;
   const add = (id: string) => { onChange({ ...value, [id]: value[id] ?? 1 }); setSearch(''); };
-  const create = () => write.put({ gestalt: 'concept@1', name: text }).then((c) => add(c.id), onError);
+  const create = () => write.put({ gestalt: 'concept@2', name: text }).then((c) => add(c.id), onError);
   const strength = (raw: string) => Math.min(1, Math.max(0, Number(raw) || 0));
   return (
     <section className="flex flex-col gap-1">
@@ -170,6 +173,7 @@ function Editor({ card, onBack, onSaved, onDeleted }: { card?: Item; onBack: () 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
         {error && <div role="alert" className="alert alert-error text-sm whitespace-pre-wrap">{error}</div>}
         <MarkdownEditor value={draft.front} onChange={(front: string) => set({ front })} placeholder="Front" />
+        <MarkdownEditor value={draft.context} onChange={(context: string) => set({ context })} placeholder="Context, small print with the front" minHeight="2rem" />
         <MarkdownEditor value={draft.back} onChange={(back: string) => set({ back })} placeholder="Back" />
         <MarkdownEditor value={draft.extra} onChange={(extra: string) => set({ extra })} placeholder="Extra, shown after the reveal" minHeight="3rem" />
         <div className="grid gap-3 md:grid-cols-3">

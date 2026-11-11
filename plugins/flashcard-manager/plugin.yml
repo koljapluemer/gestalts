@@ -2,5 +2,5 @@ id: flashcard-manager
 version: 1.0.0
 title: Manage flashcards
 description: List, search, create, edit and delete flashcards.
-reads: [flashcard@1, concept@1, fsrs-data@1, note@1]
-writes: [flashcard@1, concept@1, fsrs-data@1]
+reads: [flashcard@1, concept@2, fsrs-data@1, note@1]
+writes: [flashcard@1, concept@2, fsrs-data@1]

@@ -1,4 +1,4 @@
-import { logger, type Delta, type Health, type Item, type JsonMap, type LlmReply, type LlmRequest, type NetReply, type NetRequest, type Page, type Query } from '@gestalts/view';
+import { logger, type Belief, type BeliefDelta, type Delta, type Health, type Item, type JsonMap, type LlmReply, type LlmRequest, type NetReply, type NetRequest, type Page, type Query } from '@gestalts/view';
 import init, { WasmRepo, contentHash as wasmContentHash, newId as wasmNewId, stableId as wasmStableId, stateId as wasmStateId } from '../wasm/gestalts.js';
 import { coalesce } from './coalesce';
 import { nativeHost, type NativeHost, type NativeKind, type NativeStatus, type PairedNodeInfo } from './native';
@@ -114,6 +114,8 @@ const asJson = (q: Query) => JSON.stringify(q);
 
 /** A running live query. */
 export type Live = { page: Page; stop: () => void };
+/** Beliefs followed live: what they are now, then changes until `stop`. */
+export type LiveBeliefs = { beliefs: Belief[]; stop: () => void };
 
 /**
  * The ymls and blobs an app works with, backed by the Rust core. Views never touch this: they go through the bridge.
@@ -124,6 +126,7 @@ export class Repo {
   /** mutations queued or running, for the log */
   private pending = 0;
   private lives = new Map<number, (d: Delta) => void>();
+  private beliefLives = new Map<number, (d: BeliefDelta) => void>();
   private blobListeners = new Set<(names: string[]) => void>();
   private status: ConnectorStatus = { mode: 'sync', url: null, state: 'off', conflicts: [] };
   private statusListeners = new Set<() => void>();
@@ -259,6 +262,7 @@ export class Repo {
   /** Hands the core's deltas to the live queries they're for. */
   private pump() {
     for (const d of this.wasm.takeDeltas() as Delta[]) this.lives.get(d.sub)?.(d);
+    if (this.beliefLives.size) for (const d of this.wasm.takeBeliefDeltas() as BeliefDelta[]) this.beliefLives.get(d.sub)?.(d);
   }
 
   /**
@@ -307,6 +311,13 @@ export class Repo {
     const { sub, page } = this.wasm.subscribe(asJson(q)) as { sub: number; page: Page };
     this.lives.set(sub, onDelta);
     return { page, stop: () => { this.lives.delete(sub); this.wasm.unsubscribe(sub); } };
+  }
+
+  /** What is believed about `concepts` now, then `onDelta` with each change to them, until `stop`. */
+  liveBeliefs(concepts: string[], onDelta: (d: BeliefDelta) => void): LiveBeliefs {
+    const { sub, beliefs } = this.wasm.subscribeBeliefs(concepts) as { sub: number; beliefs: Belief[] };
+    this.beliefLives.set(sub, onDelta);
+    return { beliefs, stop: () => { this.beliefLives.delete(sub); this.wasm.unsubscribe(sub); } };
   }
 
   /** Every yml that can't be used, and why. */

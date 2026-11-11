@@ -1,7 +1,7 @@
 //! Decks: read-only ymls shipped with a plugin, mounted under the user's own storage ([`crate::storage::Layered`]).
 //!
 //! Decks that hold the same id hold the same thing, so their texts are merged by the gestalt's merge rules, without a
-//! base: a concept shared by two decks has the `parents` of both. Decks are read-only, so a value they disagree on
+//! base: a concept shared by two decks has the `aliases` of both. Decks are read-only, so a value they disagree on
 //! keeps the merge's canonical winner and is reported, never written.
 
 use std::collections::BTreeMap;
@@ -90,13 +90,13 @@ mod tests {
         pollster::block_on(async {
             let g = Gestalts::builtin();
             let (a, b) = (Memory::default(), Memory::default());
-            a.write_yml("c", "id: c\ngestalt: concept@1\nname: x\nparents: [p1]\n").await.unwrap();
-            b.write_yml("c", "id: c\ngestalt: concept@1\nname: x\nparents: [p2]\n").await.unwrap();
+            a.write_yml("c", "id: c\ngestalt: concept@2\nname: x\naliases: [p1]\n").await.unwrap();
+            b.write_yml("c", "id: c\ngestalt: concept@2\nname: x\naliases: [p2]\n").await.unwrap();
             let decks = Decks { decks: vec![DeckRef { source: "p/a", storage: &a }, DeckRef { source: "p/b", storage: &b }], gestalts: &g };
             let m = decks.read("c").await.unwrap().unwrap();
             assert!(m.conflicts.is_empty(), "{:?}", m.conflicts);
             let merged = parse_yaml(&m.text).unwrap();
-            let parents = merged["parents"].as_sequence().unwrap();
+            let parents = merged["aliases"].as_sequence().unwrap();
             assert_eq!(parents.len(), 2);
             for p in ["p1", "p2"] {
                 assert!(parents.iter().any(|x| x.as_str() == Some(p)), "{parents:?}");

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Repo } from '@gestalts/client';
 import { PROTOCOL, logger, type FromView, type JsonMap, type ToView, type ViewError } from '@gestalts/view';
-import type { FrameRuntime } from '../registry';
+import type { FrameRuntime, Permission } from '../registry';
 import { BOOT_HTML } from './boot';
 import { Bridge, type Scope, type ViewEnv } from './bridge';
 
@@ -16,14 +16,21 @@ export type RunnableView = {
   js: string;
   npm: string[];
   scope: Scope;
-  /** runs in the app's origin (granted by the distribution), so frames it embeds work like on any website */
-  sameOrigin?: boolean;
+  /** what the distribution granted it beyond the strict sandbox */
+  granted?: Permission[];
 };
 
 const STRICT = 'allow-scripts allow-downloads';
 const SAME_ORIGIN = 'allow-scripts allow-same-origin allow-downloads';
-/** what a granted view's embeds (a video player) may use */
-const SAME_ORIGIN_ALLOW = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+/** what a same-origin view's embeds (a video player) may use */
+const EMBEDS_ALLOW = ['autoplay', 'fullscreen', 'encrypted-media', 'picture-in-picture'];
+
+/** The frame's `sandbox` and `allow` for what was granted; recording needs same-origin, which the build checks. */
+export function frameFlags(granted: Permission[] = []): { sandbox: string; allow?: string; key: string } {
+  if (!granted.includes('same-origin')) return { sandbox: STRICT, key: 'strict' };
+  const allow = [...EMBEDS_ALLOW, ...(granted.includes('microphone') ? ['microphone'] : [])];
+  return { sandbox: SAME_ORIGIN, allow: allow.join('; '), key: [...granted].sort().join(' ') };
+}
 
 type Props = {
   repo: Repo;
@@ -56,6 +63,7 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
   const live = useRef<{ post: (m: ToView) => void; params: string } | null>(null);
   // what the view starts from is fixed when its frame is made
   const initial = useMemo(() => state, [view.id, view.js]); // eslint-disable-line react-hooks/exhaustive-deps
+  const flags = frameFlags(view.granted);
 
   useEffect(() => {
     const frame = ref.current;
@@ -91,7 +99,7 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       const post = (m: ToView) => port?.postMessage(m);
       const startAt = latestParams.current;
       live.current = { post, params: JSON.stringify(startAt) };
-      const b = new Bridge(repo, JSON.parse(scopeKey) as Scope, envProxy, (delta) => post({ type: 'delta', delta }));
+      const b = new Bridge(repo, JSON.parse(scopeKey) as Scope, envProxy, post);
       bridge = b;
       port.onmessage = (m: MessageEvent<FromView>) => {
         const msg = m.data;
@@ -128,7 +136,7 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       bridge?.close();
       port?.close();
     };
-  }, [repo, view.id, view.title, view.js, view.npm, view.sameOrigin, scopeKey, runtime, css, tailwind, initial]);
+  }, [repo, view.id, view.title, view.js, view.npm, flags.key, scopeKey, runtime, css, tailwind, initial]);
 
   // moved from outside while running; its own moves come back equal and aren't echoed
   useEffect(() => {
@@ -142,8 +150,8 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
     <div className={`flex h-full w-full flex-col ${hidden ? 'hidden' : ''}`}>
       {failure && <div role="alert" className="alert alert-error rounded-none font-mono text-sm whitespace-pre-wrap">{view.title}: {failure}</div>}
       {/* sandbox flags apply when a frame loads, so a change of mode is a new frame */}
-      <iframe key={view.sameOrigin ? 'same-origin' : 'strict'} ref={ref} title={view.title}
-              sandbox={view.sameOrigin ? SAME_ORIGIN : STRICT} allow={view.sameOrigin ? SAME_ORIGIN_ALLOW : undefined} allowFullScreen={view.sameOrigin}
+      <iframe key={flags.key} ref={ref} title={view.title}
+              sandbox={flags.sandbox} allow={flags.allow} allowFullScreen={!!flags.allow}
               className="block min-h-0 w-full flex-1 border-0 bg-base-100" />
     </div>
   );

@@ -5,7 +5,7 @@ folder; a **note** is a yml of gestalt `note`.
 
 ```
 crates/merge      symmetric three-way merge of YAML values
-crates/core       ymls, gestalts, the index and queries, sync, decks, blob GC; no IO
+crates/core       ymls, gestalts, the index and queries, beliefs about concepts, sync, decks, blob GC; no IO
 crates/fs         a folder on disk
 crates/peer       another node over HTTP, a published deck, pairing
 crates/wasm       the core in the browser
@@ -39,6 +39,8 @@ The host holds one index, built once on open and updated per changed id. A view 
 - When ymls change, only subscriptions whose predicate matches an old or new version of one of them are recomputed, and
   each gets a delta of its page. `crates/core/src/repo.rs` has a test of this with 12k ymls.
 - Search, ordering, a random draw and reverse references all run in the host's index.
+- So does what a learner knows: the core keeps beliefs about concepts up to date from practice events as they change
+  ([data-format.md](data-format.md)), and `useBeliefs` is live like `useQuery`, for just the concepts a view shows.
 - Opening still parses every yml once, in the host. A persisted snapshot could go behind the same contract.
 
 Writes from anywhere end up the same way: the node's watcher sees the file change and the host reindexes those ids, so a
@@ -48,9 +50,10 @@ hand edit is no different from a write through the API.
 
 A view is one React file, run in `<iframe sandbox="allow-scripts">`: an opaque origin, with no access to the app's DOM
 or storage. Source views and vibecoded views run identically. Frames nested in it inherit the sandbox, so third-party
-embeds (a YouTube player) stay blank there. For those, the distribution can grant a view that asks for it
-(`frame: same-origin`) a frame with `allow-same-origin`: it then runs as part of the app. That is the exception, for
-first-party views that load nothing at run time; see [plugins.md](plugins.md).
+embeds (a YouTube player) stay blank there, and it can't record. For those, a view asks for `permissions` and the
+distribution grants them per view (`grants`): `same-origin` gives a frame with `allow-same-origin`, so it runs as part of
+the app, and `microphone` (only with `same-origin`) adds `allow="microphone"`. That is the exception, for first-party
+views that load nothing at run time; see [plugins.md](plugins.md).
 
 The frame loads nothing from the app's origin, because an opaque origin can't. The host sends everything over a
 `MessagePort`: one script holding React, the kit and learning (built by `@gestalts/vite`), the styles, and the view's

@@ -26,7 +26,7 @@ function readState(key: string): JsonMap {
 }
 
 function runnable(p: PluginEntry): RunnableView {
-  return { id: p.manifest.id, title: p.manifest.title, js: p.js, npm: p.npm, scope: { reads: p.manifest.reads ?? [], writes: p.manifest.writes ?? [], network: p.manifest.network ?? [], llm: p.manifest.llm ?? false }, sameOrigin: p.sameOrigin };
+  return { id: p.manifest.id, title: p.manifest.title, js: p.js, npm: p.npm, scope: { reads: p.manifest.reads ?? [], writes: p.manifest.writes ?? [], network: p.manifest.network ?? [], llm: p.manifest.llm ?? false, microphone: p.granted.includes('microphone') }, granted: p.granted };
 }
 
 const needsBackend = (p: PluginEntry) => (p.manifest.requires ?? []).includes('backend');

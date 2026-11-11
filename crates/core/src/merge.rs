@@ -64,6 +64,52 @@ pub fn iso_datetime(unix_ms: i64) -> String {
     format!("{y:04}-{m:02}-{d:02}T{h:02}:{min:02}:{s:02}.{milli:03}Z")
 }
 
+/// An ISO datetime (`2026-11-04T10:00`, with optional seconds, fraction and `Z` or `±HH:MM`; local times count as
+/// UTC) as unix ms, the inverse of [`iso_datetime`]. `None` if it isn't one.
+pub fn parse_iso_datetime(s: &str) -> Option<i64> {
+    let b = s.as_bytes();
+    let num = |r: std::ops::Range<usize>| s.get(r).filter(|t| t.bytes().all(|c| c.is_ascii_digit())).and_then(|t| t.parse::<i64>().ok());
+    if b.len() < 16 || b[4] != b'-' || b[7] != b'-' || b[10] != b'T' || b[13] != b':' {
+        return None;
+    }
+    let (y, m, d, h, min) = (num(0..4)?, num(5..7)?, num(8..10)?, num(11..13)?, num(14..16)?);
+    if !(1..=12).contains(&m) || !(1..=31).contains(&d) || h > 23 || min > 59 {
+        return None;
+    }
+    let mut i = 16;
+    let (mut sec, mut milli) = (0, 0);
+    if b.get(i) == Some(&b':') {
+        sec = num(i + 1..i + 3).filter(|s| *s <= 60)?;
+        i += 3;
+        if b.get(i) == Some(&b'.') {
+            let digits = b[i + 1..].iter().take_while(|c| c.is_ascii_digit()).count();
+            if digits == 0 {
+                return None;
+            }
+            let frac = &s[i + 1..i + 1 + digits.min(3)];
+            milli = frac.parse::<i64>().ok()? * 10_i64.pow(3 - frac.len() as u32);
+            i += 1 + digits;
+        }
+    }
+    let offset_min = match &s[i..] {
+        "" | "Z" => 0,
+        rest if rest.len() == 6 && (rest.starts_with('+') || rest.starts_with('-')) && rest.as_bytes()[3] == b':' => {
+            let o = num(i + 1..i + 3)? * 60 + num(i + 4..i + 6)?;
+            if rest.starts_with('-') { -o } else { o }
+        }
+        _ => return None,
+    };
+    // days from civil, after Howard Hinnant
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let mp = if m > 2 { m - 3 } else { m + 9 };
+    let doy = (153 * mp + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    let days = era * 146_097 + doe - 719_468;
+    Some(((days * 24 + h) * 60 + min - offset_min) * 60_000 + sec * 1000 + milli)
+}
+
 /// Merges one yml. `now` dates the tombstone of a yml removed by hand.
 pub fn merge_yml(id: &str, base: Option<&str>, local: Option<&str>, remote: Option<&str>, gestalts: &Gestalts, now: &str) -> YmlMerge {
     let take = |t: Option<&str>| YmlMerge { text: t.map(str::to_owned), conflicts: vec![], raw: false };

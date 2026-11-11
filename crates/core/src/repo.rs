@@ -2,6 +2,9 @@
 //!
 //! A live query is per subscription. When ymls change, only the subscriptions whose predicate matches an old or new
 //! version of one of them are recomputed, and each gets a delta of its own page. Nothing else wakes up.
+//!
+//! Beliefs about concepts ([`crate::mastery`]) are live the same way: a view subscribes to the concepts it shows and
+//! gets what changed about them, never the events behind them.
 
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -12,6 +15,7 @@ use serde_yaml_ng::{Mapping, Value};
 use crate::blobs::BlobRefs;
 use crate::gestalt::{Edge, Gestalts, Problem, YmlState};
 use crate::index::{Entry, Index, Item, Page, Query};
+use crate::mastery::{Belief, Mastery};
 use crate::merge::tombstone;
 use crate::storage::{Result, Storage, StorageError, check_key};
 use crate::yml::{Yml, to_yaml};
@@ -44,11 +48,27 @@ struct Subscription {
     next: Option<String>,
 }
 
+/// What changed about one belief subscription's concepts.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct BeliefDelta {
+    pub sub: SubId,
+    pub beliefs: Vec<Belief>,
+}
+
+struct BeliefSubscription {
+    concepts: Vec<String>,
+    last: Vec<Belief>,
+    /// something the beliefs depend on changed since `last`
+    touched: bool,
+}
+
 pub struct Repo<S> {
     storage: S,
     gestalts: Gestalts,
     index: RefCell<Index>,
     subs: RefCell<BTreeMap<SubId, Subscription>>,
+    belief_subs: RefCell<BTreeMap<SubId, BeliefSubscription>>,
+    mastery: RefCell<Mastery>,
     next_sub: Cell<SubId>,
     deltas: RefCell<Vec<Delta>>,
 }
@@ -57,7 +77,16 @@ type Changed = Vec<(String, Option<Entry>)>;
 
 impl<S: Storage> Repo<S> {
     pub fn new(storage: S, gestalts: Gestalts) -> Self {
-        Repo { storage, gestalts, index: RefCell::default(), subs: RefCell::default(), next_sub: Cell::new(1), deltas: RefCell::default() }
+        Repo {
+            storage,
+            gestalts,
+            index: RefCell::default(),
+            subs: RefCell::default(),
+            belief_subs: RefCell::default(),
+            mastery: RefCell::default(),
+            next_sub: Cell::new(1),
+            deltas: RefCell::default(),
+        }
     }
 
     pub fn storage(&self) -> &S {
@@ -198,18 +227,56 @@ impl<S: Storage> Repo<S> {
         self.notify(vec![(id, old)]);
     }
 
+    fn new_sub(&self) -> SubId {
+        let id = self.next_sub.get();
+        self.next_sub.set(id + 1);
+        id
+    }
+
     /// Starts a live query: its first page, and the id to [`Self::unsubscribe`] with.
     pub fn subscribe(&self, query: Query) -> (SubId, Page) {
         let page = self.query(&query);
-        let id = self.next_sub.get();
-        self.next_sub.set(id + 1);
+        let id = self.new_sub();
         let window = page.items.iter().map(|i| i.id.clone()).collect();
         self.subs.borrow_mut().insert(id, Subscription { query, window, next: page.next.clone() });
         (id, page)
     }
 
+    /// Ends a live query or a belief subscription.
     pub fn unsubscribe(&self, id: SubId) {
         self.subs.borrow_mut().remove(&id);
+        self.belief_subs.borrow_mut().remove(&id);
+    }
+
+    /// What is believed about `concepts` as of `now_ms` (unix ms), in that order.
+    pub fn beliefs(&self, concepts: &[String], now_ms: i64) -> Vec<Belief> {
+        self.mastery.borrow_mut().beliefs(&self.index.borrow(), concepts, now_ms)
+    }
+
+    /// Starts following the beliefs about `concepts`: what they are now, and the id to [`Self::unsubscribe`] with.
+    /// Changes come out of [`Self::take_belief_deltas`].
+    pub fn subscribe_beliefs(&self, concepts: Vec<String>, now_ms: i64) -> (SubId, Vec<Belief>) {
+        let beliefs = self.beliefs(&concepts, now_ms);
+        let id = self.new_sub();
+        self.belief_subs.borrow_mut().insert(id, BeliefSubscription { concepts, last: beliefs.clone(), touched: false });
+        (id, beliefs)
+    }
+
+    /// For each belief subscription, the beliefs that changed since last asked, as of `now_ms`. Forgetting with time
+    /// alone changes nothing here: it shows the next time the beliefs are read.
+    pub fn take_belief_deltas(&self, now_ms: i64) -> Vec<BeliefDelta> {
+        let mut out = Vec::new();
+        let mut subs = self.belief_subs.borrow_mut();
+        for (&sub, s) in subs.iter_mut().filter(|(_, s)| s.touched) {
+            s.touched = false;
+            let now = self.beliefs(&s.concepts, now_ms);
+            let changed: Vec<Belief> = now.iter().zip(&s.last).filter(|(a, b)| a.differs(b)).map(|(a, _)| a.clone()).collect();
+            s.last = now;
+            if !changed.is_empty() {
+                out.push(BeliefDelta { sub, beliefs: changed });
+            }
+        }
+        out
     }
 
     /// The deltas since last asked.
@@ -219,10 +286,21 @@ impl<S: Storage> Repo<S> {
 
     /// Recomputes the subscriptions these changes concern. `changed` holds the previous version of each id.
     fn notify(&self, changed: Changed) {
-        if changed.is_empty() || self.subs.borrow().is_empty() {
+        if changed.is_empty() {
             return;
         }
         let index = self.index.borrow();
+        let mut mastery = self.mastery.borrow_mut();
+        let mut touched = false;
+        for (id, old) in &changed {
+            touched |= mastery.observe(id, old.as_ref(), index.get(id));
+        }
+        if touched {
+            self.belief_subs.borrow_mut().values_mut().for_each(|s| s.touched = true);
+        }
+        if self.subs.borrow().is_empty() {
+            return;
+        }
         let mut subs = self.subs.borrow_mut();
         for (&sub, s) in subs.iter_mut() {
             let touching: BTreeSet<&str> = changed
@@ -531,6 +609,43 @@ mod tests {
             r.put(note("n9999", "main: uniquely now\n")).await.unwrap();
             let d = r.take_deltas();
             assert_eq!(d.iter().map(|x| x.sub).collect::<Vec<_>>(), vec![word_sub]);
+        });
+    }
+
+    /// Beliefs are live like queries: only what changed, only to who follows it, never the events.
+    #[test]
+    fn belief_subscriptions_get_what_changed_about_their_concepts() {
+        pollster::block_on(async {
+            let r = repo();
+            let now = 1_794_398_400_000;
+            let put = |raw: &str| r.put(parse_yaml(raw).unwrap());
+            put("id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {x: 1}\n").await.unwrap();
+            put("id: l\ngestalt: concept-link@1\nfrom: x\nto: y\nweight: 0.5\n").await.unwrap();
+            let (on_x, first) = r.subscribe_beliefs(vec!["x".into(), "y".into()], now);
+            let (on_z, _) = r.subscribe_beliefs(vec!["z".into()], now);
+            assert_eq!(first.iter().map(|b| (b.concept.as_str(), b.mean)).collect::<Vec<_>>(), vec![("x", 0.0), ("y", 0.0)]);
+
+            put("id: e1\ngestalt: practice-event@1\nsubject: f\nview: t\nat: 2026-11-11T10:00:00Z\nrating: 2\n").await.unwrap();
+            let d = r.take_belief_deltas(now);
+            assert_eq!(d.iter().map(|d| d.sub).collect::<Vec<_>>(), vec![on_x], "z didn't change");
+            assert_eq!(d[0].beliefs.iter().map(|b| b.concept.as_str()).collect::<Vec<_>>(), vec!["x", "y"]);
+            assert!(d[0].beliefs.iter().all(|b| b.mean > 0.0));
+            assert!(r.take_belief_deltas(now).is_empty(), "taken");
+
+            // nothing beliefs depend on
+            put("id: n\ngestalt: note@1\nmain: hi\n").await.unwrap();
+            assert!(r.take_belief_deltas(now).is_empty());
+
+            // a link gone reinterprets the past: y falls back to the prior
+            r.delete("l", "2026-11-11T11:00:00Z").await.unwrap();
+            let d = r.take_belief_deltas(now);
+            assert_eq!(d.len(), 1);
+            assert_eq!((d[0].beliefs[0].concept.as_str(), d[0].beliefs[0].mean), ("y", 0.0));
+
+            r.unsubscribe(on_x);
+            r.unsubscribe(on_z);
+            put("id: e2\ngestalt: practice-event@1\nsubject: f\nview: t\nat: 2026-11-11T10:05:00Z\nrating: 2\n").await.unwrap();
+            assert!(r.take_belief_deltas(now).is_empty());
         });
     }
 

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
 import { AddSource, Modal, SOURCE_LABEL, byline, sourceTitle, useDebounced } from '@gestalts/kit';
-import { useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
+import { useBeliefs, useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
-const CONCEPT = 'concept@1';
+const CONCEPT = 'concept@2';
 const NOTE = 'note@1';
 const SOURCE = 'source@1';
+const LINK = 'concept-link@1';
 /** how a note relates to the concept unless the user says otherwise */
 const LABEL = 'sheds light on';
 const SAVE_AFTER_MS = 500;
@@ -312,6 +313,55 @@ function Aliases({ concept, onError }: { concept: Item; onError: (e: unknown) =>
   );
 }
 
+// ---- how it relates, and how well it's known ----
+
+type LinkRow = { id: string; other: string; weight: number; kind: string; source: string };
+
+function LinkList({ title, rows, names, onOpen }: { title: string; rows: LinkRow[]; names: Map<string, string>; onOpen: (id: string) => void }) {
+  if (!rows.length) return null;
+  return (
+    <div className="flex flex-col gap-1">
+      <h3 className="text-xs font-semibold text-base-content/60">{title}</h3>
+      <ul className="flex flex-wrap gap-1">
+        {rows.map((r) => (
+          <li key={r.id}>
+            <button type="button" className="badge badge-outline gap-1 hover:badge-primary" title={[r.kind, r.source && `claimed by ${r.source}`].filter(Boolean).join(' · ')} onClick={() => onOpen(r.other)}>
+              {names.get(r.other) ?? r.other} <span className="text-base-content/50">{r.weight}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** What the app believes about the concept, and the concepts it says something about or is said something about by. */
+function Relations({ concept, onOpen }: { concept: string; onOpen: (id: string) => void }) {
+  const out = useQuery({ gestalt: LINK, refs: { to: concept, field: 'from' }, limit: 100 });
+  const into = useQuery({ gestalt: LINK, refs: { to: concept, field: 'to' }, limit: 100 });
+  const row = (l: Item, side: 'from' | 'to'): LinkRow => ({ id: l.id, other: str(l.value[side]), weight: Number(l.value.weight), kind: str(l.value.kind), source: str(l.value.source) });
+  const outRows = out.items.map((l) => row(l, 'to'));
+  const inRows = into.items.map((l) => row(l, 'from'));
+  const others = [...new Set([...outRows, ...inRows].map((r) => r.other))].sort();
+  const { items } = useQuery(others.length ? { gestalt: CONCEPT, ids: others, fields: ['name'], limit: others.length } : null);
+  const names = new Map(items.map((c) => [c.id, str(c.value.name)]));
+  const { beliefs } = useBeliefs([concept]);
+  const b = beliefs.get(concept);
+  return (
+    <section className="flex flex-col gap-2 rounded-box border border-base-300 p-3">
+      {b && (
+        <p className="text-sm" title={`logit ${b.mean.toFixed(2)} ± ${b.sd.toFixed(2)}`}>
+          {b.evidence || b.lastAt
+            ? <>Known about <strong>{Math.round(b.p * 100)}%</strong>, from {b.evidence} answer{b.evidence === 1 ? '' : 's'} on it{b.lastAt ? `, last ${b.lastAt.slice(0, 10)}` : ''}.</>
+            : <span className="text-base-content/60">Not practised yet.</span>}
+        </p>
+      )}
+      <LinkList title="Says something about" rows={outRows} names={names} onOpen={onOpen} />
+      <LinkList title="Is said something about by" rows={inRows} names={names} onOpen={onOpen} />
+    </section>
+  );
+}
+
 function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: string) => void; onClosed: () => void }) {
   const read = useRead();
   const write = useWrite();
@@ -333,10 +383,12 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
     write.put({ ...rest, name: next, ...(aliases.length ? { aliases } : {}) }).catch(fail);
   };
   const remove = async () => {
-    if (!confirm(`Delete the concept “${name}”? Its notes stay, no longer related to it.`)) return;
+    if (!confirm(`Delete the concept “${name}”? Its notes stay, no longer related to it, and its links go.`)) return;
     try {
       const notes = await read.all({ gestalt: NOTE, refs: { to: concept.id, field: 'relationships' } });
       for (const n of notes) await write.put(noteValue(n.value, str(n.value.main), relationsOf(n.value).filter((r) => r.to !== concept.id)));
+      // a link to nothing says nothing
+      for (const l of await read.all({ gestalt: LINK, refs: { to: concept.id } })) await write.remove(l.id);
       await write.remove(concept.id);
       onClosed();
     } catch (e) { fail(e); }
@@ -364,6 +416,7 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
           {error && <div role="alert" className="alert alert-error text-sm whitespace-pre-wrap">{error}</div>}
+          <Relations concept={concept.id} onOpen={onOpen} />
           <Notes concept={concept.id} onError={fail} />
         </div>
       </div>

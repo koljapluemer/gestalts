@@ -1,0 +1,14 @@
+name: practice-event
+version: 1
+description: >-
+  Something came up in practice, as it happened: `subject` is what was practised (a flashcard, or a concept itself
+  when there's no item, like a word heard in a video), `origin` where it came up when that isn't the subject (the
+  video), `view` which view logged it. `rating` runs from -2 (went very badly) over 0 (came up, no score) to 2 (went
+  very well). What an event says about concepts is worked out when it's read, from the subject's `concepts` and the
+  `concept-link`s at that time, so a better model or graph reinterprets all past practice.
+fields:
+  subject: { type: ref, required: true }
+  origin: { type: ref }
+  view: { type: string, required: true }
+  at: { type: datetime, required: true }
+  rating: { type: integer, required: true, one_of: [-2, -1, 0, 1, 2] }
