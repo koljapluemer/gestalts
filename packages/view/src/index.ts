@@ -6,5 +6,5 @@ export { useBeliefs, useBlobUrl, useBlobUrls, useCapabilities, useDoc, useHost, 
 export { connect, type ViewHost } from './connection';
 export { fixtureHost, type Fixture } from './fixture';
 export { PROTOCOL, type Answers, type Call, type Capabilities, type FromView, type LlmReply, type LlmRequest, type NetReply, type NetRequest, type ServiceReply, type ToView, type ViewError, type ViewInit } from './protocol';
-export { CAPACITY as LOG_CAPACITY, debugLog, installGlobalCapture, logger, onDebugLog, type DebugSnapshot, type Level as LogLevel, type LogEvent, type Logger, type Span } from './log';
+export { logger, type Logger, type Span } from './log';
 export type * from './types';

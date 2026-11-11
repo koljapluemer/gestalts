@@ -1,6 +1,6 @@
 /** The host: running views in frames, tabs, plugins and their installs, connector and LLM settings. */
 export { ConnectorSettings, useConnectorState } from './ConnectorSettings';
-export { DebugLogButton, ErrorBoundary } from './debug';
+export { ErrorBoundary } from './debug';
 export { FrameView, type RunnableView } from './frame/FrameView';
 export { AccessError, Bridge, type Scope, type ViewEnv } from './frame/bridge';
 export { installId, installState, installedPlugins, useInstalled } from './installs';
