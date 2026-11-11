@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink } from 'lucide-react';
+import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
 import { BibtexPaste, MarkdownEditor, Modal, SourceSearch, byline, sourceTitle } from '@gestalts/kit';
 import { useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
@@ -13,6 +13,8 @@ const SAVE_AFTER_MS = 500;
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
+const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+const fold = (s: string) => s.trim().toLowerCase();
 
 /** A uuid v4 for a note before it's written, so it keeps its place on screen (a sandboxed frame has no randomUUID). */
 function newId(): string {
@@ -58,16 +60,17 @@ function ConceptPicker({ onOpen, autoFocus }: { onOpen: (id: string) => void; au
   const [busy, setBusy] = useState(false);
   const text = useDebounced(search, 150).trim();
   const name = search.trim();
-  const { items } = useQuery(text ? { gestalt: CONCEPT, text, fields: ['name'], limit: 8 } : null);
-  const same = (c: Item) => str(c.value.name).toLowerCase() === name.toLowerCase();
+  const { items } = useQuery(text ? { gestalt: CONCEPT, text, fields: ['name', 'aliases'], limit: 8 } : null);
+  /** named so, or going by that name */
+  const same = (c: Item) => [str(c.value.name), ...strings(c.value.aliases)].some((n) => fold(n) === fold(name));
   /** the concept named exactly so, else a new one; asked afresh, as the suggestions may lag behind the typing */
   const openOrCreate = async () => {
     if (!name || busy) return;
     setBusy(true);
     setError(undefined);
     try {
-      const { items: found } = await read.page({ gestalt: CONCEPT, text: name, fields: ['name'], limit: 50 });
-      const existing = found.find(same);
+      const { items: found } = await read.page({ gestalt: CONCEPT, text: name, fields: ['name', 'aliases'], limit: 50 });
+      const existing = found.find((c) => fold(str(c.value.name)) === fold(name)) ?? found.find(same);
       onOpen(existing ? existing.id : (await write.put({ gestalt: CONCEPT, name })).id);
     } catch (e) { setError(message(e)); } finally { setBusy(false); }
   };
@@ -76,7 +79,10 @@ function ConceptPicker({ onOpen, autoFocus }: { onOpen: (id: string) => void; au
       <input className="input w-full" type="search" placeholder="Find or create a concept…" value={search} autoFocus={autoFocus}
              onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void openOrCreate(); }} />
       {text && items.map((c) => (
-        <button key={c.id} type="button" className="btn btn-ghost btn-sm justify-start truncate font-normal" onClick={() => onOpen(c.id)}>{str(c.value.name)}</button>
+        <button key={c.id} type="button" className="btn btn-ghost btn-sm justify-start gap-2 font-normal" onClick={() => onOpen(c.id)}>
+          <span className="truncate">{str(c.value.name)}</span>
+          {strings(c.value.aliases).length > 0 && <span className="min-w-0 truncate text-xs text-base-content/50">{strings(c.value.aliases).join(', ')}</span>}
+        </button>
       ))}
       {name && !items.some(same) && (
         <button type="button" className="btn btn-ghost btn-sm justify-start truncate font-normal" disabled={busy} onClick={() => void openOrCreate()}>
@@ -271,6 +277,65 @@ function Notes({ concept, onError }: { concept: string; onError: (e: unknown) =>
   );
 }
 
+/** One alias: shown as a chip, edited in place on a click; emptied, it goes. */
+function Alias({ value, onSave, onRemove }: { value: string; onSave: (v: string) => void; onRemove: () => void }) {
+  const [editing, setEditing] = useState<string | null>(null);
+  const cancelled = useRef(false);
+  const done = () => {
+    const next = editing ?? value;
+    setEditing(null);
+    if (cancelled.current) { cancelled.current = false; return; }
+    if (next.trim() !== value) onSave(next);
+  };
+  if (editing !== null) {
+    return (
+      <input className="input input-xs w-40" aria-label="Alias" autoFocus value={editing} onChange={(e) => setEditing(e.target.value)} onBlur={done}
+             onKeyDown={(e) => {
+               if (e.key === 'Enter') e.currentTarget.blur();
+               if (e.key === 'Escape') { cancelled.current = true; e.currentTarget.blur(); }
+             }} />
+    );
+  }
+  return (
+    <span className="badge badge-ghost gap-0.5 pr-0.5">
+      <button type="button" className="cursor-text" title="Edit the alias" onClick={() => setEditing(value)}>{value}</button>
+      <button type="button" className="btn btn-ghost btn-xs btn-circle size-4 min-h-0" title="Remove the alias" onClick={onRemove}><X className="size-3" /></button>
+    </span>
+  );
+}
+
+/** Other names the concept goes by: edited in place, added by typing (commas or Enter separate them). */
+function Aliases({ concept, onError }: { concept: Item; onError: (e: unknown) => void }) {
+  const write = useWrite();
+  const name = str(concept.value.name);
+  const aliases = strings(concept.value.aliases);
+  const [adding, setAdding] = useState('');
+  /** each name once, apart from the concept's own name */
+  const save = (next: string[]) => {
+    const seen = new Set([fold(name)]);
+    const clean = next.map((a) => a.trim()).filter((a) => a && !seen.has(fold(a)) && seen.add(fold(a)));
+    const { aliases: _old, ...rest } = concept.value;
+    write.put(clean.length ? { ...rest, aliases: clean } : rest).catch(onError);
+  };
+  const add = (text: string) => {
+    const fresh = text.split(',').map((a) => a.trim()).filter(Boolean);
+    setAdding('');
+    if (fresh.length) save([...aliases, ...fresh]);
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-1 px-4 pb-2">
+      <span className="text-xs text-base-content/60">also</span>
+      {aliases.map((a, i) => (
+        <Alias key={`${a}:${i}`} value={a} onSave={(v) => save(aliases.map((x, j) => (j === i ? v : x)))} onRemove={() => save(aliases.filter((_, j) => j !== i))} />
+      ))}
+      <input className="input input-ghost input-xs w-36" aria-label="Add an alias" placeholder="Add an alias…" value={adding}
+             onChange={(e) => { if (e.target.value.endsWith(',')) add(e.target.value); else setAdding(e.target.value); }}
+             onKeyDown={(e) => { if (e.key === 'Enter') add(adding); if (e.key === 'Escape') setAdding(''); }}
+             onBlur={() => add(adding)} />
+    </div>
+  );
+}
+
 function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: string) => void; onClosed: () => void }) {
   const read = useRead();
   const write = useWrite();
@@ -285,7 +350,11 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
     const next = renaming?.trim();
     setRenaming(null);
     if (cancelled.current) { cancelled.current = false; return; }
-    if (next && next !== name) write.put({ ...concept.value, name: next }).catch(fail);
+    if (!next || next === name) return;
+    // a name it went by as an alias is now its name, not an alias as well
+    const aliases = strings(concept.value.aliases).filter((a) => fold(a) !== fold(next));
+    const { aliases: _old, ...rest } = concept.value;
+    write.put({ ...rest, name: next, ...(aliases.length ? { aliases } : {}) }).catch(fail);
   };
   const remove = async () => {
     if (!confirm(`Delete the concept “${name}”? Its notes stay, no longer related to it.`)) return;
@@ -299,19 +368,22 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-base-100">
-      <header className="flex items-center gap-1 border-b border-base-300 p-2">
-        {renaming === null
-          ? <h1 className="min-w-0 truncate px-2 text-xl font-semibold">{name}</h1>
-          : <input className="input min-w-0 flex-1 text-xl font-semibold" aria-label="Name" autoFocus value={renaming}
-                   onChange={(e) => setRenaming(e.target.value)} onBlur={rename}
-                   onKeyDown={(e) => {
-                     if (e.key === 'Enter') e.currentTarget.blur();
-                     if (e.key === 'Escape') { cancelled.current = true; e.currentTarget.blur(); }
-                   }} />}
-        <button type="button" className="btn btn-ghost btn-sm btn-square" title="Go to another concept" onClick={() => setSwitching(true)}><ArrowLeftRight className="size-4" /></button>
-        <span className="flex-1" />
-        {renaming === null && <button type="button" className="btn btn-ghost btn-sm btn-square" title="Rename" onClick={() => setRenaming(name)}><Pencil className="size-4" /></button>}
-        <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the concept" onClick={() => void remove()}><Trash2 className="size-4" /></button>
+      <header className="border-b border-base-300">
+        <div className="flex items-center gap-1 p-2">
+          {renaming === null
+            ? <h1 className="min-w-0 truncate px-2 text-xl font-semibold">{name}</h1>
+            : <input className="input min-w-0 flex-1 text-xl font-semibold" aria-label="Name" autoFocus value={renaming}
+                     onChange={(e) => setRenaming(e.target.value)} onBlur={rename}
+                     onKeyDown={(e) => {
+                       if (e.key === 'Enter') e.currentTarget.blur();
+                       if (e.key === 'Escape') { cancelled.current = true; e.currentTarget.blur(); }
+                     }} />}
+          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Go to another concept" onClick={() => setSwitching(true)}><ArrowLeftRight className="size-4" /></button>
+          <span className="flex-1" />
+          {renaming === null && <button type="button" className="btn btn-ghost btn-sm btn-square" title="Rename" onClick={() => setRenaming(name)}><Pencil className="size-4" /></button>}
+          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the concept" onClick={() => void remove()}><Trash2 className="size-4" /></button>
+        </div>
+        <Aliases concept={concept} onError={fail} />
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">

@@ -28,6 +28,7 @@ name: concept
 version: 1
 fields:
   name: { type: string, required: true }
+  aliases: { type: string_list }
   parents: { type: ref_list, targets: [concept] }
   children: { type: ref_list, targets: [concept] }
 merge:                # optional, over what the field types imply
@@ -56,7 +57,7 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | Gestalt | |
 |---|---|
 | `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes, sources and concepts), `blobs`; all optional |
-| `concept@1` | `name`, `parents`, `children`: what larger things a yml trains, in any domain |
+| `concept@1` | `name`, `aliases`, `parents`, `children`: what larger things a yml trains, in any domain |
 | `concept-practice-event@1` | a `concept` came up through `origin` at `at`, with a `rating` from -2 to 2 |
 | `flashcard@1` | Markdown `front`; optional `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`) |
 | `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `aliases`, `tags`, `extra`, `blobs` |

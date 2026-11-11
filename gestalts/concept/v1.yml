@@ -3,7 +3,9 @@ version: 1
 description: >-
   Something that can be learned, in any domain. What practices a concept says so itself, through a `concepts` prop. What
   a concept means inside a domain, and how a strength is computed, belongs to the deck or view that creates it.
+  `aliases` are other names it goes by, and find it too.
 fields:
   name: { type: string, required: true }
+  aliases: { type: string_list }
   parents: { type: ref_list, targets: [concept] }
   children: { type: ref_list, targets: [concept] }

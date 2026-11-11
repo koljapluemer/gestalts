@@ -595,6 +595,7 @@ mod tests {
     #[test]
     fn a_concept_has_a_name_and_no_practicers() {
         assert!(matches!(state("c", "id: c\ngestalt: concept@1\nname: 'grc:θ'\nparents: [p]\nchildren: []\n"), YmlState::Valid(_)));
+        assert!(matches!(state("c", "id: c\ngestalt: concept@1\nname: entropy\naliases: [disorder]\n"), YmlState::Valid(_)));
         assert!(invalid("c", "id: c\ngestalt: concept@1\nname: x\npracticed-by: {e1: 1}\n").contains("not a prop of concept@1"));
         invalid("c", "id: c\ngestalt: concept@1\n");
     }
