@@ -8,7 +8,7 @@ my-plugin/
   view.tsx        # one React file; its default export is the view
   gestalts/<name>/v1.yml   # optional: gestalts it owns
   decks/<id>/              # optional: ymls it ships, one `deck@1` among them
-  backend.py               # optional, with `requires: [backend]`
+  backend.py               # optional; see Backends
 ```
 
 ```yaml
@@ -42,7 +42,8 @@ A view may also ask for:
 `network` and `llm` work where a node is: the desktop app, or a page connected to it. `useCapabilities()` says whether
 they do, so a view can offer less instead of failing.
 
-A view imports `react`, `lucide-react`, `@gestalts/view`, `@gestalts/kit`, `@gestalts/learning`, and any npm package.
+A view imports `react`, `lucide-react`, `@gestalts/view`, `@gestalts/kit`, `@gestalts/learning`, `@gestalts/sources`,
+and any npm package.
 There are no local imports. `plugins/note-queue/view.tsx` is a short real one.
 
 ## Backends
@@ -65,6 +66,8 @@ def hello(body):
 backend.run()
 ```
 
-A view calls it with `useService()`. Backends run only where there's a node: not on a phone, and not in a static site. A
-view that requires one is hidden there. `backend.data` reads and writes ymls within the plugin's `reads` and `writes`.
+A view calls it with `useService()`. Backends run only where there's a node: not on a phone, and not in a static site.
+With `requires: [backend]` in `plugin.yml` the view needs it, and is hidden where it can't run. Without, the backend is
+optional: the view runs everywhere, and `useCapabilities().backend` says whether its backend is up, so it can offer
+what needs it only then (`plugins/source-manager` writes its .bib that way). `backend.data` reads and writes ymls within the plugin's `reads` and `writes`.
 That limit is on the node's API only: a backend is ordinary local code.

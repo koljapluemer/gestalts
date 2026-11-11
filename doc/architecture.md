@@ -14,10 +14,11 @@ crates/node       the local server, watcher, backends, LAN pairing
 packages/view     @gestalts/view: everything a view gets from the app
 packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives)
 packages/learning @gestalts/learning: FSRS, practice sessions
+packages/sources  @gestalts/sources: bibliographic sources, BibTeX in and out
 packages/client   the wasm-backed repo; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime
-plugins/          the note views
+plugins/          the views that live in source: notes, flashcards, sources
 sdk/python        gestalts_backend.py, what a backend.py imports
 ```
 
@@ -33,7 +34,8 @@ so nothing is ever destroyed, but they can't be queried; `gestalts-node health <
 
 The host holds one index, built once on open and updated per changed id. A view never holds the index:
 
-- `useQuery` is a **live query**, one bounded page at a time. It must name one gestalt.
+- `useQuery` is a **live query**, one bounded page at a time. It must name one gestalt. `useRead` reads once, for a
+  check or an action (is this key taken? export everything), never for what the view shows.
 - When ymls change, only subscriptions whose predicate matches an old or new version of one of them are recomputed, and
   each gets a delta of its page. `crates/core/src/repo.rs` has a test of this with 12k ymls.
 - Search, ordering, a random draw and reverse references all run in the host's index.

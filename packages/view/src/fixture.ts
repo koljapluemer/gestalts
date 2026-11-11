@@ -88,7 +88,7 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       case 'contentHash': return Array.from(c.bytes).reduce((h, b) => (Math.imul(31, h) + b) | 0, 0).toString(16);
       case 'service': return { status: 503, contentType: 'text/plain', body: new TextEncoder().encode('no backend in a fixture') };
       case 'net': case 'llm': throw new Error(`${c.op} isn't available in a fixture`);
-      case 'capabilities': return { net: false, llm: false };
+      case 'capabilities': return { net: false, llm: false, backend: false };
       case 'setState': case 'setTitle': case 'openView': return null;
     }
   };

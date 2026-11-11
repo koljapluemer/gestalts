@@ -2,12 +2,13 @@ import { defineConfig } from 'oxlint';
 
 /**
  * Who may import whom (eslint-plugin-boundaries):
- * - `@gestalts/view` (what a view gets from the app) imports nothing of ours; `@gestalts/learning` only the view package.
+ * - `@gestalts/view` (what a view gets from the app) imports nothing of ours; `@gestalts/learning` only the view package;
+ *   `@gestalts/sources` nothing of ours.
  * - `@gestalts/kit` imports only the view package, in layers: primitives < components < widgets < perspectives.
- * - a plugin's `view.tsx` imports only the view package, the kit (its index) and learning, never another plugin, the
+ * - a plugin's `view.tsx` imports only the view package, the kit (its index), learning and sources, never another plugin, the
  *   client or the host.
- * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit and learning
- *   (learning and the kit only for the runtime frames load).
+ * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit, learning and
+ *   sources (learning, sources and the kit only for the runtime frames load).
  * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
  * External packages are always fine.
  */
@@ -24,11 +25,12 @@ const allowed: Record<string, string[]> = {
   view: [],
   vite: ['view'],
   learning: ['view'],
+  sources: [],
   client: ['view'],
   ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['view', ...below]])),
-  plugin: ['view', 'kit-index', 'learning'],
+  plugin: ['view', 'kit-index', 'learning', 'sources'],
   debug: ['client', 'view'],
-  host: ['client', 'view', 'kit-index', 'learning', 'debug'],
+  host: ['client', 'view', 'kit-index', 'learning', 'sources', 'debug'],
 };
 
 export default defineConfig({
@@ -42,6 +44,7 @@ export default defineConfig({
       { type: 'view', pattern: 'packages/view/src' },
       { type: 'vite', pattern: 'packages/vite/src' },
       { type: 'learning', pattern: 'packages/learning/src' },
+      { type: 'sources', pattern: 'packages/sources/src' },
       { type: 'client', pattern: 'packages/client/src' },
       { type: 'primitive', pattern: `${kit}/primitives` },
       { type: 'component', pattern: `${kit}/components` },

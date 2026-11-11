@@ -14,7 +14,8 @@
     "@gestalts/kit": "workspace:*",
     "lucide-react": "1.66.0",
     "@gestalts/view": "workspace:*",
-    "@gestalts/learning": "workspace:*"
+    "@gestalts/learning": "workspace:*",
+    "@gestalts/sources": "workspace:*"
   },
   "peerDependencies": {
     "react": "19.3.1",

@@ -116,8 +116,8 @@ export class Bridge {
         if (!this.env.llm) throw new AccessError('asking an LLM needs the desktop app, which isn\'t connected here');
         return this.env.llm(c.request);
       case 'capabilities': {
-        const c_ = (await this.env.capabilities?.()) ?? { net: false, llm: false };
-        return { net: c_.net && !!this.scope.network?.length, llm: c_.llm && !!this.scope.llm };
+        const c_ = (await this.env.capabilities?.()) ?? { net: false, llm: false, backend: false };
+        return { net: c_.net && !!this.scope.network?.length, llm: c_.llm && !!this.scope.llm, backend: c_.backend && !!this.env.service };
       }
       case 'setState': this.env.setState(c.state); return null;
       case 'setTitle': this.env.setTitle(c.title); return null;

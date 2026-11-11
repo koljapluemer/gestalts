@@ -5,7 +5,7 @@
 import { transform } from 'sucrase';
 
 /** What the frame's runtime provides; any other bare import is fetched from npm. */
-export const RUNTIME_MODULES = ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'lucide-react', '@gestalts/view', '@gestalts/kit', '@gestalts/learning'] as const;
+export const RUNTIME_MODULES = ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'lucide-react', '@gestalts/view', '@gestalts/kit', '@gestalts/learning', '@gestalts/sources'] as const;
 
 export type CompileError = { message: string; line?: number; column?: number };
 export type Compiled = { ok: true; js: string; npm: string[] } | { ok: false; errors: CompileError[] };

@@ -1,11 +1,13 @@
 name: note
 version: 1
-description: A note in the everyday sense. Every prop is optional; `id` and `gestalt` are all a note needs.
+description: >-
+  A note in the everyday sense. Every prop is optional; `id` and `gestalt` are all a note needs. A note relating to a
+  `source` is a claim about it; the label says how (by default `source`, with a locator if any: `source p. 34`).
 fields:
   title: { type: string }
   main: { type: text }
   extra: { type: text }
   aliases: { type: string_list }
   tags: { type: string_list }
-  relationships: { type: relationships, targets: [note] }
+  relationships: { type: relationships, targets: [note, source] }
   blobs: { type: blobs }

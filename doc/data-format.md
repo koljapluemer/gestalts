@@ -55,10 +55,11 @@ Text merges by line, lists of references as sets, and everything else per key, c
 
 | Gestalt | |
 |---|---|
-| `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes), `blobs`; all optional |
+| `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes and sources), `blobs`; all optional |
 | `concept@1` | `name`, `parents`, `children`: what larger things a yml trains, in any domain |
 | `concept-practice-event@1` | a `concept` came up through `origin` at `at`, with a `rating` from -2 to 2 |
 | `flashcard@1` | Markdown `front`; optional `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`) |
+| `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `aliases`, `tags`, `extra`, `blobs` |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
 | `practice-session@1` | one session's timing and trials |
@@ -69,6 +70,12 @@ Text merges by line, lists of references as sets, and everything else per key, c
 `concept@1` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
 deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
 the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
+
+A claim about a `source` is a note relating to it, labelled `source` by default; a locator goes in the label
+(`source p. 34`). Names in `author` and `editor` are `family, given` (`family, suffix, given`; without a comma, one
+name never split), and are a `list`, not a `string_list`, so their order survives a merge. `doi` is kept lowercase
+without a resolver prefix and `isbn` as ISBN-13 digits, so `where` finds a source by either. `@gestalts/sources`
+has the model, BibTeX in and out, duplicate finding and merging.
 
 ## Publishing a deck
 

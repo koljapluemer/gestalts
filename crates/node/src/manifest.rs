@@ -79,9 +79,9 @@ impl PluginBundle {
         let text = std::fs::read_to_string(&path).map_err(|e| ManifestError::Read(path, e))?;
         let manifest: PluginManifest = serde_yaml_ng::from_str(&text)?;
         validate(&manifest)?;
-        let has_backend = root.join("backend.py").is_file();
-        if manifest.requires.contains(&Requirement::Backend) != has_backend {
-            return invalid(format!("{}: `requires: [backend]` and backend.py must come together", manifest.id));
+        // a backend.py without `requires: [backend]` is optional: the view works without it, and better with it
+        if manifest.requires.contains(&Requirement::Backend) && !root.join("backend.py").is_file() {
+            return invalid(format!("{}: `requires: [backend]` but there's no backend.py", manifest.id));
         }
         let gestalt_texts = read_gestalts(&root)?;
         Gestalts::from_yaml(&gestalt_texts.iter().map(String::as_str).collect::<Vec<_>>()).map_err(ManifestError::Invalid)?;
@@ -93,8 +93,9 @@ impl PluginBundle {
         &self.gestalt_texts
     }
 
+    /// Its `backend.py`, required or optional.
     pub fn backend(&self) -> Option<PathBuf> {
-        self.manifest.requires.contains(&Requirement::Backend).then(|| self.root.join("backend.py"))
+        Some(self.root.join("backend.py")).filter(|p| p.is_file())
     }
 }
 
@@ -265,13 +266,15 @@ mod tests {
     }
 
     #[test]
-    fn a_backend_is_declared_and_present_or_neither() {
+    fn a_required_backend_must_be_there_and_an_optional_one_may_be() {
         let (_a, b) = bundle("be1", &format!("{BASE}requires: [backend]\n"), &[("backend.py", "")]);
         assert!(b.unwrap().backend().is_some());
         let (_b, b) = bundle("be2", &format!("{BASE}requires: [backend]\n"), &[]);
         assert!(b.is_err());
         let (_c, b) = bundle("be3", BASE, &[("backend.py", "")]);
-        assert!(b.is_err());
+        assert!(b.unwrap().backend().is_some());
+        let (_d, b) = bundle("be4", BASE, &[]);
+        assert!(b.unwrap().backend().is_none());
     }
 
     #[test]

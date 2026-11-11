@@ -35,6 +35,8 @@ export type PluginEntry = {
   core: boolean;
   /** its frame runs in the app's origin: it declared `frame: same-origin` and the distribution granted it */
   sameOrigin: boolean;
+  /** it has a `backend.py`: required when the manifest says `requires: [backend]`, else optional */
+  backend: boolean;
 };
 
 /** `id`: whose tabs and data are whose, for good. */

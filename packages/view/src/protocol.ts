@@ -25,8 +25,11 @@ export type NetReply = ServiceReply;
 export type LlmRequest = { prompt: string; json?: boolean };
 export type LlmReply = { text: string; provider: string; model: string };
 
-/** What the view can use here and now: a manifest asks, but the app around it decides. */
-export type Capabilities = { net: boolean; llm: boolean };
+/**
+ * What the view can use here and now: a manifest asks, but the app around it decides. `backend`: its own `backend.py`
+ * is running, which matters to a view whose backend is optional.
+ */
+export type Capabilities = { net: boolean; llm: boolean; backend: boolean };
 
 /** Everything a view can ask of its host. The host checks each against the view's `reads` and `writes`. */
 export type Call =

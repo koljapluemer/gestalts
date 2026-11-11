@@ -148,6 +148,28 @@ export function useDoc(gestalt: string, id: string | null): Item | undefined {
   return useQuery(id === null ? null : { gestalt, ids: [id], limit: 1 }).items[0];
 }
 
+/**
+ * Reading ymls once, not kept current: for a check or an action (is this key taken? export everything), not for what
+ * the view shows, which is `useQuery`'s.
+ */
+export function useRead() {
+  const { host } = useContext_();
+  return useMemo(() => ({
+    page: (query: Query) => host.call({ op: 'query', query }),
+    /** Every page of `query`, one after another. */
+    all: async (query: Query) => {
+      const items: Item[] = [];
+      let cursor: string | undefined;
+      do {
+        const page = await host.call({ op: 'query', query: { ...query, limit: 500, ...(cursor ? { cursor } : {}) } });
+        items.push(...page.items);
+        cursor = page.next ?? undefined;
+      } while (cursor);
+      return items;
+    },
+  }), [host]);
+}
+
 /** Writing ymls and blobs. A yml must be valid by its gestalt, or the promise rejects saying why. */
 export function useWrite() {
   const { host } = useContext_();
@@ -240,14 +262,14 @@ export function useLlm() {
   return useMemo(() => (request: LlmRequest) => host.call({ op: 'llm', request }), [host]);
 }
 
-/** Whether `useNet` and `useLlm` work here; undefined until the app has said. */
+/** Whether `useNet`, `useLlm` and (for an optional backend) `useService` work here; undefined until the app has said. */
 export function useCapabilities(): { capabilities: Capabilities | undefined; refresh: () => void } {
   const { host } = useContext_();
   const [capabilities, setCapabilities] = useState<Capabilities>();
   const [round, setRound] = useState(0);
   useEffect(() => {
     let live = true;
-    host.call({ op: 'capabilities' }).then((c) => { if (live) setCapabilities(c); }, () => { if (live) setCapabilities({ net: false, llm: false }); });
+    host.call({ op: 'capabilities' }).then((c) => { if (live) setCapabilities(c); }, () => { if (live) setCapabilities({ net: false, llm: false, backend: false }); });
     return () => { live = false; };
   }, [host, round]);
   return { capabilities, refresh: useMemo(() => () => setRound((r) => r + 1), []) };

@@ -77,7 +77,7 @@ function loadPlugin(appRoot: string, path: string, core: boolean) {
   const viewFile = join(root, 'view.tsx');
   const compiled = compile(readFileSync(viewFile, 'utf8'), viewFile);
   if (!compiled.ok) throw new Error(`${manifest.id}/view.tsx: ${compiled.errors.map((e) => `${e.line ?? '?'}: ${e.message}`).join('; ')}`);
-  return { id: manifest.id, root, manifest, gestalts: readGestalts(root), decks: readDecks(manifest.id, root), js: compiled.js, npm: compiled.npm, core };
+  return { id: manifest.id, root, manifest, gestalts: readGestalts(root), decks: readDecks(manifest.id, root), js: compiled.js, npm: compiled.npm, core, backend: existsSync(join(root, 'backend.py')) };
 }
 
 function load(appRoot: string) {
@@ -166,7 +166,7 @@ export function gestaltsPlugins(): PluginOption[] {
         this.addWatchFile(join(p.root, 'plugin.yml'));
         this.addWatchFile(join(p.root, 'view.tsx'));
         const decks = p.decks.map((d) => ({ id: d.id, title: d.title, source: `${p.id}/${d.id}`, path: `decks/${p.id}/${d.id}` }));
-        return { manifest: p.manifest, gestalts: p.gestalts, decks, js: p.js, npm: p.npm, core: p.core, sameOrigin: p.sameOrigin };
+        return { manifest: p.manifest, gestalts: p.gestalts, decks, js: p.js, npm: p.npm, core: p.core, sameOrigin: p.sameOrigin, backend: p.backend };
       });
       return `export const registry = ${JSON.stringify({ distribution, plugins: entries, runtime: await runtime })};\n`;
     },

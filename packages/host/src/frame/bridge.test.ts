@@ -55,14 +55,14 @@ describe('the bridge', () => {
   it('reaches only declared hosts, over plain https, and only where the app can', async () => {
     const seen: string[] = [];
     const reply = { status: 200, contentType: 'text/plain', body: new Uint8Array() };
-    const withNet = { ...env, net: async (r: { url: string }) => { seen.push(r.url); return reply; }, capabilities: async () => ({ net: true, llm: true }) };
+    const withNet = { ...env, net: async (r: { url: string }) => { seen.push(r.url); return reply; }, capabilities: async () => ({ net: true, llm: true, backend: true }) };
     const bridge = new Bridge({} as never, { reads: [], writes: [], network: ['www.youtube.com'] }, withNet, () => {});
     await expect(bridge.handle({ op: 'net', request: { url: 'https://www.youtube.com/watch?v=x' } })).resolves.toBe(reply);
     for (const url of ['https://youtube.com/', 'http://www.youtube.com/', 'https://www.youtube.com:8443/', 'https://u:p@www.youtube.com/', 'nonsense']) {
       await expect(bridge.handle({ op: 'net', request: { url } })).rejects.toBeInstanceOf(AccessError);
     }
     expect(seen).toEqual(['https://www.youtube.com/watch?v=x']);
-    await expect(bridge.handle({ op: 'capabilities' })).resolves.toEqual({ net: true, llm: false });
+    await expect(bridge.handle({ op: 'capabilities' })).resolves.toEqual({ net: true, llm: false, backend: false });
     const offline = new Bridge({} as never, { reads: [], writes: [], network: ['www.youtube.com'] }, env, () => {});
     await expect(offline.handle({ op: 'net', request: { url: 'https://www.youtube.com/' } })).rejects.toBeInstanceOf(AccessError);
   });
@@ -74,6 +74,16 @@ describe('the bridge', () => {
     await expect(declared.handle({ op: 'llm', request: { prompt: 'hi' } })).resolves.toBe(answer);
     const undeclared = new Bridge({} as never, { reads: [], writes: [] }, withLlm, () => {});
     await expect(undeclared.handle({ op: 'llm', request: { prompt: 'hi' } })).rejects.toBeInstanceOf(AccessError);
+  });
+
+  it('says an optional backend is there only when the app wired it and it runs', async () => {
+    const up = async () => ({ net: true, llm: false, backend: true });
+    const reply = { status: 200, contentType: 'application/json', body: new Uint8Array() };
+    const wired = new Bridge({} as never, { reads: [], writes: [] }, { ...env, capabilities: up, service: async () => reply }, () => {});
+    await expect(wired.handle({ op: 'capabilities' })).resolves.toMatchObject({ backend: true });
+    const unwired = new Bridge({} as never, { reads: [], writes: [] }, { ...env, capabilities: up }, () => {});
+    await expect(unwired.handle({ op: 'capabilities' })).resolves.toMatchObject({ backend: false });
+    await expect(unwired.handle({ op: 'service', path: '/x', method: 'POST' })).rejects.toBeInstanceOf(AccessError);
   });
 
   it('forwards deltas under its own numbering and stops everything when the view goes', async () => {

@@ -49,14 +49,18 @@ function ViewFrame({ registry, css, tab, hidden, navigate, setTitle }: {
   const key = stateKey(registry.distribution.id, tab.id);
   const [state] = useState(() => readState(key));
   const env = useMemo<ViewEnv>(() => ({
-    service: plugin && needsBackend(plugin) ? serviceFor(repo, plugin.manifest.id) : undefined,
+    service: plugin?.backend ? serviceFor(repo, plugin.manifest.id) : undefined,
     // these ask the node at call time, so connecting later is enough
     net: (r) => repo.net(r),
     llm: (r) => repo.llm(r),
     capabilities: async () => {
-      if (!repo.hasNode()) return { net: false, llm: false };
-      const llm = await repo.llmSettings().then((s) => !!s?.providers.some((p) => p.configured), () => false);
-      return { net: true, llm };
+      if (!repo.hasNode()) return { net: false, llm: false, backend: false };
+      const id = plugin?.manifest.id;
+      const [llm, backend] = await Promise.all([
+        repo.llmSettings().then((s) => !!s?.providers.some((p) => p.configured), () => false),
+        plugin?.backend ? repo.services().then((list) => !!list?.some((s) => s.id === id && s.available), () => false) : false,
+      ]);
+      return { net: true, llm, backend };
     },
     setState: (s) => { try { localStorage.setItem(key, JSON.stringify(s)); } catch { /* not remembered */ } },
     setTitle: (t) => setTitle(tab.id, t),

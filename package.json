@@ -26,6 +26,7 @@
     "yaml": "2.8.1",
     "@gestalts/kit": "workspace:*",
     "@gestalts/learning": "workspace:*",
+    "@gestalts/sources": "workspace:*",
     "@gestalts/view": "workspace:*",
     "lucide-react": "1.66.0",
     "react": "19.3.1"

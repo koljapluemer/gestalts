@@ -1,0 +1,40 @@
+name: source
+version: 1
+description: >-
+  A bibliographic source, in the subset of biblatex needed to cite it in ACM, IEEE or APA style. `key` is its BibTeX key,
+  apart from its id so it can change. Names are `family, given` (or `family, suffix, given`; without a comma, one name
+  that is never split, e.g. an organisation), in order. `doi` is kept lowercase without a resolver prefix, `isbn` as
+  ISBN-13 digits. `aliases` are other ways to find it. Claims about it are notes relating to it.
+fields:
+  key: { type: string, required: true }
+  entrytype:
+    type: string
+    required: true
+    one_of: [article, book, incollection, inproceedings, thesis, report, online, software, misc]
+  title: { type: string }
+  author: { type: list, items: { type: string } }
+  editor: { type: list, items: { type: string } }
+  date: { type: partial_date }
+  urldate: { type: partial_date }
+  journaltitle: { type: string }
+  booktitle: { type: string }
+  series: { type: string }
+  type: { type: string }
+  number: { type: string }
+  volume: { type: integer }
+  edition: { type: string }
+  version: { type: string }
+  pages: { type: string }
+  publisher: { type: list, items: { type: string } }
+  institution: { type: list, items: { type: string } }
+  organization: { type: list, items: { type: string } }
+  location: { type: list, items: { type: string } }
+  doi: { type: string }
+  isbn: { type: string }
+  eprint: { type: string }
+  eprinttype: { type: string }
+  url: { type: url }
+  aliases: { type: string_list }
+  tags: { type: string_list }
+  extra: { type: text }
+  blobs: { type: blobs }

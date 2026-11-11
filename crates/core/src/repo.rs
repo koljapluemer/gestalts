@@ -372,6 +372,18 @@ mod tests {
     }
 
     #[test]
+    fn a_sources_claims_are_found_through_the_reverse_index() {
+        pollster::block_on(async {
+            let r = repo();
+            r.put(parse_yaml("id: s\ngestalt: source@1\nkey: k\nentrytype: misc\n").unwrap()).await.unwrap();
+            r.put(parse_yaml("id: n1\ngestalt: note@1\nmain: a\nrelationships: [{to: s, label: source p. 3}]\n").unwrap()).await.unwrap();
+            r.put(parse_yaml("id: n2\ngestalt: note@1\nmain: b\nrelationships: [{to: n1, label: see}]\n").unwrap()).await.unwrap();
+            let q = Query { gestalt: Some("note@1".into()), refs: Some(RefFilter { to: "s".into(), field: Some("relationships".into()) }), ..Default::default() };
+            assert_eq!(ids(&r.query(&q)), vec!["n1"]);
+        });
+    }
+
+    #[test]
     fn a_concepts_practicers_are_found_through_the_reverse_index() {
         pollster::block_on(async {
             let r = repo();

@@ -10,6 +10,7 @@ import * as lucide from 'lucide-react';
 import * as view from '@gestalts/view';
 import * as kit from '@gestalts/kit';
 import * as learning from '@gestalts/learning';
+import * as sources from '@gestalts/sources';
 import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react';
 import type { ViewError, ViewHost, ViewInit } from '@gestalts/view';
 
@@ -22,6 +23,7 @@ const modules: Record<string, unknown> = {
   '@gestalts/view': view,
   '@gestalts/kit': kit,
   '@gestalts/learning': learning,
+  '@gestalts/sources': sources,
 };
 
 class Boundary extends Component<{ host: ViewHost; children: ReactNode }, { error: Error | null }> {

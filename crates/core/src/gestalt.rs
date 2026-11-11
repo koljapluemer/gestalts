@@ -453,6 +453,7 @@ const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/concept/v1.yml"),
     include_str!("../../../gestalts/concept-practice-event/v1.yml"),
     include_str!("../../../gestalts/flashcard/v1.yml"),
+    include_str!("../../../gestalts/source/v1.yml"),
     include_str!("../../../gestalts/deck/v1.yml"),
     include_str!("../../../gestalts/fsrs-data/v1.yml"),
     include_str!("../../../gestalts/practice-session/v1.yml"),
@@ -533,6 +534,7 @@ impl Gestalts {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::yml::parse_yaml;
 
     fn state(id: &str, raw: &str) -> YmlState {
         Gestalts::builtin().classify(&Yml::parse(id, raw))
@@ -605,6 +607,38 @@ mod tests {
         invalid("f", "id: f\ngestalt: flashcard@1\nback: a\n");
         assert!(invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c1: 1.5}\n").contains("concepts.c1"));
         invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nblobs: [{file: a.png, label: front}, {file: b.png, label: front}]\n");
+    }
+
+    #[test]
+    fn a_source_is_a_biblatex_entry_with_ordered_names() {
+        let ok = "id: s\ngestalt: source@1\nkey: doe2020\nentrytype: article\ntitle: On magnets\nauthor: ['Doe, Jane', 'van Rossum, Guido', ACM]\ndate: 2020-05\nvolume: 12\npages: 1--10\ndoi: 10.1/x\nurl: https://example.org/a\naliases: [the weird magnet paper]\nblobs: [{file: a.pdf, label: pdf}]\n";
+        assert!(matches!(state("s", ok), YmlState::Valid(_)));
+        assert!(matches!(state("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\n"), YmlState::Valid(_)));
+        invalid("s", "id: s\ngestalt: source@1\nentrytype: misc\n");
+        assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: blogpost\n").contains("entrytype"));
+        assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\nauthor: [{family: Doe}]\n").contains("author"));
+        assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\njournal: X\n").contains("not a prop of source@1"));
+
+        let def = Gestalts::builtin().get("source@1").unwrap().clone();
+        let y = Yml::parse("s", ok);
+        let found = def.searchable(y.map().unwrap());
+        for s in ["On magnets", "Doe, Jane", "the weird magnet paper", "10.1/x"] {
+            assert!(found.contains(&s), "{s} in {found:?}");
+        }
+        // names keep their order: two different edits conflict rather than mixing into a set
+        let v = |s: &str| parse_yaml(s).unwrap();
+        let (base, a, b) = (v("{author: [A, B]}"), v("{author: [B, A]}"), v("{author: [A, B, C]}"));
+        let out = gestalts_merge::merge(&def.policy(), Some(&base), Some(&a), Some(&b));
+        assert_eq!(out.conflicts.len(), 1);
+    }
+
+    #[test]
+    fn a_note_relates_to_a_source() {
+        let g = Gestalts::builtin();
+        let n = Yml::parse("n", "id: n\ngestalt: note@1\nmain: magnets attract\nrelationships: [{to: s, label: source p. 3}]\n");
+        let edges = g.get("note@1").unwrap().edges(n.map().unwrap());
+        assert_eq!(edges.len(), 1);
+        assert_eq!(edges[0].targets, vec!["note", "source"]);
     }
 
     #[test]

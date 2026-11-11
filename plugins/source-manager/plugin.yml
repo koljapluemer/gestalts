@@ -1,0 +1,8 @@
+id: source-manager
+version: 1.0.0
+title: Academic sources
+description: >-
+  Bibliographic sources: add them from BibTeX (spotting ones you already have), edit their fields, paste BibTeX again to
+  update one, give them aliases, and attach claims (notes) to them. Where the desktop app runs, writes a .bib file.
+reads: [source@1, note@1]
+writes: [source@1, note@1]
