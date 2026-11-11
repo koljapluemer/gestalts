@@ -1,4 +1,4 @@
-import { logger, type Delta, type Health, type Item, type JsonMap, type Page, type Query } from '@gestalts/view';
+import { logger, type Delta, type Health, type Item, type JsonMap, type LlmReply, type LlmRequest, type NetReply, type NetRequest, type Page, type Query } from '@gestalts/view';
 import init, { WasmRepo, contentHash as wasmContentHash, newId as wasmNewId, stableId as wasmStableId, stateId as wasmStateId } from '../wasm/gestalts.js';
 import { coalesce } from './coalesce';
 import { nativeHost, type NativeHost, type NativeKind, type NativeStatus, type PairedNodeInfo } from './native';
@@ -25,6 +25,16 @@ export type RepoSource = YmlsIn & {
 
 /** One of a node's `/services`: `available` while its worker runs. */
 export type ServiceStatus = { id: string; available: boolean };
+
+export type LlmProviderId = 'gemini' | 'claude_cli' | 'openai';
+/** One LLM provider as the node has it: `paused` after a rate limit, `last_error` from its last failed try. */
+export type LlmProvider = { id: LlmProviderId; configured: boolean; model: string; paused: string | null; last_error: string | null };
+/** The node's `/llm/settings`: providers in the order they're tried. Keys never come back. */
+export type LlmSettings = { order: LlmProviderId[]; providers: LlmProvider[] };
+type KeyedChange = { key?: string | null; model?: string | null };
+export type LlmSettingsChange = { order?: LlmProviderId[]; gemini?: KeyedChange; openai?: KeyedChange; claude_cli?: { enabled?: boolean; model?: string | null } };
+
+const pick = (h: Record<string, string>, names: string[]) => Object.fromEntries(Object.entries(h).filter(([k]) => names.includes(k.toLowerCase())));
 
 /** A node's `/health`. */
 export type NodeHealth = { app: string; version: string; folder: { id: string; path: string } | null };
@@ -318,6 +328,57 @@ export class Repo {
   service(id: string, path: string, init?: RequestInit): Promise<Response> | undefined {
     if (!this.status.url || this.status.mode === 'paired') return undefined;
     return fetch(`${withSlash(this.status.url)}services/${encodeURIComponent(id)}/${path.replace(/^\//, '')}`, init);
+  }
+
+  /** The node to ask for `/net` and `/llm`: none when there's none, or when it's a native app's paired one. */
+  private nodeUrl(): string | null {
+    return this.status.url && this.status.mode !== 'paired' ? withSlash(this.status.url) : null;
+  }
+
+  /** Whether `net`, `llm` and the LLM settings can work here. */
+  hasNode(): boolean {
+    return this.nodeUrl() !== null;
+  }
+
+  /** HTTP through the node, to a host some plugin declares. Throws when the node refuses or there's none. */
+  async net(request: NetRequest): Promise<NetReply> {
+    const url = this.nodeUrl();
+    if (!url) throw new Error('reaching the network needs the desktop app, which isn\'t connected');
+    const headers: Record<string, string> = { ...pick(request.headers ?? {}, ['content-type', 'accept', 'accept-language']), 'x-gestalts-url': request.url, 'x-gestalts-method': request.method ?? 'GET' };
+    const r = await fetch(`${url}net`, { method: 'POST', headers, body: request.body as BodyInit | undefined });
+    if (!r.headers.has('x-gestalts-upstream')) throw new Error(`the desktop app refused: ${(await r.text()) || r.status}`);
+    return { status: r.status, contentType: r.headers.get('content-type') ?? '', body: new Uint8Array(await r.arrayBuffer()) };
+  }
+
+  /** A completion from the user's providers, in their order. Throws, saying why each failed, when none answers. */
+  async llm(request: LlmRequest): Promise<LlmReply> {
+    const url = this.nodeUrl();
+    if (!url) throw new Error('asking an LLM needs the desktop app, which isn\'t connected');
+    const r = await fetch(`${url}llm/complete`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
+    const body = (await r.json().catch(() => ({}))) as LlmReply & { error?: string; tried?: [string, string][] };
+    if (!r.ok) {
+      const tried = (body.tried ?? []).filter(([, why]) => why !== 'not set up').map(([p, why]) => `${p}: ${why}`);
+      throw new Error([body.error ?? `the desktop app answered ${r.status}`, ...tried].join('; '));
+    }
+    return { text: body.text, provider: body.provider, model: body.model };
+  }
+
+  /** The LLM providers as the node has them (never their keys); null without a node. */
+  async llmSettings(): Promise<LlmSettings | null> {
+    const url = this.nodeUrl();
+    if (!url) return null;
+    const r = await fetch(`${url}llm/settings`);
+    if (!r.ok) throw new Error(`the desktop app answered ${r.status}`);
+    return (await r.json()) as LlmSettings;
+  }
+
+  /** Changes them: an absent field stays, a `key: null` clears that key. */
+  async changeLlmSettings(change: LlmSettingsChange): Promise<LlmSettings> {
+    const url = this.nodeUrl();
+    if (!url) throw new Error('the LLM settings live in the desktop app, which isn\'t connected');
+    const r = await fetch(`${url}llm/settings`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(change) });
+    if (!r.ok) throw new Error(`the desktop app answered ${r.status}: ${await r.text()}`);
+    return (await r.json()) as LlmSettings;
   }
 
   /** The backends the node offers and whether each is running; null without a node, or if it didn't answer. */

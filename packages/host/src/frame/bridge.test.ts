@@ -52,6 +52,30 @@ describe('the bridge', () => {
     expect(store.size).toBe(2);
   });
 
+  it('reaches only declared hosts, over plain https, and only where the app can', async () => {
+    const seen: string[] = [];
+    const reply = { status: 200, contentType: 'text/plain', body: new Uint8Array() };
+    const withNet = { ...env, net: async (r: { url: string }) => { seen.push(r.url); return reply; }, capabilities: async () => ({ net: true, llm: true }) };
+    const bridge = new Bridge({} as never, { reads: [], writes: [], network: ['www.youtube.com'] }, withNet, () => {});
+    await expect(bridge.handle({ op: 'net', request: { url: 'https://www.youtube.com/watch?v=x' } })).resolves.toBe(reply);
+    for (const url of ['https://youtube.com/', 'http://www.youtube.com/', 'https://www.youtube.com:8443/', 'https://u:p@www.youtube.com/', 'nonsense']) {
+      await expect(bridge.handle({ op: 'net', request: { url } })).rejects.toBeInstanceOf(AccessError);
+    }
+    expect(seen).toEqual(['https://www.youtube.com/watch?v=x']);
+    await expect(bridge.handle({ op: 'capabilities' })).resolves.toEqual({ net: true, llm: false });
+    const offline = new Bridge({} as never, { reads: [], writes: [], network: ['www.youtube.com'] }, env, () => {});
+    await expect(offline.handle({ op: 'net', request: { url: 'https://www.youtube.com/' } })).rejects.toBeInstanceOf(AccessError);
+  });
+
+  it('asks an LLM only for a view that declares it', async () => {
+    const answer = { text: '{}', provider: 'gemini', model: 'm' };
+    const withLlm = { ...env, llm: async () => answer };
+    const declared = new Bridge({} as never, { reads: [], writes: [], llm: true }, withLlm, () => {});
+    await expect(declared.handle({ op: 'llm', request: { prompt: 'hi' } })).resolves.toBe(answer);
+    const undeclared = new Bridge({} as never, { reads: [], writes: [] }, withLlm, () => {});
+    await expect(undeclared.handle({ op: 'llm', request: { prompt: 'hi' } })).rejects.toBeInstanceOf(AccessError);
+  });
+
   it('forwards deltas under its own numbering and stops everything when the view goes', async () => {
     const { bridge, stops, out, fire } = setup();
     const { sub } = await bridge.handle({ op: 'subscribe', query: { gestalt: 'note@1' } });

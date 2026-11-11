@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::net::Ipv4Addr;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
@@ -44,6 +44,8 @@ pub struct PluginHost {
     client: reqwest::Client,
     /// the core's gestalts and every plugin's
     gestalts: Arc<Gestalts>,
+    /// every host some plugin's view may reach through `/net`
+    network: Arc<BTreeSet<String>>,
 }
 
 /// What a `backend.py` imports; written next to it at start, so a plugin needs nothing installed.
@@ -72,8 +74,15 @@ impl PluginHost {
             }
         }
         let gestalts = crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())?;
-        Ok(Self { inner: Arc::new(RwLock::new(found)), connector_url, paths, uv: Arc::new(std::sync::RwLock::new(UvState::Locating)), client: reqwest::Client::new(), gestalts: Arc::new(gestalts) })
+        let network = bundles.iter().flat_map(|b| b.manifest.network.iter().cloned()).collect();
+        Ok(Self { inner: Arc::new(RwLock::new(found)), connector_url, paths, uv: Arc::new(std::sync::RwLock::new(UvState::Locating)), client: reqwest::Client::new(), gestalts: Arc::new(gestalts), network: Arc::new(network) })
     }
+
+    /// Every host some plugin found here declares in `network`.
+    pub fn network_hosts(&self) -> BTreeSet<String> { (*self.network).clone() }
+
+    /// Where this node keeps its settings.
+    pub fn config_dir(&self) -> &std::path::Path { &self.paths.config }
 
     /// The core's gestalts and those of every plugin found, for access checks and merging.
     pub fn gestalts(&self) -> &Gestalts { &self.gestalts }

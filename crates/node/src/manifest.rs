@@ -48,6 +48,21 @@ pub struct PluginManifest {
     pub tags: Vec<String>,
     #[serde(default)]
     pub requires: Vec<Requirement>,
+    /// asks to run in the app's origin; the distribution decides whether it does
+    #[serde(default)]
+    pub frame: Option<FrameMode>,
+    /// hosts its view may reach through the node's `/net`, exactly
+    #[serde(default)]
+    pub network: Vec<String>,
+    /// its view asks for completions through the node's `/llm`
+    #[serde(default)]
+    pub llm: bool,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
+pub enum FrameMode {
+    #[serde(rename = "same-origin")]
+    SameOrigin,
 }
 
 #[derive(Debug, Clone)]
@@ -127,7 +142,16 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     if let Some(g) = m.writes.iter().find(|g| !m.reads.contains(g)) {
         return invalid(format!("{} writes {g} but doesn't read it", m.id));
     }
+    if let Some(h) = m.network.iter().find(|h| !valid_host(h)) {
+        return invalid(format!("{}: network host {h} is not a plain host name (like www.example.com)", m.id));
+    }
     Ok(())
+}
+
+/// A DNS name with at least one dot: no scheme, port, path or wildcard.
+pub fn valid_host(h: &str) -> bool {
+    h.contains('.') && h.split('.').all(|l| !l.is_empty() && l.len() <= 63 && !l.starts_with('-') && !l.ends_with('-')
+        && l.bytes().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-'))
 }
 
 /// The core's gestalts plus every plugin's: each defined once, and every gestalt a plugin reads existing.
@@ -202,6 +226,19 @@ mod tests {
     }
 
     const BASE: &str = "id: x\nversion: 1.0.0\ntitle: X\n";
+
+    #[test]
+    fn frame_network_and_llm_are_read_and_hosts_checked() {
+        let (_d, b) = bundle("caps", &format!("{BASE}frame: same-origin\nnetwork: [www.youtube.com]\nllm: true\n"), &[]);
+        let m = b.unwrap().manifest;
+        assert_eq!(m.frame, Some(FrameMode::SameOrigin));
+        assert_eq!(m.network, vec!["www.youtube.com".to_owned()]);
+        assert!(m.llm);
+        for bad in ["https://www.youtube.com", "*.youtube.com", "localhost", "www.youtube.com:443"] {
+            let (_d, b) = bundle("caps-bad", &format!("{BASE}network: ['{bad}']\n"), &[]);
+            assert!(b.is_err(), "{bad} should be refused");
+        }
+    }
 
     #[test]
     fn a_minimal_plugin_is_three_lines() {

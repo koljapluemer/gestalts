@@ -23,6 +23,8 @@ use serde::{Deserialize, Serialize};
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
 use crate::lan::{Lan, LanView};
+use crate::llm::{Llm, SettingsChange};
+use crate::net::Net;
 use crate::pairing::{DeviceView, Offer, Refused};
 use crate::paths::{Config, Paths};
 use crate::manifest::AccessPolicy;
@@ -151,14 +153,20 @@ pub struct AppState {
     extra_origins: Arc<[String]>,
     /// the home network: paired devices, and the listener for them
     lan: Option<Arc<Lan>>,
+    /// HTTP for views, to the hosts plugins declare
+    net: Net,
+    /// completions for views, from the user's providers
+    llm: Arc<Llm>,
 }
 
 impl AppState {
     #[allow(clippy::too_many_arguments)]
     pub fn new(folder: Option<Folder>, plugins: PluginHost, control_token: String, remember_in: Option<Paths>,
                shell: Arc<dyn Shell>, identity: Identity, address: String, extra_origins: Vec<String>) -> Self {
+        let net = Net::new(plugins.network_hosts());
+        let llm = Arc::new(Llm::load(plugins.config_dir()));
         let state = AppState { folder: Arc::default(), watcher: Arc::default(), events: Events::default(), plugins, clients: Arc::default(),
-                               control_token: control_token.into(), remember_in, shell, identity, address, extra_origins: extra_origins.into(), lan: None };
+                               control_token: control_token.into(), remember_in, shell, identity, address, extra_origins: extra_origins.into(), lan: None, net, llm };
         if let Some(f) = folder { state.set_folder(f); }
         state
     }
@@ -457,6 +465,47 @@ async fn proxy_service(State(s): State<AppState>, UrlPath((service, path)): UrlP
     }
 }
 
+// --- for views, through the app: HTTP to declared hosts, and completions (net.rs, llm.rs) ---
+
+async fn net_request(State(s): State<AppState>, headers: HeaderMap, body: Bytes) -> Result<Response, Response> {
+    app_only(&headers, &s).await?;
+    Ok(s.net.handle(&headers, body).await)
+}
+
+#[derive(Deserialize)]
+struct CompleteRequest {
+    prompt: String,
+    #[serde(default)]
+    json: bool,
+}
+
+#[derive(Serialize)]
+struct NoCompletion {
+    error: String,
+    tried: Vec<(crate::llm::ProviderId, String)>,
+}
+
+async fn llm_complete(State(s): State<AppState>, headers: HeaderMap, Json(req): Json<CompleteRequest>) -> Result<Response, Response> {
+    app_only(&headers, &s).await?;
+    Ok(match s.llm.complete(&req.prompt, req.json).await {
+        Ok(c) => Json(c).into_response(),
+        Err(tried) => {
+            let error = if tried.iter().all(|(_, why)| why == "not set up") { "no LLM provider is set up".to_owned() } else { "no LLM provider answered".to_owned() };
+            (StatusCode::SERVICE_UNAVAILABLE, Json(NoCompletion { error, tried })).into_response()
+        }
+    })
+}
+
+async fn llm_settings(State(s): State<AppState>, headers: HeaderMap) -> Result<Response, Response> {
+    app_only(&headers, &s).await?;
+    Ok(Json(s.llm.view()).into_response())
+}
+
+async fn llm_change(State(s): State<AppState>, headers: HeaderMap, Json(change): Json<SettingsChange>) -> Result<Response, Response> {
+    app_only(&headers, &s).await?;
+    s.llm.change(change).map(|v| Json(v).into_response()).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response())
+}
+
 // --- control: the embedding app's own UI (its token) or its web frontend served by this node (its own origin) ---
 
 /// Whether a request comes from a page this node served: its `Origin` is the address it was sent to, or, for a GET
@@ -694,6 +743,9 @@ pub fn app(state: AppState) -> Router {
         .route("/plugins", get(list_plugins))
         .route("/services", get(list_services))
         .route("/services/{service}/{*path}", any(proxy_service))
+        .route("/net", post(net_request))
+        .route("/llm/complete", post(llm_complete))
+        .route("/llm/settings", get(llm_settings).put(llm_change))
         .nest("/control", control)
         .fallback(get(app_file))
         .layer(middleware::from_fn_with_state(state.clone(), track_origin))

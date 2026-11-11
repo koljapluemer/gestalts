@@ -87,11 +87,13 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       case 'stateId': return `${c.gestalt}-${c.target}-${c.facet ?? ''}`;
       case 'contentHash': return Array.from(c.bytes).reduce((h, b) => (Math.imul(31, h) + b) | 0, 0).toString(16);
       case 'service': return { status: 503, contentType: 'text/plain', body: new TextEncoder().encode('no backend in a fixture') };
+      case 'net': case 'llm': throw new Error(`${c.op} isn't available in a fixture`);
+      case 'capabilities': return { net: false, llm: false };
       case 'setState': case 'setTitle': case 'openView': return null;
     }
   };
   return {
-    call: <C extends Call>(c: C) => Promise.resolve(perform(c) as Answers[C['op']]),
+    call: <C extends Call>(c: C) => { try { return Promise.resolve(perform(c) as Answers[C['op']]); } catch (e) { return Promise.reject(e); } },
     onDelta(sub, f) {
       const s = subs.get(sub);
       if (s) s.listener = f;

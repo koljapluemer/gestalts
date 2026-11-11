@@ -26,7 +26,7 @@ function readState(key: string): JsonMap {
 }
 
 function runnable(p: PluginEntry): RunnableView {
-  return { id: p.manifest.id, title: p.manifest.title, js: p.js, npm: p.npm, scope: { reads: p.manifest.reads ?? [], writes: p.manifest.writes ?? [] } };
+  return { id: p.manifest.id, title: p.manifest.title, js: p.js, npm: p.npm, scope: { reads: p.manifest.reads ?? [], writes: p.manifest.writes ?? [], network: p.manifest.network ?? [], llm: p.manifest.llm ?? false }, sameOrigin: p.sameOrigin };
 }
 
 const needsBackend = (p: PluginEntry) => (p.manifest.requires ?? []).includes('backend');
@@ -50,6 +50,14 @@ function ViewFrame({ registry, css, tab, hidden, navigate, setTitle }: {
   const [state] = useState(() => readState(key));
   const env = useMemo<ViewEnv>(() => ({
     service: plugin && needsBackend(plugin) ? serviceFor(repo, plugin.manifest.id) : undefined,
+    // these ask the node at call time, so connecting later is enough
+    net: (r) => repo.net(r),
+    llm: (r) => repo.llm(r),
+    capabilities: async () => {
+      if (!repo.hasNode()) return { net: false, llm: false };
+      const llm = await repo.llmSettings().then((s) => !!s?.providers.some((p) => p.configured), () => false);
+      return { net: true, llm };
+    },
     setState: (s) => { try { localStorage.setItem(key, JSON.stringify(s)); } catch { /* not remembered */ } },
     setTitle: (t) => setTitle(tab.id, t),
     openView: navigate,

@@ -9,7 +9,9 @@ use clap::Subcommand;
 use gestalts_fs::FsStorage;
 
 pub mod lan;
+pub mod llm;
 pub mod manifest;
+pub mod net;
 pub mod pairing;
 pub mod paths;
 pub mod plugins;

@@ -10,6 +10,12 @@ export type PluginManifest = {
   writes?: string[];
   tags?: string[];
   requires?: 'backend'[];
+  /** asks to run in the app's origin; only the distribution can grant it (`same_origin` in `distribution.yml`) */
+  frame?: 'same-origin';
+  /** hosts it may reach through the node, exactly */
+  network?: string[];
+  /** asks for completions from the user's LLM providers */
+  llm?: boolean;
 };
 
 /** One of a plugin's decks, as the build serves it: `source` is `<plugin>/<deck>`, `path` relative to the app. */
@@ -27,6 +33,8 @@ export type PluginEntry = {
   npm: string[];
   /** can't be uninstalled here */
   core: boolean;
+  /** its frame runs in the app's origin: it declared `frame: same-origin` and the distribution granted it */
+  sameOrigin: boolean;
 };
 
 /** `id`: whose tabs and data are whose, for good. */

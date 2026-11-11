@@ -16,6 +16,18 @@ export type ViewInit = {
 
 export type ServiceReply = { status: number; contentType: string; body: Uint8Array };
 
+/** HTTP through the app, to a host the view's manifest lists in `network`. */
+export type NetRequest = { url: string; method?: string; headers?: Record<string, string>; body?: string | Uint8Array };
+/** The remote's answer, whatever its status. A refusal by the app is an error instead. */
+export type NetReply = ServiceReply;
+
+/** A completion from the user's LLM providers; with `json`, the answer is a JSON text. */
+export type LlmRequest = { prompt: string; json?: boolean };
+export type LlmReply = { text: string; provider: string; model: string };
+
+/** What the view can use here and now: a manifest asks, but the app around it decides. */
+export type Capabilities = { net: boolean; llm: boolean };
+
 /** Everything a view can ask of its host. The host checks each against the view's `reads` and `writes`. */
 export type Call =
   | { op: 'query'; query: Query }
@@ -29,6 +41,9 @@ export type Call =
   | { op: 'stateId'; gestalt: string; target: string; facet?: string }
   | { op: 'contentHash'; bytes: Uint8Array }
   | { op: 'service'; path: string; method: string; body?: string | Uint8Array; contentType?: string }
+  | { op: 'net'; request: NetRequest }
+  | { op: 'llm'; request: LlmRequest }
+  | { op: 'capabilities' }
   | { op: 'setState'; state: JsonMap }
   | { op: 'setTitle'; title: string }
   | { op: 'openView'; view: string; params?: Record<string, string> };
@@ -46,6 +61,9 @@ export type Answers = {
   stateId: string;
   contentHash: string;
   service: ServiceReply;
+  net: NetReply;
+  llm: LlmReply;
+  capabilities: Capabilities;
   setState: null;
   setTitle: null;
   openView: null;

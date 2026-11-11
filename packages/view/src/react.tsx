@@ -1,6 +1,6 @@
 import { createContext, use, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { ViewHost } from './connection';
-import type { Call, ViewInit } from './protocol';
+import type { Call, Capabilities, LlmRequest, NetReply, NetRequest, ViewInit } from './protocol';
 import type { Item, Json, JsonMap, Page, Query } from './types';
 
 const SAVE_DELAY_MS = 300;
@@ -221,6 +221,36 @@ export function useService() {
     if (r.status >= 400) throw new Error(text || `the backend answered ${r.status}`);
     return JSON.parse(text) as T;
   }, [host]);
+}
+
+export type NetResponse = NetReply & { text(): string };
+
+/** HTTP to the hosts this view's manifest lists in `network`, through the app (so no CORS). Refusals throw. */
+export function useNet() {
+  const { host } = useContext_();
+  return useMemo(() => async (request: NetRequest): Promise<NetResponse> => {
+    const r = await host.call({ op: 'net', request });
+    return { ...r, text: () => new TextDecoder().decode(r.body) };
+  }, [host]);
+}
+
+/** A completion from the user's LLM providers (manifest: `llm: true`). Throws, saying why, when none answers. */
+export function useLlm() {
+  const { host } = useContext_();
+  return useMemo(() => (request: LlmRequest) => host.call({ op: 'llm', request }), [host]);
+}
+
+/** Whether `useNet` and `useLlm` work here; undefined until the app has said. */
+export function useCapabilities(): { capabilities: Capabilities | undefined; refresh: () => void } {
+  const { host } = useContext_();
+  const [capabilities, setCapabilities] = useState<Capabilities>();
+  const [round, setRound] = useState(0);
+  useEffect(() => {
+    let live = true;
+    host.call({ op: 'capabilities' }).then((c) => { if (live) setCapabilities(c); }, () => { if (live) setCapabilities({ net: false, llm: false }); });
+    return () => { live = false; };
+  }, [host, round]);
+  return { capabilities, refresh: useMemo(() => () => setRound((r) => r + 1), []) };
 }
 
 /** Who this view is, and what it can ask of the app around it. */

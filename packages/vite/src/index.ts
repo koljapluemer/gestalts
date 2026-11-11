@@ -17,8 +17,8 @@ const VIRTUAL = 'virtual:gestalts-plugins';
 const RESOLVED = '\0' + VIRTUAL;
 const SOURCES = /^@gestalts-sources;$/m;
 
-type Manifest = { id: string; title: string; version: string; requires?: string[] };
-type DistributionFile = { id?: unknown; core?: string[]; plugins?: string[]; default_views?: string[]; install_ui?: boolean };
+type Manifest = { id: string; title: string; version: string; requires?: string[]; frame?: string };
+type DistributionFile = { id?: unknown; core?: string[]; plugins?: string[]; default_views?: string[]; install_ui?: boolean; same_origin?: string[] };
 type PackageJson = { dependencies?: Record<string, string> };
 
 function dependencies(root: string): string[] {
@@ -90,7 +90,18 @@ function load(appRoot: string) {
     seen.add(p.id);
   }
   for (const v of file.default_views ?? []) if (!seen.has(v)) throw new Error(`default view ${v} is in no plugin of the distribution`);
-  return { distribution: { id: file.id, default_views: file.default_views ?? [], install_ui: file.install_ui ?? false }, plugins };
+  const granted = new Set(file.same_origin ?? []);
+  for (const id of granted) {
+    const p = plugins.find((x) => x.id === id);
+    if (!p) throw new Error(`same_origin: ${id} is in no plugin of the distribution`);
+    if (p.manifest.frame !== 'same-origin') throw new Error(`same_origin: ${id} doesn't ask for it (frame: same-origin in its plugin.yml)`);
+    // it runs as part of the app, so nothing it runs may come from elsewhere at run time
+    if (p.npm.length) throw new Error(`same_origin: ${id} imports npm packages (${p.npm.join(', ')}), which load from esm.sh at run time`);
+  }
+  return {
+    distribution: { id: file.id, default_views: file.default_views ?? [], install_ui: file.install_ui ?? false },
+    plugins: plugins.map((p) => ({ ...p, sameOrigin: granted.has(p.id) })),
+  };
 }
 
 /** Everything a frame loads, as one script and its styles. */
@@ -155,7 +166,7 @@ export function gestaltsPlugins(): PluginOption[] {
         this.addWatchFile(join(p.root, 'plugin.yml'));
         this.addWatchFile(join(p.root, 'view.tsx'));
         const decks = p.decks.map((d) => ({ id: d.id, title: d.title, source: `${p.id}/${d.id}`, path: `decks/${p.id}/${d.id}` }));
-        return { manifest: p.manifest, gestalts: p.gestalts, decks, js: p.js, npm: p.npm, core: p.core };
+        return { manifest: p.manifest, gestalts: p.gestalts, decks, js: p.js, npm: p.npm, core: p.core, sameOrigin: p.sameOrigin };
       });
       return `export const registry = ${JSON.stringify({ distribution, plugins: entries, runtime: await runtime })};\n`;
     },

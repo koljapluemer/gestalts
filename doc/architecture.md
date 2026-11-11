@@ -45,7 +45,10 @@ hand edit is no different from a write through the API.
 ## Views
 
 A view is one React file, run in `<iframe sandbox="allow-scripts">`: an opaque origin, with no access to the app's DOM
-or storage. Source views and vibecoded views run identically.
+or storage. Source views and vibecoded views run identically. Frames nested in it inherit the sandbox, so third-party
+embeds (a YouTube player) stay blank there. For those, the distribution can grant a view that asks for it
+(`frame: same-origin`) a frame with `allow-same-origin`: it then runs as part of the app. That is the exception, for
+first-party views that load nothing at run time; see [plugins.md](plugins.md).
 
 The frame loads nothing from the app's origin, because an opaque origin can't. The host sends everything over a
 `MessagePort`: one script holding React, the kit and learning (built by `@gestalts/vite`), the styles, and the view's
@@ -85,6 +88,8 @@ holding ymls without that marker is refused.
 | `/sync/{hashes,read,write}` | what syncing apps use; hashes are cached by file time and size |
 | `/blobs`, `/blobs/{name}`, `/blobs/collect` | |
 | `/services/{plugin}/{path}` | a plugin's backend |
+| `/net` | HTTP for a view, to hosts some plugin declares in `network` (the bridge checks the view's own list first) |
+| `/llm/complete`, `/llm/settings` | completions from the user's providers in their order; keys are kept in the node's config folder and never returned |
 | `/control/*` | the embedding app |
 
 Paired devices reach a subset over TLS on the home network.

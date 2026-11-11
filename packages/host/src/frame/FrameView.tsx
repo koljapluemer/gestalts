@@ -16,7 +16,14 @@ export type RunnableView = {
   js: string;
   npm: string[];
   scope: Scope;
+  /** runs in the app's origin (granted by the distribution), so frames it embeds work like on any website */
+  sameOrigin?: boolean;
 };
+
+const STRICT = 'allow-scripts allow-downloads';
+const SAME_ORIGIN = 'allow-scripts allow-same-origin allow-downloads';
+/** what a granted view's embeds (a video player) may use */
+const SAME_ORIGIN_ALLOW = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
 
 type Props = {
   repo: Repo;
@@ -57,6 +64,9 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
     }, STALLED_MS);
     const envProxy: ViewEnv = {
       service: latest.current.env.service && ((...a) => latest.current.env.service!(...a)),
+      net: latest.current.env.net && ((r) => latest.current.env.net!(r)),
+      llm: latest.current.env.llm && ((r) => latest.current.env.llm!(r)),
+      capabilities: latest.current.env.capabilities && (() => latest.current.env.capabilities!()),
       setState: (s) => latest.current.env.setState(s),
       setTitle: (t) => latest.current.env.setTitle(t),
       openView: (v, p) => latest.current.env.openView(v, p),
@@ -106,12 +116,15 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       bridge?.close();
       port?.close();
     };
-  }, [repo, view.id, view.title, view.js, view.npm, scopeKey, paramsKey, runtime, css, tailwind, initial]);
+  }, [repo, view.id, view.title, view.js, view.npm, view.sameOrigin, scopeKey, paramsKey, runtime, css, tailwind, initial]);
 
   return (
     <div className={`flex h-full w-full flex-col ${hidden ? 'hidden' : ''}`}>
       {failure && <div role="alert" className="alert alert-error rounded-none font-mono text-sm whitespace-pre-wrap">{view.title}: {failure}</div>}
-      <iframe ref={ref} title={view.title} sandbox="allow-scripts allow-downloads" className="block min-h-0 w-full flex-1 border-0 bg-base-100" />
+      {/* sandbox flags apply when a frame loads, so a change of mode is a new frame */}
+      <iframe key={view.sameOrigin ? 'same-origin' : 'strict'} ref={ref} title={view.title}
+              sandbox={view.sameOrigin ? SAME_ORIGIN : STRICT} allow={view.sameOrigin ? SAME_ORIGIN_ALLOW : undefined} allowFullScreen={view.sameOrigin}
+              className="block min-h-0 w-full flex-1 border-0 bg-base-100" />
     </div>
   );
 }

@@ -1,14 +1,20 @@
 import type { Live, Repo } from '@gestalts/client';
 import { stableId, stateId } from '@gestalts/client';
-import type { Answers, Call, Delta, Item, JsonMap, Query, ServiceReply } from '@gestalts/view';
+import type { Answers, Call, Capabilities, Delta, Item, JsonMap, LlmReply, LlmRequest, NetReply, NetRequest, Query, ServiceReply } from '@gestalts/view';
 
-/** What a view may touch: its `reads` and `writes`. */
-export type Scope = { reads: string[]; writes: string[] };
+/** What a view may touch: its `reads` and `writes`, the hosts it may reach, whether it may ask an LLM. */
+export type Scope = { reads: string[]; writes: string[]; network?: string[]; llm?: boolean };
 
 /** What the bridge needs of the app, beyond the repo. */
 export type ViewEnv = {
   /** this view's own backend; absent where there's none */
   service?: (path: string, method: string, body: string | Uint8Array | undefined, contentType: string | undefined) => Promise<ServiceReply>;
+  /** HTTP through the node; absent where there's none */
+  net?: (request: NetRequest) => Promise<NetReply>;
+  /** completions through the node; absent where there's none */
+  llm?: (request: LlmRequest) => Promise<LlmReply>;
+  /** what `net` and `llm` can do right now (a node connected, a provider set up) */
+  capabilities?: () => Promise<Capabilities>;
   setState(state: JsonMap): void;
   setTitle(title: string): void;
   openView(view: string, params?: Record<string, string>): void;
@@ -47,6 +53,14 @@ export class Bridge {
   private checkExisting(id: unknown) {
     const old: Item | undefined = typeof id === 'string' ? this.repo.get(id) : undefined;
     if (old) this.checkWrite(old.gestalt);
+  }
+
+  /** https to a host the manifest lists, nothing else: no other scheme, port or credentials. */
+  private checkNet(r: NetRequest) {
+    let url: URL;
+    try { url = new URL(r.url); } catch { throw new AccessError(`not a URL: ${r.url}`); }
+    if (url.protocol !== 'https:' || url.port || url.username || url.password) throw new AccessError(`only plain https URLs: ${r.url}`);
+    if (!(this.scope.network ?? []).includes(url.hostname)) throw new AccessError(`this view doesn't declare that it reaches ${url.hostname}`);
   }
 
   async handle<C extends Call>(c: C): Promise<Answers[C['op']]> {
@@ -92,6 +106,18 @@ export class Bridge {
       case 'service': {
         if (!this.env.service) throw new AccessError('this view has no backend here');
         return this.env.service(c.path, c.method, c.body, c.contentType);
+      }
+      case 'net':
+        this.checkNet(c.request);
+        if (!this.env.net) throw new AccessError('reaching the network needs the desktop app, which isn\'t connected here');
+        return this.env.net(c.request);
+      case 'llm':
+        if (!this.scope.llm) throw new AccessError('this view doesn\'t declare that it asks an LLM');
+        if (!this.env.llm) throw new AccessError('asking an LLM needs the desktop app, which isn\'t connected here');
+        return this.env.llm(c.request);
+      case 'capabilities': {
+        const c_ = (await this.env.capabilities?.()) ?? { net: false, llm: false };
+        return { net: c_.net && !!this.scope.network?.length, llm: c_.llm && !!this.scope.llm };
       }
       case 'setState': this.env.setState(c.state); return null;
       case 'setTitle': this.env.setTitle(c.title); return null;
