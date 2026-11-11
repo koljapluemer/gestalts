@@ -638,7 +638,7 @@ mod tests {
         let n = Yml::parse("n", "id: n\ngestalt: note@1\nmain: magnets attract\nrelationships: [{to: s, label: source p. 3}]\n");
         let edges = g.get("note@1").unwrap().edges(n.map().unwrap());
         assert_eq!(edges.len(), 1);
-        assert_eq!(edges[0].targets, vec!["note", "source"]);
+        assert_eq!(edges[0].targets, vec!["note", "source", "concept"]);
     }
 
     #[test]

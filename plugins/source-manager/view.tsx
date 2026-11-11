@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ClipboardPaste, Download, Pencil, Plus, Trash2, Unlink } from 'lucide-react';
-import { MarkdownEditor, Modal, NoteCard, NoteEditor } from '@gestalts/kit';
+import { MarkdownEditor, Modal, NoteCard, NoteEditor, bibJson, byline, clipboardText, freeKey, ingestBibtex, sourceTitle as titleOf } from '@gestalts/kit';
 import {
-  ENTRY_TYPES, FIELD_NAMES, FIELDS, bibOf, isEntryType, match, mergeSource, normalise, parseBibtex, renderBibtex, slug, titleWords,
-  type Bib, type Candidate, type EntryType, type FieldName, type MergeConflict,
+  ENTRY_TYPES, FIELD_NAMES, FIELDS, bibOf, isEntryType, mergeSource, normalise, parseBibtex, renderBibtex, slug,
+  type Bib, type EntryType, type FieldName, type MergeConflict,
 } from '@gestalts/sources';
-import { useCapabilities, useDoc, useQuery, useRead, useService, useViewState, useWrite, type Item, type JsonMap, type Query } from '@gestalts/view';
+import { useCapabilities, useDoc, useQuery, useRead, useService, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const SOURCE = 'source@1';
 const NOTE = 'note@1';
@@ -25,44 +25,6 @@ function useDebounced(value: string, ms: number) {
     return () => clearTimeout(t);
   }, [value, ms]);
   return settled;
-}
-
-/** "Hofstadter 1979", for telling sources apart in lists. */
-function byline(v: Record<string, unknown>): string {
-  const first = strings(v.author)[0] ?? strings(v.editor)[0] ?? '';
-  const family = first.includes(',') ? first.split(',')[0] : first;
-  return [family, str(v.date).slice(0, 4)].filter(Boolean).join(' ');
-}
-
-const titleOf = (v: Record<string, unknown>) => str(v.title) || str(v.key) || '(untitled)';
-
-// ---- reading and writing sources ----
-
-type Read = ReturnType<typeof useRead>;
-
-/** A key no other source has: `key`, else `key-2`, `key-3`, … */
-async function freeKey(read: Read, key: string, self?: string): Promise<string> {
-  for (let n = 1; ; n++) {
-    const candidate = n === 1 ? key : `${key}-${n}`;
-    const { items } = await read.page({ gestalt: SOURCE, where: { key: candidate }, fields: [], limit: 2 });
-    if (!items.some((i) => i.id !== self)) return candidate;
-  }
-}
-
-const json = (b: Bib): JsonMap => Object.fromEntries(Object.entries(b).filter(([, v]) => v !== undefined)) as JsonMap;
-
-/**
- * The existing sources a pasted one may be, without loading them all: those sharing an identifier, and those found by
- * the title's rarest-looking words, judged by `match`.
- */
-async function candidates(read: Read, bib: Bib): Promise<Candidate<Bib & { id: string }>[]> {
-  const queries: Query[] = [];
-  for (const f of ['doi', 'isbn', 'eprint'] as const) if (typeof bib[f] === 'string') queries.push({ gestalt: SOURCE, where: { [f]: bib[f] }, limit: 5 });
-  for (const w of titleWords(bib.title ?? '', 3)) queries.push({ gestalt: SOURCE, text: w, limit: 20 });
-  const pages = await Promise.all(queries.map((q) => read.page(q)));
-  const seen = new Map<string, Bib & { id: string }>();
-  for (const i of pages.flatMap((p) => p.items)) seen.set(i.id, { id: i.id, ...bibOf(i.value) });
-  return match(bib, [...seen.values()]);
 }
 
 // ---- the form ----
@@ -108,7 +70,7 @@ function sourceValue(id: string | undefined, bib: Bib, d: Draft, blobs: unknown)
   return {
     ...(id ? { id } : {}),
     gestalt: SOURCE,
-    ...json(bib),
+    ...bibJson(bib),
     ...(aliases.length ? { aliases } : {}),
     ...(tags.length ? { tags } : {}),
     ...(d.extra.trim() ? { extra: d.extra } : {}),
@@ -135,10 +97,6 @@ function FieldInput({ field, value, onChange }: { field: FieldName; value: strin
         : <input className="input input-sm w-full" inputMode={type === 'integer' ? 'numeric' : undefined} placeholder={HINT[type]} value={value} onChange={(e) => onChange(e.target.value)} />}
     </label>
   );
-}
-
-async function clipboardText(): Promise<string> {
-  try { return await navigator.clipboard.readText(); } catch { throw new Error("The clipboard can't be read here: press Ctrl+V instead."); }
 }
 
 /** Pasting BibTeX over a source: what it adds at once, and the differences to decide. */
@@ -469,8 +427,6 @@ function List({ selected, status, busy, onSelect, onNew, onPaste }: {
 
 type Pane = { kind: 'none' } | { kind: 'new' } | { kind: 'source'; id: string; incoming?: Bib; n: number };
 
-const quoted = (b: { title?: string; key: string }) => `'${b.title ?? b.key}'`;
-
 /**
  * BibTeX straight into the sources: each entry that is (likely) one already here fills in that one's missing fields,
  * every other entry becomes a new source. Says what it did; differences to decide open with that source.
@@ -484,30 +440,9 @@ function useIngest(open: (id: string, incoming?: Bib) => void) {
     setBusy(true);
     setStatus(undefined);
     try {
-      const said: string[] = [];
-      let ok = true;
-      let show: { id: string; incoming?: Bib } | undefined;
-      for (const raw of parseBibtex(text)) {
-        let bib: Bib;
-        try { bib = normalise({ ...raw }); } catch (e) { ok = false; said.push(`${raw.key}: ${message(e)}`); continue; }
-        const found = await candidates(read, bib);
-        const same = found.find((c) => c.level !== 'possible');
-        if (same) {
-          const item = (await read.page({ gestalt: SOURCE, ids: [same.source.id], limit: 1 })).items[0];
-          const r = mergeSource(bibOf(item.value), bib, []);
-          if (r.filled.length) await write.put({ ...item.value, ...json(r.value) });
-          said.push(`${quoted(r.value)} was here${r.filled.length ? `: filled ${r.filled.join(', ')}` : ''}${r.conflicts.length ? `; ${r.conflicts.length} to decide` : ''}.`);
-          if (r.conflicts.length) show = { id: item.id, incoming: bib };
-          else if (!show?.incoming) show = { id: item.id };
-        } else {
-          const key = await freeKey(read, bib.key);
-          const saved = await write.put({ gestalt: SOURCE, ...json({ ...bib, key }) });
-          said.push(`Added ${quoted(bib)}${found[0] ? ` (maybe the same as ${quoted(found[0].source)})` : ''}.`);
-          if (!show?.incoming) show = { id: saved.id };
-        }
-      }
-      setStatus({ ok, text: said.join(' ') });
-      if (show) open(show.id, show.incoming);
+      const r = await ingestBibtex(read, write, text);
+      setStatus({ ok: r.ok, text: r.said.join(' ') });
+      if (r.show) open(r.show.id, r.show.incoming);
     } catch (e) { setStatus({ ok: false, text: message(e) }); } finally { setBusy(false); }
   };
   return { ingest, status, busy, fail: (e: unknown) => setStatus({ ok: false, text: message(e) }) };

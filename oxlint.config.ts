@@ -4,7 +4,7 @@ import { defineConfig } from 'oxlint';
  * Who may import whom (eslint-plugin-boundaries):
  * - `@gestalts/view` (what a view gets from the app) imports nothing of ours; `@gestalts/learning` only the view package;
  *   `@gestalts/sources` nothing of ours.
- * - `@gestalts/kit` imports only the view package, in layers: primitives < components < widgets < perspectives.
+ * - `@gestalts/kit` imports only the view and sources packages, in layers: primitives < components < widgets < perspectives.
  * - a plugin's `view.tsx` imports only the view package, the kit (its index), learning and sources, never another plugin, the
  *   client or the host.
  * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit, learning and
@@ -27,7 +27,7 @@ const allowed: Record<string, string[]> = {
   learning: ['view'],
   sources: [],
   client: ['view'],
-  ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['view', ...below]])),
+  ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['view', 'sources', ...below]])),
   plugin: ['view', 'kit-index', 'learning', 'sources'],
   debug: ['client', 'view'],
   host: ['client', 'view', 'kit-index', 'learning', 'sources', 'debug'],

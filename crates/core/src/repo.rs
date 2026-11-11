@@ -311,10 +311,12 @@ mod tests {
     fn references_must_be_to_an_allowed_gestalt() {
         pollster::block_on(async {
             let r = repo();
+            r.put(parse_yaml("id: f\ngestalt: flashcard@1\nfront: q\n").unwrap()).await.unwrap();
             r.put(parse_yaml("id: c\ngestalt: concept@1\nname: x\n").unwrap()).await.unwrap();
             r.put(note("n", "")).await.unwrap();
-            assert!(r.put(note("m", "relationships: [{to: c, label: see}]\n")).await.is_err());
+            assert!(r.put(note("m", "relationships: [{to: f, label: see}]\n")).await.is_err());
             r.put(note("m", "relationships: [{to: n, label: see}]\n")).await.unwrap();
+            r.put(note("m", "relationships: [{to: c, label: sheds light on}]\n")).await.unwrap();
             r.put(note("dangling", "relationships: [{to: nowhere, label: see}]\n")).await.unwrap();
         });
     }

@@ -1,0 +1,7 @@
+id: concept-explorer
+version: 1.0.0
+title: Concept explorer
+description: >-
+  One concept at a time: collect what sheds light on it, as notes related to it, each with the sources it draws on.
+reads: [concept@1, note@1, source@1]
+writes: [concept@1, note@1, source@1]

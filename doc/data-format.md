@@ -55,7 +55,7 @@ Text merges by line, lists of references as sets, and everything else per key, c
 
 | Gestalt | |
 |---|---|
-| `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes and sources), `blobs`; all optional |
+| `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes, sources and concepts), `blobs`; all optional |
 | `concept@1` | `name`, `parents`, `children`: what larger things a yml trains, in any domain |
 | `concept-practice-event@1` | a `concept` came up through `origin` at `at`, with a `rating` from -2 to 2 |
 | `flashcard@1` | Markdown `front`; optional `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`) |
@@ -71,8 +71,8 @@ Text merges by line, lists of references as sets, and everything else per key, c
 deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
 the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
 
-A claim about a `source` is a note relating to it, labelled `source` by default; a locator goes in the label
-(`source p. 34`). Names in `author` and `editor` are `family, given` (`family, suffix, given`; without a comma, one
+A note relating to a `concept` says something about it, labelled `sheds light on` by default. A claim about a `source`
+is a note relating to it, labelled `source` by default; a locator goes in the label (`source p. 34`). Names in `author` and `editor` are `family, given` (`family, suffix, given`; without a comma, one
 name never split), and are a `list`, not a `string_list`, so their order survives a merge. `doi` is kept lowercase
 without a resolver prefix and `isbn` as ISBN-13 digits, so `where` finds a source by either. `@gestalts/sources`
 has the model, BibTeX in and out, duplicate finding and merging.

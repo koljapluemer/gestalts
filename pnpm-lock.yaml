@@ -136,6 +136,9 @@ importers:
       '@codemirror/view':
         specifier: 6.43.15
         version: 6.43.15
+      '@gestalts/sources':
+        specifier: workspace:*
+        version: link:../sources
       '@gestalts/view':
         specifier: workspace:*
         version: link:../view

@@ -12,13 +12,13 @@ crates/wasm       the core in the browser
 crates/device     a phone's folder and sync thread
 crates/node       the local server, watcher, backends, LAN pairing
 packages/view     @gestalts/view: everything a view gets from the app
-packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives)
+packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives); on view and sources
 packages/learning @gestalts/learning: FSRS, practice sessions
 packages/sources  @gestalts/sources: bibliographic sources, BibTeX in and out
 packages/client   the wasm-backed repo; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime
-plugins/          the views that live in source: notes, flashcards, sources
+plugins/          the views that live in source: notes, flashcards, sources, concepts
 sdk/python        gestalts_backend.py, what a backend.py imports
 ```
 
