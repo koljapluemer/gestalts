@@ -43,6 +43,12 @@ export type Fixture = ViewHost & {
   blobs: Map<string, Uint8Array>;
   /** the errors the view reported */
   errors: ViewError[];
+  /** where the view last put itself (`setParams`) */
+  params(): Record<string, string>;
+  /** the views it asked to show, in order */
+  opened: { view: string; params?: Record<string, string> }[];
+  /** moves the view elsewhere, as the app would */
+  move(params: Record<string, string>): void;
 };
 
 /** A host that holds `ymls` in memory, for running a view with no app around it: in a test, or in a bare iframe. */
@@ -56,6 +62,9 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
   };
   ymls.forEach(put);
   const blobs = new Map<string, Uint8Array>();
+  let params: Record<string, string> = {};
+  const opened: { view: string; params?: Record<string, string> }[] = [];
+  const moved = new Set<(p: Record<string, string>) => void>();
   const errors: ViewError[] = [];
   const subs = new Map<number, { query: Query; order: string[]; listener?: (d: Delta) => void }>();
   let nextSub = 1;
@@ -89,7 +98,10 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       case 'service': return { status: 503, contentType: 'text/plain', body: new TextEncoder().encode('no backend in a fixture') };
       case 'net': case 'llm': throw new Error(`${c.op} isn't available in a fixture`);
       case 'capabilities': return { net: false, llm: false, backend: false };
-      case 'setState': case 'setTitle': case 'openView': return null;
+      case 'setState': case 'setTitle': return null;
+      case 'setParams': params = c.params; return null;
+      // nothing else runs here to show
+      case 'openView': opened.push({ view: c.view, ...(c.params ? { params: c.params } : {}) }); return false;
     }
   };
   return {
@@ -99,9 +111,13 @@ export function fixtureHost(ymls: JsonMap[] = []): Fixture {
       if (s) s.listener = f;
       return () => { if (s) s.listener = undefined; };
     },
+    onParams(f) { moved.add(f); return () => { moved.delete(f); }; },
     report: (e) => { errors.push(e); },
     items: () => [...store.values()],
     blobs,
     errors,
+    params: () => params,
+    opened,
+    move(p) { params = p; moved.forEach((f) => f(p)); },
   };
 }

@@ -6,6 +6,8 @@ export interface ViewHost {
   call<C extends Call>(call: C): Promise<Answers[C['op']]>;
   /** Calls `f` with each delta of the live query `sub`. */
   onDelta(sub: number, f: (d: Delta) => void): () => void;
+  /** Calls `f` with the view's params each time the app moves it elsewhere. */
+  onParams(f: (params: Record<string, string>) => void): () => void;
   report(error: ViewError): void;
 }
 
@@ -16,6 +18,9 @@ export function connect(port: MessagePort): ViewHost {
   const listeners = new Map<number, (d: Delta) => void>();
   // a delta can arrive before `subscribe`'s reply has been handled
   const early = new Map<number, Delta[]>();
+  const moved = new Set<(params: Record<string, string>) => void>();
+  // a move can arrive before anything listens (while the view mounts): the last one is handed over then
+  let unheard: Record<string, string> | undefined;
   const send = (m: FromView) => port.postMessage(m);
   port.onmessage = (e: MessageEvent<ToView>) => {
     const m = e.data;
@@ -23,6 +28,11 @@ export function connect(port: MessagePort): ViewHost {
       const l = listeners.get(m.delta.sub);
       if (l) l(m.delta);
       else early.set(m.delta.sub, [...(early.get(m.delta.sub) ?? []), m.delta]);
+      return;
+    }
+    if (m.type === 'params') {
+      if (moved.size) moved.forEach((f) => f(m.params));
+      else unheard = m.params;
       return;
     }
     const w = waiting.get(m.id);
@@ -41,6 +51,11 @@ export function connect(port: MessagePort): ViewHost {
       early.get(sub)?.forEach(f);
       early.delete(sub);
       return () => { listeners.delete(sub); };
+    },
+    onParams(f) {
+      moved.add(f);
+      if (unheard) { f(unheard); unheard = undefined; }
+      return () => { moved.delete(f); };
     },
     report: (error) => send({ type: 'error', error }),
   };

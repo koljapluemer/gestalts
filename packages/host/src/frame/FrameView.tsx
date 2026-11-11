@@ -48,7 +48,12 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
   const latest = useRef({ env, onError });
   useEffect(() => { latest.current = { env, onError }; }, [env, onError]);
   const scopeKey = JSON.stringify(view.scope);
+  // where the view is: a new frame starts there; a running one is told when it's moved, not remade
   const paramsKey = JSON.stringify(params);
+  const latestParams = useRef(params);
+  useEffect(() => { latestParams.current = params; }, [params]);
+  /** the running view's port, and the params it has (as JSON) */
+  const live = useRef<{ post: (m: ToView) => void; params: string } | null>(null);
   // what the view starts from is fixed when its frame is made
   const initial = useMemo(() => state, [view.id, view.js]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -69,6 +74,10 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       capabilities: latest.current.env.capabilities && (() => latest.current.env.capabilities!()),
       setState: (s) => latest.current.env.setState(s),
       setTitle: (t) => latest.current.env.setTitle(t),
+      setParams: (p) => {
+        if (live.current) live.current.params = JSON.stringify(p);
+        latest.current.env.setParams(p);
+      },
       openView: (v, p) => latest.current.env.openView(v, p),
     };
     const onReady = (e: MessageEvent) => {
@@ -80,6 +89,8 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       const channel = new MessageChannel();
       port = channel.port1;
       const post = (m: ToView) => port?.postMessage(m);
+      const startAt = latestParams.current;
+      live.current = { post, params: JSON.stringify(startAt) };
       const b = new Bridge(repo, JSON.parse(scopeKey) as Scope, envProxy, (delta) => post({ type: 'delta', delta }));
       bridge = b;
       port.onmessage = (m: MessageEvent<FromView>) => {
@@ -104,7 +115,7 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       };
       frame.contentWindow?.postMessage({
         runtime: runtime.js, css: `${runtime.css}\n${css}`, tailwind, js: view.js, npm: view.npm,
-        init: { protocol: PROTOCOL, id: view.id, title: view.title, params: JSON.parse(paramsKey) as Record<string, string>, state: initial },
+        init: { protocol: PROTOCOL, id: view.id, title: view.title, params: startAt, state: initial },
       }, '*', [channel.port2]);
     };
     addEventListener('message', onReady);
@@ -113,10 +124,19 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       clearTimeout(stalled);
       setFailure(undefined);
       removeEventListener('message', onReady);
+      live.current = null;
       bridge?.close();
       port?.close();
     };
-  }, [repo, view.id, view.title, view.js, view.npm, view.sameOrigin, scopeKey, paramsKey, runtime, css, tailwind, initial]);
+  }, [repo, view.id, view.title, view.js, view.npm, view.sameOrigin, scopeKey, runtime, css, tailwind, initial]);
+
+  // moved from outside while running; its own moves come back equal and aren't echoed
+  useEffect(() => {
+    const l = live.current;
+    if (!l || l.params === paramsKey) return;
+    l.params = paramsKey;
+    l.post({ type: 'params', params: JSON.parse(paramsKey) as Record<string, string> });
+  }, [paramsKey]);
 
   return (
     <div className={`flex h-full w-full flex-col ${hidden ? 'hidden' : ''}`}>

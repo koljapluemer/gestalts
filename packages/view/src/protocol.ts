@@ -1,14 +1,17 @@
 import type { Delta, Item, Json, JsonMap, Page, Query } from './types';
 
 /** Bumped when a message below changes meaning. A view and the host that run it must agree. */
-export const PROTOCOL = 1;
+export const PROTOCOL = 2;
 
 /** What a view is told when it starts. */
 export type ViewInit = {
   protocol: number;
   id: string;
   title: string;
-  /** set by whoever opened it */
+  /**
+   * Where it is, like a URL: set by whoever opened it, by the view itself (`setParams`), or by another view moving it
+   * (`openView`). It changes while the view runs.
+   */
   params: Record<string, string>;
   /** what it last saved with `useViewState` */
   state: JsonMap;
@@ -49,6 +52,8 @@ export type Call =
   | { op: 'capabilities' }
   | { op: 'setState'; state: JsonMap }
   | { op: 'setTitle'; title: string }
+  | { op: 'setParams'; params: Record<string, string> }
+  /** shows `view`: its most recent tab, moved to `params` if given, else a new one */
   | { op: 'openView'; view: string; params?: Record<string, string> };
 
 /** What each call answers. */
@@ -69,7 +74,9 @@ export type Answers = {
   capabilities: Capabilities;
   setState: null;
   setTitle: null;
-  openView: null;
+  setParams: null;
+  /** whether the app showed it: an app may not have that view */
+  openView: boolean;
 };
 
 export type ViewError = { kind: 'error' | 'rejection' | 'render' | 'console' | 'compile'; message: string; stack?: string; at: string };
@@ -83,4 +90,6 @@ export type FromView =
 export type ToView =
   | { type: 'reply'; id: number; ok: true; value: Json | Uint8Array | object }
   | { type: 'reply'; id: number; ok: false; error: string }
-  | { type: 'delta'; delta: Delta };
+  | { type: 'delta'; delta: Delta }
+  /** the view was moved elsewhere (`openView` from another view, or the app) */
+  | { type: 'params'; params: Record<string, string> };

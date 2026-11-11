@@ -18,12 +18,27 @@ class SavedState {
   }
 }
 
-type Context = { host: ViewHost; init: ViewInit; blobs: Map<string, Promise<string | null>>; saved: SavedState };
+type Params = Record<string, string>;
+
+/** Where this view is: what it started at, then each move by the app and by the view itself. */
+class Location {
+  private listeners = new Set<() => void>();
+  constructor(private host: ViewHost, private params: Params) {}
+  get = () => this.params;
+  subscribe = (l: () => void) => { this.listeners.add(l); return () => { this.listeners.delete(l); }; };
+  /** moved by the app */
+  moved = (params: Params) => { this.params = params; this.listeners.forEach((l) => l()); };
+  /** moved by the view: the app keeps it, so a reload comes back here */
+  set = (params: Params) => { this.moved(params); void this.host.call({ op: 'setParams', params }); };
+}
+
+type Context = { host: ViewHost; init: ViewInit; blobs: Map<string, Promise<string | null>>; saved: SavedState; location: Location };
 const ViewContext = createContext<Context | null>(null);
 
 /** What a view runs inside; the runtime (or a test) provides it. */
 export function ViewProvider({ host, init, children }: { host: ViewHost; init: ViewInit; children: ReactNode }) {
-  const value = useMemo(() => ({ host, init, blobs: new Map(), saved: new SavedState(host, init.state) }), [host, init]);
+  const value = useMemo(() => ({ host, init, blobs: new Map(), saved: new SavedState(host, init.state), location: new Location(host, init.params) }), [host, init]);
+  useEffect(() => host.onParams(value.location.moved), [host, value]);
   return <ViewContext value={value}>{children}</ViewContext>;
 }
 
@@ -233,6 +248,16 @@ export function useViewState<T extends Json>(key: string, initial: T): [T, (valu
   return [value, set];
 }
 
+/**
+ * Where this view is, like a URL: what it shows that another view could send it to (`openView`), kept across reloads.
+ * It changes when the app moves the view, and with the setter. What isn't a place (a search box) belongs in
+ * `useViewState`.
+ */
+export function useParams(): [Params, (params: Params) => void] {
+  const { location } = useContext_();
+  return [useSyncExternalStore(location.subscribe, location.get), location.set];
+}
+
 /** This plugin's `backend.py`, where the app has one. `path` as in its routes. */
 export function useService() {
   const { host } = useContext_();
@@ -281,8 +306,8 @@ export function useHost() {
   return useMemo(() => ({
     id: init.id,
     title: init.title,
-    params: init.params,
     setTitle: (title: string) => { void host.call({ op: 'setTitle', title }); },
-    openView: (view: string, params?: Record<string, string>) => { void host.call({ op: 'openView', view, params }); },
+    /** Shows `view` (its most recent tab, moved to `params` if given); whether the app could, as it may lack that view. */
+    openView: (view: string, params?: Params): Promise<boolean> => host.call({ op: 'openView', view, ...(params ? { params } : {}) }),
   }), [host, init]);
 }

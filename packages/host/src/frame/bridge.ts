@@ -17,8 +17,19 @@ export type ViewEnv = {
   capabilities?: () => Promise<Capabilities>;
   setState(state: JsonMap): void;
   setTitle(title: string): void;
-  openView(view: string, params?: Record<string, string>): void;
+  /** where the view put itself, kept so it comes back there */
+  setParams(params: Record<string, string>): void;
+  /** shows `view`; whether the app could */
+  openView(view: string, params?: Record<string, string>): boolean;
 };
+
+/** Params are a flat map of strings, like a URL's query; anything else is refused before it's kept. */
+function checkParams(params: unknown): Record<string, string> {
+  if (!params || typeof params !== 'object' || Array.isArray(params) || !Object.values(params).every((v) => typeof v === 'string')) {
+    throw new AccessError('params are a map of strings');
+  }
+  return params as Record<string, string>;
+}
 
 export class AccessError extends Error {}
 
@@ -121,7 +132,8 @@ export class Bridge {
       }
       case 'setState': this.env.setState(c.state); return null;
       case 'setTitle': this.env.setTitle(c.title); return null;
-      case 'openView': this.env.openView(c.view, c.params); return null;
+      case 'setParams': this.env.setParams(checkParams(c.params)); return null;
+      case 'openView': return this.env.openView(c.view, c.params === undefined ? undefined : checkParams(c.params));
     }
   }
 

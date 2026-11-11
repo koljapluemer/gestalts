@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { closeTab, moveBefore, openTab, parseTabs, serializeTabs, type Tab } from './tabs';
+import { closeTab, moveBefore, openTab, parseTabs, routeTo, serializeTabs, type Tab } from './tabs';
 
 const tab = (id: string, view = 'note-crud'): Tab => ({ id, view, params: {} });
 const ids = (tabs: Tab[]) => tabs.map((t) => t.id);
@@ -48,5 +48,27 @@ describe('tab actions', () => {
     expect(ids(moveBefore(tabs, 'a', null))).toEqual(['b', 'c', 'a']);
     expect(ids(moveBefore(tabs, 'a', 'c'))).toEqual(['b', 'a', 'c']);
     expect(moveBefore(tabs, 'a', 'a')).toBe(tabs);
+  });
+});
+
+describe('showing a view from another', () => {
+  const tabs = [tab('a'), tab('q', 'note-queue'), tab('b')];
+
+  it('moves its most recently active tab there, leaving the others be', () => {
+    const r = routeTo(tabs, ['q', 'b', 'a'], 'note-crud', { note: 'n' });
+    expect(r.id).toBe('b');
+    expect(r.tabs.map((t) => t.params)).toEqual([{}, {}, { note: 'n' }]);
+  });
+
+  it('takes its first tab when none was active lately, and keeps where it is without params', () => {
+    const r = routeTo(tabs, ['q'], 'note-crud');
+    expect(r.id).toBe('a');
+    expect(r.tabs).toBe(tabs);
+  });
+
+  it('opens a tab when there is none', () => {
+    const r = routeTo(tabs, [], 'quick-note', { x: '1' });
+    expect(ids(r.tabs)).toEqual(['a', 'q', 'b', r.id]);
+    expect(r.tabs.at(-1)).toMatchObject({ view: 'quick-note', params: { x: '1' } });
   });
 });

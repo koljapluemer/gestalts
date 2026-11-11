@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ClipboardPaste } from 'lucide-react';
 import { bibOf, match, mergeSource, normalise, parseBibtex, titleWords, type Bib, type Candidate } from '@gestalts/sources';
 import { useQuery, useRead, useWrite, type JsonMap, type Query } from '@gestalts/view';
+import { Modal } from '../components';
+import { useDebounced } from '../primitives';
 
 /** Bibliographic sources (`source@1`) for any view: BibTeX pasted in without duplicates, and finding one. */
 
 const SOURCE = 'source@1';
+/** how a note relates to a source it draws on, unless it says more (a locator: `source p. 34`) */
+export const SOURCE_LABEL = 'source';
 
 type Read = ReturnType<typeof useRead>;
 type Write = ReturnType<typeof useWrite>;
@@ -101,14 +105,6 @@ export async function ingestBibtex(read: Read, write: Write, text: string): Prom
   return { ok, said, ids, show };
 }
 
-function useDebounced(value: string, ms: number) {
-  const [settled, setSettled] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return settled;
-}
 
 /** A box to paste BibTeX into (or take it from the clipboard): each entry becomes a source, or finds the one here. */
 export function BibtexPaste({ onIngested }: { onIngested: (r: Ingested) => void }) {
@@ -163,5 +159,26 @@ export function SourceSearch({ exclude, onPick, placeholder = 'Find a source…'
       ))}
       {text && !loading && !found.length && <p className="px-2 text-sm text-base-content/60">Nothing found.</p>}
     </div>
+  );
+}
+
+/**
+ * Picking sources for something to draw on, in a modal: one you have, or new ones from pasted BibTeX. `attached` are
+ * left out of the search; `onAdd` gets the ids picked.
+ */
+export function AddSource({ attached, onAdd, onClose }: { attached: Set<string>; onAdd: (ids: string[]) => void; onClose: () => void }) {
+  return (
+    <Modal onClose={onClose}>
+      <div className="flex flex-col gap-4 p-4 pt-0">
+        <section className="flex flex-col gap-2">
+          <h3 className="text-sm font-semibold">A source you have</h3>
+          <SourceSearch exclude={attached} onPick={(id) => onAdd([id])} />
+        </section>
+        <section className="flex flex-col gap-2">
+          <h3 className="text-sm font-semibold">A new one, from BibTeX</h3>
+          <BibtexPaste onIngested={(r) => onAdd(r.ids)} />
+        </section>
+      </div>
+    </Modal>
   );
 }

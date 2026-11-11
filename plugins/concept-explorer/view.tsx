@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
-import { BibtexPaste, Modal, SourceSearch, byline, sourceTitle } from '@gestalts/kit';
+import { AddSource, Modal, SOURCE_LABEL, byline, sourceTitle, useDebounced } from '@gestalts/kit';
 import { useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const CONCEPT = 'concept@1';
@@ -8,7 +8,6 @@ const NOTE = 'note@1';
 const SOURCE = 'source@1';
 /** how a note relates to the concept unless the user says otherwise */
 const LABEL = 'sheds light on';
-const SOURCE_LABEL = 'source';
 const SAVE_AFTER_MS = 500;
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -23,15 +22,6 @@ function newId(): string {
   b[8] = (b[8] & 0x3f) | 0x80;
   const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
-
-function useDebounced(value: string, ms: number) {
-  const [settled, setSettled] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return settled;
 }
 
 type Relationship = { to: string; label: string };
@@ -124,23 +114,6 @@ function Sources({ relationships, concept, onChange, onError }: {
         </li>
       ))}
     </ul>
-  );
-}
-
-function AddSource({ attached, onAdd, onClose }: { attached: Set<string>; onAdd: (ids: string[]) => void; onClose: () => void }) {
-  return (
-    <Modal onClose={onClose}>
-      <div className="flex flex-col gap-4 p-4 pt-0">
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">A source you have</h3>
-          <SourceSearch exclude={attached} onPick={(id) => onAdd([id])} />
-        </section>
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">A new one, from BibTeX</h3>
-          <BibtexPaste onIngested={(r) => onAdd(r.ids)} />
-        </section>
-      </div>
-    </Modal>
   );
 }
 

@@ -4,7 +4,7 @@ import type { Delta, Item, JsonMap } from '@gestalts/view';
 vi.mock('@gestalts/client', () => ({ stableId: () => 's', stateId: () => 't', contentHash: () => 'h' }));
 const { AccessError, Bridge } = await import('./bridge');
 
-const env = { setState: () => {}, setTitle: () => {}, openView: () => {} };
+const env = { setState: () => {}, setTitle: () => {}, setParams: () => {}, openView: () => false };
 
 function setup(existing: Item[] = []) {
   const stops: number[] = [];
@@ -93,5 +93,20 @@ describe('the bridge', () => {
     expect(out[0].sub).toBe(sub);
     bridge.close();
     expect(stops).toHaveLength(1);
+  });
+
+  it('keeps where a view put itself only as a map of strings, and says whether another view showed', async () => {
+    const moves: Record<string, string>[] = [];
+    const opened: string[] = [];
+    const withTabs = { ...env, setParams: (p: Record<string, string>) => moves.push(p), openView: (v: string) => { opened.push(v); return v === 'note-crud'; } };
+    const bridge = new Bridge({} as never, { reads: [], writes: [] }, withTabs, () => {});
+    await bridge.handle({ op: 'setParams', params: { note: 'n' } });
+    await expect(bridge.handle({ op: 'setParams', params: { note: 3 } as never })).rejects.toBeInstanceOf(AccessError);
+    await expect(bridge.handle({ op: 'setParams', params: null as never })).rejects.toBeInstanceOf(AccessError);
+    expect(moves).toEqual([{ note: 'n' }]);
+    await expect(bridge.handle({ op: 'openView', view: 'note-crud', params: { note: 'n' } })).resolves.toBe(true);
+    await expect(bridge.handle({ op: 'openView', view: 'elsewhere' })).resolves.toBe(false);
+    await expect(bridge.handle({ op: 'openView', view: 'note-crud', params: ['x'] as never })).rejects.toBeInstanceOf(AccessError);
+    expect(opened).toEqual(['note-crud', 'elsewhere']);
   });
 });

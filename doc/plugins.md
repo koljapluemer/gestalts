@@ -46,6 +46,22 @@ A view imports `react`, `lucide-react`, `@gestalts/view`, `@gestalts/kit`, `@ges
 and any npm package.
 There are no local imports. `plugins/note-queue/view.tsx` is a short real one.
 
+## Where a view is
+
+A view's params are where it is, like a URL: what it shows that someone else could send it to. `useParams()` gives them
+and a setter; the app keeps them with the tab, so a reload comes back there. What isn't a place (a search box, a
+draft) belongs in `useViewState`.
+
+`useHost().openView(view, params)` shows another view: its most recently used tab, moved to `params`, else a new tab.
+It answers whether the app could, since an app may not have that view (a preview has none). Notes takes `note` (an id)
+and `edit=1`, so Quick note's Save and Edit is:
+
+```tsx
+await openView('note-crud', { note: id, edit: '1' });
+```
+
+Params are strings. A view that takes them says which in its doc comment.
+
 ## Backends
 
 `backend.py` is one file with PEP 723 inline metadata; the node gives it an environment through uv.

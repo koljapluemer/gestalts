@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
-import { NoteCard, NoteEditor } from '@gestalts/kit';
-import { useDoc, useQuery, useViewState, useWrite, type Item } from '@gestalts/view';
+import { NoteCard, NoteEditor, useDebounced } from '@gestalts/kit';
+import { useDoc, useParams, useQuery, useViewState, useWrite, type Item } from '@gestalts/view';
 
 const LIST_FIELDS = ['title', 'main'];
 const PAGE = 40;
@@ -11,15 +11,6 @@ function firstLine(n: Item): string {
   if (typeof title === 'string' && title) return title;
   if (typeof main === 'string' && main.trim()) return main.trim().split('\n')[0];
   return '(empty)';
-}
-
-function useDebounced(value: string, ms: number) {
-  const [settled, setSettled] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return settled;
 }
 
 function List({ selected, onSelect, onNew }: { selected: string | null; onSelect: (id: string) => void; onNew: () => void }) {
@@ -53,13 +44,11 @@ function List({ selected, onSelect, onNew }: { selected: string | null; onSelect
   );
 }
 
-function Detail({ id, onBack, onDeleted }: { id: string; onBack: () => void; onDeleted: () => void }) {
+function Detail({ id, onBack, onEdit, onDeleted }: { id: string; onBack: () => void; onEdit: () => void; onDeleted: () => void }) {
   const note = useDoc('note@1', id);
   const write = useWrite();
-  const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string>();
   if (!note) return null;
-  if (editing) return <div className="h-full overflow-y-auto"><NoteEditor key={note.id} note={note} onDone={() => setEditing(false)} /></div>;
   const remove = () => {
     if (confirm('Delete this note?')) write.remove(note.id).then(onDeleted, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
   };
@@ -68,7 +57,7 @@ function Detail({ id, onBack, onDeleted }: { id: string; onBack: () => void; onD
       <div className="flex gap-1 border-b border-base-300 p-2">
         <button type="button" className="btn btn-sm btn-ghost md:hidden" onClick={onBack}><ArrowLeft className="size-4" /></button>
         <span className="flex-1" />
-        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setEditing(true)}><Pencil className="size-4" /> Edit</button>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={onEdit}><Pencil className="size-4" /> Edit</button>
         <button type="button" className="btn btn-sm btn-ghost" onClick={remove}><Trash2 className="size-4" /> Delete</button>
       </div>
       {error && <div role="alert" className="alert alert-error m-2 text-sm">{error}</div>}
@@ -77,19 +66,32 @@ function Detail({ id, onBack, onDeleted }: { id: string; onBack: () => void; onD
   );
 }
 
-/** On a phone, the list or the note; on anything wider, side by side. */
+/** The note `id` in the editor, once it's loaded. */
+function Editing({ id, onDone }: { id: string; onDone: (saved?: Item) => void }) {
+  const note = useDoc('note@1', id);
+  if (!note) return null;
+  return <div className="h-full overflow-y-auto"><NoteEditor note={note} onDone={onDone} /></div>;
+}
+
+/**
+ * On a phone, the list or the note; on anything wider, side by side. Where it is is its params (so another view can
+ * send it to a note): `note`, the note shown, and `edit=1` to edit it, or to write a new one without `note`.
+ */
 export default function NoteCrud() {
-  const [selected, setSelected] = useViewState<string | null>('selected', null);
-  const [creating, setCreating] = useState(false);
-  const showDetail = selected !== null || creating;
+  const [params, setParams] = useParams();
+  const selected = params.note ?? null;
+  const editing = params.edit === '1';
+  const show = (note: string | null, edit = false) => setParams({ ...(note ? { note } : {}), ...(edit ? { edit: '1' } : {}) });
+  const done = (saved?: Item) => show(saved?.id ?? selected);
   return (
     <div className="flex h-full bg-base-100">
-      <div className={`h-full w-full border-base-300 md:w-80 md:shrink-0 md:border-r ${showDetail ? 'hidden md:block' : ''}`}>
-        <List selected={selected} onSelect={(id) => { setCreating(false); setSelected(id); }} onNew={() => { setSelected(null); setCreating(true); }} />
+      <div className={`h-full w-full border-base-300 md:w-80 md:shrink-0 md:border-r ${selected || editing ? 'hidden md:block' : ''}`}>
+        <List selected={selected} onSelect={(id) => show(id)} onNew={() => show(null, true)} />
       </div>
-      <div className={`h-full min-w-0 flex-1 ${showDetail ? '' : 'hidden md:block'}`}>
-        {creating && <div className="h-full overflow-y-auto"><NoteEditor onDone={(saved) => { setCreating(false); if (saved) setSelected(saved.id); }} /></div>}
-        {!creating && selected && <Detail key={selected} id={selected} onBack={() => setSelected(null)} onDeleted={() => setSelected(null)} />}
+      <div className={`h-full min-w-0 flex-1 ${selected || editing ? '' : 'hidden md:block'}`}>
+        {editing && !selected && <div className="h-full overflow-y-auto"><NoteEditor onDone={done} /></div>}
+        {editing && selected && <Editing key={selected} id={selected} onDone={done} />}
+        {!editing && selected && <Detail key={selected} id={selected} onBack={() => show(null)} onEdit={() => show(selected, true)} onDeleted={() => show(null)} />}
       </div>
     </div>
   );

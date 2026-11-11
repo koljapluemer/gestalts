@@ -6,7 +6,7 @@ import { FrameView, type RunnableView } from './frame/FrameView';
 import type { ViewEnv } from './frame/bridge';
 import { useInstalled } from './installs';
 import { findPlugin, type PluginEntry, type Registry } from './registry';
-import { closeTab, moveBefore, openTab, useTabs, type Tab } from './tabs';
+import { closeTab, moveBefore, openTab, routeTo, useTabs, withParams, type Tab } from './tabs';
 
 const subscribeUrl = (l: () => void) => { addEventListener('popstate', l); addEventListener('gestalts:url', l); return () => { removeEventListener('popstate', l); removeEventListener('gestalts:url', l); }; };
 const useTabParam = () => useSyncExternalStore(subscribeUrl, () => new URLSearchParams(location.search).get('tab'));
@@ -40,9 +40,11 @@ function serviceFor(repo: Repo, plugin: string): ViewEnv['service'] {
   };
 }
 
-function ViewFrame({ registry, css, tab, hidden, navigate, setTitle }: {
+type Navigate = (view: string, params?: Record<string, string>) => boolean;
+
+function ViewFrame({ registry, css, tab, hidden, navigate, setTitle, setParams }: {
   registry: Registry; css: string; tab: Tab; hidden: boolean;
-  navigate: (view: string, params?: Record<string, string>) => void; setTitle: (id: string, title: string) => void;
+  navigate: Navigate; setTitle: (id: string, title: string) => void; setParams: (id: string, params: Record<string, string>) => void;
 }) {
   const repo = useHostRepo();
   const plugin = findPlugin(registry, tab.view);
@@ -64,8 +66,9 @@ function ViewFrame({ registry, css, tab, hidden, navigate, setTitle }: {
     },
     setState: (s) => { try { localStorage.setItem(key, JSON.stringify(s)); } catch { /* not remembered */ } },
     setTitle: (t) => setTitle(tab.id, t),
+    setParams: (p) => setParams(tab.id, p),
     openView: navigate,
-  }), [repo, plugin, key, tab.id, setTitle, navigate]);
+  }), [repo, plugin, key, tab.id, setTitle, setParams, navigate]);
   const view = useMemo(() => (plugin ? runnable(plugin) : undefined), [plugin]);
   if (!view) return <p className="p-8 text-center text-base-content/60">This view (<code>{tab.view}</code>) isn't in this app.</p>;
   return <FrameView repo={repo} view={view} runtime={registry.runtime} css={css} params={tab.params} state={state} env={env} hidden={hidden} />;
@@ -92,11 +95,6 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
     setTabs(r.tabs);
     selectTab(r.id);
   }, [tabs, setTabs]);
-  const navigate = useCallback((view: string, params?: Record<string, string>) => {
-    const existing = !params && tabs.find((t) => t.view === view);
-    if (existing) selectTab(existing.id);
-    else open(view, params);
-  }, [tabs, open]);
   const close = (t: Tab) => {
     const r = closeTab(tabs, t.id);
     setTabs(r.tabs);
@@ -111,6 +109,19 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
     return up === undefined ? 'missing' : up ? 'ok' : 'down';
   };
   const offered = installed.filter((p) => availability(p) !== 'missing');
+  /** a view asked to show `view` (moved to `params`): in its most recent tab, else a new one; not if it can't run here */
+  const navigate = useCallback<Navigate>((view, params) => {
+    const p = installed.find((x) => x.manifest.id === view);
+    if (!p || availability(p) !== 'ok') return false;
+    const r = routeTo(tabs, recent, view, params);
+    setTabs(r.tabs);
+    selectTab(r.id);
+    return true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `availability` reads `services`
+  }, [tabs, recent, installed, services, setTabs]);
+  const setParams = useCallback((id: string, params: Record<string, string>) => {
+    setTabs((now) => (JSON.stringify(now.find((t) => t.id === id)?.params) === JSON.stringify(params) ? now : withParams(now, id, params)));
+  }, [setTabs]);
   const alive = tabs.filter((t) => recent.includes(t.id) && installed.some((p) => p.manifest.id === t.view));
 
   return (
@@ -143,7 +154,7 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
         {end}
       </nav>
       <main className="min-h-0 flex-1">
-        {active ? alive.map((t) => <ViewFrame key={t.id} registry={registry} css={css} tab={t} hidden={t.id !== active.id} navigate={navigate} setTitle={setTitle} />)
+        {active ? alive.map((t) => <ViewFrame key={t.id} registry={registry} css={css} tab={t} hidden={t.id !== active.id} navigate={navigate} setTitle={setTitle} setParams={setParams} />)
           : <p className="p-8 text-center text-base-content/60">Open a view with +.</p>}
       </main>
     </div>
@@ -152,7 +163,11 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
 
 /** One view alone, for apps that show one at a time. */
 export function SingleView({ registry, css, view }: { registry: Registry; css: string; view: string }) {
-  const tab = useMemo<Tab>(() => ({ id: `single-${view}`, view, params: {} }), [view]);
+  const [params, setParams] = useState<Record<string, string>>({});
+  const tab = useMemo<Tab>(() => ({ id: `single-${view}`, view, params }), [view, params]);
   const noop = useCallback(() => {}, []);
-  return <ViewFrame key={view} registry={registry} css={css} tab={tab} hidden={false} navigate={noop} setTitle={noop} />;
+  // there's nowhere else to show
+  const navigate = useCallback(() => false, []);
+  const move = useCallback((_id: string, p: Record<string, string>) => setParams(p), []);
+  return <ViewFrame key={view} registry={registry} css={css} tab={tab} hidden={false} navigate={navigate} setTitle={noop} setParams={move} />;
 }

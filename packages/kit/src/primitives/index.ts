@@ -6,3 +6,4 @@ export { Markdown } from './Markdown';
 export { inCodeOrMath, insertReference, referenceAt, referenceCompletion, referenceLinks, type ReferenceCandidate } from './markdownCompletion';
 export { embedKind, escapeHtml, mathAt, references, renderMarkdown, type EmbedKind } from './markdown';
 export { MarkdownEditor } from './MarkdownEditor';
+export { useDebounced } from './useDebounced';

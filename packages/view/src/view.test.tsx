@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { connect } from './connection';
 import { fixtureHost } from './fixture';
+import type { ToView } from './protocol';
 
 const note = (id: string, extra = {}) => ({ id, gestalt: 'note@1', ...extra });
 
@@ -44,5 +46,35 @@ describe('compile', () => {
     expect(compile("import './x';\nexport default () => null;").ok).toBe(false);
     expect(compile('export const a = 1;').ok).toBe(false);
     expect(compile('export default (').ok).toBe(false);
+  });
+});
+
+describe('where a view is', () => {
+  it('hears each move, and the last one made before it listened', async () => {
+    const { port1, port2 } = new MessageChannel();
+    const host = connect(port1);
+    const send = (m: ToView) => port2.postMessage(m);
+    const tick = () => new Promise((r) => setTimeout(r, 0));
+    send({ type: 'params', params: { note: 'a' } });
+    send({ type: 'params', params: { note: 'b' } });
+    await tick();
+    const heard: string[] = [];
+    const stop = host.onParams((p) => heard.push(p.note));
+    send({ type: 'params', params: { note: 'c' } });
+    await tick();
+    stop();
+    send({ type: 'params', params: { note: 'd' } });
+    await tick();
+    expect(heard).toEqual(['b', 'c']);
+    port1.close();
+    port2.close();
+  });
+
+  it('is kept by a fixture, which shows nothing else', async () => {
+    const h = fixtureHost();
+    await h.call({ op: 'setParams', params: { note: 'n' } });
+    expect(h.params()).toEqual({ note: 'n' });
+    await expect(h.call({ op: 'openView', view: 'note-crud', params: { note: 'n' } })).resolves.toBe(false);
+    expect(h.opened).toEqual([{ view: 'note-crud', params: { note: 'n' } }]);
   });
 });

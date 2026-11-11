@@ -62,7 +62,9 @@ the frame. A sandboxed frame isn't a secure context, so anything needing `crypto
 
 `@gestalts/view` also has `fixtureHost`: a view runs against that with no app around it.
 
-Recently used tabs stay alive hidden, fewer on a phone. A view unloaded from memory restores through `useViewState`.
+Recently used tabs stay alive hidden, fewer on a phone. A view unloaded from memory restores through `useViewState`,
+and comes back where it was through its params, which its tab keeps. Views never talk to each other: one asks the app
+to show another somewhere (`openView`), and the app moves that view there (a `params` message, no reload).
 
 ## Plugins
 

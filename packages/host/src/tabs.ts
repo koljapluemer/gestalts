@@ -45,6 +45,22 @@ export function openTab(tabs: Tab[], view: string, params: Record<string, string
   return { tabs: [...tabs, { id, view, params }], id };
 }
 
+/** Tab `id` moved to `params`. */
+export function withParams(tabs: Tab[], id: string, params: Record<string, string>): Tab[] {
+  return tabs.map((t) => (t.id === id ? { ...t, params } : t));
+}
+
+/**
+ * Where showing `view` lands: its tab active most recently (`recent`, most recent first; else its first one), moved to
+ * `params` if given; without a tab of `view`, a new one at the end.
+ */
+export function routeTo(tabs: Tab[], recent: string[], view: string, params?: Record<string, string>): { tabs: Tab[]; id: string } {
+  const own = tabs.filter((t) => t.view === view);
+  const target = own.map((t) => ({ t, rank: recent.indexOf(t.id) })).filter((x) => x.rank >= 0).sort((a, b) => a.rank - b.rank)[0]?.t ?? own[0];
+  if (!target) return openTab(tabs, view, params);
+  return { tabs: params ? withParams(tabs, target.id, params) : tabs, id: target.id };
+}
+
 /** Without tab `id`; `next` is the tab to select instead (its right neighbour, else its left one). */
 export function closeTab(tabs: Tab[], id: string): { tabs: Tab[]; next?: string } {
   const i = tabs.findIndex((t) => t.id === id);
@@ -97,10 +113,11 @@ function subscribe(l: () => void) {
   return () => { listeners.delete(l); removeEventListener('storage', onStorage); };
 }
 
-/** The distribution's tabs in this browser, and a setter that stores them. */
-export function useTabs(distribution: string, defaults: string[]): [Tab[], (tabs: Tab[]) => void] {
+/** The distribution's tabs in this browser, and a setter that stores them (or a change to them). */
+export function useTabs(distribution: string, defaults: string[]): [Tab[], (tabs: Tab[] | ((now: Tab[]) => Tab[])) => void] {
   const key = tabsKey(distribution);
   const tabs = useSyncExternalStore(subscribe, () => current(key, defaults));
-  const set = useCallback((next: Tab[]) => write(key, next), [key]);
+  // a function gets the tabs as stored now, not as last rendered
+  const set = useCallback((next: Tab[] | ((now: Tab[]) => Tab[])) => write(key, typeof next === 'function' ? next(current(key, defaults)) : next), [key, defaults]);
   return [tabs, set];
 }

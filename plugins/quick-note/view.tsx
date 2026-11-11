@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Paperclip, X } from 'lucide-react';
 import { Modal, storeFile, type BlobRef } from '@gestalts/kit';
-import { useWrite } from '@gestalts/view';
+import { useHost, useWrite } from '@gestalts/view';
 
-/** One box: type, attach what belongs to it, save. Everything else about a note can wait. */
+/**
+ * One box: type, attach what belongs to it, save, and on to the next. Everything else about a note can wait, or be done
+ * right away in the Notes view (Save and Edit).
+ */
 export default function QuickNote() {
   const write = useWrite();
+  const { openView } = useHost();
+  const box = useRef<HTMLTextAreaElement>(null);
   const [main, setMain] = useState('');
   const [blobs, setBlobs] = useState<BlobRef[]>([]);
   const [picking, setPicking] = useState(false);
-  const [status, setStatus] = useState<{ error?: string; saved?: boolean }>({});
+  const [status, setStatus] = useState<{ error?: string; saved?: string }>({});
   const [busy, setBusy] = useState(false);
 
   const attach = async (files: FileList | null) => {
@@ -25,13 +30,16 @@ export default function QuickNote() {
     if (!errors.length) setPicking(false);
   };
 
-  const save = async () => {
+  /** then: the next note here, or this one in the Notes view's editor */
+  const save = async (then: 'next' | 'edit') => {
     setBusy(true);
     try {
-      await write.put({ gestalt: 'note@1', ...(main.trim() ? { main } : {}), ...(blobs.length ? { blobs } : {}) });
+      const note = await write.put({ gestalt: 'note@1', ...(main.trim() ? { main } : {}), ...(blobs.length ? { blobs } : {}) });
       setMain('');
       setBlobs([]);
-      setStatus({ saved: true });
+      if (then === 'edit' && await openView('note-crud', { note: note.id, edit: '1' })) setStatus({});
+      else setStatus({ saved: then === 'edit' ? "Saved. There's no Notes view here to edit it in." : 'Saved.' });
+      box.current?.focus();
     } catch (e) {
       setStatus({ error: e instanceof Error ? e.message : String(e) });
     } finally {
@@ -44,11 +52,12 @@ export default function QuickNote() {
     <div className="mx-auto flex h-full w-full max-w-xl flex-col gap-3 p-4">
       <textarea
         autoFocus
+        ref={box}
         className="textarea min-h-40 w-full flex-1 text-base"
         placeholder="What's on your mind?"
         value={main}
         onChange={(e) => { setMain(e.target.value); setStatus({}); }}
-        onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !empty) void save(); }}
+        onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !empty) void save('next'); }}
       />
       {blobs.length > 0 && (
         <ul className="flex flex-wrap gap-2">
@@ -61,10 +70,13 @@ export default function QuickNote() {
         </ul>
       )}
       {status.error && <div role="alert" className="alert alert-error text-sm whitespace-pre-wrap">{status.error}</div>}
-      {status.saved && <p role="status" className="text-sm text-success">Saved.</p>}
-      <div className="flex justify-between gap-2">
+      {status.saved && <p role="status" className="text-sm text-success">{status.saved}</p>}
+      <div className="flex flex-wrap justify-between gap-2">
         <button type="button" className="btn btn-ghost" onClick={() => setPicking(true)}><Paperclip className="size-4" /> Attach</button>
-        <button type="button" className="btn btn-primary" disabled={busy || empty} onClick={() => void save()}>Save</button>
+        <div className="flex flex-wrap justify-end gap-2">
+          <button type="button" className="btn" disabled={busy || empty} title="Save, and open it in Notes to add more" onClick={() => void save('edit')}>Save and Edit</button>
+          <button type="button" className="btn btn-primary" disabled={busy || empty} title="Save, and write the next one (Ctrl+Enter)" onClick={() => void save('next')}>Save and Next</button>
+        </div>
       </div>
       {picking && (
         <Modal onClose={() => setPicking(false)}>
