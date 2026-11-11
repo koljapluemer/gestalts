@@ -138,7 +138,7 @@ function FieldInput({ field, value, onChange }: { field: FieldName; value: strin
 }
 
 async function clipboardText(): Promise<string> {
-  try { return await navigator.clipboard.readText(); } catch { throw new Error("The clipboard can't be read here: paste into the box instead."); }
+  try { return await navigator.clipboard.readText(); } catch { throw new Error("The clipboard can't be read here: press Ctrl+V instead."); }
 }
 
 /** Pasting BibTeX over a source: what it adds at once, and the differences to decide. */
@@ -289,24 +289,22 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
   const [pending, setPending] = useState<Pending | undefined>(start.pending);
   const [notice, setNotice] = useState<string | undefined>(start.notice);
   const [error, setError] = useState<string | undefined>(start.error);
-  const [pasting, setPasting] = useState(false);
-  const [bibtex, setBibtex] = useState('');
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState('');
   const set = (patch: Partial<Draft>) => { setNotice(undefined); setDraft((d) => ({ ...d, ...patch })); };
   const setField = (f: FieldName, v: string) => set({ fields: { ...draft.fields, [f]: v } });
   const fail = (e: unknown) => setError(message(e));
 
-  const save = async () => {
+  const save = async (d: Draft = draft) => {
     setBusy(true);
     setError(undefined);
     try {
-      const bib = bibOfDraft(draft);
+      const bib = bibOfDraft(d);
       const key = await freeKey(read, bib.key, source?.id);
       if (key !== bib.key && source) throw new Error(`Another source has the key '${bib.key}'.`);
-      const saved = await write.put(sourceValue(source?.id, { ...bib, key }, draft, source?.value.blobs));
+      const saved = await write.put(sourceValue(source?.id, { ...bib, key }, d, source?.value.blobs));
       setDraft((d) => ({ ...d, key }));
-      setNotice(key !== bib.key ? `Saved, as '${key}': '${bib.key}' was taken.` : 'Saved.');
+      setNotice((n) => (key !== bib.key ? `Saved, as '${key}': '${bib.key}' was taken.` : n ?? 'Saved.'));
       onSaved(saved);
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
@@ -316,6 +314,7 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
     try { await write.remove(source.id); onDeleted(); } catch (e) { fail(e); }
   };
 
+  /** The clipboard's BibTeX merged in: what's missing is filled and saved at once; differences wait for a decision. */
   const merge = (text: string) => {
     setError(undefined);
     try {
@@ -326,14 +325,18 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
       setDraft(m.draft);
       setNotice(m.filled.length ? `Filled ${m.filled.join(', ')}.` : m.conflicts.length ? undefined : 'Nothing new in the BibTeX.');
       setPending(m.conflicts.length ? { incoming: incomingBib, conflicts: m.conflicts, take: m.conflicts.map((c) => c.field).filter((f) => f !== 'key') } : undefined);
-      setPasting(false);
-      setBibtex('');
+      if (m.filled.length) void save(m.draft);
     } catch (e) { fail(e); }
   };
 
   const apply = () => {
     if (!pending) return;
-    try { setDraft(mergeInto(draft, pending.incoming, pending.take).draft); setPending(undefined); } catch (e) { fail(e); }
+    try {
+      const next = mergeInto(draft, pending.incoming, pending.take).draft;
+      setDraft(next);
+      setPending(undefined);
+      void save(next);
+    } catch (e) { fail(e); }
   };
 
   const fields = shown(draft);
@@ -343,7 +346,7 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-1 border-b border-base-300 p-2">
         <button type="button" className="btn btn-sm btn-ghost md:hidden" title="Back to the list" onClick={onBack}><ArrowLeft className="size-4" /></button>
-        <button type="button" className="btn btn-sm btn-ghost" title="Paste BibTeX over this source" onClick={() => setPasting((p) => !p)}><ClipboardPaste className="size-4" /> BibTeX</button>
+        <button type="button" className="btn btn-sm btn-ghost" title="Update this source from the BibTeX in the clipboard" onClick={() => void clipboardText().then(merge, fail)}><ClipboardPaste className="size-4" /> BibTeX</button>
         <span className="flex-1" />
         {notice && <span className="truncate text-sm text-base-content/60">{notice}</span>}
         {source && <button type="button" className="btn btn-sm btn-ghost" title="Delete" onClick={() => void remove()}><Trash2 className="size-4" /></button>}
@@ -351,15 +354,6 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
         {error && <div role="alert" className="alert alert-error text-sm whitespace-pre-wrap">{error}</div>}
-        {pasting && (
-          <section className="flex flex-col gap-2">
-            <textarea className="textarea w-full font-mono text-xs" rows={6} placeholder="@article{…}" value={bibtex} onChange={(e) => setBibtex(e.target.value)} />
-            <div className="flex justify-end gap-2">
-              <button type="button" className="btn btn-sm btn-ghost" onClick={() => void clipboardText().then(merge, fail)}>From clipboard</button>
-              <button type="button" className="btn btn-sm" disabled={!bibtex.trim()} onClick={() => merge(bibtex)}>Merge in</button>
-            </div>
-          </section>
-        )}
         {pending && (
           <Repaste conflicts={pending.conflicts} take={pending.take} onApply={apply} onCancel={() => setPending(undefined)}
                    onTake={(f, on) => setPending({ ...pending, take: on ? [...pending.take, f] : pending.take.filter((x) => x !== f) })} />
@@ -401,89 +395,6 @@ function Existing({ id, incoming, onBack, onDeleted }: { id: string; incoming?: 
   return source ? <Editor source={source} incoming={incoming} onBack={onBack} onSaved={() => {}} onDeleted={onDeleted} /> : null;
 }
 
-// ---- adding sources from BibTeX ----
-
-type Entry = { bib?: Bib; error?: string; candidates?: Candidate<Bib & { id: string }>[]; created?: string };
-
-function Import({ onOpen, onUpdate, onBack }: { onOpen: (id: string) => void; onUpdate: (id: string, bib: Bib) => void; onBack: () => void }) {
-  const read = useRead();
-  const write = useWrite();
-  const [text, setText] = useState('');
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [error, setError] = useState<string>();
-
-  const run = async (bibtex: string) => {
-    setError(undefined);
-    setEntries([]);
-    try {
-      const parsed: Entry[] = parseBibtex(bibtex).map((raw) => {
-        try { return { bib: normalise({ ...raw }) }; } catch (e) { return { error: `${raw.key}: ${message(e)}` }; }
-      });
-      setEntries(parsed);
-      const found = await Promise.all(parsed.map((e) => (e.bib ? candidates(read, e.bib) : Promise.resolve(undefined))));
-      setEntries(parsed.map((e, i) => ({ ...e, candidates: found[i] })));
-    } catch (e) { setError(message(e)); }
-  };
-
-  const create = async (index: number) => {
-    const e = entries[index];
-    if (!e.bib) return;
-    try {
-      const key = await freeKey(read, e.bib.key);
-      const saved = await write.put({ gestalt: SOURCE, ...json({ ...e.bib, key }) });
-      setEntries((all) => all.map((x, i) => (i === index ? { ...x, created: saved.id } : x)));
-    } catch (err) { setEntries((all) => all.map((x, i) => (i === index ? { ...x, error: message(err) } : x))); }
-  };
-
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center gap-1 border-b border-base-300 p-2">
-        <button type="button" className="btn btn-sm btn-ghost md:hidden" title="Back to the list" onClick={onBack}><ArrowLeft className="size-4" /></button>
-        <span className="flex-1 font-semibold">Add from BibTeX</span>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
-        <textarea className="textarea w-full font-mono text-xs" rows={8} placeholder="Paste one or more BibTeX entries" value={text} onChange={(e) => setText(e.target.value)} />
-        <div className="flex justify-end gap-2">
-          <button type="button" className="btn btn-sm btn-ghost" onClick={() => void clipboardText().then((t) => { setText(t); return run(t); }, (e: unknown) => setError(message(e)))}>From clipboard</button>
-          <button type="button" className="btn btn-sm btn-primary" disabled={!text.trim()} onClick={() => void run(text)}>Read</button>
-        </div>
-        {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
-        {entries.map((e, i) => (
-          <section key={i} className="flex flex-col gap-2 rounded-box border border-base-300 p-3">
-            {e.bib && (
-              <div>
-                <div className="font-semibold">{e.bib.title ?? e.bib.key}</div>
-                <div className="text-sm text-base-content/60">{[byline(e.bib), e.bib.entrytype, e.bib.key].filter(Boolean).join(' · ')}</div>
-              </div>
-            )}
-            {e.error && <div role="alert" className="alert alert-error text-sm">{e.error}</div>}
-            {e.created ? (
-              <button type="button" className="btn btn-sm self-start" onClick={() => onOpen(e.created!)}>Added: open it</button>
-            ) : e.bib && (
-              <>
-                {e.candidates === undefined && <span className="loading loading-spinner loading-sm" />}
-                {e.candidates?.map((c) => (
-                  <div key={c.source.id} className="flex flex-wrap items-center gap-2 text-sm">
-                    <span className={`badge badge-sm ${c.level === 'same' ? 'badge-warning' : 'badge-ghost'}`}>{c.level}</span>
-                    <span className="min-w-0 flex-1 truncate" title={c.reasons.join(', ')}>{titleOf(c.source)} <span className="text-base-content/60">{byline(c.source)}</span></span>
-                    <button type="button" className="btn btn-xs btn-ghost" onClick={() => onOpen(c.source.id)}>Open</button>
-                    <button type="button" className="btn btn-xs" onClick={() => onUpdate(c.source.id, e.bib!)}>Update it</button>
-                  </div>
-                ))}
-                {e.candidates !== undefined && (
-                  <button type="button" className={`btn btn-sm self-start ${e.candidates.length ? '' : 'btn-primary'}`} onClick={() => void create(i)}>
-                    <Plus className="size-4" /> {e.candidates.length ? 'Add as a new source anyway' : 'Add'}
-                  </button>
-                )}
-              </>
-            )}
-          </section>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ---- the list ----
 
 function Export() {
@@ -513,7 +424,11 @@ function Export() {
   );
 }
 
-function List({ selected, onSelect, onNew, onImport }: { selected: string | null; onSelect: (id: string) => void; onNew: () => void; onImport: () => void }) {
+type Status = { ok: boolean; text: string };
+
+function List({ selected, status, busy, onSelect, onNew, onPaste }: {
+  selected: string | null; status?: Status; busy: boolean; onSelect: (id: string) => void; onNew: () => void; onPaste: () => void;
+}) {
   const [search, setSearch] = useViewState<string>('search', '');
   const text = useDebounced(search, 150);
   const { capabilities } = useCapabilities();
@@ -529,9 +444,12 @@ function List({ selected, onSelect, onNew, onImport }: { selected: string | null
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex gap-2 border-b border-base-300 p-2">
         <input className="input input-sm min-w-0 flex-1" type="search" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button type="button" className="btn btn-sm btn-square" title="Add from BibTeX" onClick={onImport}><ClipboardPaste className="size-4" /></button>
+        <button type="button" className="btn btn-sm btn-square" title="Add the BibTeX in the clipboard (or press Ctrl+V)" disabled={busy} onClick={onPaste}>
+          {busy ? <span className="loading loading-spinner loading-xs" /> : <ClipboardPaste className="size-4" />}
+        </button>
         <button type="button" className="btn btn-sm btn-primary btn-square" title="New source" onClick={onNew}><Plus className="size-4" /></button>
       </div>
+      {status && <p role={status.ok ? 'status' : 'alert'} className={`border-b border-base-300 px-3 py-2 text-sm break-words ${status.ok ? 'text-base-content/70' : 'text-error'}`}>{status.text}</p>}
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {items.map((s) => (
           <li key={s.id}>
@@ -549,7 +467,53 @@ function List({ selected, onSelect, onNew, onImport }: { selected: string | null
   );
 }
 
-type Pane = { kind: 'none' } | { kind: 'new' } | { kind: 'import' } | { kind: 'source'; id: string; incoming?: Bib; n: number };
+type Pane = { kind: 'none' } | { kind: 'new' } | { kind: 'source'; id: string; incoming?: Bib; n: number };
+
+const quoted = (b: { title?: string; key: string }) => `'${b.title ?? b.key}'`;
+
+/**
+ * BibTeX straight into the sources: each entry that is (likely) one already here fills in that one's missing fields,
+ * every other entry becomes a new source. Says what it did; differences to decide open with that source.
+ */
+function useIngest(open: (id: string, incoming?: Bib) => void) {
+  const read = useRead();
+  const write = useWrite();
+  const [status, setStatus] = useState<Status>();
+  const [busy, setBusy] = useState(false);
+  const ingest = async (text: string) => {
+    setBusy(true);
+    setStatus(undefined);
+    try {
+      const said: string[] = [];
+      let ok = true;
+      let show: { id: string; incoming?: Bib } | undefined;
+      for (const raw of parseBibtex(text)) {
+        let bib: Bib;
+        try { bib = normalise({ ...raw }); } catch (e) { ok = false; said.push(`${raw.key}: ${message(e)}`); continue; }
+        const found = await candidates(read, bib);
+        const same = found.find((c) => c.level !== 'possible');
+        if (same) {
+          const item = (await read.page({ gestalt: SOURCE, ids: [same.source.id], limit: 1 })).items[0];
+          const r = mergeSource(bibOf(item.value), bib, []);
+          if (r.filled.length) await write.put({ ...item.value, ...json(r.value) });
+          said.push(`${quoted(r.value)} was here${r.filled.length ? `: filled ${r.filled.join(', ')}` : ''}${r.conflicts.length ? `; ${r.conflicts.length} to decide` : ''}.`);
+          if (r.conflicts.length) show = { id: item.id, incoming: bib };
+          else if (!show?.incoming) show = { id: item.id };
+        } else {
+          const key = await freeKey(read, bib.key);
+          const saved = await write.put({ gestalt: SOURCE, ...json({ ...bib, key }) });
+          said.push(`Added ${quoted(bib)}${found[0] ? ` (maybe the same as ${quoted(found[0].source)})` : ''}.`);
+          if (!show?.incoming) show = { id: saved.id };
+        }
+      }
+      setStatus({ ok, text: said.join(' ') });
+      if (show) open(show.id, show.incoming);
+    } catch (e) { setStatus({ ok: false, text: message(e) }); } finally { setBusy(false); }
+  };
+  return { ingest, status, busy, fail: (e: unknown) => setStatus({ ok: false, text: message(e) }) };
+}
+
+const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
 /** On a phone, the list or one pane; on anything wider, side by side. */
 export default function SourceManager() {
@@ -557,15 +521,29 @@ export default function SourceManager() {
   const [pane, setPane] = useState<Pane>(() => (selected ? { kind: 'source', id: selected, n: 0 } : { kind: 'none' }));
   const open = (id: string, incoming?: Bib) => { setSelected(id); setPane((p) => ({ kind: 'source', id, incoming, n: (p.kind === 'source' ? p.n : 0) + 1 })); };
   const close = () => { setSelected(null); setPane({ kind: 'none' }); };
+  const { ingest, status, busy, fail } = useIngest(open);
+  const fromClipboard = () => void clipboardText().then(ingest, fail);
+  // Ctrl+V anywhere but in a field adds what's pasted
+  const latest = useRef(ingest);
+  useEffect(() => { latest.current = ingest; });
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData('text/plain') ?? '';
+      if (typing(e.target) || !text.includes('@')) return;
+      e.preventDefault();
+      void latest.current(text);
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+  }, []);
   const showPane = pane.kind !== 'none';
   return (
     <div className="flex h-full bg-base-100">
       <div className={`h-full w-full border-base-300 md:w-80 md:shrink-0 md:border-r ${showPane ? 'hidden md:block' : ''}`}>
-        <List selected={pane.kind === 'source' ? pane.id : null} onSelect={(id) => open(id)} onNew={() => { setSelected(null); setPane({ kind: 'new' }); }} onImport={() => { setSelected(null); setPane({ kind: 'import' }); }} />
+        <List selected={pane.kind === 'source' ? pane.id : null} status={status} busy={busy} onSelect={(id) => open(id)} onNew={() => { setSelected(null); setPane({ kind: 'new' }); }} onPaste={fromClipboard} />
       </div>
       <div className={`h-full min-w-0 flex-1 ${showPane ? '' : 'hidden md:block'}`}>
         {pane.kind === 'new' && <Editor onBack={close} onSaved={(s) => open(s.id)} onDeleted={close} />}
-        {pane.kind === 'import' && <Import onOpen={(id) => open(id)} onUpdate={(id, bib) => open(id, bib)} onBack={close} />}
         {pane.kind === 'source' && <Existing key={`${pane.id}:${pane.n}`} id={pane.id} incoming={pane.incoming} onBack={close} onDeleted={close} />}
       </div>
     </div>
