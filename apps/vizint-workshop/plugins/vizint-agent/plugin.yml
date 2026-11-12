@@ -1,0 +1,5 @@
+id: vizint-agent
+version: 0.1.0
+title: Viz agent
+description: Builds one viz from its spec with the claude CLI, checks it and hands back the source and the built page. It touches no ymls; the browser writes them.
+requires: [backend]

@@ -486,6 +486,79 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.8.1))
 
+  apps/vizint-workshop:
+    dependencies:
+      '@gestalts/client':
+        specifier: workspace:*
+        version: link:../../packages/client
+      '@gestalts/host':
+        specifier: workspace:*
+        version: link:../../packages/host
+      '@gestalts/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
+      '@gestalts/learning':
+        specifier: workspace:*
+        version: link:../../packages/learning
+      '@gestalts/sources':
+        specifier: workspace:*
+        version: link:../../packages/sources
+      '@gestalts/view':
+        specifier: workspace:*
+        version: link:../../packages/view
+      '@gestalts/vite':
+        specifier: workspace:*
+        version: link:../../packages/vite
+      lucide-react:
+        specifier: 1.66.0
+        version: 1.66.0(@types/react@19.3.0)(react@19.3.1)
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: 19.3.1
+        version: 19.3.1(react@19.3.1)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: 4.3.3
+        version: 4.3.3(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.8.1))
+      '@types/node':
+        specifier: 26.6.6
+        version: 26.6.6
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: 6.1.2
+        version: 6.1.2(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.8.1))
+      daisyui:
+        specifier: 5.7.50
+        version: 5.7.50
+      eslint-plugin-react-hooks:
+        specifier: 7.1.1
+        version: 7.1.1(eslint@10.14.0(jiti@2.7.0))
+      oxlint:
+        specifier: 1.90.0
+        version: 1.90.0(oxlint-tsgolint@7.0.2005)
+      oxlint-tsgolint:
+        specifier: 7.0.2005
+        version: 7.0.2005
+      tailwindcss:
+        specifier: 4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vite:
+        specifier: 8.3.5
+        version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.8.1)
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.8.1))
+
   packages/client:
     dependencies:
       '@gestalts/view':

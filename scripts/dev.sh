@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Everything for development at once, with hot reload, stopped together (Ctrl-C, or when any of it exits):
 #   - the dev desktop node (tray, the repo's plugins, --profile dev) and its settings page
-#   - the learning workshop's Make node (headless, --profile workshop)
-#   - gestalter, loops-for-learning and vizint on the dev node, the learning workshop on the Make node
+#   - the learning workshop's Make node (headless, --profile workshop), and the vizint workshop's node
+#   - gestalter, loops-for-learning and vizint on the dev node, each workshop on its own node
 # Each server gets the first free port from its usual one (scripts/free-port.sh), so it runs beside an installed node
 # (7717/7718) and whatever else listens here. Output is prefixed with who wrote it.
 set -euo pipefail
@@ -20,11 +20,13 @@ take() {
 # the nodes in steps of two: the port after each is its home-network port. Clear of an installed node on 7717
 take node 7737 2
 take make 7727 2
+take viznode 7747 2
 take gestalter 5173
 take loops 5174
 take workshop 5175
 take settings 5176
 take vizint 5178
+take vizworkshop 5179
 
 # the node binary once, so the two nodes don't wait on each other's cargo
 cargo build -q -p gestalts-node-desktop
@@ -39,11 +41,13 @@ run() {
 run node cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" \
   $(bash scripts/plugin-dirs.sh) --background --open-url "http://localhost:$settings/"
 run make env WORKSHOP_NODE_PORT="$make" apps/learning-workshop/scripts/node.sh
+run viznode env VIZINT_WORKSHOP_NODE_PORT="$viznode" apps/vizint-workshop/scripts/node.sh
 run settings env GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/node/settings dev --port "$settings" --strictPort
 run gestalter env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$gestalter" --strictPort
 run loops env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/loops-for-learning dev --port "$loops" --strictPort
 run vizint env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/vizint dev --port "$vizint" --strictPort
 run workshop env VITE_WORKSHOP_NODE="http://127.0.0.1:$make" pnpm --dir apps/learning-workshop dev --port "$workshop" --strictPort
+run vizworkshop env VITE_VIZINT_WORKSHOP_NODE="http://127.0.0.1:$viznode" pnpm --dir apps/vizint-workshop dev --port "$vizworkshop" --strictPort
 
 cat <<EOF
 
@@ -51,9 +55,11 @@ cat <<EOF
   loops-for-learning  http://localhost:$loops/
   learning workshop   http://localhost:$workshop/
   vizint              http://localhost:$vizint/
+  vizint workshop     http://localhost:$vizworkshop/
   node settings       http://localhost:$settings/
   dev node            http://127.0.0.1:$node  (home network :$((node + 1)), profile dev)
   Make node           http://127.0.0.1:$make  (home network :$((make + 1)), profile workshop)
+  vizint node         http://127.0.0.1:$viznode  (home network :$((viznode + 1)), profile vizint-workshop)
 
 EOF
 # stop all when one stops (macOS' bash 3.2 has no `wait -n`: there, when all have)

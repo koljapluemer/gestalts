@@ -21,7 +21,7 @@ run = [
 ]
 
 [tasks.check]
-description = "Tests, lints, typechecks, every deck's health and the agent template's example"
+description = "Tests, lints, typechecks, every deck's health and the agent templates' examples"
 depends = ["setup"]
 shell = "bash -c"
 run = """
@@ -34,6 +34,8 @@ pnpm typecheck
 pnpm test
 python3 -m unittest discover -s apps/learning-workshop/tests
 apps/learning-workshop/scripts/check-example.sh
+python3 -m unittest discover -s apps/vizint-workshop/tests
+apps/vizint-workshop/scripts/check-examples.sh
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
@@ -186,6 +188,27 @@ run = "pnpm --dir apps/vizint build"
 [tasks."vizint:deck"]
 description = "Rebuild plugins/vizint's examples deck from packages/viz/examples, and publish it"
 run = ["node plugins/vizint/tools/build-deck.ts", "mise run publish-data plugins/vizint/decks/examples"]
+
+# --- vizint-workshop ---
+
+[tasks."vizint-workshop:dev"]
+description = "The vizint workshop's node on :7747 (with the viz agent) and the workshop on :5179 with hot reload"
+depends = ["setup"]
+run = "apps/vizint-workshop/scripts/dev.sh"
+
+[tasks."vizint-workshop:app"]
+description = "The vizint workshop on :5179 without its node; the preview works, building doesn't"
+depends = ["setup"]
+run = "pnpm --dir apps/vizint-workshop dev"
+
+[tasks."vizint-workshop:node"]
+description = "The vizint workshop's node on :7747, using $VIZINT_WORKSHOP_DATA or ~/vizint-workshop-data"
+run = "apps/vizint-workshop/scripts/node.sh"
+
+[tasks."vizint-workshop:build"]
+description = "Production build into apps/vizint-workshop/dist"
+depends = ["setup"]
+run = "pnpm --dir apps/vizint-workshop build"
 
 # --- learning-workshop ---
 

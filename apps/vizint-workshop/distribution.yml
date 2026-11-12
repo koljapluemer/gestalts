@@ -1,0 +1,5 @@
+# The vizint workshop (`id` is its for good). Its vizzes are user data; the vizint view shows the one being made, as
+# vizint shows it.
+id: vizint-workshop
+plugins:
+  - ../../plugins/vizint

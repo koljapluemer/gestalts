@@ -5,4 +5,5 @@ packages:
   - apps/loops-for-learning
   - apps/learning-workshop
   - apps/vizint
+  - apps/vizint-workshop
   - apps/node/settings
