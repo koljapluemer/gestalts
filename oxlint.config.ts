@@ -2,6 +2,7 @@ import { defineConfig } from 'oxlint';
 
 /**
  * Who may import whom (eslint-plugin-boundaries):
+ * - `@gestalts/viz` (what an interactive visualization is written with, and its runtime) imports nothing of ours.
  * - `@gestalts/view` (what a view gets from the app) imports nothing of ours; `@gestalts/learning` only the view package;
  *   `@gestalts/sources` nothing of ours.
  * - `@gestalts/kit` imports only the view and sources packages, in layers: primitives < components < widgets < perspectives.
@@ -29,6 +30,7 @@ const allowed: Record<string, string[]> = {
   vite: ['view'],
   learning: ['view'],
   sources: [],
+  viz: [],
   client: ['view'],
   ...Object.fromEntries(Object.entries(kitBelow).map(([t, below]) => [t, ['view', 'sources', ...below]])),
   plugin: ['view', 'kit-index', 'learning', 'sources'],
@@ -49,6 +51,7 @@ export default defineConfig({
       { type: 'vite', pattern: 'packages/vite/src' },
       { type: 'learning', pattern: 'packages/learning/src' },
       { type: 'sources', pattern: 'packages/sources/src' },
+      { type: 'viz', pattern: 'packages/viz/src' },
       { type: 'client', pattern: 'packages/client/src' },
       { type: 'primitive', pattern: `${kit}/primitives` },
       { type: 'component', pattern: `${kit}/components` },

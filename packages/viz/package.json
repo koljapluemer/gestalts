@@ -1,0 +1,31 @@
+{
+  "name": "@gestalts/viz",
+  "version": "0.1.0",
+  "description": "Interactive visualizations: params, one clock, a pure model and a scene of marks; the runtime draws them, makes the controls and builds one offline page",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mount": "./src/mount.ts",
+    "./tex": "./src/tex.ts",
+    "./build": "./build/build.ts",
+    "./client": "./client.d.ts"
+  },
+  "files": [
+    "src",
+    "build",
+    "client.d.ts"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "esbuild": "0.28.2",
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0",
+    "temml": "0.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/pngjs": "6.0.5"
+  }
+}

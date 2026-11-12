@@ -1,0 +1,29 @@
+// PSNR's formula with every part hoverable: what it means appears below.
+import { text, viz } from '@gestalts/viz';
+import { tex } from '@gestalts/viz/tex';
+
+const PARTS: Record<string, string> = {
+  db: 'Ten times the base-10 logarithm turns a ratio into decibels: every factor of 10 adds 10 dB.',
+  max: 'The largest value a pixel can have, squared: 255² for 8-bit images.',
+  mse: 'The mean squared error: the average of the squared differences between the original and the compressed pixel.',
+  mn: 'Divide by the number of pixels, m rows times n columns: the sum becomes an average.',
+  sums: 'Add up every pixel: each row i, each column j.',
+  diff: 'How far the compressed pixel K(i, j) is from the original I(i, j), squared so that every difference counts as positive.',
+};
+
+export default viz({
+  params: {},
+  panels: {
+    formula: { x: [0, 1], y: [0, 1], aspect: 3.2, min: 280 },
+    meaning: { x: [0, 1], y: [0, 1], yDown: true, aspect: 5, min: 280 },
+  },
+  model: () => PARTS,
+  scene: (_p, parts, ui) => [
+    tex([0.5, 0.72], String.raw`\mathrm{PSNR} = \class{db}{10 \log_{10}} \left( \frac{\class{max}{\mathrm{MAX}_I^2}}{\class{mse}{\mathrm{MSE}}} \right)`, { panel: 'formula', size: 20 }),
+    tex([0.5, 0.25], String.raw`\class{mse}{\mathrm{MSE}} = \class{mn}{\frac{1}{mn}} \class{sums}{\sum_{i=0}^{m-1} \sum_{j=0}^{n-1}} \class{diff}{\left[ I(i,j) - K(i,j) \right]^2}`, { panel: 'formula', size: 18 }),
+    ...(ui.hover && parts[ui.hover] ? [text([0.02, 0.2], parts[ui.hover], { panel: 'meaning', align: 'start', baseline: 'top', wrap: 0.96, size: 14 })] : []),
+  ],
+  checks: [
+    { name: 'every part has a meaning', expect: (parts) => ['db', 'max', 'mse', 'mn', 'sums', 'diff'].every((k) => parts[k]) },
+  ],
+});
