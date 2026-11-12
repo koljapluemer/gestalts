@@ -1,0 +1,17 @@
+id: fd730633-dea5-5005-97c6-100dfb8f56ff
+gestalt: flashcard@1
+front: "ἄτομον"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 0a1b99592898a201.webp}
+- {label: audio, file: 2347272fcafb150a.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.166667
+  concept-927d19d39cb3b2fa: 0.166667
+  concept-a37a168e6aeb95ce: 0.166667
+  concept-b20327da45ceefc8: 1.0
+  concept-bc1767973b740c00: 0.333333
+  concept-f3c24fce21b15d72: 0.166667

@@ -1,0 +1,21 @@
+id: f03d01b4-1aee-5914-a2a1-4821dbe79fa3
+gestalt: flashcard@1
+front: "δεινόσαυρος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: cf4ee75c4c57325f.webp}
+- {label: audio, file: 077cef20931db19c.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.090909
+  concept-4a4a6efd38f5c83b: 0.181818
+  concept-67f80ac5a8e61df2: 0.090909
+  concept-6ce1d33edca68a50: 0.090909
+  concept-8933a2a0f24b7f07: 1.0
+  concept-9ce48bbe96191c88: 0.090909
+  concept-a11f395c31268153: 0.090909
+  concept-a88920689c0438c2: 0.090909
+  concept-bc1767973b740c00: 0.181818
+  concept-f3c24fce21b15d72: 0.090909

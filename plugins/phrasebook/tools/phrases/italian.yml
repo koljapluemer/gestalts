@@ -1,0 +1,172 @@
+# Source of decks/italian-for-english-speakers; build with tools/build_phrase_decks.py. Same shape as vietnamese.yml.
+#
+# Italian marks the relation to whom you speak with one switch: tu (people you know, children) or Lei (everyone you
+# don't know), plus a few greetings that are formal or informal in themselves. Every variant here is the source's.
+
+deck: italian-for-english-speakers
+title: Essential Italian phrases for English speakers
+lang: ita
+language: Italian
+source:
+  key: wikivoyage-italian-phrasebook
+  title: Italian phrasebook
+  url: https://en.wikivoyage.org/wiki/Italian_phrasebook
+  urldate: 2026-11-11
+  history: https://en.wikivoyage.org/w/index.php?title=Italian_phrasebook&action=history
+
+links:
+  - ["ita: Lei (formal you)", "ita: formal register", 0.6, part-of]
+  - ["ita: tu (informal you)", "ita: informal register", 0.6, part-of]
+  - ["ita: Lei (formal you)", "social: addressing by relation", 0.4, part-of]
+  - ["ita: tu (informal you)", "social: addressing by relation", 0.4, part-of]
+  - ["ita: formal register", "social: politeness", 0.5, part-of]
+  # knowing one form of a verb pair helps with the other
+  - ["ita: Lei (formal you)", "ita: tu (informal you)", 0.3, contrasts]
+  - ["ita: tu (informal you)", "ita: Lei (formal you)", 0.3, contrasts]
+
+phrases:
+  - intent: say hello
+    functions: [greet]
+    situations: [meeting someone]
+    variants:
+      - { front: "Hello.", context: "formal", back: "Salve.", concepts: { "ita: formal register": 0.4 } }
+      - { front: "Hello.", context: "informal", back: "Ciao.", concepts: { "ita: informal register": 0.4 } }
+
+  - intent: ask how someone is
+    functions: [ask how someone is]
+    situations: [meeting someone]
+    variants:
+      - { front: "How are you?", context: "to someone you don't know (Lei)", back: "Come sta?", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "How are you?", context: "to a friend or a child (tu)", back: "Come stai?", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: say you're fine
+    functions: [answer how you are, thank]
+    situations: [meeting someone]
+    variants:
+      - { front: "Fine, thank you.", back: "Bene, grazie." }
+
+  - intent: ask someone's name
+    functions: [ask someone's name]
+    situations: [meeting someone]
+    variants:
+      - { front: "What is your name?", context: "to someone you don't know (Lei)", back: "Come si chiama?", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "What is your name?", context: "to a friend or a child (tu)", back: "Come ti chiami?", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: say your name
+    functions: [introduce yourself]
+    situations: [meeting someone]
+    variants:
+      - { front: "My name is ___.", back: "Mi chiamo ___." }
+
+  - intent: say nice to meet you
+    functions: [greet]
+    situations: [meeting someone]
+    variants:
+      - { front: "Nice to meet you.", context: "to someone you don't know (Lei)", back: "Piacere di conoscerla.", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "Nice to meet you.", context: "to someone your own age, casually (tu)", back: "Piacere di conoscerti.", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: say please
+    functions: [ask for something]
+    situations: [anywhere]
+    variants:
+      - { front: "Please.", back: "Per favore." }
+
+  - intent: say thank you
+    functions: [thank]
+    situations: [anywhere]
+    variants:
+      - { front: "Thank you.", back: "Grazie." }
+
+  - intent: answer thanks
+    functions: [answer thanks]
+    situations: [anywhere]
+    variants:
+      - { front: "You're welcome.", back: "Prego." }
+
+  - intent: say it's no problem
+    functions: [answer thanks]
+    situations: [anywhere]
+    variants:
+      - { front: "No problem.", back: "Non c'è problema." }
+
+  - intent: say yes
+    functions: [agree]
+    situations: [anywhere]
+    variants:
+      - { front: "Yes.", back: "Sì." }
+
+  - intent: say no
+    functions: [refuse]
+    situations: [anywhere]
+    variants:
+      - { front: "No.", back: "No." }
+
+  - intent: say excuse me
+    functions: [get someone's attention, apologise]
+    situations: [anywhere]
+    variants:
+      - { front: "Excuse me.", context: "to someone you don't know (Lei)", back: "Mi scusi.", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "Excuse me.", context: "to a friend or a child (tu)", back: "Scusa.", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: apologise
+    functions: [apologise]
+    situations: [anywhere]
+    variants:
+      - { front: "I'm sorry.", back: "Mi dispiace." }
+
+  - intent: say goodbye
+    functions: [take leave]
+    situations: [meeting someone]
+    variants:
+      - { front: "Goodbye.", context: "formal", back: "Arrivederci.", concepts: { "ita: formal register": 0.4 } }
+      - { front: "Goodbye.", context: "informal", back: "Ciao.", concepts: { "ita: informal register": 0.4 } }
+
+  - intent: say see you
+    functions: [take leave]
+    situations: [meeting someone]
+    variants:
+      - { front: "See you.", back: "Ci vediamo." }
+
+  - intent: say you don't speak Italian
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "I don't speak Italian.", back: "Non parlo italiano." }
+
+  - intent: ask if someone speaks English
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "Do you speak English?", context: "to someone you don't know (Lei)", back: "Parla inglese?", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "Do you speak English?", context: "to a friend or a child (tu)", back: "Parli inglese?", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: ask for someone who speaks English
+    functions: [cope with not understanding, ask for help]
+    situations: [anywhere]
+    variants:
+      - { front: "Is there someone here who speaks English?", back: "Qualcuno qui parla inglese?" }
+
+  - intent: ask someone to speak slowly
+    functions: [cope with not understanding, ask for something]
+    situations: [anywhere]
+    variants:
+      - { front: "Speak more slowly, please.", context: "to someone you don't know (Lei)", back: "Parli più lentamente, per favore.", concepts: { "ita: Lei (formal you)": 0.5 } }
+      - { front: "Speak more slowly, please.", context: "to a friend or a child (tu)", back: "Parla più lentamente, per favore.", concepts: { "ita: tu (informal you)": 0.5 } }
+
+  - intent: say you understand a little
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "I understand Italian a little.", back: "Capisco l'italiano solo un po'." }
+
+  - intent: ask what something means
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "What does it mean?", back: "Cosa significa?" }
+
+  - intent: say you don't know
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "I don't know.", back: "Non lo so." }

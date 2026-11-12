@@ -1,0 +1,17 @@
+id: 05226fdc-bc01-58fb-95d1-1b77d4642167
+gestalt: flashcard@1
+front: "θρόνος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: cdf625e280f0cb48.webp}
+- {label: audio, file: b94e9599efe57662.mp3}
+concepts:
+  concept-1f20b2f619da7232: 0.166667
+  concept-4a4a6efd38f5c83b: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-bc1767973b740c00: 0.333333
+  concept-cba4c0097454dadd: 1.0
+  concept-f3c24fce21b15d72: 0.166667

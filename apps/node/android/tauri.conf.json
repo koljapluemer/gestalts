@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "gestalter",
+  "version": "0.1.0",
+  "identifier": "com.koljasam.gestalter",
+  "build": {
+    "frontendDist": "../../gestalter/distribution-android/dist",
+    "devUrl": "http://localhost:5174",
+    "beforeDevCommand": { "script": "pnpm dev", "cwd": "../../gestalter/distribution-android" },
+    "beforeBuildCommand": { "script": "pnpm build", "cwd": "../../gestalter/distribution-android" }
+  },
+  "app": {
+    "windows": [{ "title": "gestalter" }],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"]
+  }
+}

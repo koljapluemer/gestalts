@@ -34,12 +34,12 @@ const allowed: Record<string, string[]> = {
 };
 
 export default defineConfig({
-  ignorePatterns: ['**/dist', 'packages/client/wasm', '**/node_modules'],
+  ignorePatterns: ['**/dist', 'packages/client/wasm', '**/node_modules', '**/decks', 'apps/node/android/gen'],
   plugins: ['typescript', 'react', 'oxc', 'unicorn'],
   jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }, 'eslint-plugin-boundaries'],
   categories: { correctness: 'error' },
   settings: {
-    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json'] }, node: true },
+    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json', 'apps/*/tsconfig.json', 'apps/gestalter/*/tsconfig.json'] }, node: true },
     'boundaries/elements': [
       { type: 'view', pattern: 'packages/view/src' },
       { type: 'vite', pattern: 'packages/vite/src' },

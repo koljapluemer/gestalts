@@ -1,0 +1,5 @@
+id: workshop-agent
+version: 1.0.0
+title: Workshop agent
+description: Has the claude CLI edit one view's files. It touches no ymls; the browser writes them.
+requires: [backend]

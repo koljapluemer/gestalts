@@ -1,0 +1,17 @@
+id: 6a358eac-756b-5c31-bcf4-5825803bf701
+gestalt: flashcard@1
+front: "ἐλέφας"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 0729263da192e229.webp}
+- {label: audio, file: e7b24f87054e3880.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.166667
+  concept-41216d48a05be718: 0.166667
+  concept-4a4a6efd38f5c83b: 0.166667
+  concept-a11f395c31268153: 0.333333
+  concept-aa73127d91582d60: 0.166667
+  concept-abb623087ff7cd14: 1.0

@@ -1,0 +1,15 @@
+id: card-2d4999cc3a16aead
+gestalt: flashcard@1
+front: Do you speak English?
+back: Biết nói tiếng Anh không?
+extra: No "you" at all; Vietnamese often leaves the pronoun out.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-99c26fb11d77175b: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

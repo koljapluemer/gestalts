@@ -1,0 +1,17 @@
+id: 20e8244f-5a2a-5eec-9bef-bd89098d7c20
+gestalt: flashcard@1
+front: "σφαῖρα"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 6efb24249720831e.webp}
+- {label: audio, file: 5092431876019455.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.333333
+  concept-41216d48a05be718: 0.166667
+  concept-4a4a6efd38f5c83b: 0.166667
+  concept-6ce1d33edca68a50: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-ae9823bd89e71279: 1.0

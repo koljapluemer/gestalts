@@ -1,0 +1,16 @@
+id: card-d6d5de0d720c1f3a
+gestalt: flashcard@1
+front: Yes.
+context: respectfully
+back: Dạ.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-648d1a5092ae5635: 1.0
+  concept-aace74d073c2b1a8: 0.5
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

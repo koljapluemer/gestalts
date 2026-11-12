@@ -1,0 +1,17 @@
+id: 0d2edfc7-501d-5d65-9804-ab93a65c6763
+gestalt: flashcard@1
+front: "καρδία"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 43b7dfe7fe9e95cd.webp}
+- {label: audio, file: e5b943d04b85efec.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.333333
+  concept-0692f3e2bc08b128: 0.166667
+  concept-6ce1d33edca68a50: 0.166667
+  concept-9ce48bbe96191c88: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-ea49163c55458387: 1.0

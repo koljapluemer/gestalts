@@ -1,0 +1,17 @@
+id: d4557c82-b778-55dc-a22f-e8c446270eba
+gestalt: flashcard@1
+front: "κῶνος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: a6f1f7bc78f36101.webp}
+- {label: audio, file: 7be1381489ab639f.mp3}
+concepts:
+  concept-0692f3e2bc08b128: 0.2
+  concept-4a4a6efd38f5c83b: 0.2
+  concept-bc1767973b740c00: 0.2
+  concept-c6471c8d9f9a56df: 0.2
+  concept-eacd354ccc55dbf9: 1.0
+  concept-f3c24fce21b15d72: 0.2

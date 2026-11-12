@@ -1,0 +1,14 @@
+id: card-6a8980566a04d382
+gestalt: flashcard@1
+front: Goodbye.
+back: Tạm biệt.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-d52d44ec05cfe625: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

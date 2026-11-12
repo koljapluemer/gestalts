@@ -1,0 +1,14 @@
+id: card-38891fc57ce8140a
+gestalt: flashcard@1
+front: I understand Italian a little.
+back: Capisco l'italiano solo un po'.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-2c3a02b32c0bc2ef: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

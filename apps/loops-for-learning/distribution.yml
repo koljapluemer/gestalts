@@ -1,0 +1,10 @@
+# The public app (`id` is its for good): every plugin here is a learning view, shown one at a time.
+id: loops
+plugins:
+  - ../../plugins/flashcards
+  - ../../plugins/alphabet-pronunciation-trainer
+  - ../../plugins/phrasebook
+# what views may do beyond the strict sandbox, out of what each asks for (`permissions` in its plugin.yml): only for our
+# own code, which loads nothing from elsewhere at run time
+grants:
+  phrasebook: [same-origin, microphone]

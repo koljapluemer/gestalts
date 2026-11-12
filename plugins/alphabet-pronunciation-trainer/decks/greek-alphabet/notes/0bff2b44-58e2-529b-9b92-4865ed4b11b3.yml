@@ -1,0 +1,16 @@
+id: 0bff2b44-58e2-529b-9b92-4865ed4b11b3
+gestalt: flashcard@1
+front: "πέπερι"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 61b5d83e54462afb.webp}
+- {label: audio, file: 2afb63ca4933cb1a.mp3}
+concepts:
+  concept-6ce1d33edca68a50: 0.166667
+  concept-a11f395c31268153: 0.333333
+  concept-a88920689c0438c2: 0.166667
+  concept-c83c85a3196b3338: 1.0
+  concept-fa2effb4251815db: 0.333333

@@ -1,0 +1,16 @@
+id: card-305fe3a2eebc651b
+gestalt: flashcard@1
+front: Nice to meet you.
+context: to someone your own age, casually (tu)
+back: Piacere di conoscerti.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-04940712c401691c: 1.0
+  concept-f8e675d57e4b2567: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

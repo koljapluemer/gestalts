@@ -1,0 +1,14 @@
+id: transparent-input
+version: 1.0.0
+title: Watch with vocabulary
+description: >-
+  Watch YouTube videos in a language you learn, with cards for the words worth knowing as they come up. Every word shown
+  counts as having come up, for the concept of its flemma; words whose flashcards you know well get no cards.
+tags: [learning]
+# the video player is a frame of its own, which only works in the app's origin (granted by the distribution)
+permissions: [same-origin]
+# a video's subtitles: YouTube doesn't let pages read them, so the desktop app fetches them
+network: [www.youtube.com]
+llm: true
+reads: [media-source@1, glossed-track@1, flashcard@1, fsrs-data@1, concept@2, practice-event@1]
+writes: [media-source@1, glossed-track@1, concept@2, practice-event@1]

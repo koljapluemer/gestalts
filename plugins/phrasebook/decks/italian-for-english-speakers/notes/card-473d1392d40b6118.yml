@@ -1,0 +1,14 @@
+id: card-473d1392d40b6118
+gestalt: flashcard@1
+front: Thank you.
+back: Grazie.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-bcd1df9bb41af1d6: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

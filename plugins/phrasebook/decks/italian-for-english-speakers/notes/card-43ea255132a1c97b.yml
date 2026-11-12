@@ -1,0 +1,16 @@
+id: card-43ea255132a1c97b
+gestalt: flashcard@1
+front: Nice to meet you.
+context: to someone you don't know (Lei)
+back: Piacere di conoscerla.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-04940712c401691c: 1.0
+  concept-54265fe22379a9aa: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

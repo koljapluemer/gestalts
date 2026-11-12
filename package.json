@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "oxlint packages plugins",
+    "lint": "oxlint packages plugins apps",
     "typecheck": "pnpm -r typecheck && tsc -p plugins",
-    "test": "vitest run"
+    "test": "vitest run && pnpm -r --if-present test"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",

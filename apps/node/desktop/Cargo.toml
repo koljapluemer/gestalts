@@ -1,0 +1,57 @@
+[package]
+name = "gestalter"
+description = "The gestalter's desktop app: serves the gestalter, with a folder on this computer as the source of truth, and runs its plugins' workers"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+gestalts-node.workspace = true
+clap = { version = "4", features = ["derive"] }
+# the same version as the node's, whose `Embedded` takes these `Dir`s
+include_dir = "0.7"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
+serde_json.workspace = true
+png = "0.18"
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
+auto-launch = "0.6"
+opener = "0.9"
+
+[build-dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_yaml_ng.workspace = true
+
+# Linux: StatusNotifierItem over D-Bus, so no GTK/appindicator; it runs its own thread, no event loop needed
+[target.'cfg(target_os = "linux")'.dependencies]
+tray-icon = { version = "0.26", default-features = false, features = ["ksni"] }
+
+# macOS/Windows: the tray needs an event loop on the main thread, which tao provides
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+tray-icon = "0.26"
+tao = "0.37"
+
+[package.metadata.packager]
+product-name = "gestalter"
+identifier = "com.koljasam.gestalter"
+category = "Productivity"
+description = "Your notes in a folder on this computer: the gestalter, its plugins and their workers"
+icons = ["assets/icon.png"]
+authors = ["Kolja Sam"]
+publisher = "Kolja Sam"
+before-packaging-command = "cargo build --release -p gestalter"
+out-dir = "../../../target/packages"
+
+
+[package.metadata.generate-rpm]
+name = "gestalter"
+summary = "Your notes in a folder on this computer: the gestalter, its plugins and their workers"
+license = "proprietary"
+assets = [
+  { source = "../../../target/release/gestalter", dest = "/usr/bin/gestalter", mode = "755" },
+  { source = "assets/gestalter.desktop", dest = "/usr/share/applications/gestalter.desktop", mode = "644" },
+  { source = "assets/icon.png", dest = "/usr/share/icons/hicolor/256x256/apps/gestalter.png", mode = "644" },
+]
+
+# the desktop app's earlier name (the .deb can't say so: uninstall that one by hand); the settings
+# (`gestalts/config.json`) are the node's and stay
+[package.metadata.generate-rpm.obsoletes]
+gestalts-connector = "*"

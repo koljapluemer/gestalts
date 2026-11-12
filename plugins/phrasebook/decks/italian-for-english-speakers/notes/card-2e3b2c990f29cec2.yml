@@ -1,0 +1,16 @@
+id: card-2e3b2c990f29cec2
+gestalt: flashcard@1
+front: Speak more slowly, please.
+context: to someone you don't know (Lei)
+back: Parli più lentamente, per favore.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-54265fe22379a9aa: 0.5
+  concept-d301348c1a7cfe1a: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

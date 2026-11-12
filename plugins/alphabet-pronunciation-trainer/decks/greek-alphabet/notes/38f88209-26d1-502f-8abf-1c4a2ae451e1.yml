@@ -1,0 +1,18 @@
+id: 38f88209-26d1-502f-8abf-1c4a2ae451e1
+gestalt: flashcard@1
+front: "κομήτης"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 296c4c57f1a22074.webp}
+- {label: audio, file: 6a9a4de6b85adeac.mp3}
+concepts:
+  concept-0692f3e2bc08b128: 0.142857
+  concept-3cfa85d98326d0c6: 1.0
+  concept-4a4a6efd38f5c83b: 0.142857
+  concept-6260640a23d10f77: 0.285714
+  concept-927d19d39cb3b2fa: 0.142857
+  concept-a37a168e6aeb95ce: 0.142857
+  concept-bc1767973b740c00: 0.142857

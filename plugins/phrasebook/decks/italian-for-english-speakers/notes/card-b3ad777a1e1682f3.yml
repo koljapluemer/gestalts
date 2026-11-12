@@ -1,0 +1,14 @@
+id: card-b3ad777a1e1682f3
+gestalt: flashcard@1
+front: My name is ___.
+back: Mi chiamo ___.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-d2f09b0a80682a94: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

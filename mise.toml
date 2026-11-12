@@ -6,27 +6,38 @@ node = "26.12.0"
 pnpm = "10.32.1"
 uv = "0.13.6"
 "cargo:wasm-pack" = "0.15.1"
+"cargo:cargo-packager" = "0.11.8"
+"cargo:cargo-generate-rpm" = "0.21.1"
+"cargo:tauri-cli" = "2.12.4"
+
+# --- the whole repo ---
 
 [tasks.setup]
-description = "JS dependencies and the core compiled to wasm (after cloning, and after changing crates/core, crates/peer or crates/wasm)"
+description = "JS dependencies, the core compiled to wasm (after cloning, and after changing crates/core, crates/peer or crates/wasm) and the Make agent template"
 run = [
   "pnpm install",
   "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",
+  "pnpm -C apps/loops-for-learning/agent-template install --ignore-workspace",
 ]
 
 [tasks.check]
-description = "Tests, lints and typechecks"
+description = "Tests, lints, typechecks, every deck's health and the agent template's example"
 depends = ["setup"]
-run = [
-  "cargo test --workspace -q",
-  "cargo clippy --workspace -q -- -D warnings",
-  "pnpm lint",
-  "pnpm typecheck",
-  "pnpm test",
-]
+shell = "bash -c"
+run = """
+set -euo pipefail
+cargo test --workspace -q
+cargo clippy --workspace -q -- -D warnings
+pnpm lint
+pnpm typecheck
+pnpm test
+python3 -m unittest discover -s apps/loops-for-learning/tests
+apps/loops-for-learning/scripts/check-example.sh
+for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
+"""
 
 [tasks.serve]
-description = "The node headless with this repo's plugins (and gestalt-plugins', when checked out next to it), for working on workers without an app's desktop shell"
+description = "The node headless with the repo's plugins, for working on workers without the desktop shell"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
 run = "cargo run -q -p gestalts-node -- --profile dev $(bash scripts/plugin-dirs.sh) serve --data {{usage.dir}}"
 
@@ -36,6 +47,108 @@ usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
 run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health {{usage.dir}}"
 
 [tasks.publish-data]
-description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, checks"
-usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
+description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, checks (after editing a plugin's deck)"
+usage = 'arg "<dir>" help="the data folder, e.g. plugins/phrasebook/decks/<deck>"'
 run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
+
+# --- gestalter and the desktop/Android app ---
+
+[tasks."gestalter:dev"]
+description = "The desktop app (tray, the repo's plugins, dev profile) and gestalter on it, with hot reload, on the first free ports from :5173 and :7737"
+depends = ["setup"]
+shell = "bash -c"
+run = """
+trap 'kill 0' EXIT
+page="$(scripts/free-port.sh 5173)"
+# in steps of two: the port after it is this node's home-network port. Clear of an installed gestalter on 7717
+node="$(scripts/free-port.sh 7737 2)"
+echo "gestalter: http://localhost:$page/ on the node at :$node"
+cargo run -q -p gestalter -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --open-url "http://localhost:$page/" &
+GESTALTER_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$page" --strictPort &
+wait
+"""
+
+[tasks."gestalter:build"]
+description = "Production build of the gestalter into apps/gestalter/distribution/dist, which the desktop app embeds"
+depends = ["setup"]
+run = "pnpm --dir apps/gestalter/distribution build"
+
+[tasks."node:package"]
+description = "Desktop app installers for this OS into target/packages"
+depends = ["gestalter:build"]
+shell = "bash -c"
+run = """
+set -euo pipefail
+case "$(uname -s)" in
+  Linux)  cargo packager -p gestalter --release --formats deb,appimage
+          cargo generate-rpm -p apps/node/desktop -o target/packages ;;
+  Darwin) cargo packager -p gestalter --release --formats dmg ;;
+  *)      cargo packager -p gestalter --release --formats nsis ;;
+esac
+"""
+
+[tasks."node:install"]
+description = "Build and install the desktop app on this machine, the way a user gets it"
+depends = ["node:package"]
+run = "bash scripts/install-package.sh target/packages"
+
+[tasks."android:check"]
+description = "Clippy on the Android app for arm64 Android (needs the NDK, see apps/gestalter/doc/android.md)"
+shell = "bash -c"
+run = """
+set -euo pipefail
+source scripts/android-env.sh
+bin="$(echo "$NDK_HOME"/toolchains/llvm/prebuilt/*/bin)"
+export CC_aarch64_linux_android="$bin/aarch64-linux-android24-clang" AR_aarch64_linux_android="$bin/llvm-ar"
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$bin/aarch64-linux-android24-clang"
+cargo clippy --manifest-path apps/node/android/Cargo.toml -q --target aarch64-linux-android -- -D warnings
+"""
+
+[tasks."android:dev"]
+description = "The Android app on a connected phone or a running emulator, with the page hot-reloading from this machine"
+depends = ["setup"]
+dir = "apps/node/android"
+shell = "bash -c"
+run = """
+source ../../../scripts/android-env.sh
+export GESTALTER_PAGE_PORT="$(../../../scripts/free-port.sh 5174)"
+export GESTALTER_HMR_PORT="$(../../../scripts/free-port.sh $((GESTALTER_PAGE_PORT + 1)))"
+cargo tauri android dev --config "{\\"build\\":{\\"devUrl\\":\\"http://localhost:$GESTALTER_PAGE_PORT\\"}}"
+"""
+
+[tasks."android:build"]
+description = "A debug APK for arm64 phones, to install with adb (other targets: cd apps/node/android && cargo tauri android build --debug --apk --target x86_64)"
+depends = ["setup"]
+dir = "apps/node/android"
+shell = "bash -c"
+run = """
+set -euo pipefail
+source ../../../scripts/android-env.sh
+cargo tauri android build --debug --apk --target aarch64
+ls gen/android/app/build/outputs/apk/*/debug/*.apk
+"""
+
+# --- loops-for-learning ---
+
+[tasks."loops:dev"]
+description = "The local Make node on :7727 and the Loops app on :5174 with hot reload"
+depends = ["setup"]
+run = "apps/loops-for-learning/scripts/dev.sh"
+
+[tasks."loops:app"]
+description = "The Loops app on :5174 without the local Make agent"
+depends = ["setup"]
+run = "pnpm --dir apps/loops-for-learning dev"
+
+[tasks."loops:node"]
+description = "The local Make node on :7727, using $WORKSHOP_DATA or ~/gestalt-workshop-views"
+run = "apps/loops-for-learning/scripts/node.sh"
+
+[tasks."loops:build"]
+description = "Production build into apps/loops-for-learning/dist, static files to host anywhere"
+depends = ["setup"]
+run = "pnpm --dir apps/loops-for-learning build"
+
+[tasks."loops:agent-stats"]
+description = "Summarize local Make agent time, token use, cost and tool activity"
+run = "python3 apps/loops-for-learning/scripts/agent_stats.py"

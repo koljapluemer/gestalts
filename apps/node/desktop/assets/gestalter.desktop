@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=gestalter
+Comment=Your notes in a folder on this computer: the gestalter, its plugins and their workers
+Exec=gestalter
+Icon=gestalter
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=false

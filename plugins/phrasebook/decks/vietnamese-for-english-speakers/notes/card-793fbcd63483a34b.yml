@@ -1,0 +1,16 @@
+id: card-793fbcd63483a34b
+gestalt: flashcard@1
+front: What is your name?
+context: formal, to a woman in her forties or older
+back: Bà tên là gì?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-8a92021dfbe4d9ba: 0.5
+  concept-ac95210aa650f8ef: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

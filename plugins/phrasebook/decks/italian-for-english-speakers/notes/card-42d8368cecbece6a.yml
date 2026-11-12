@@ -1,0 +1,16 @@
+id: card-42d8368cecbece6a
+gestalt: flashcard@1
+front: Goodbye.
+context: informal
+back: Ciao.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-66e7b45d69543b77: 1.0
+  concept-c29043a284918ee3: 0.4
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

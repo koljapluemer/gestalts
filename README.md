@@ -1,31 +1,42 @@
 # gestalts
 
-Shared code base for gestalt-based apps: personal plain-text data (ymls and blobs in one folder, each yml naming exactly
-one gestalt) with views on top. The core, the node, the host, the view contract and the note views live here; the apps
-(`gestalter` and `loops-for-learning`, whose Make mode contains the former Workshop) are repos of their own. Start with
-[`doc/architecture.md`](doc/architecture.md).
+Personal plain-text data (ymls and blobs in one folder, each yml naming exactly one gestalt) with views on top, and the
+apps built on it. Start with [`doc/architecture.md`](doc/architecture.md).
+
+```
+crates/       the core (Rust, also in the page as wasm), merge, fs, peer sync, the node, the phone's device
+packages/     what apps and views build with: client, host, view (the view contract), kit, learning, sources, vite
+gestalts/     the core's gestalt definitions
+plugins/      the views (and their decks, workers), one folder each, usable by any app
+sdk/python/   what plugin workers import
+apps/
+  gestalter/            notes and learning: distribution/ (desktop), distribution-android/
+  loops-for-learning/   the learning views one at a time (Learn), and Make
+  node/                 the desktop app (desktop/), the Android app (android/), iOS later
+scripts/      shared by the tasks
+```
 
 ## Developing
 
-Needs [mise](https://mise.jdx.dev) and [rustup](https://rustup.rs). mise installs Node, pnpm, uv and wasm-pack as
-pinned in `mise.toml`; rustup picks up the Rust version from `rust-toolchain.toml`.
+Needs [mise](https://mise.jdx.dev) and [rustup](https://rustup.rs). mise installs Node, pnpm, uv, wasm-pack and the
+packaging tools as pinned in `mise.toml`; rustup picks up the Rust version (and the wasm and Android targets) from
+`rust-toolchain.toml`.
 
 ```sh
 mise install          # once after cloning, and when mise.toml changes
-mise run setup        # JS dependencies and the core in wasm; the apps' setup runs this too
-mise run check        # tests, lints, typechecks
+mise run setup        # JS dependencies, the core in wasm, the Make agent template
+mise run check        # tests, lints, typechecks, deck health
+mise run gestalter:dev                            # the desktop app and gestalter on it, hot reload
+mise run loops:dev                                # loops-for-learning and its local Make node
+mise run android:dev                              # the Android app on a phone or emulator (needs the SDK and NDK)
 mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's deck
 mise run health-data ~/some-folder                # which ymls can't be used, and why
-mise run serve ~/some-folder                      # the node headless with this repo's plugins
+mise run serve ~/some-folder                      # the node headless with the repo's plugins
 mise tasks            # everything else
 ```
 
-To see changes in an app, check it out next to this repo and run it there (`mise run dev`): it links these packages,
-plugins and crates by path, so they hot-reload.
+## History
 
-```
-parent/
-  gestalts/
-  gestalter/
-  loops-for-learning/
-```
+Until 2026-11-12 the apps and plugins were repos of their own, now archived: gestalter (`f64751c`), gestalt-plugins
+(`f642f41`), loops-for-learning (`0ba0ff7`, which had folded in gestalt-workshop). Each has a `pre-one-gestalt` tag
+from before the one-yml-one-gestalt re-architecture.

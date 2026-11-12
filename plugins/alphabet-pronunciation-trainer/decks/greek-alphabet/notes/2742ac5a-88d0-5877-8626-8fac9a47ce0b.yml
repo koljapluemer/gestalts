@@ -1,0 +1,20 @@
+id: 2742ac5a-88d0-5877-8626-8fac9a47ce0b
+gestalt: flashcard@1
+front: "κροκόδειλος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 42dc9f88cfe0bb57.webp}
+- {label: audio, file: e93a89611611326f.mp3}
+concepts:
+  concept-0692f3e2bc08b128: 0.181818
+  concept-4a4a6efd38f5c83b: 0.090909
+  concept-6ce1d33edca68a50: 0.090909
+  concept-9ce48bbe96191c88: 0.090909
+  concept-a11f395c31268153: 0.090909
+  concept-a88920689c0438c2: 0.090909
+  concept-aa73127d91582d60: 0.090909
+  concept-b77bc2d49d48b844: 1.0
+  concept-bc1767973b740c00: 0.272727

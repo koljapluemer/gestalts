@@ -1,0 +1,5 @@
+@import "tailwindcss";
+/* an @source per @gestalts package and plugin, from @gestalts/vite */
+@gestalts-sources;
+@plugin "daisyui";
+

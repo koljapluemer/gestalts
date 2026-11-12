@@ -1,0 +1,15 @@
+id: card-98896f2f7f49bfaf
+gestalt: flashcard@1
+front: I can't speak Vietnamese.
+back: Tôi không biết nói tiếng Việt.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-ab0a21e95b023939: 1.0
+  concept-dd97ae9168ba5a60: 0.2
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

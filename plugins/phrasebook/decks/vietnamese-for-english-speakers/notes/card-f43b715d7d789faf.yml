@@ -1,0 +1,15 @@
+id: card-f43b715d7d789faf
+gestalt: flashcard@1
+front: Hello.
+context: informal
+back: Chào.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-22e23ddbd7d42e89: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

@@ -1,0 +1,18 @@
+id: 1343328c-2a17-55eb-a6fc-35f8363020b1
+gestalt: flashcard@1
+front: "δελφίς"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: c96d567c41b483e1.webp}
+- {label: audio, file: aab7dfa72cc15337.mp3}
+concepts:
+  concept-41216d48a05be718: 0.166667
+  concept-4a4a6efd38f5c83b: 0.166667
+  concept-6ce1d33edca68a50: 0.166667
+  concept-9ce48bbe96191c88: 0.166667
+  concept-9e08f1cbda04912d: 1.0
+  concept-a11f395c31268153: 0.166667
+  concept-aa73127d91582d60: 0.166667

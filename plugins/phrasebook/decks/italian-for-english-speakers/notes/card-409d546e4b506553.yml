@@ -1,0 +1,16 @@
+id: card-409d546e4b506553
+gestalt: flashcard@1
+front: What is your name?
+context: to a friend or a child (tu)
+back: Come ti chiami?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-d1f9486ec20bac11: 1.0
+  concept-f8e675d57e4b2567: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

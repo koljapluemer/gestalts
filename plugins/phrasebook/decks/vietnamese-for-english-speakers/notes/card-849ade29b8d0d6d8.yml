@@ -1,0 +1,17 @@
+id: card-849ade29b8d0d6d8
+gestalt: flashcard@1
+front: What is your name?
+context: to a woman not yet middle-aged
+back: Cô tên là gì?
+extra: '*Cô* rather than *bà* gives her the benefit of the doubt about her age.'
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-504c4f1e4616b99b: 0.5
+  concept-ac95210aa650f8ef: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

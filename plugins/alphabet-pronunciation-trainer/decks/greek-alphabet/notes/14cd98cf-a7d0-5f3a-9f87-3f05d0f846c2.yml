@@ -1,0 +1,16 @@
+id: 14cd98cf-a7d0-5f3a-9f87-3f05d0f846c2
+gestalt: flashcard@1
+front: "ὕδωρ"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: f845695c917729ed.webp}
+- {label: audio, file: d359db8b844e08cf.mp3}
+concepts:
+  concept-521174037f78ad9d: 1.0
+  concept-67f80ac5a8e61df2: 0.25
+  concept-9ce48bbe96191c88: 0.25
+  concept-a88920689c0438c2: 0.25
+  concept-c6471c8d9f9a56df: 0.25

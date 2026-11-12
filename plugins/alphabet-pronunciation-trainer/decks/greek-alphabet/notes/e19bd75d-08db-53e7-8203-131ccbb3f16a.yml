@@ -1,0 +1,21 @@
+id: e19bd75d-08db-53e7-8203-131ccbb3f16a
+gestalt: flashcard@1
+front: "τεχνολογία"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 3673337a21a89712.webp}
+- {label: audio, file: 1268325ec071ab93.mp3}
+concepts:
+  concept-0286d3857baf70ae: 1.0
+  concept-044b0c7b2c46daaa: 0.1
+  concept-0f759da3e0e988c9: 0.1
+  concept-6ce1d33edca68a50: 0.1
+  concept-90196fbd70c97279: 0.1
+  concept-927d19d39cb3b2fa: 0.1
+  concept-a11f395c31268153: 0.1
+  concept-aa73127d91582d60: 0.1
+  concept-bc1767973b740c00: 0.2
+  concept-f3c24fce21b15d72: 0.1

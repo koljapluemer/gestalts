@@ -1,0 +1,19 @@
+id: a780aea1-c6fb-535a-8d12-074ade18873b
+gestalt: flashcard@1
+front: "μέταλλον"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 4d7c80d315201289.webp}
+- {label: audio, file: a5b4faf0bbdfe890.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.125
+  concept-5a49c85b1ebc4a12: 1.0
+  concept-927d19d39cb3b2fa: 0.125
+  concept-a11f395c31268153: 0.125
+  concept-a37a168e6aeb95ce: 0.125
+  concept-aa73127d91582d60: 0.25
+  concept-bc1767973b740c00: 0.125
+  concept-f3c24fce21b15d72: 0.125

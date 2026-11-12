@@ -1,0 +1,17 @@
+id: 94ac8db3-953e-5761-a951-3a0143994122
+gestalt: flashcard@1
+front: "κύβος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: cc8fe12dc8fe16d4.webp}
+- {label: audio, file: e9bc14f826d32b08.mp3}
+concepts:
+  concept-0692f3e2bc08b128: 0.2
+  concept-09e3337487562311: 0.2
+  concept-4a4a6efd38f5c83b: 0.2
+  concept-67f80ac5a8e61df2: 0.2
+  concept-bc1767973b740c00: 0.2
+  concept-cd94bec5410c3ee4: 1.0

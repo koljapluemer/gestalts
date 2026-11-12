@@ -1,0 +1,17 @@
+id: 53698b1b-0495-5f8b-a186-ccddd936b2ce
+gestalt: flashcard@1
+front: "φοῖνιξ"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: f88406aaa9deb112.webp}
+- {label: audio, file: 51d60d60e58e7ce3.mp3}
+concepts:
+  concept-051df7886d6a542f: 0.166667
+  concept-2e01314ee575b161: 1.0
+  concept-41216d48a05be718: 0.166667
+  concept-6ce1d33edca68a50: 0.333333
+  concept-bc1767973b740c00: 0.166667
+  concept-f3c24fce21b15d72: 0.166667

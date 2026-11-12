@@ -1,0 +1,262 @@
+# Source of decks/vietnamese-for-english-speakers; build with tools/build_phrase_decks.py.
+#
+# Each phrase is one intent ("ask how someone is") and becomes one concept, `vie: <intent>`, practised fully by every
+# variant. Variants are the ways to say it, each its own card: who you are and who you speak to go in `context`.
+# `concepts` adds what a variant practises beyond the intent (a pronoun, a particle), by name and weight. `own: true`
+# marks a card written for this deck, not taken from the source: those need a native speaker's check.
+#
+# Spelling follows the source, which mixes khỏe and khoẻ. Its pronunciation guide is Southern (Saigon); there is no
+# audio yet, and the written forms here are the same in the north.
+
+deck: vietnamese-for-english-speakers
+title: Essential Vietnamese phrases for English speakers
+lang: vie
+language: Vietnamese
+source:
+  key: wikivoyage-vietnamese-phrasebook
+  title: Vietnamese phrasebook
+  url: https://en.wikivoyage.org/wiki/Vietnamese_phrasebook
+  urldate: 2026-11-11
+  history: https://en.wikivoyage.org/w/index.php?title=Vietnamese_phrasebook&action=history
+
+# what the language's own concepts say about others; the shared ones (function:, situation:, social:) are named as in
+# every phrase deck, so decks meet there
+links:
+  - ["vie: address as anh", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as chị", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as em", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as ông", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as bà", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as cô", "social: addressing by relation", 0.5, part-of]
+  - ["vie: address as bạn", "social: addressing by relation", 0.3, part-of]
+  - ["vie: self as em", "social: addressing by relation", 0.5, part-of]
+  - ["vie: self as anh", "social: addressing by relation", 0.5, part-of]
+  - ["vie: self as tôi", "social: addressing by relation", 0.2, part-of]
+  # the kinship terms are learned as a system: one well known makes its neighbours easier
+  - ["vie: address as anh", "vie: address as chị", 0.5, similar]
+  - ["vie: address as chị", "vie: address as anh", 0.5, similar]
+  - ["vie: address as ông", "vie: address as bà", 0.5, similar]
+  - ["vie: address as bà", "vie: address as ông", 0.5, similar]
+  - ["vie: address as cô", "vie: address as chị", 0.3, similar]
+  # calling someone em and calling yourself em are two sides of one relation
+  - ["vie: address as em", "vie: self as anh", 0.4, similar]
+  - ["vie: self as em", "vie: address as anh", 0.4, similar]
+  - ["vie: self as em", "vie: address as chị", 0.4, similar]
+  - ["vie: particle ạ (respect)", "social: politeness", 0.6, part-of]
+  - ["vie: dạ (respectful yes)", "social: politeness", 0.5, part-of]
+  - ["vie: dạ (respectful yes)", "vie: particle ạ (respect)", 0.3, similar]
+
+phrases:
+  - intent: say hello
+    functions: [greet]
+    situations: [meeting someone]
+    variants:
+      - { front: "Hello.", context: "informal", back: "Chào." }
+      - { front: "Hello.", context: "formal", back: "Xin chào." }
+
+  - intent: answer the phone
+    functions: [greet]
+    situations: [on the phone]
+    variants:
+      - { front: "Hello?", context: "answering the phone", back: "A-lô." }
+
+  - intent: ask how someone is
+    functions: [ask how someone is]
+    situations: [meeting someone]
+    variants:
+      - front: How are you?
+        context: to someone your own age you don't know well
+        back: Bạn khỏe không?
+        extra: Literally "are you healthy?". *Bạn* means friend.
+        concepts: { "vie: address as bạn": 0.5 }
+      - front: How are you?
+        context: to a man a little older than you
+        back: Anh có khỏe không ạ?
+        extra: '*Anh* (older brother) for him; *ạ* at the end shows respect.'
+        concepts: { "vie: address as anh": 0.5, "vie: particle ạ (respect)": 0.3 }
+        own: true
+      - front: How are you?
+        context: to a woman a little older than you
+        back: Chị có khỏe không ạ?
+        extra: '*Chị* (older sister) for her; *ạ* at the end shows respect.'
+        concepts: { "vie: address as chị": 0.5, "vie: particle ạ (respect)": 0.3 }
+        own: true
+      - front: How are you?
+        context: to someone younger than you
+        back: Em có khỏe không?
+        extra: '*Em* (younger sibling) for anyone younger; no *ạ* needed.'
+        concepts: { "vie: address as em": 0.5 }
+        own: true
+
+  - intent: say you're fine
+    functions: [answer how you are, thank]
+    situations: [meeting someone]
+    variants:
+      - front: Fine, thank you.
+        back: Tôi khoẻ, cảm ơn.
+        extra: Literally "I am healthy, thank you". Vietnamese mostly use *tôi* (I) in formal situations.
+        concepts: { "vie: self as tôi": 0.3 }
+
+  - intent: ask someone's name
+    functions: [ask someone's name]
+    situations: [meeting someone]
+    variants:
+      - front: What is your name?
+        context: formal, to a man in his forties or older
+        back: Ông tên là gì?
+        concepts: { "vie: address as ông": 0.5 }
+      - front: What is your name?
+        context: formal, to a woman in her forties or older
+        back: Bà tên là gì?
+        concepts: { "vie: address as bà": 0.5 }
+      - front: What is your name?
+        context: to a man not much older than you
+        back: Anh tên là gì?
+        extra: '*Anh* is for any older male figure; literally "older brother".'
+        concepts: { "vie: address as anh": 0.5 }
+      - front: What is your name?
+        context: to a woman not yet middle-aged
+        back: Cô tên là gì?
+        extra: '*Cô* rather than *bà* gives her the benefit of the doubt about her age.'
+        concepts: { "vie: address as cô": 0.5 }
+      - front: What is your name?
+        context: to a woman a little older than you
+        back: Chị tên là gì ạ?
+        concepts: { "vie: address as chị": 0.5, "vie: particle ạ (respect)": 0.3 }
+        own: true
+      - front: What is your name?
+        context: to someone younger than you
+        back: Em tên là gì?
+        concepts: { "vie: address as em": 0.5 }
+        own: true
+
+  - intent: say your name
+    functions: [introduce yourself]
+    situations: [meeting someone]
+    variants:
+      - { front: "My name is ___.", back: "Tôi tên là ___.", concepts: { "vie: self as tôi": 0.3 } }
+
+  - intent: say please
+    functions: [ask for something]
+    situations: [anywhere]
+    variants:
+      - front: Please.
+        back: Làm ơn.
+        extra: Used far less than "please" in English; politeness mostly comes from how you address someone.
+
+  - intent: say thank you
+    functions: [thank]
+    situations: [anywhere]
+    variants:
+      - { front: "Thank you.", back: "Cảm ơn." }
+      - front: Thank you.
+        context: you're younger, to an older man
+        back: Em cảm ơn anh ạ.
+        extra: '*Em* for yourself, *anh* for him, *ạ* for respect.'
+        concepts: { "vie: self as em": 0.4, "vie: address as anh": 0.4, "vie: particle ạ (respect)": 0.3 }
+        own: true
+      - front: Thank you.
+        context: you're younger, to an older woman
+        back: Em cảm ơn chị ạ.
+        concepts: { "vie: self as em": 0.4, "vie: address as chị": 0.4, "vie: particle ạ (respect)": 0.3 }
+        own: true
+      - front: Thank you.
+        context: you're a man, to someone younger
+        back: Anh cảm ơn em.
+        extra: To someone younger you call yourself *anh* (if you're a man) or *chị* (if you're a woman).
+        concepts: { "vie: self as anh": 0.4, "vie: address as em": 0.4 }
+        own: true
+
+  - intent: answer thanks
+    functions: [answer thanks]
+    situations: [anywhere]
+    variants:
+      - { front: "You're welcome.", back: "Không sao đâu." }
+
+  - intent: say yes
+    functions: [agree]
+    situations: [anywhere]
+    variants:
+      - { front: "Yes.", back: "Vâng." }
+      - front: Yes.
+        context: respectfully
+        back: Dạ.
+        concepts: { "vie: dạ (respectful yes)": 0.5 }
+
+  - intent: say no
+    functions: [refuse]
+    situations: [anywhere]
+    variants:
+      - { front: "No.", back: "Không." }
+
+  - intent: apologise
+    functions: [apologise]
+    situations: [anywhere]
+    variants:
+      - { front: "I'm sorry.", back: "Xin lỗi." }
+
+  - intent: say goodbye
+    functions: [take leave]
+    situations: [meeting someone]
+    variants:
+      - { front: "Goodbye.", back: "Tạm biệt." }
+
+  - intent: say you can't speak Vietnamese
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "I can't speak Vietnamese.", back: "Tôi không biết nói tiếng Việt.", concepts: { "vie: self as tôi": 0.2 } }
+
+  - intent: ask if someone speaks English
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - front: Do you speak English?
+        back: Biết nói tiếng Anh không?
+        extra: No "you" at all; Vietnamese often leaves the pronoun out.
+
+  - intent: ask for someone who speaks English
+    functions: [cope with not understanding, ask for help]
+    situations: [anywhere]
+    variants:
+      - { front: "Is there someone here who speaks English?", back: "Có ai ở đây biết nói tiếng Anh không?" }
+
+  - intent: say you don't understand
+    functions: [cope with not understanding]
+    situations: [anywhere]
+    variants:
+      - { front: "I don't understand.", back: "Tôi không hiểu.", concepts: { "vie: self as tôi": 0.2 } }
+
+  - intent: call for help
+    functions: [ask for help]
+    situations: [emergency]
+    variants:
+      - { front: "Help!", back: "Cứu tôi với!" }
+
+  - intent: warn someone
+    functions: [warn]
+    situations: [emergency]
+    variants:
+      - { front: "Look out!", back: "Cẩn thận!" }
+
+  - intent: ask where the toilet is
+    functions: [ask the way]
+    situations: [getting around]
+    variants:
+      - { front: "Where is the toilet?", back: "Nhà vệ sinh ở đâu?" }
+
+  - intent: say you'll be back soon
+    functions: [take leave]
+    situations: [anywhere]
+    variants:
+      - { front: "I'll be back soon.", back: "Tôi sẽ quay lại sớm." }
+
+  - intent: call a waiter
+    functions: [get someone's attention]
+    situations: [restaurant]
+    variants:
+      - front: Excuse me!
+        context: calling a waiter or waitress who looks younger than you
+        back: Em ơi!
+        extra: Servers are usually young, so *em*; for an older one, use the term that fits their age.
+        concepts: { "vie: address as em": 0.5 }

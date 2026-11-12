@@ -1,0 +1,14 @@
+id: card-ce78a82626c7a9fd
+gestalt: flashcard@1
+front: Is there someone here who speaks English?
+back: Qualcuno qui parla inglese?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-26a7b49a8f2ddef9: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

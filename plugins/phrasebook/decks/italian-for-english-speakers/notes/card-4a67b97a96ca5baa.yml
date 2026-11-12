@@ -1,0 +1,14 @@
+id: card-4a67b97a96ca5baa
+gestalt: flashcard@1
+front: I don't speak Italian.
+back: Non parlo italiano.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-76a78cc15ab207b6: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

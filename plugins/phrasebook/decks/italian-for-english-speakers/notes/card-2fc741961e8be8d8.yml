@@ -1,0 +1,14 @@
+id: card-2fc741961e8be8d8
+gestalt: flashcard@1
+front: Yes.
+back: Sì.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-78b394cf4c3a660c: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

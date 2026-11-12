@@ -1,0 +1,14 @@
+id: card-fe8aea87c40cdd56
+gestalt: flashcard@1
+front: Is there someone here who speaks English?
+back: Có ai ở đây biết nói tiếng Anh không?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-05e48e22ad7cd492: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

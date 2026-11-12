@@ -1,0 +1,7 @@
+id: alphabet-pronunciation-trainer
+version: 1.0.0
+title: Alphabet pronunciation
+description: Learn a script by reading words aloud whose pictures give their meaning away, practised by spaced repetition.
+reads: [flashcard@1, fsrs-data@1, practice-session@1, practice-event@1]
+writes: [fsrs-data@1, practice-session@1, practice-event@1]
+tags: [learning]

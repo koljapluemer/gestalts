@@ -1,0 +1,18 @@
+# The gestalter on Android (`id` is its for good: tabs are kept per distribution). `core` plugins are always there;
+# `plugins` can be installed and uninstalled. Paths are from this file.
+id: gestalter-phone
+core:
+  - ../../../plugins/quick-note
+  - ../../../plugins/note-crud
+  - ../../../plugins/note-queue
+  - ../../../plugins/flashcards
+plugins:
+  - ../../../plugins/flashcard-manager
+  - ../../../plugins/source-manager
+  - ../../../plugins/concept-explorer
+  - ../../../plugins/alphabet-pronunciation-trainer
+  # no grants: recording in the Android app needs its WebView to pass the microphone on, which it doesn't yet, so the
+  # phrasebook reveals instead of recording there
+  - ../../../plugins/phrasebook
+default_views: [quick-note, note-crud, note-queue]
+install_ui: true

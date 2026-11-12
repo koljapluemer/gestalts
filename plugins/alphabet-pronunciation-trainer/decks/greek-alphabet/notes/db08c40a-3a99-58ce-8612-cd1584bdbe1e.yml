@@ -1,0 +1,20 @@
+id: db08c40a-3a99-58ce-8612-cd1584bdbe1e
+gestalt: flashcard@1
+front: "κρύσταλλος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 9ab58d3864546f54.webp}
+- {label: audio, file: 7d97c8d849932342.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.1
+  concept-0692f3e2bc08b128: 0.1
+  concept-4a4a6efd38f5c83b: 0.2
+  concept-5e234e4bf8adba23: 1.0
+  concept-67f80ac5a8e61df2: 0.1
+  concept-927d19d39cb3b2fa: 0.1
+  concept-a88920689c0438c2: 0.1
+  concept-aa73127d91582d60: 0.2
+  concept-bc1767973b740c00: 0.1

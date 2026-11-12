@@ -1,0 +1,16 @@
+id: card-e1340f0b3e4acff3
+gestalt: flashcard@1
+front: How are you?
+context: to a friend or a child (tu)
+back: Come stai?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-b7d8cfacebe63162: 1.0
+  concept-f8e675d57e4b2567: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

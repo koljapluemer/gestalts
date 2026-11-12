@@ -1,0 +1,19 @@
+id: 7e71453a-fe1f-5441-aeab-9e2c73d301ed
+gestalt: flashcard@1
+front: "κέραμος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 2adebb307499956d.webp}
+- {label: audio, file: 73f9ee168240b530.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.142857
+  concept-0692f3e2bc08b128: 0.142857
+  concept-44fdf8793e886588: 1.0
+  concept-4a4a6efd38f5c83b: 0.142857
+  concept-a11f395c31268153: 0.142857
+  concept-a37a168e6aeb95ce: 0.142857
+  concept-a88920689c0438c2: 0.142857
+  concept-bc1767973b740c00: 0.142857

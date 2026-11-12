@@ -1,0 +1,15 @@
+id: 790e651b-a0f3-598c-ae60-c941f88aa059
+gestalt: flashcard@1
+front: "πῦρ"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 8f7113c9aad378eb.webp}
+- {label: audio, file: 652f4c486799c2e9.mp3}
+concepts:
+  concept-67f80ac5a8e61df2: 0.333333
+  concept-a88920689c0438c2: 0.333333
+  concept-a8b17e9b0b4fca74: 1.0
+  concept-fa2effb4251815db: 0.333333

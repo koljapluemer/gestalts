@@ -1,0 +1,20 @@
+id: 94039b68-8cc2-5b0d-b6ec-17d6beffe1e5
+gestalt: flashcard@1
+front: "ἀμφορεύς"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: d998aaccb222b8e8.webp}
+- {label: audio, file: a9f4ce0f02e8a158.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.125
+  concept-41216d48a05be718: 0.125
+  concept-4a4a6efd38f5c83b: 0.125
+  concept-67f80ac5a8e61df2: 0.125
+  concept-6c07eea0f02aec63: 1.0
+  concept-a11f395c31268153: 0.125
+  concept-a37a168e6aeb95ce: 0.125
+  concept-a88920689c0438c2: 0.125
+  concept-bc1767973b740c00: 0.125

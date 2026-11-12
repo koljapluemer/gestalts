@@ -1,0 +1,19 @@
+id: ac51a91e-021f-5c3e-be0b-bae36efa7c9d
+gestalt: flashcard@1
+front: "ὀρχήστρα"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: d30e7a0a80862971.webp}
+- {label: audio, file: de06dadabb96a6c6.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.125
+  concept-0f759da3e0e988c9: 0.125
+  concept-4a4a6efd38f5c83b: 0.125
+  concept-6260640a23d10f77: 0.125
+  concept-927d19d39cb3b2fa: 0.125
+  concept-95923d81eb2bebb5: 1.0
+  concept-a88920689c0438c2: 0.25
+  concept-bc1767973b740c00: 0.125

@@ -1,0 +1,17 @@
+id: 487e2484-35ba-5322-b212-99c3758c6522
+gestalt: flashcard@1
+front: "κιθάρα"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 5e660a05e53db1a5.webp}
+- {label: audio, file: facb064bf9e237c6.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.333333
+  concept-0692f3e2bc08b128: 0.166667
+  concept-1f20b2f619da7232: 0.166667
+  concept-6ce1d33edca68a50: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-b518fd1e643f8f78: 1.0

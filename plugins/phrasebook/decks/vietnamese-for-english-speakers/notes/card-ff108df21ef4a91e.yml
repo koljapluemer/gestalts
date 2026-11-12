@@ -1,0 +1,17 @@
+id: card-ff108df21ef4a91e
+gestalt: flashcard@1
+front: Excuse me!
+context: calling a waiter or waitress who looks younger than you
+back: Em ơi!
+extra: Servers are usually young, so *em*; for an older one, use the term that fits their age.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-34d85a58dcd5528b: 1.0
+  concept-ed0ed4d04e45ccc1: 0.5
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

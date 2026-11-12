@@ -1,0 +1,34 @@
+name: glossed-track
+version: 1
+description: >-
+  The subtitles of `source` in `language`, glossed for a `native` speaker: per segment (seconds `start` to `end`), the
+  words and expressions worth knowing, as they appear (`surface`), as their flemma (the base form standing for all
+  inflections, whatever the part of speech) and translated. Filled in as the video is watched, so it holds the segments
+  glossed so far, of `segment_count`; `model` made the last ones.
+  Id: `stableId("glossed-track", "<source>:<language>:<native>")`.
+fields:
+  source: { type: ref, required: true, targets: [media-source] }
+  language: { type: string, required: true }
+  native: { type: string, required: true }
+  segment_count: { type: integer, min: 0 }
+  model: { type: string }
+  segments:
+    type: list
+    items:
+      type: map
+      fields:
+        start: { type: number, required: true }
+        end: { type: number, required: true }
+        text: { type: string, required: true }
+        glosses:
+          type: list
+          items:
+            type: map
+            fields:
+              surface: { type: string, required: true }
+              flemma: { type: string, required: true }
+              translation: { type: string, required: true }
+merge:
+  keys:
+    segments: { union_by: start }
+    segment_count: max

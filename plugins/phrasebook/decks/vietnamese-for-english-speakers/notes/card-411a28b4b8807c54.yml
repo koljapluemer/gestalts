@@ -1,0 +1,14 @@
+id: card-411a28b4b8807c54
+gestalt: flashcard@1
+front: I'm sorry.
+back: Xin lỗi.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-85bcb3b34835f52a: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

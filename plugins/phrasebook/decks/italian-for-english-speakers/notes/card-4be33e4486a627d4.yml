@@ -1,0 +1,16 @@
+id: card-4be33e4486a627d4
+gestalt: flashcard@1
+front: Excuse me.
+context: to someone you don't know (Lei)
+back: Mi scusi.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-54265fe22379a9aa: 0.5
+  concept-635530ebd6731a30: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

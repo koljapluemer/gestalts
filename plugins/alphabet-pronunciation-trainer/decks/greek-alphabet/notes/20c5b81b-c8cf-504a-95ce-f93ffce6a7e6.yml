@@ -1,0 +1,17 @@
+id: 20c5b81b-c8cf-504a-95ce-f93ffce6a7e6
+gestalt: flashcard@1
+front: "πολύπους"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: abe03ec1c9ece0e8.webp}
+- {label: audio, file: cdafded9fc6cc673.mp3}
+concepts:
+  concept-4a4a6efd38f5c83b: 0.125
+  concept-4c2963a87f2522eb: 1.0
+  concept-67f80ac5a8e61df2: 0.25
+  concept-aa73127d91582d60: 0.125
+  concept-bc1767973b740c00: 0.25
+  concept-fa2effb4251815db: 0.25

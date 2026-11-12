@@ -1,0 +1,14 @@
+id: card-46ff49173aa492fc
+gestalt: flashcard@1
+front: Look out!
+back: Cẩn thận!
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-60f25ff5a67223f9: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

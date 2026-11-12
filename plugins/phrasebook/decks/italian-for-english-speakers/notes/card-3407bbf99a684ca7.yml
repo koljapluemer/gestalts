@@ -1,0 +1,14 @@
+id: card-3407bbf99a684ca7
+gestalt: flashcard@1
+front: No problem.
+back: Non c'è problema.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-d0b0da694ccd1f57: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

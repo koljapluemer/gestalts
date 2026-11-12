@@ -1,0 +1,22 @@
+id: 44ac7f3a-e77f-50d0-b970-b19b337c5d07
+gestalt: flashcard@1
+front: "λαβύρινθος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 5054fd66c6c7e7bc.webp}
+- {label: audio, file: 1351f9a4d9ad7d4b.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.1
+  concept-09e3337487562311: 0.1
+  concept-1f20b2f619da7232: 0.1
+  concept-4a4a6efd38f5c83b: 0.1
+  concept-67f80ac5a8e61df2: 0.1
+  concept-6ce1d33edca68a50: 0.1
+  concept-a88920689c0438c2: 0.1
+  concept-aa73127d91582d60: 0.1
+  concept-bc1767973b740c00: 0.1
+  concept-edbf00ca2804661e: 1.0
+  concept-f3c24fce21b15d72: 0.1

@@ -1,0 +1,15 @@
+id: card-ecafe38e04ce7c11
+gestalt: flashcard@1
+front: How are you?
+context: to a man a little older than you
+back: Anh có khỏe không ạ?
+extra: '*Anh* (older brother) for him; *ạ* at the end shows respect.'
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-28ca29e2c00929b6: 0.5
+  concept-864c80af33c2518c: 1.0
+  concept-ed1c490a8d8e85f1: 0.3

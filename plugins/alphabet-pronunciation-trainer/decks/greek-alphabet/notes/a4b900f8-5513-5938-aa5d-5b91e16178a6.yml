@@ -1,0 +1,19 @@
+id: a4b900f8-5513-5938-aa5d-5b91e16178a6
+gestalt: flashcard@1
+front: "θέατρον"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 30027e453a48f1f7.webp}
+- {label: audio, file: b24f6e59e2b68769.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.142857
+  concept-1281ee144624e86b: 1.0
+  concept-1f20b2f619da7232: 0.142857
+  concept-927d19d39cb3b2fa: 0.142857
+  concept-a11f395c31268153: 0.142857
+  concept-a88920689c0438c2: 0.142857
+  concept-bc1767973b740c00: 0.142857
+  concept-f3c24fce21b15d72: 0.142857

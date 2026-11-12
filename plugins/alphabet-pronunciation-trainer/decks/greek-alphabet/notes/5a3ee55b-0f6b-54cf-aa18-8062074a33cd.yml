@@ -1,0 +1,18 @@
+id: 5a3ee55b-0f6b-54cf-aa18-8062074a33cd
+gestalt: flashcard@1
+front: "σκορπίος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: f471df90175835ea.webp}
+- {label: audio, file: 6bf037fb5ee6ddce.mp3}
+concepts:
+  concept-0692f3e2bc08b128: 0.125
+  concept-4a4a6efd38f5c83b: 0.25
+  concept-6ce1d33edca68a50: 0.125
+  concept-8e901c29e965e1a2: 1.0
+  concept-a88920689c0438c2: 0.125
+  concept-bc1767973b740c00: 0.25
+  concept-fa2effb4251815db: 0.125

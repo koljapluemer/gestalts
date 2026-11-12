@@ -1,0 +1,14 @@
+id: card-e87842e792dd790f
+gestalt: flashcard@1
+front: You're welcome.
+back: Không sao đâu.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-42e4eecddc8776f5: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

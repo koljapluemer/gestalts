@@ -1,0 +1,14 @@
+id: card-76a4f9782c9f2441
+gestalt: flashcard@1
+front: Please.
+back: Per favore.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-fa7bd50b0429da41: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

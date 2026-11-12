@@ -1,0 +1,19 @@
+id: c708cff8-d026-58b0-96df-2848321f09b9
+gestalt: flashcard@1
+front: "τρίγωνον"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: a200f083050dd541.webp}
+- {label: audio, file: f2c8c7d13d635ee1.mp3}
+concepts:
+  concept-6ce1d33edca68a50: 0.125
+  concept-90196fbd70c97279: 0.125
+  concept-927d19d39cb3b2fa: 0.125
+  concept-a88920689c0438c2: 0.125
+  concept-bc1767973b740c00: 0.125
+  concept-c6471c8d9f9a56df: 0.125
+  concept-e4d58d7d0da782de: 1.0
+  concept-f3c24fce21b15d72: 0.25

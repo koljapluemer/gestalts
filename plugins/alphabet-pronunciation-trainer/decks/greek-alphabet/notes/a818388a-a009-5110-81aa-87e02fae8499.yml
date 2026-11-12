@@ -1,0 +1,17 @@
+id: a818388a-a009-5110-81aa-87e02fae8499
+gestalt: flashcard@1
+front: "τίγρις"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: da16e31fba29efc9.webp}
+- {label: audio, file: f0319836f32ca057.mp3}
+concepts:
+  concept-4a4a6efd38f5c83b: 0.166667
+  concept-6ce1d33edca68a50: 0.333333
+  concept-90196fbd70c97279: 0.166667
+  concept-927d19d39cb3b2fa: 0.166667
+  concept-9b1f4c03a01c1f1c: 1.0
+  concept-a88920689c0438c2: 0.166667

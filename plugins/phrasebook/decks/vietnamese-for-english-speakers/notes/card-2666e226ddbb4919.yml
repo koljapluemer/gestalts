@@ -1,0 +1,14 @@
+id: card-2666e226ddbb4919
+gestalt: flashcard@1
+front: Help!
+back: Cứu tôi với!
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-1c7c6e883cbf1d0b: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

@@ -1,0 +1,14 @@
+id: card-5c30e277aaee9063
+gestalt: flashcard@1
+front: Fine, thank you.
+back: Bene, grazie.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-d2084a80fc350640: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

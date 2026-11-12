@@ -1,0 +1,14 @@
+id: card-e96182b85a9f835a
+gestalt: flashcard@1
+front: I don't know.
+back: Non lo so.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-10d02b2b97c853c4: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

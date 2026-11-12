@@ -1,0 +1,16 @@
+id: card-1f07e8fd59df663c
+gestalt: flashcard@1
+front: What is your name?
+context: to someone you don't know (Lei)
+back: Come si chiama?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-54265fe22379a9aa: 0.5
+  concept-d1f9486ec20bac11: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

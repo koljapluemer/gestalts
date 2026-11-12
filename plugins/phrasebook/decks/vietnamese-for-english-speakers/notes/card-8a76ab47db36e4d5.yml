@@ -1,0 +1,14 @@
+id: card-8a76ab47db36e4d5
+gestalt: flashcard@1
+front: Thank you.
+back: Cảm ơn.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-183fb9be539baebb: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

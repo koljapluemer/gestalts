@@ -1,0 +1,17 @@
+id: card-91d95a181d36e8f5
+gestalt: flashcard@1
+front: How are you?
+context: to someone your own age you don't know well
+back: Bạn khỏe không?
+extra: Literally "are you healthy?". *Bạn* means friend.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-70e265c2c9720d72: 0.5
+  concept-864c80af33c2518c: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

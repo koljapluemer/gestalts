@@ -1,0 +1,15 @@
+id: card-25c1abd130a98667
+gestalt: flashcard@1
+front: My name is ___.
+back: Tôi tên là ___.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-dd97ae9168ba5a60: 0.3
+  concept-fa49782328a14fda: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

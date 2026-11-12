@@ -1,0 +1,16 @@
+id: card-96cf0aae02d9698d
+gestalt: flashcard@1
+front: What is your name?
+context: formal, to a man in his forties or older
+back: Ông tên là gì?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-ac95210aa650f8ef: 1.0
+  concept-fd49b1282ce44d96: 0.5
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

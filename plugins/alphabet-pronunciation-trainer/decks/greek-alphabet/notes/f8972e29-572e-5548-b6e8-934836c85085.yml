@@ -1,0 +1,16 @@
+id: f8972e29-572e-5548-b6e8-934836c85085
+gestalt: flashcard@1
+front: "λέων"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: caa74331c0e51641.webp}
+- {label: audio, file: f9732142a35c9012.mp3}
+concepts:
+  concept-9e9f24290ae30136: 1.0
+  concept-a11f395c31268153: 0.25
+  concept-aa73127d91582d60: 0.25
+  concept-c6471c8d9f9a56df: 0.25
+  concept-f3c24fce21b15d72: 0.25

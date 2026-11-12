@@ -1,0 +1,15 @@
+id: card-c4a060999a414e05
+gestalt: flashcard@1
+front: Please.
+back: Làm ơn.
+extra: Used far less than "please" in English; politeness mostly comes from how you address someone.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-d3adc3ae44b152b3: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

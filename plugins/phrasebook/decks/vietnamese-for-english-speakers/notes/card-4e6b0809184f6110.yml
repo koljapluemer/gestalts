@@ -1,0 +1,15 @@
+id: card-4e6b0809184f6110
+gestalt: flashcard@1
+front: I don't understand.
+back: Tôi không hiểu.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-dd97ae9168ba5a60: 0.2
+  concept-efaf2376b5543282: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

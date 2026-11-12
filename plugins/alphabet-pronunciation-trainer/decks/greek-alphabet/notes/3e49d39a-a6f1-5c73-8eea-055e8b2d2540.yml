@@ -1,0 +1,19 @@
+id: 3e49d39a-a6f1-5c73-8eea-055e8b2d2540
+gestalt: flashcard@1
+front: "κάμηλος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 84648c9e0a14c5ee.webp}
+- {label: audio, file: 3e6cab42aec012b6.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.142857
+  concept-0692f3e2bc08b128: 0.142857
+  concept-4a4a6efd38f5c83b: 0.142857
+  concept-6260640a23d10f77: 0.142857
+  concept-a37a168e6aeb95ce: 0.142857
+  concept-aa73127d91582d60: 0.142857
+  concept-bc1767973b740c00: 0.142857
+  concept-dce65effed9f6e59: 1.0

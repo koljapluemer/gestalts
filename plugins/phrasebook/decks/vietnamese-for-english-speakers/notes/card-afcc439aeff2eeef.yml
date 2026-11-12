@@ -1,0 +1,15 @@
+id: card-afcc439aeff2eeef
+gestalt: flashcard@1
+front: Hello?
+context: answering the phone
+back: A-lô.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-49370840c7152442: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

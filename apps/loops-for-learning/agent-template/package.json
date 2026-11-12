@@ -1,0 +1,17 @@
+{
+  "name": "loops-for-learning-agent-template",
+  "private": true,
+  "description": "What the agent works against in each view's workspace: the types of what a view may import, and check.ts",
+  "type": "module",
+  "dependencies": {
+    "@gestalts/learning": "link:../../../packages/learning",
+    "@gestalts/sources": "link:../../../packages/sources",
+    "@types/react": "19.3.0",
+    "lucide-react": "1.66.0",
+    "react": "19.3.1",
+    "typescript": "7.0.2",
+    "@gestalts/view": "link:../../../packages/view",
+    "@gestalts/kit": "link:../../../packages/kit",
+    "vite": "8.3.5"
+  }
+}

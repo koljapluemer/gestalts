@@ -1,0 +1,18 @@
+id: 9e0976b9-23ed-52d5-a44a-fb89170afe67
+gestalt: flashcard@1
+front: "πάπυρος"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 852aafe08680e318.webp}
+- {label: audio, file: 07ec0e043b1ca73b.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.142857
+  concept-060422e1edb7fcb9: 1.0
+  concept-4a4a6efd38f5c83b: 0.142857
+  concept-67f80ac5a8e61df2: 0.142857
+  concept-a88920689c0438c2: 0.142857
+  concept-bc1767973b740c00: 0.142857
+  concept-fa2effb4251815db: 0.285714

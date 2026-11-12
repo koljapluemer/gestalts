@@ -1,0 +1,18 @@
+id: 6efae5ad-f5e1-542c-afdd-b643db7100ef
+gestalt: flashcard@1
+front: "πάνθηρ"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 0bc4917542ea5753.webp}
+- {label: audio, file: 5089aa4a50c4d1b0.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.166667
+  concept-1f20b2f619da7232: 0.166667
+  concept-5a6bc97c1453dbb0: 1.0
+  concept-6260640a23d10f77: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-f3c24fce21b15d72: 0.166667
+  concept-fa2effb4251815db: 0.166667

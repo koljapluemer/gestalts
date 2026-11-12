@@ -1,0 +1,14 @@
+id: card-1161d8b1717588f7
+gestalt: flashcard@1
+front: I'm sorry.
+back: Mi dispiace.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-fef2ad2bbc4719e3: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

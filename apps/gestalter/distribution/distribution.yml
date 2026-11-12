@@ -1,0 +1,23 @@
+# The gestalter on the desktop (`id` is its for good: tabs are kept per distribution). `core` plugins are always there;
+# `plugins` can be installed and uninstalled. Paths are from this file.
+id: gestalter
+core:
+  - ../../../plugins/quick-note
+  - ../../../plugins/note-crud
+  - ../../../plugins/note-queue
+  - ../../../plugins/flashcards
+plugins:
+  - ../../../plugins/flashcard-manager
+  - ../../../plugins/source-manager
+  - ../../../plugins/concept-explorer
+  - ../../../plugins/alphabet-pronunciation-trainer
+  - ../../../plugins/transparent-input
+  - ../../../plugins/phrasebook
+default_views: [quick-note, note-crud, note-queue]
+install_ui: true
+# what views may do beyond the strict sandbox, out of what each asks for (`permissions` in its plugin.yml): same-origin
+# runs a view in the app's origin, so frames it embeds (a video player) work, and is only for our own code, which loads
+# nothing from elsewhere at run time; microphone lets it record
+grants:
+  transparent-input: [same-origin]
+  phrasebook: [same-origin, microphone]

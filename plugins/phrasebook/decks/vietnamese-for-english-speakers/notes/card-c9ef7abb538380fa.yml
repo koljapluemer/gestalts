@@ -1,0 +1,14 @@
+id: card-c9ef7abb538380fa
+gestalt: flashcard@1
+front: Where is the toilet?
+back: Nhà vệ sinh ở đâu?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-ed01bc93d665d476: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

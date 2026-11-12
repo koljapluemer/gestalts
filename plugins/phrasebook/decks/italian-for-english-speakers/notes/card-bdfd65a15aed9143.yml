@@ -1,0 +1,16 @@
+id: card-bdfd65a15aed9143
+gestalt: flashcard@1
+front: Excuse me.
+context: to a friend or a child (tu)
+back: Scusa.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-635530ebd6731a30: 1.0
+  concept-f8e675d57e4b2567: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

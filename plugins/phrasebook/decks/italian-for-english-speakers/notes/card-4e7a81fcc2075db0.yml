@@ -1,0 +1,16 @@
+id: card-4e7a81fcc2075db0
+gestalt: flashcard@1
+front: Hello.
+context: formal
+back: Salve.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-a4b3066285b22fd0: 1.0
+  concept-b3eb7b0e6a33c826: 0.4
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

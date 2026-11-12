@@ -1,0 +1,16 @@
+id: card-0490e3cdbb04b289
+gestalt: flashcard@1
+front: How are you?
+context: to someone you don't know (Lei)
+back: Come sta?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-54265fe22379a9aa: 0.5
+  concept-b7d8cfacebe63162: 1.0
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

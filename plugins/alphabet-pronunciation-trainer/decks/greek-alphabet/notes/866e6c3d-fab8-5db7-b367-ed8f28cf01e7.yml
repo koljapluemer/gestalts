@@ -1,0 +1,20 @@
+id: 866e6c3d-fab8-5db7-b367-ed8f28cf01e7
+gestalt: flashcard@1
+front: "χαμαιλέων"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 2cb7aaec9e3f2fd2.webp}
+- {label: audio, file: a3760212a9795003.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.222222
+  concept-0f759da3e0e988c9: 0.111111
+  concept-3ab5b4236f191463: 1.0
+  concept-6ce1d33edca68a50: 0.111111
+  concept-a11f395c31268153: 0.111111
+  concept-a37a168e6aeb95ce: 0.111111
+  concept-aa73127d91582d60: 0.111111
+  concept-c6471c8d9f9a56df: 0.111111
+  concept-f3c24fce21b15d72: 0.111111

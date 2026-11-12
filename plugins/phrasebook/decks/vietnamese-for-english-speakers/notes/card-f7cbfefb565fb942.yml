@@ -1,0 +1,15 @@
+id: card-f7cbfefb565fb942
+gestalt: flashcard@1
+front: Hello.
+context: formal
+back: Xin chào.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-22e23ddbd7d42e89: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

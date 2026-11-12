@@ -1,0 +1,18 @@
+id: 8f9b9b38-ee12-581d-8993-d0e36669b3a0
+gestalt: flashcard@1
+front: "δράκων"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: a8c5985857bfc62a.webp}
+- {label: audio, file: bee4a6d395040a13.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.166667
+  concept-0692f3e2bc08b128: 0.166667
+  concept-9105bce4eb73debf: 1.0
+  concept-9ce48bbe96191c88: 0.166667
+  concept-a88920689c0438c2: 0.166667
+  concept-c6471c8d9f9a56df: 0.166667
+  concept-f3c24fce21b15d72: 0.166667

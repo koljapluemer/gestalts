@@ -1,0 +1,19 @@
+id: 9f7cbefc-99e9-53ce-835b-17faa5e799d8
+gestalt: flashcard@1
+front: "πλανήτης"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 453445f73b7a97ce.webp}
+- {label: audio, file: 4ca43ea1de129487.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.125
+  concept-4a4a6efd38f5c83b: 0.125
+  concept-6260640a23d10f77: 0.25
+  concept-927d19d39cb3b2fa: 0.125
+  concept-aa73127d91582d60: 0.125
+  concept-f299d166bc223613: 1.0
+  concept-f3c24fce21b15d72: 0.125
+  concept-fa2effb4251815db: 0.125

@@ -1,0 +1,12 @@
+name: media-source
+version: 1
+description: >-
+  Something to watch or listen to while learning: `external_id` at `provider` (`youtube`), with its `title`, and the
+  `language` of the subtitles chosen for it. `concepts`: the concepts (words) that came up while watching it, and how
+  strongly that practises each, from 0 to 1. Id: `stableId("media-source", "<provider>:<external_id>")`.
+fields:
+  provider: { type: string, required: true, one_of: [youtube] }
+  external_id: { type: string, required: true }
+  title: { type: string }
+  language: { type: string, required: true }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }

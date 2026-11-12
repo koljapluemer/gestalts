@@ -1,0 +1,16 @@
+id: card-198d685a17ede885
+gestalt: flashcard@1
+front: Do you speak English?
+context: to someone you don't know (Lei)
+back: Parla inglese?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-4fe6e80cb3d1cf04: 1.0
+  concept-54265fe22379a9aa: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

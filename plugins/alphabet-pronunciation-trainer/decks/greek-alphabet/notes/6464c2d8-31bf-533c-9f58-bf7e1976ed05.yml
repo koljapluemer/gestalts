@@ -1,0 +1,19 @@
+id: 6464c2d8-31bf-533c-9f58-bf7e1976ed05
+gestalt: flashcard@1
+front: "πυραμίς"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: e0983830030c279d.webp}
+- {label: audio, file: ffcd31e2b7b31ae1.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.142857
+  concept-4a4a6efd38f5c83b: 0.142857
+  concept-619e5793a882c067: 1.0
+  concept-67f80ac5a8e61df2: 0.142857
+  concept-6ce1d33edca68a50: 0.142857
+  concept-a37a168e6aeb95ce: 0.142857
+  concept-a88920689c0438c2: 0.142857
+  concept-fa2effb4251815db: 0.142857

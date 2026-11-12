@@ -1,0 +1,16 @@
+id: card-2dbbde88a557bac1
+gestalt: flashcard@1
+front: Fine, thank you.
+back: Tôi khoẻ, cảm ơn.
+extra: Literally "I am healthy, thank you". Vietnamese mostly use *tôi* (I) in formal situations.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-21b0b35bc5d76941: 1.0
+  concept-dd97ae9168ba5a60: 0.3
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from

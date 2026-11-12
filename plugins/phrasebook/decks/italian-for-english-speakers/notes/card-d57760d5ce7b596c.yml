@@ -1,0 +1,16 @@
+id: card-d57760d5ce7b596c
+gestalt: flashcard@1
+front: Do you speak English?
+context: to a friend or a child (tu)
+back: Parli inglese?
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:ita
+concepts:
+  concept-4fe6e80cb3d1cf04: 1.0
+  concept-f8e675d57e4b2567: 0.5
+sources:
+- to: source-wikivoyage-italian-phrasebook
+  label: adapted from

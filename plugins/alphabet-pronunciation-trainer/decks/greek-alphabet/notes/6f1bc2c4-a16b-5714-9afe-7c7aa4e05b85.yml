@@ -1,0 +1,19 @@
+id: 6f1bc2c4-a16b-5714-9afe-7c7aa4e05b85
+gestalt: flashcard@1
+front: "κιννάμωμον"
+tags:
+- alphabet-pronunciation
+- lang:grc
+- no-generic-practice
+blobs:
+- {label: back, file: 5ca39ea42b8ba4a4.webp}
+- {label: audio, file: 9a4d126b799abf09.mp3}
+concepts:
+  concept-044b0c7b2c46daaa: 0.1
+  concept-0692f3e2bc08b128: 0.1
+  concept-6ce1d33edca68a50: 0.1
+  concept-a37a168e6aeb95ce: 0.2
+  concept-bc1767973b740c00: 0.1
+  concept-c6471c8d9f9a56df: 0.1
+  concept-cb75dbb0938aa733: 1.0
+  concept-f3c24fce21b15d72: 0.3

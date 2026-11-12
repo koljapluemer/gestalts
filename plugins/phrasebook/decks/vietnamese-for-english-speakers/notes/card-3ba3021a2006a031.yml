@@ -1,0 +1,14 @@
+id: card-3ba3021a2006a031
+gestalt: flashcard@1
+front: I'll be back soon.
+back: Tôi sẽ quay lại sớm.
+tags:
+- phrasebook
+- native:eng
+- no-generic-practice
+- lang:vie
+concepts:
+  concept-5197f1b21808d43b: 1.0
+sources:
+- to: source-wikivoyage-vietnamese-phrasebook
+  label: adapted from
