@@ -10,6 +10,9 @@ import { defineConfig } from 'oxlint';
  * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit, learning and
  *   sources (learning, sources and the kit only for the runtime frames load).
  * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
+ * - an app (`apps/<app>/src`, `apps/gestalter/<distribution>/src`, the node's settings page) imports only the packages
+ *   (client, host, view, the kit's index, learning, sources) and its own files, never another app or a plugin;
+ *   nothing imports an app.
  * External packages are always fine.
  */
 const kit = 'packages/kit/src';
@@ -31,6 +34,7 @@ const allowed: Record<string, string[]> = {
   plugin: ['view', 'kit-index', 'learning', 'sources'],
   debug: ['client', 'view'],
   host: ['client', 'view', 'kit-index', 'learning', 'sources', 'debug'],
+  app: ['client', 'host', 'view', 'kit-index', 'learning', 'sources'],
 };
 
 export default defineConfig({
@@ -39,7 +43,7 @@ export default defineConfig({
   jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }, 'eslint-plugin-boundaries'],
   categories: { correctness: 'error' },
   settings: {
-    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json', 'apps/*/tsconfig.json', 'apps/gestalter/*/tsconfig.json'] }, node: true },
+    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json', 'apps/*/tsconfig.json', 'apps/gestalter/*/tsconfig.json', 'apps/node/*/tsconfig.json'] }, node: true },
     'boundaries/elements': [
       { type: 'view', pattern: 'packages/view/src' },
       { type: 'vite', pattern: 'packages/vite/src' },
@@ -55,6 +59,10 @@ export default defineConfig({
       { type: 'plugin', pattern: 'plugins/*', capture: ['plugin'] },
       { type: 'debug', pattern: `${host}/debug` },
       { type: 'host', pattern: host },
+      // apps: each its own element, so one may not import another
+      { type: 'app', pattern: 'apps/gestalter/*/src', capture: ['app'] },
+      { type: 'app', pattern: 'apps/node/*/src', capture: ['app'] },
+      { type: 'app', pattern: 'apps/*/src', capture: ['app'] },
     ],
   },
   rules: {
@@ -65,7 +73,7 @@ export default defineConfig({
     'react-hooks-js/refs': 'error',
   },
   overrides: [{
-    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/*.{ts,tsx}'],
+    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/*.{ts,tsx}', 'apps/*/src/**/*.{ts,tsx}', 'apps/*/*/src/**/*.{ts,tsx}'],
     rules: {
       'boundaries/no-unknown-files': 'error',
       'boundaries/dependencies': ['error', {

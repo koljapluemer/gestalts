@@ -17,6 +17,9 @@ apps/
 scripts/      shared by the tasks
 ```
 
+Who may import whom (packages, plugins, apps) is checked by `oxlint.config.ts`; that apps take their plugins only
+from `plugins/`, by `scripts/check-distributions.ts`. Both run in `mise run check`.
+
 ## Developing
 
 Needs [mise](https://mise.jdx.dev) and [rustup](https://rustup.rs). mise installs Node, pnpm, uv, wasm-pack and the

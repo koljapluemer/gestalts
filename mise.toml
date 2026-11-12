@@ -29,6 +29,7 @@ set -euo pipefail
 cargo test --workspace -q
 cargo clippy --workspace -q -- -D warnings
 pnpm lint
+node scripts/check-distributions.ts
 pnpm typecheck
 pnpm test
 python3 -m unittest discover -s apps/learning-workshop/tests
