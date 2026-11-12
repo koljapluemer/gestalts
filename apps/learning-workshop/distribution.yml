@@ -1,0 +1,7 @@
+# The learning workshop (`id` is its for good). Its drafts are user data, not plugins; these are the learning views a
+# draft's preview runs beside, so drafts get the same runtime and gestalts as loops-for-learning's.
+id: learning-workshop
+plugins:
+  - ../../plugins/flashcards
+  - ../../plugins/alphabet-pronunciation-trainer
+  - ../../plugins/phrasebook

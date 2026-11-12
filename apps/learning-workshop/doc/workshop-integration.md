@@ -1,12 +1,13 @@
-# Folding gestalt-workshop into Loops for Learning
+# From draft to plugin
 
-Status: consolidation implemented; promotion roadmap deferred
+Status: the learning workshop is its own app (`apps/learning-workshop`), deployed apart from loops-for-learning;
+the promotion roadmap below is deferred
 
-The standalone Workshop UI, local backend, agent template, scripts, checks and documentation now live in
-`loops-for-learning`, with Learn and Make modes. The fold intentionally preserves `view@1`, `workshop-views`, the
-`WORKSHOP_*` environment variables and the local agent protocol so existing drafts and sessions require no migration.
-The promotion, remix, source-root, worktree and GitHub sections below remain design notes rather than implemented
-features; source-to-draft remixing is explicitly out of scope for this consolidation.
+gestalt-workshop was first folded into loops-for-learning as its Make mode, then split out again into its own app in
+the monorepo: it optimises for learning views, but is deployed and used apart from the public Learn site. It keeps
+`view@1`, `workshop-views`, the `WORKSHOP_*` environment variables and the local agent protocol, so existing drafts
+and sessions need no migration (drafts come back from the Make node's folder on first load). The promotion, remix,
+source-root, worktree and GitHub sections below are design notes, not implemented features.
 
 ## Summary
 
@@ -30,29 +31,17 @@ a source plugin:
 The important design decision is to treat transfer as an explicit **promotion**, not as continuous synchronization.
 User-space yml is personal, editable draft state. A plugin directory is maintained application source.
 
-## Proposed repository shape
+## Where things live
 
-```text
-loops-for-learning/
-  src/
-    app/                    learner-facing Loops shell
-    workshop/               view list, chat, preview and promotion UI
-  plugins/
-    workshop-agent/         local-only authoring backend
-    <loops-owned plugins>/  promoted views specific to Loops, when useful
-  agent-template/           contract and checks used by the drafting agent
-  scripts/                  local node, checks and reports
-  distribution.yml
-```
+- `apps/learning-workshop` owns the authoring experience: the draft list, chat, preview, the `workshop-agent`
+  backend and the agent template.
+- `plugins/` holds source plugins, flat, usable by any app; promotion writes there.
+- `packages/` and `crates/` own generic execution, compilation, schemas and APIs.
 
-The exact directory names are not important. The ownership boundary is:
+The interface between draft and source is explicit: `src/workshop/workshop.ts` is the one place that knows the draft
+format (`view@1` ⇄ files), and promotion (below) is the one way a draft becomes a plugin folder.
 
-- Loops owns the authoring experience and the learning application.
-- `gestalts` owns generic execution, compilation, schemas, APIs and reusable packages.
-- Views useful to several applications may remain in `gestalts/plugins` or `gestalt-plugins`.
-- Views specific to Loops may live beside the application, avoiding an unnecessary third-repository hop.
-
-The public application can expose the Workshop UI without promising that every authoring capability is available.
+The workshop can be deployed without promising that every authoring capability is available.
 Preview and manual editing can work in a browser. Chat with the CLI agent and direct writes into a source checkout need
 a connected local node. The UI should expose these as capabilities rather than assume them.
 
@@ -133,7 +122,7 @@ capabilities:
   permissions: []
 
 origin:
-  repository: loops-for-learning
+  repository: gestalts
   path: plugins/phrase-drills
   revision: 8f31ab
   source_hash: sha256:...
@@ -167,15 +156,14 @@ Keeping this conversion pure prevents browser, backend and CLI exporters from de
 
 ## Writing into a local checkout
 
-A browser should not give an agent an arbitrary filesystem path. The node can be configured with named source roots:
+A browser should not give an agent an arbitrary filesystem path. The node is configured with the one source root,
+the checkout's flat plugin folder:
 
 ```yaml
-source_roots:
-  loops: /home/me/code/loops-for-learning/plugins
-  shared: /home/me/code/gestalt-plugins
+source_root: /home/me/code/gestalts/plugins
 ```
 
-Promotion requests name a root and safe plugin slug, include the expected base hash, and contain only the generated
+Promotion requests name a safe plugin slug, include the expected base hash, and contain only the generated
 files. The backend must:
 
 - resolve and verify that the destination remains below the configured root;

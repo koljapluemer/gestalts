@@ -17,7 +17,7 @@ description = "JS dependencies, the core compiled to wasm (after cloning, and af
 run = [
   "pnpm install",
   "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",
-  "pnpm -C apps/loops-for-learning/agent-template install --ignore-workspace",
+  "pnpm -C apps/learning-workshop/agent-template install --ignore-workspace",
 ]
 
 [tasks.check]
@@ -31,8 +31,8 @@ cargo clippy --workspace -q -- -D warnings
 pnpm lint
 pnpm typecheck
 pnpm test
-python3 -m unittest discover -s apps/loops-for-learning/tests
-apps/loops-for-learning/scripts/check-example.sh
+python3 -m unittest discover -s apps/learning-workshop/tests
+apps/learning-workshop/scripts/check-example.sh
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
@@ -131,24 +131,36 @@ ls gen/android/app/build/outputs/apk/*/debug/*.apk
 # --- loops-for-learning ---
 
 [tasks."loops:dev"]
-description = "The local Make node on :7727 and the Loops app on :5174 with hot reload"
-depends = ["setup"]
-run = "apps/loops-for-learning/scripts/dev.sh"
-
-[tasks."loops:app"]
-description = "The Loops app on :5174 without the local Make agent"
+description = "The Loops app on :5174 with hot reload"
 depends = ["setup"]
 run = "pnpm --dir apps/loops-for-learning dev"
-
-[tasks."loops:node"]
-description = "The local Make node on :7727, using $WORKSHOP_DATA or ~/gestalt-workshop-views"
-run = "apps/loops-for-learning/scripts/node.sh"
 
 [tasks."loops:build"]
 description = "Production build into apps/loops-for-learning/dist, static files to host anywhere"
 depends = ["setup"]
 run = "pnpm --dir apps/loops-for-learning build"
 
-[tasks."loops:agent-stats"]
+# --- learning-workshop ---
+
+[tasks."workshop:dev"]
+description = "The local Make node on :7727 and the learning workshop on :5175 with hot reload"
+depends = ["setup"]
+run = "apps/learning-workshop/scripts/dev.sh"
+
+[tasks."workshop:app"]
+description = "The learning workshop on :5175 without the local node; preview still works without an agent"
+depends = ["setup"]
+run = "pnpm --dir apps/learning-workshop dev"
+
+[tasks."workshop:node"]
+description = "The local Make node on :7727, using $WORKSHOP_DATA or ~/gestalt-workshop-views"
+run = "apps/learning-workshop/scripts/node.sh"
+
+[tasks."workshop:build"]
+description = "Production build into apps/learning-workshop/dist"
+depends = ["setup"]
+run = "pnpm --dir apps/learning-workshop build"
+
+[tasks."workshop:agent-stats"]
 description = "Summarize local Make agent time, token use, cost and tool activity"
-run = "python3 apps/loops-for-learning/scripts/agent_stats.py"
+run = "python3 apps/learning-workshop/scripts/agent_stats.py"

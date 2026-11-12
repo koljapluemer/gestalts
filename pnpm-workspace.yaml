@@ -3,3 +3,4 @@ packages:
   - apps/gestalter/distribution
   - apps/gestalter/distribution-android
   - apps/loops-for-learning
+  - apps/learning-workshop

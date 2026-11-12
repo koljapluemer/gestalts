@@ -11,7 +11,8 @@ plugins/      the views (and their decks, workers), one folder each, usable by a
 sdk/python/   what plugin workers import
 apps/
   gestalter/            notes and learning: distribution/ (desktop), distribution-android/
-  loops-for-learning/   the learning views one at a time (Learn), and Make
+  loops-for-learning/   the learning views, one at a time: a static site
+  learning-workshop/    make learning views with a local agent
   node/                 the desktop app (desktop/), the Android app (android/), iOS later
 scripts/      shared by the tasks
 ```
@@ -27,7 +28,8 @@ mise install          # once after cloning, and when mise.toml changes
 mise run setup        # JS dependencies, the core in wasm, the Make agent template
 mise run check        # tests, lints, typechecks, deck health
 mise run gestalter:dev                            # the desktop app and gestalter on it, hot reload
-mise run loops:dev                                # loops-for-learning and its local Make node
+mise run loops:dev                                # loops-for-learning
+mise run workshop:dev                             # the learning workshop and its local Make node
 mise run android:dev                              # the Android app on a phone or emulator (needs the SDK and NDK)
 mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's deck
 mise run health-data ~/some-folder                # which ymls can't be used, and why

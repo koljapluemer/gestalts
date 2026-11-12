@@ -1,4 +1,4 @@
-# Make mode architecture
+# Learning workshop architecture
 
 ```
 src/workshop/Make.tsx       the list of views, and the workbench
@@ -35,5 +35,5 @@ for a resumed session, so they live under `session_totals`; reports count only t
 it is private local data and is kept until manually deleted. Prompts and view files are not copied into the normalized
 record. Older record schemas are left untouched and ignored by the report.
 
-Run `mise run loops:agent-stats`, optionally followed by `-- --days N`, `--view ID`, `--limit N` or `--json`, to summarize
+Run `mise run workshop:agent-stats`, optionally followed by `-- --days N`, `--view ID`, `--limit N` or `--json`, to summarize
 the journal. A failed logging write is reported to the node's stderr but never changes the agent turn's result.
