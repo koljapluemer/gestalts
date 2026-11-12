@@ -3,11 +3,14 @@ import { useConnector, useHostRepo } from '@gestalts/client';
 
 const DEFAULT_URL = 'http://127.0.0.1:7717';
 
-/** Connect to the gestalter desktop app, which makes a folder on disk the source of truth. */
-export function ConnectorSettings() {
+/**
+ * Connect to the gestalter desktop app, which makes a folder on disk the source of truth. `defaultUrl` is the node it
+ * offers (default the installed one's, `http://127.0.0.1:7717`).
+ */
+export function ConnectorSettings({ defaultUrl = DEFAULT_URL }: { defaultUrl?: string }) {
     const repo = useHostRepo();
     const status = useConnector();
-    const [url, setUrl] = useState(status.url ?? DEFAULT_URL);
+    const [url, setUrl] = useState(status.url ?? defaultUrl);
     return (
       <div className="flex w-72 flex-col gap-2">
         <p className="text-sm text-base-content/70">

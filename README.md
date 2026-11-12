@@ -30,6 +30,7 @@ packaging tools as pinned in `mise.toml`; rustup picks up the Rust version (and 
 mise install          # once after cloning, and when mise.toml changes
 mise run setup        # JS dependencies, the core in wasm, the Make agent template
 mise run check        # tests, lints, typechecks, deck health
+mise run dev                                      # all of the below at once, beside an installed node
 mise run gestalter:dev                            # gestalter on a dev node, hot reload
 mise run node:dev                                 # the desktop node and its settings page, hot reload
 mise run loops:dev                                # loops-for-learning

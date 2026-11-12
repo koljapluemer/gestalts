@@ -41,7 +41,7 @@ export function Learn() {
           <details className="dropdown dropdown-end">
             <summary className="btn btn-sm btn-ghost btn-square" title="Sync settings"><Settings className="size-4" /></summary>
             <div className="dropdown-content z-50 mt-2 rounded-box border border-base-300 bg-base-100 p-3 shadow">
-              <RepoProvider repo={repo}><ConnectorSettings /></RepoProvider>
+              <RepoProvider repo={repo}><ConnectorSettings defaultUrl={import.meta.env.VITE_GESTALTS_NODE} /></RepoProvider>
             </div>
           </details>
         )}

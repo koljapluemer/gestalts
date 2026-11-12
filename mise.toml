@@ -37,6 +37,11 @@ apps/learning-workshop/scripts/check-example.sh
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
+[tasks.dev]
+description = "Everything with hot reload: the dev desktop node and its settings page, the workshop's Make node, gestalter, loops-for-learning and the learning workshop, each on the first free port from its usual one"
+depends = ["setup"]
+run = "bash scripts/dev.sh"
+
 [tasks.serve]
 description = "The node headless with the repo's plugins, for working on workers without the desktop shell"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
