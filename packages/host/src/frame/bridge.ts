@@ -33,10 +33,10 @@ function checkParams(params: unknown): Record<string, string> {
 
 export class AccessError extends Error {}
 
-export type BridgeRepo = Pick<Repo, 'query' | 'live' | 'liveBeliefs' | 'get' | 'put' | 'delete' | 'readBlob' | 'writeBlob'>;
+export type BridgeRepo = Pick<Repo, 'query' | 'live' | 'liveBeliefs' | 'liveOutline' | 'get' | 'put' | 'delete' | 'readBlob' | 'writeBlob'>;
 
 /** What the host sends a view unasked: changes to what it follows. */
-export type Pushed = Extract<ToView, { type: 'delta' | 'beliefs' }>;
+export type Pushed = Extract<ToView, { type: 'delta' | 'beliefs' | 'outline' }>;
 
 /** Sha256 in the page around the frame: a sandboxed frame isn't a secure context, so it has no `crypto.subtle`. */
 async function sha256(bytes: Uint8Array): Promise<string> {
@@ -101,6 +101,15 @@ export class Bridge {
         const live = this.repo.liveBeliefs(c.concepts, (d) => this.push({ type: 'beliefs', delta: { ...d, sub } }));
         this.lives.set(sub, live);
         return { sub, beliefs: live.beliefs };
+      }
+      case 'outline': {
+        // an outline shows ymls of its gestalt (and their props), so that's what must be readable
+        if (typeof c.query?.spec?.gestalt !== 'string') throw new AccessError('an outline must name the gestalt it is of');
+        if (!this.scope.reads.includes(c.query.spec.gestalt)) throw new AccessError(`this view doesn't declare that it reads ${c.query.spec.gestalt}`);
+        const sub = this.nextSub++;
+        const live = this.repo.liveOutline(c.query, (d) => this.push({ type: 'outline', delta: { ...d, sub } }));
+        this.lives.set(sub, live);
+        return { sub, page: live.page };
       }
       case 'unsubscribe':
         this.lives.get(c.sub)?.stop();

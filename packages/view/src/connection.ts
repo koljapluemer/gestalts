@@ -1,5 +1,5 @@
 import type { Answers, Call, FromView, ToView, ViewError } from './protocol';
-import type { BeliefDelta, Delta } from './types';
+import type { BeliefDelta, Delta, OutlineDelta } from './types';
 
 /** What a view talks to: the app around it, or a fixture. */
 export interface ViewHost {
@@ -8,6 +8,8 @@ export interface ViewHost {
   onDelta(sub: number, f: (d: Delta) => void): () => void;
   /** Calls `f` with each change to the belief subscription `sub`. */
   onBeliefs(sub: number, f: (d: BeliefDelta) => void): () => void;
+  /** Calls `f` with each new page of the outline subscription `sub`. */
+  onOutline(sub: number, f: (d: OutlineDelta) => void): () => void;
   /** Calls `f` with the view's params each time the app moves it elsewhere. */
   onParams(f: (params: Record<string, string>) => void): () => void;
   report(error: ViewError): void;
@@ -22,6 +24,9 @@ export function connect(port: MessagePort): ViewHost {
   const early = new Map<number, Delta[]>();
   const beliefListeners = new Map<number, (d: BeliefDelta) => void>();
   const earlyBeliefs = new Map<number, BeliefDelta[]>();
+  const outlineListeners = new Map<number, (d: OutlineDelta) => void>();
+  // pages are whole, so only the last one matters
+  const earlyOutline = new Map<number, OutlineDelta>();
   const moved = new Set<(params: Record<string, string>) => void>();
   // a move can arrive before anything listens (while the view mounts): the last one is handed over then
   let unheard: Record<string, string> | undefined;
@@ -38,6 +43,12 @@ export function connect(port: MessagePort): ViewHost {
       const l = beliefListeners.get(m.delta.sub);
       if (l) l(m.delta);
       else earlyBeliefs.set(m.delta.sub, [...(earlyBeliefs.get(m.delta.sub) ?? []), m.delta]);
+      return;
+    }
+    if (m.type === 'outline') {
+      const l = outlineListeners.get(m.delta.sub);
+      if (l) l(m.delta);
+      else earlyOutline.set(m.delta.sub, m.delta);
       return;
     }
     if (m.type === 'params') {
@@ -67,6 +78,13 @@ export function connect(port: MessagePort): ViewHost {
       earlyBeliefs.get(sub)?.forEach(f);
       earlyBeliefs.delete(sub);
       return () => { beliefListeners.delete(sub); };
+    },
+    onOutline(sub, f) {
+      outlineListeners.set(sub, f);
+      const last = earlyOutline.get(sub);
+      if (last) f(last);
+      earlyOutline.delete(sub);
+      return () => { outlineListeners.delete(sub); };
     },
     onParams(f) {
       moved.add(f);

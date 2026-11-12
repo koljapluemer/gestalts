@@ -1,10 +1,32 @@
 import type { ViewHost } from './connection';
 import type { Answers, Call, ViewError } from './protocol';
-import type { Belief, BeliefDelta, Delta, Item, JsonMap, Page, Query } from './types';
+import { outlinePage } from './outline';
+import type { Belief, BeliefDelta, Delta, Item, JsonMap, LinkMatch, OutlineDelta, OutlineQuery, Page, Query, Shape } from './types';
 
 const words = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
-function matches(i: Item, q: Query): boolean {
+/** References as the fixture sees them, knowing no gestalt: items of a list prop with a string `to`. */
+function edges(i: Item): { field: string; to: string; label?: string }[] {
+  return Object.entries(i.value).flatMap(([field, v]) => (Array.isArray(v) ? v : []).flatMap((r) => (
+    r && typeof r === 'object' && !Array.isArray(r) && typeof r.to === 'string' ? [{ field, to: r.to, ...(typeof r.label === 'string' ? { label: r.label } : {}) }] : []
+  )));
+}
+
+function holds(i: Item | undefined, s: Shape): boolean {
+  if (!i) return false;
+  const tags = Array.isArray(i.value.tags) ? i.value.tags : [];
+  return (s.gestalt === undefined || s.gestalt === i.gestalt)
+    && (s.ids === undefined || s.ids.includes(i.id))
+    && Object.entries(s.where ?? {}).every(([k, v]) => JSON.stringify(i.value[k]) === JSON.stringify(v))
+    && (s.tags?.all ?? []).every((t) => tags.includes(t))
+    && !(s.tags?.none ?? []).some((t) => tags.includes(t));
+}
+
+function linked(i: Item, m: LinkMatch, all: Map<string, Item>): boolean {
+  return edges(i).some((e) => (m.field === undefined || m.field === e.field) && (m.label === undefined || m.label === e.label) && (m.to === undefined || holds(all.get(e.to), m.to)));
+}
+
+function matches(i: Item, q: Query, all: Map<string, Item>): boolean {
   const tags = Array.isArray(i.value.tags) ? i.value.tags : [];
   const text = words(JSON.stringify(i.value));
   return (q.gestalt === undefined || q.gestalt === i.gestalt)
@@ -12,13 +34,18 @@ function matches(i: Item, q: Query): boolean {
     && Object.entries(q.where ?? {}).every(([k, v]) => JSON.stringify(i.value[k]) === JSON.stringify(v))
     && (q.tags?.all ?? []).every((t) => tags.includes(t))
     && !(q.tags?.none ?? []).some((t) => tags.includes(t))
-    && (q.refs === undefined || JSON.stringify(q.refs.field === undefined ? i.value : i.value[q.refs.field] ?? null).includes(JSON.stringify(q.refs.to).slice(1, -1)))
+    && (q.refs === undefined || (q.refs.label === undefined
+      ? JSON.stringify(q.refs.field === undefined ? i.value : i.value[q.refs.field] ?? null).includes(JSON.stringify(q.refs.to).slice(1, -1))
+      : edges(i).some((e) => e.to === q.refs!.to && e.label === q.refs!.label && (q.refs!.field === undefined || q.refs!.field === e.field))))
+    && (q.links?.all ?? []).every((m) => linked(i, m, all))
+    && !(q.links?.none ?? []).some((m) => linked(i, m, all))
     && (q.text === undefined || words(q.text).every((w) => text.some((t) => t.startsWith(w))));
 }
 
 function page(all: Item[], q: Query): Page {
   const order = q.order;
-  const sorted = all.filter((i) => matches(i, q)).sort((a, b) => {
+  const byId = new Map(all.map((i) => [i.id, i]));
+  const sorted = all.filter((i) => matches(i, q, byId)).sort((a, b) => {
     if (order && 'field' in order) {
       const [x, y] = [a.value[order.field], b.value[order.field]];
       const c = x === y ? 0 : (x ?? '') < (y ?? '') ? -1 : 1;
@@ -77,6 +104,7 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
   const moved = new Set<(p: Record<string, string>) => void>();
   const errors: ViewError[] = [];
   const subs = new Map<number, { query: Query; order: string[]; listener?: (d: Delta) => void }>();
+  const outlineSubs = new Map<number, { query: OutlineQuery; last: string; listener?: (d: OutlineDelta) => void }>();
   let nextSub = 1;
   const changed = () => {
     for (const [sub, s] of subs) {
@@ -86,6 +114,13 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
       const remove = s.order.filter((id) => !order.includes(id));
       s.order = order;
       s.listener?.({ sub, upsert: p.items, remove, order, next: p.next });
+    }
+    for (const [sub, s] of outlineSubs) {
+      const p = outlinePage([...store.values()], s.query);
+      const now = JSON.stringify(p);
+      if (now === s.last) continue;
+      s.last = now;
+      s.listener?.({ sub, page: p });
     }
   };
   const perform = (c: Call): unknown => {
@@ -102,7 +137,13 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
         beliefSubs.set(sub, { concepts: c.concepts });
         return { sub, beliefs: c.concepts.map((id) => known.get(id) ?? priorBelief(id)) };
       }
-      case 'unsubscribe': subs.delete(c.sub); beliefSubs.delete(c.sub); return null;
+      case 'outline': {
+        const sub = nextSub++;
+        const p = outlinePage([...store.values()], c.query);
+        outlineSubs.set(sub, { query: c.query, last: JSON.stringify(p) });
+        return { sub, page: p };
+      }
+      case 'unsubscribe': subs.delete(c.sub); beliefSubs.delete(c.sub); outlineSubs.delete(c.sub); return null;
       case 'put': { const item = put(c.value); changed(); return item; }
       case 'delete': { const had = store.delete(c.id); changed(); return had; }
       case 'readBlob': return blobs.get(c.name) ?? null;
@@ -128,6 +169,11 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
     },
     onBeliefs(sub, f) {
       const s = beliefSubs.get(sub);
+      if (s) s.listener = f;
+      return () => { if (s) s.listener = undefined; };
+    },
+    onOutline(sub, f) {
+      const s = outlineSubs.get(sub);
       if (s) s.listener = f;
       return () => { if (s) s.listener = undefined; };
     },

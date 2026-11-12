@@ -25,13 +25,78 @@ pub struct TagFilter {
     pub none: Vec<String>,
 }
 
-/// Ymls that reference `to`, through the prop `field` if given.
+/// Ymls that reference `to`, through the prop `field` and with the `label` (of a `relationships` item) if given.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RefFilter {
     pub to: String,
     #[serde(default)]
     pub field: Option<String>,
+    #[serde(default)]
+    pub label: Option<String>,
+}
+
+/// What a yml a link points at must be. A target that isn't there (or isn't valid) is no shape.
+#[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
+#[serde(default, deny_unknown_fields)]
+pub struct Shape {
+    pub gestalt: Option<String>,
+    pub ids: Option<Vec<String>>,
+    #[serde(rename = "where")]
+    pub where_: BTreeMap<String, Value>,
+    pub tags: TagFilter,
+}
+
+/// One kind of outgoing reference: through `field`, labelled `label`, to a yml of shape `to`, each if given.
+#[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
+#[serde(default, deny_unknown_fields)]
+pub struct LinkMatch {
+    pub field: Option<String>,
+    pub label: Option<String>,
+    pub to: Option<Shape>,
+}
+
+/// Every one of `all` must be matched by some reference of the yml, and none of its references may match one of `none`.
+#[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
+#[serde(default, deny_unknown_fields)]
+pub struct LinkFilter {
+    pub all: Vec<LinkMatch>,
+    pub none: Vec<LinkMatch>,
+}
+
+impl LinkFilter {
+    fn is_empty(&self) -> bool {
+        self.all.is_empty() && self.none.is_empty()
+    }
+
+    /// Whether a match depends on what the targets are, not only on the yml itself.
+    pub fn looks_at_targets(&self) -> bool {
+        self.all.iter().chain(&self.none).any(|m| m.to.is_some())
+    }
+}
+
+impl Shape {
+    fn holds(&self, e: &Entry) -> bool {
+        let Some(gestalt) = e.gestalt() else { return false };
+        self.gestalt.as_deref().is_none_or(|g| g == gestalt)
+            && self.ids.as_ref().is_none_or(|ids| ids.contains(&e.yml.id))
+            && self.where_.iter().all(|(k, v)| e.yml.get(k) == Some(v))
+            && self.tags.holds(e)
+    }
+}
+
+impl TagFilter {
+    fn holds(&self, e: &Entry) -> bool {
+        self.all.iter().all(|t| e.tags().any(|have| have == t)) && !self.none.iter().any(|t| e.tags().any(|have| have == t))
+    }
+}
+
+impl LinkMatch {
+    fn by(&self, edge: &Edge, index: &Index) -> bool {
+        self.field.as_ref().is_none_or(|f| *f == edge.field)
+            && self.label.as_ref().is_none_or(|l| edge.label.as_ref() == Some(l))
+            && self.to.as_ref().is_none_or(|shape| index.get(&edge.target).is_some_and(|t| shape.holds(t)))
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -59,6 +124,8 @@ pub struct Query {
     pub where_: BTreeMap<String, Value>,
     pub tags: TagFilter,
     pub refs: Option<RefFilter>,
+    /// what the yml itself references
+    pub links: LinkFilter,
     /// every word must start a word of the yml's text; case and diacritics don't matter
     pub text: Option<String>,
     /// by id when not given
@@ -114,7 +181,7 @@ impl Entry {
         }
     }
 
-    fn tags(&self) -> impl Iterator<Item = &str> {
+    pub fn tags(&self) -> impl Iterator<Item = &str> {
         self.yml.get("tags").and_then(Value::as_sequence).into_iter().flatten().filter_map(Value::as_str)
     }
 
@@ -143,15 +210,21 @@ pub fn words(text: &str) -> impl Iterator<Item = String> + '_ {
 }
 
 impl Query {
-    /// Whether `e` is one the query asks for, regardless of paging.
-    pub fn matches(&self, e: &Entry) -> bool {
+    /// Whether `e` is one the query asks for, regardless of paging. `index` says what `e`'s targets are, for `links`.
+    pub fn matches(&self, e: &Entry, index: &Index) -> bool {
         let Some(gestalt) = e.gestalt() else { return false };
         self.gestalt.as_deref().is_none_or(|g| g == gestalt)
             && self.ids.as_ref().is_none_or(|ids| ids.contains(&e.yml.id))
             && self.where_.iter().all(|(k, v)| e.yml.get(k) == Some(v))
-            && self.tags.all.iter().all(|t| e.tags().any(|have| have == t))
-            && !self.tags.none.iter().any(|t| e.tags().any(|have| have == t))
-            && self.refs.as_ref().is_none_or(|r| e.edges.iter().any(|edge| edge.target == r.to && r.field.as_ref().is_none_or(|f| *f == edge.field)))
+            && self.tags.holds(e)
+            && self.refs.as_ref().is_none_or(|r| {
+                e.edges.iter().any(|edge| {
+                    edge.target == r.to && r.field.as_ref().is_none_or(|f| *f == edge.field) && r.label.as_ref().is_none_or(|l| edge.label.as_ref() == Some(l))
+                })
+            })
+            && (self.links.is_empty()
+                || (self.links.all.iter().all(|m| e.edges.iter().any(|edge| m.by(edge, index)))
+                    && !self.links.none.iter().any(|m| e.edges.iter().any(|edge| m.by(edge, index)))))
             && self.text.as_deref().is_none_or(|t| words(t).all(|w| e.has_word(&w)))
     }
 
@@ -190,6 +263,11 @@ pub struct Index {
 impl Index {
     pub fn get(&self, id: &str) -> Option<&Entry> {
         self.entries.get(id)
+    }
+
+    /// The ids of the ymls referencing `id` (whether or not it exists).
+    pub fn referencing<'a>(&'a self, id: &str) -> impl Iterator<Item = &'a String> + 'a {
+        self.backrefs.get(id).into_iter().flatten()
     }
 
     pub fn entries(&self) -> impl Iterator<Item = &Entry> {
@@ -278,8 +356,8 @@ impl Index {
     pub fn page(&self, q: &Query) -> Page {
         let limit = q.limit.unwrap_or(DEFAULT_LIMIT).clamp(1, MAX_LIMIT);
         let matching: Vec<&Entry> = match self.narrowed(q) {
-            Some(ids) => ids.iter().filter_map(|id| self.entries.get(id)).filter(|e| q.matches(e)).collect(),
-            None => self.entries.values().filter(|e| q.matches(e)).collect(),
+            Some(ids) => ids.iter().filter_map(|id| self.entries.get(id)).filter(|e| q.matches(e, self)).collect(),
+            None => self.entries.values().filter(|e| q.matches(e, self)).collect(),
         };
         let mut keyed: Vec<(Value, &Entry)> = matching.into_iter().map(|e| (q.sort_key(e), e)).collect();
         let desc = q.descending();

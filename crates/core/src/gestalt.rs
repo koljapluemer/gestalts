@@ -132,6 +132,8 @@ pub struct Edge {
     pub target: String,
     /// the gestalt names the target may have; empty allows any
     pub targets: Vec<String>,
+    /// how a `relationships` item labels it
+    pub label: Option<String>,
 }
 
 fn whole(message: impl Into<String>) -> Vec<Problem> {
@@ -226,12 +228,19 @@ impl GestaltDef {
     pub fn edges(&self, m: &Mapping) -> Vec<Edge> {
         let mut out = Vec::new();
         self.each_field(m, &mut |field, v, r| {
-            let mut add = |target: &str| out.push(Edge { field: field.to_owned(), target: target.to_owned(), targets: r.targets.clone() });
+            let mut add = |target: &str, label: Option<&str>| {
+                out.push(Edge { field: field.to_owned(), target: target.to_owned(), targets: r.targets.clone(), label: label.map(str::to_owned) })
+            };
             match r.ty {
-                FieldType::Ref => v.as_str().into_iter().for_each(&mut add),
-                FieldType::RefList => v.as_sequence().into_iter().flatten().filter_map(Value::as_str).for_each(&mut add),
-                FieldType::RefMap => v.as_mapping().into_iter().flat_map(Mapping::keys).filter_map(Value::as_str).for_each(&mut add),
-                FieldType::Relationships => labelled(v, "to").for_each(&mut add),
+                FieldType::Ref => v.as_str().into_iter().for_each(|t| add(t, None)),
+                FieldType::RefList => v.as_sequence().into_iter().flatten().filter_map(Value::as_str).for_each(|t| add(t, None)),
+                FieldType::RefMap => v.as_mapping().into_iter().flat_map(Mapping::keys).filter_map(Value::as_str).for_each(|t| add(t, None)),
+                FieldType::Relationships => v
+                    .as_sequence()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|item| Some((item.get("to")?.as_str()?, item.get("label").and_then(Value::as_str))))
+                    .for_each(|(t, l)| add(t, l)),
                 _ => {}
             }
         });

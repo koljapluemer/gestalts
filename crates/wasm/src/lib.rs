@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use gestalts_core::storage::{Deck, Layered, Storage, StorageError, Tracked};
 use gestalts_core::sync::{Fetched, Pending, SyncBase};
-use gestalts_core::{Gestalts, Query, Repo};
+use gestalts_core::{Gestalts, OutlineQuery, Query, Repo};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -218,6 +218,25 @@ impl WasmRepo {
         to_js(&self.repo.take_belief_deltas(now_ms()))
     }
 
+    /// One page of what an outline is asked (`json`: an outline query as JSON text): `{entries, next}`.
+    pub fn outline(&self, json: String) -> Result<JsValue, JsError> {
+        to_js(&self.repo.outline(&parse_json::<OutlineQuery>(&json)?))
+    }
+
+    /// Starts following an outline's answer: `{sub, page}`. Changes come out of `takeOutlineDeltas`; `unsubscribe`
+    /// ends it.
+    #[wasm_bindgen(js_name = subscribeOutline)]
+    pub fn subscribe_outline(&self, json: String) -> Result<JsValue, JsError> {
+        let (sub, page) = self.repo.subscribe_outline(parse_json::<OutlineQuery>(&json)?);
+        to_js(&serde_json::json!({ "sub": sub, "page": page }))
+    }
+
+    /// The outline pages that changed since last asked, whole: `[{sub, page}]`.
+    #[wasm_bindgen(js_name = takeOutlineDeltas)]
+    pub fn take_outline_deltas(&self) -> Result<JsValue, JsError> {
+        to_js(&self.repo.take_outline_deltas())
+    }
+
     /// `json`: the yml as JSON text. Refused unless valid by its gestalt; without `id`, it gets a new uuid.
     pub async fn put(&self, json: String) -> Result<JsValue, JsError> {
         let value: gestalts_core::Value = serde_json::from_str(&json).map_err(|e| JsError::new(&e.to_string()))?;
@@ -356,6 +375,10 @@ pub fn content_hash(text: &str) -> String {
 
 /// As JSON text, so a number in a query stays the integer or float it is.
 fn parse_query(json: &str) -> Result<Query, JsError> {
+    parse_json(json)
+}
+
+fn parse_json<T: serde::de::DeserializeOwned>(json: &str) -> Result<T, JsError> {
     serde_json::from_str(json).map_err(|e| JsError::new(&e.to_string()))
 }
 

@@ -16,6 +16,7 @@ use crate::blobs::BlobRefs;
 use crate::gestalt::{Edge, Gestalts, Problem, YmlState};
 use crate::index::{Entry, Index, Item, Page, Query};
 use crate::mastery::{Belief, Mastery};
+use crate::outline::{Outline, OutlinePage, OutlineQuery, OutlineSpec};
 use crate::merge::tombstone;
 use crate::storage::{Result, Storage, StorageError, check_key};
 use crate::yml::{Yml, to_yaml};
@@ -62,6 +63,20 @@ struct BeliefSubscription {
     touched: bool,
 }
 
+/// An outline subscription's page, again, after something it shows changed.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct OutlineDelta {
+    pub sub: SubId,
+    pub page: OutlinePage,
+}
+
+struct OutlineSubscription {
+    query: OutlineQuery,
+    last: OutlinePage,
+    shown: BTreeSet<String>,
+    touched: bool,
+}
+
 pub struct Repo<S> {
     storage: S,
     gestalts: Gestalts,
@@ -69,6 +84,8 @@ pub struct Repo<S> {
     subs: RefCell<BTreeMap<SubId, Subscription>>,
     belief_subs: RefCell<BTreeMap<SubId, BeliefSubscription>>,
     mastery: RefCell<Mastery>,
+    outlines: RefCell<Vec<Outline>>,
+    outline_subs: RefCell<BTreeMap<SubId, OutlineSubscription>>,
     next_sub: Cell<SubId>,
     deltas: RefCell<Vec<Delta>>,
 }
@@ -84,6 +101,8 @@ impl<S: Storage> Repo<S> {
             subs: RefCell::default(),
             belief_subs: RefCell::default(),
             mastery: RefCell::default(),
+            outlines: RefCell::default(),
+            outline_subs: RefCell::default(),
             next_sub: Cell::new(1),
             deltas: RefCell::default(),
         }
@@ -246,6 +265,51 @@ impl<S: Storage> Repo<S> {
     pub fn unsubscribe(&self, id: SubId) {
         self.subs.borrow_mut().remove(&id);
         self.belief_subs.borrow_mut().remove(&id);
+        let mut outline_subs = self.outline_subs.borrow_mut();
+        if outline_subs.remove(&id).is_some() {
+            // an outline nobody follows isn't kept up
+            self.outlines.borrow_mut().retain(|o| outline_subs.values().any(|s| s.query.spec == *o.spec()));
+        }
+    }
+
+    /// One page of what `q` asks of an outline ([`crate::outline`]).
+    pub fn outline(&self, q: &OutlineQuery) -> OutlinePage {
+        let mut outlines = self.outlines.borrow_mut();
+        let at = match outlines.iter().position(|o| *o.spec() == q.spec) {
+            Some(at) => at,
+            None => {
+                outlines.push(Outline::new(q.spec.clone()));
+                outlines.len() - 1
+            }
+        };
+        outlines[at].answer(&self.index.borrow(), q)
+    }
+
+    /// Starts following an outline's answer: its first page, and the id to [`Self::unsubscribe`] with. Changes come
+    /// out of [`Self::take_outline_deltas`].
+    pub fn subscribe_outline(&self, query: OutlineQuery) -> (SubId, OutlinePage) {
+        let page = self.outline(&query);
+        let id = self.new_sub();
+        self.outline_subs.borrow_mut().insert(id, OutlineSubscription { shown: page.ids(), last: page.clone(), query, touched: false });
+        (id, page)
+    }
+
+    /// For each outline subscription, its page again if it changed since last asked.
+    pub fn take_outline_deltas(&self) -> Vec<OutlineDelta> {
+        let touched: Vec<(SubId, OutlineQuery)> =
+            self.outline_subs.borrow_mut().iter_mut().filter(|(_, s)| s.touched).map(|(&id, s)| { s.touched = false; (id, s.query.clone()) }).collect();
+        let mut out = Vec::new();
+        for (sub, query) in touched {
+            let page = self.outline(&query);
+            let mut subs = self.outline_subs.borrow_mut();
+            let Some(s) = subs.get_mut(&sub) else { continue };
+            if page != s.last {
+                s.shown = page.ids();
+                s.last = page.clone();
+                out.push(OutlineDelta { sub, page });
+            }
+        }
+        out
     }
 
     /// What is believed about `concepts` as of `now_ms` (unix ms), in that order.
@@ -298,6 +362,15 @@ impl<S: Storage> Repo<S> {
         if touched {
             self.belief_subs.borrow_mut().values_mut().for_each(|s| s.touched = true);
         }
+        let stale: Vec<OutlineSpec> = self
+            .outlines
+            .borrow_mut()
+            .iter_mut()
+            .filter_map(|o| changed.iter().fold(false, |any, (id, old)| o.observe(old.as_ref(), index.get(id)) | any).then(|| o.spec().clone()))
+            .collect();
+        for s in self.outline_subs.borrow_mut().values_mut() {
+            s.touched |= stale.contains(&s.query.spec) || changed.iter().any(|(id, _)| s.shown.contains(id));
+        }
         if self.subs.borrow().is_empty() {
             return;
         }
@@ -305,10 +378,12 @@ impl<S: Storage> Repo<S> {
         for (&sub, s) in subs.iter_mut() {
             let touching: BTreeSet<&str> = changed
                 .iter()
-                .filter(|(id, old)| old.as_ref().is_some_and(|e| s.query.matches(e)) || index.get(id).is_some_and(|e| s.query.matches(e)))
+                .filter(|(id, old)| old.as_ref().is_some_and(|e| s.query.matches(e, &index)) || index.get(id).is_some_and(|e| s.query.matches(e, &index)))
                 .map(|(id, _)| id.as_str())
                 .collect();
-            if touching.is_empty() {
+            // a link to a shape matches by what the target is, so a changed target concerns whoever references it
+            let via_target = s.query.links.looks_at_targets() && changed.iter().any(|(id, _)| index.referencing(id).next().is_some());
+            if touching.is_empty() && !via_target {
                 continue;
             }
             let page = index.page(&s.query);
@@ -348,7 +423,7 @@ pub fn state_id(gestalt: &str, target: &str, facet: Option<&str>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::index::{Order, RefFilter, TagFilter};
+    use crate::index::{LinkFilter, LinkMatch, Order, RefFilter, Shape, TagFilter};
     use crate::storage::Memory;
     use crate::yml::parse_yaml;
 
@@ -441,8 +516,8 @@ mod tests {
                 ids(&r.query(&q)).into_iter().map(str::to_owned).collect::<Vec<_>>()
             };
             assert_eq!(q(|q| q.tags = TagFilter { all: vec!["x".into()], none: vec!["no-queue".into()] }), vec!["b"]);
-            assert_eq!(q(|q| q.refs = Some(RefFilter { to: "a".into(), field: None })), vec!["b"]);
-            assert_eq!(q(|q| q.refs = Some(RefFilter { to: "a".into(), field: Some("other".into()) })), Vec::<String>::new());
+            assert_eq!(q(|q| q.refs = Some(RefFilter { to: "a".into(), field: None, label: None })), vec!["b"]);
+            assert_eq!(q(|q| q.refs = Some(RefFilter { to: "a".into(), field: Some("other".into()), label: None })), Vec::<String>::new());
             assert_eq!(q(|q| q.text = Some("κινναμ".into())), vec!["a"]);
             assert_eq!(q(|q| q.text = Some("KEPT he".into())), vec!["b"]);
             assert_eq!(q(|q| q.text = Some("kept spice".into())), Vec::<String>::new());
@@ -458,7 +533,7 @@ mod tests {
             r.put(parse_yaml("id: s\ngestalt: source@1\nkey: k\nentrytype: misc\n").unwrap()).await.unwrap();
             r.put(parse_yaml("id: n1\ngestalt: note@1\nmain: a\nrelationships: [{to: s, label: source p. 3}]\n").unwrap()).await.unwrap();
             r.put(parse_yaml("id: n2\ngestalt: note@1\nmain: b\nrelationships: [{to: n1, label: see}]\n").unwrap()).await.unwrap();
-            let q = Query { gestalt: Some("note@1".into()), refs: Some(RefFilter { to: "s".into(), field: Some("relationships".into()) }), ..Default::default() };
+            let q = Query { gestalt: Some("note@1".into()), refs: Some(RefFilter { to: "s".into(), field: Some("relationships".into()), label: None }), ..Default::default() };
             assert_eq!(ids(&r.query(&q)), vec!["n1"]);
         });
     }
@@ -468,8 +543,47 @@ mod tests {
         pollster::block_on(async {
             let r = repo();
             r.put(parse_yaml("id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c: 0.5}\n").unwrap()).await.unwrap();
-            let q = Query { refs: Some(RefFilter { to: "c".into(), field: Some("concepts".into()) }), ..Default::default() };
+            let q = Query { refs: Some(RefFilter { to: "c".into(), field: Some("concepts".into()), label: None }), ..Default::default() };
             assert_eq!(ids(&r.query(&q)), vec!["f"]);
+        });
+    }
+
+    #[test]
+    fn links_filter_by_label_and_by_what_the_target_is() {
+        pollster::block_on(async {
+            let r = repo();
+            r.put(note("root", "tags: [r]\n")).await.unwrap();
+            r.put(note("a", "relationships: [{to: root, label: follows}]\n")).await.unwrap();
+            r.put(note("b", "relationships: [{to: a, label: see}]\n")).await.unwrap();
+            r.put(note("c", "relationships: [{to: gone, label: follows}]\n")).await.unwrap();
+            let follows = |to: Option<Shape>| LinkMatch { label: Some("follows".into()), to, ..Default::default() };
+            let tagged = || Some(Shape { tags: TagFilter { all: vec!["r".into()], none: vec![] }, ..Default::default() });
+            let q = |links: LinkFilter| ids(&r.query(&Query { links, ..notes() })).into_iter().map(str::to_owned).collect::<Vec<_>>();
+            assert_eq!(q(LinkFilter { all: vec![follows(None)], none: vec![] }), vec!["a", "c"]);
+            assert_eq!(q(LinkFilter { all: vec![], none: vec![follows(None)] }), vec!["b", "root"]);
+            assert_eq!(q(LinkFilter { all: vec![follows(tagged())], none: vec![] }), vec!["a"]);
+            assert_eq!(q(LinkFilter { all: vec![follows(Some(Shape::default()))], none: vec![] }), vec!["a"], "a missing target is no shape");
+            let by_label = |label: &str| Query { refs: Some(RefFilter { to: "root".into(), field: None, label: Some(label.into()) }), ..notes() };
+            assert_eq!(ids(&r.query(&by_label("follows"))), vec!["a"]);
+            assert!(r.query(&by_label("see")).items.is_empty());
+        });
+    }
+
+    #[test]
+    fn a_link_to_a_shape_follows_changes_of_the_target() {
+        pollster::block_on(async {
+            let r = repo();
+            r.put(note("t", "")).await.unwrap();
+            r.put(note("s", "relationships: [{to: t, label: follows}]\n")).await.unwrap();
+            let shape = Shape { tags: TagFilter { all: vec!["r".into()], none: vec![] }, ..Default::default() };
+            let links = LinkFilter { all: vec![LinkMatch { to: Some(shape), ..Default::default() }], none: vec![] };
+            let (sub, page) = r.subscribe(Query { links, ..notes() });
+            assert!(page.items.is_empty());
+            r.put(note("t", "tags: [r]\n")).await.unwrap();
+            let d = r.take_deltas();
+            assert_eq!((d.len(), d[0].sub, d[0].order.clone()), (1, sub, vec!["s".to_owned()]));
+            r.delete("t", NOW).await.unwrap();
+            assert_eq!(r.take_deltas()[0].remove, vec!["s".to_owned()]);
         });
     }
 
@@ -646,6 +760,36 @@ mod tests {
             r.unsubscribe(on_z);
             put("id: e2\ngestalt: practice-event@1\nsubject: f\nview: t\nat: 2026-11-11T10:05:00Z\nrating: 2\n").await.unwrap();
             assert!(r.take_belief_deltas(now).is_empty());
+        });
+    }
+
+    #[test]
+    fn outline_subscriptions_follow_places_and_what_they_show() {
+        pollster::block_on(async {
+            use crate::outline::{Ask, OutlineQuery, OutlineSpec};
+            let r = repo();
+            r.put(note("root", "title: R\ntags: [zettelkasten-root]\n")).await.unwrap();
+            r.put(note("other", "title: O\n")).await.unwrap();
+            let spec = OutlineSpec {
+                gestalt: "note@1".into(),
+                field: "relationships".into(),
+                follows: "follows".into(),
+                branches: "branches from".into(),
+                root_tag: "zettelkasten-root".into(),
+                exclude_tag: "no-zettelkasten".into(),
+            };
+            let (sub, page) = r.subscribe_outline(OutlineQuery { spec, ask: Ask::Children(None), limit: None, cursor: None, fields: None, subject: None });
+            assert_eq!(page.entries.len(), 1);
+            r.put(note("other", "title: O2\n")).await.unwrap();
+            assert!(r.take_outline_deltas().is_empty(), "neither shown nor placing");
+            r.put(note("root", "title: R2\ntags: [zettelkasten-root]\n")).await.unwrap();
+            let d = r.take_outline_deltas();
+            assert_eq!((d.len(), d[0].sub), (1, sub));
+            assert_eq!(d[0].page.entries[0].item.value.get("title").and_then(Value::as_str), Some("R2"));
+            r.put(note("other", "title: O2\nrelationships: [{to: root, label: follows}]\n")).await.unwrap();
+            assert_eq!(r.take_outline_deltas()[0].page.entries.len(), 2);
+            r.unsubscribe(sub);
+            assert!(r.outlines.borrow().is_empty());
         });
     }
 

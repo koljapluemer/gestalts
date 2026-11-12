@@ -1,4 +1,4 @@
-import type { Belief, BeliefDelta, Delta, Item, Json, JsonMap, Page, Query } from './types';
+import type { Belief, BeliefDelta, Delta, Item, Json, JsonMap, OutlineDelta, OutlinePage, OutlineQuery, Page, Query } from './types';
 
 /** Bumped when a message below changes meaning. A view and the host that run it must agree. */
 export const PROTOCOL = 3;
@@ -41,6 +41,8 @@ export type Call =
   | { op: 'subscribe'; query: Query }
   /** follows the beliefs about `concepts`; ended with `unsubscribe` */
   | { op: 'beliefs'; concepts: string[] }
+  /** follows what an outline answers; ended with `unsubscribe` */
+  | { op: 'outline'; query: OutlineQuery }
   | { op: 'unsubscribe'; sub: number }
   | { op: 'put'; value: JsonMap }
   | { op: 'delete'; id: string }
@@ -64,6 +66,7 @@ export type Answers = {
   query: Page;
   subscribe: { sub: number; page: Page };
   beliefs: { sub: number; beliefs: Belief[] };
+  outline: { sub: number; page: OutlinePage };
   unsubscribe: null;
   put: Item;
   delete: boolean;
@@ -96,5 +99,6 @@ export type ToView =
   | { type: 'reply'; id: number; ok: false; error: string }
   | { type: 'delta'; delta: Delta }
   | { type: 'beliefs'; delta: BeliefDelta }
+  | { type: 'outline'; delta: OutlineDelta }
   /** the view was moved elsewhere (`openView` from another view, or the app) */
   | { type: 'params'; params: Record<string, string> };

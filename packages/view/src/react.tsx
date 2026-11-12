@@ -1,7 +1,7 @@
 import { createContext, use, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { ViewHost } from './connection';
 import type { Call, Capabilities, LlmRequest, NetReply, NetRequest, ViewInit } from './protocol';
-import type { Belief, Item, Json, JsonMap, Page, Query } from './types';
+import type { Belief, Item, Json, JsonMap, OutlineAsk, OutlineEntry, OutlinePage, OutlineQuery, OutlineSpec, Page, Query } from './types';
 
 const SAVE_DELAY_MS = 300;
 
@@ -230,6 +230,97 @@ export function useBeliefs(concepts: string[] | null): BeliefsResult {
   return useSyncExternalStore(live?.subscribe ?? noSubscribe, live?.get ?? idleBeliefs);
 }
 const idleBeliefs = () => NO_BELIEFS;
+
+export type OutlineResult = {
+  entries: OutlineEntry[];
+  loading: boolean;
+  error?: string;
+  /** whether `more` would load anything */
+  hasMore: boolean;
+  more: () => void;
+};
+
+const LOADING_OUTLINE: OutlineResult = { entries: [], loading: true, hasMore: false, more: () => {} };
+
+/** An outline's answer kept current: one subscription per loaded page, each page replaced whole when it changes. */
+class LiveOutline {
+  private listeners = new Set<() => void>();
+  private pages: { sub: number; page: OutlinePage; stop: () => void }[] = [];
+  private snapshot = LOADING_OUTLINE;
+  private generation = 0;
+  private busy = false;
+
+  constructor(private host: ViewHost, private query: OutlineQuery) {}
+
+  get = () => this.snapshot;
+
+  subscribe = (l: () => void) => {
+    this.listeners.add(l);
+    if (this.listeners.size === 1) { this.snapshot = LOADING_OUTLINE; this.load(undefined); }
+    return () => {
+      this.listeners.delete(l);
+      if (this.listeners.size === 0) this.stop();
+    };
+  };
+
+  private stop() {
+    this.generation++;
+    for (const p of this.pages) {
+      p.stop();
+      void this.host.call({ op: 'unsubscribe', sub: p.sub });
+    }
+    this.pages = [];
+    this.busy = false;
+  }
+
+  private more = () => {
+    const last = this.pages.at(-1);
+    if (last?.page.next && !this.busy) this.load(last.page.next);
+  };
+
+  private load(cursor: string | undefined) {
+    const generation = this.generation;
+    this.busy = true;
+    this.host.call({ op: 'outline', query: { ...this.query, ...(cursor === undefined ? {} : { cursor }) } }).then(({ sub, page }) => {
+      if (generation !== this.generation) {
+        void this.host.call({ op: 'unsubscribe', sub });
+        return;
+      }
+      this.busy = false;
+      const entry = { sub, page, stop: () => {} };
+      entry.stop = this.host.onOutline(sub, (d) => { entry.page = d.page; this.publish(); });
+      this.pages.push(entry);
+      this.publish();
+    }, (e: unknown) => {
+      if (generation !== this.generation) return;
+      this.busy = false;
+      this.publish(e instanceof Error ? e.message : String(e));
+    });
+  }
+
+  private publish(error?: string) {
+    const seen = new Set<string>();
+    // a yml can move between pages while they load
+    const entries = this.pages.flatMap((p) => p.page.entries.filter((e) => !seen.has(e.item.id) && seen.add(e.item.id)));
+    this.snapshot = { entries, loading: false, error, hasMore: Boolean(this.pages.at(-1)?.page.next), more: this.more };
+    this.listeners.forEach((l) => l());
+  }
+}
+
+/**
+ * What an outline (see `OutlineSpec`) answers to `ask`, kept current: the rows under a yml (`{children: id}`, the top
+ * level for `null`), a yml and what follows it (`{sequence: id}`), where some ymls are (`{locate: ids}`, with
+ * `belowSubject` when `subject` is given), or every yml that doesn't add up (`'loose'`). Loads one page; `more()` adds
+ * the next. `null` asks for nothing yet. The view must read the spec's gestalt.
+ */
+export function useOutline(spec: OutlineSpec, ask: OutlineAsk | null, options: { limit?: number; fields?: string[]; subject?: string } = {}): OutlineResult {
+  const { host } = useContext_();
+  const key = ask === null ? null : JSON.stringify({ spec, ask, ...options });
+  const live = useMemo(() => (key === null ? null : new LiveOutline(host, JSON.parse(key) as OutlineQuery)), [host, key]);
+  return useSyncExternalStore(live?.subscribe ?? noSubscribe, live?.get ?? idleOutline);
+}
+const IDLE_OUTLINE: OutlineResult = { entries: [], loading: false, hasMore: false, more: () => {} };
+const idleOutline = () => IDLE_OUTLINE;
 
 /** One yml by id, kept current; `undefined` while loading or when there's none. */
 export function useDoc(gestalt: string, id: string | null): Item | undefined {

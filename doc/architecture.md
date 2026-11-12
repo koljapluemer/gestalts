@@ -39,9 +39,14 @@ The host holds one index, built once on open and updated per changed id. A view 
   check or an action (is this key taken? export everything), never for what the view shows.
 - When ymls change, only subscriptions whose predicate matches an old or new version of one of them are recomputed, and
   each gets a delta of its page. `crates/core/src/repo.rs` has a test of this with 12k ymls.
-- Search, ordering, a random draw and reverse references all run in the host's index.
+- Search, ordering, a random draw and references both ways run in the host's index. A query can ask what a yml
+  references (`links`): through which prop, with which label, and to a yml of what shape. A shape is about the
+  target, so a change to a yml also rechecks the subscriptions with a shape for the ymls referencing it.
 - So does what a learner knows: the core keeps beliefs about concepts up to date from practice events as they change
   ([data-format.md](data-format.md)), and `useBeliefs` is live like `useQuery`, for just the concepts a view shows.
+- So is an outline over labelled references, Luhmann's Zettelkasten being one (`crates/core/src/outline.rs`): the
+  core works out where each yml sits, what floats and what doesn't add up, and `useOutline` is live for just the rows,
+  places or problems a view shows. Only a change to what places a yml rebuilds it.
 - Opening still parses every yml once, in the host. A persisted snapshot could go behind the same contract.
 
 Writes from anywhere end up the same way: the node's watcher sees the file change and the host reindexes those ids, so a

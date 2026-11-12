@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { BeliefDelta, Delta, Item, JsonMap } from '@gestalts/view';
+import type { BeliefDelta, Delta, Item, JsonMap, OutlineDelta, OutlineSpec } from '@gestalts/view';
 import type { Pushed } from './bridge';
 
 vi.mock('@gestalts/client', () => ({ stableId: () => 's', stateId: () => 't', contentHash: () => 'h' }));
@@ -12,6 +12,7 @@ function setup(existing: Item[] = []) {
   const store = new Map(existing.map((i) => [i.id, i]));
   let listener: ((d: Delta) => void) | undefined;
   let beliefListener: ((d: BeliefDelta) => void) | undefined;
+  let outlineListener: ((d: OutlineDelta) => void) | undefined;
   const repo = {
     query: () => ({ items: [...store.values()], next: null }),
     live: (_q: unknown, f: (d: Delta) => void) => { listener = f; return { page: { items: [], next: null }, stop: () => stops.push(1) }; },
@@ -19,6 +20,7 @@ function setup(existing: Item[] = []) {
       beliefListener = f;
       return { beliefs: concepts.map((concept) => ({ concept, mean: 0, sd: 1.5, p: 0.5, evidence: 0 })), stop: () => stops.push(2) };
     },
+    liveOutline: (_q: unknown, f: (d: OutlineDelta) => void) => { outlineListener = f; return { page: { entries: [], next: null }, stop: () => stops.push(3) }; },
     get: (id: string) => store.get(id),
     put: async (value: JsonMap) => { const i = { id: String(value.id), gestalt: String(value.gestalt), value }; store.set(i.id, i); return i; },
     delete: async (id: string) => store.delete(id),
@@ -27,7 +29,7 @@ function setup(existing: Item[] = []) {
   };
   const out: Pushed[] = [];
   const bridge = new Bridge(repo as never, { reads: ['note@1', 'concept@1'], writes: ['note@1'] }, env, (m) => out.push(m));
-  return { bridge, stops, out, fire: (d: Delta) => listener?.(d), fireBeliefs: (d: BeliefDelta) => beliefListener?.(d), store };
+  return { bridge, stops, out, fire: (d: Delta) => listener?.(d), fireBeliefs: (d: BeliefDelta) => beliefListener?.(d), fireOutline: (d: OutlineDelta) => outlineListener?.(d), store };
 }
 
 const concept: Item = { id: 'c', gestalt: 'concept@1', value: { id: 'c', gestalt: 'concept@1', name: 'x' } };
@@ -113,6 +115,17 @@ describe('the bridge', () => {
     expect(stops).toEqual([2]);
     const blind = new Bridge({} as never, { reads: ['note@1'], writes: [] }, env, () => {});
     await expect(blind.handle({ op: 'beliefs', concepts: ['x'] })).rejects.toBeInstanceOf(AccessError);
+  });
+
+  it('follows an outline only of a gestalt the view reads, under its own numbering', async () => {
+    const { bridge, stops, out, fireOutline } = setup();
+    const spec: OutlineSpec = { gestalt: 'note@1', field: 'relationships', follows: 'follows', branches: 'branches from', rootTag: 'r', excludeTag: 'x' };
+    const { sub } = await bridge.handle({ op: 'outline', query: { spec, ask: 'loose' } });
+    fireOutline({ sub: 999, page: { entries: [], next: null } });
+    expect(out[0]).toMatchObject({ type: 'outline', delta: { sub } });
+    await bridge.handle({ op: 'unsubscribe', sub });
+    expect(stops).toEqual([3]);
+    await expect(bridge.handle({ op: 'outline', query: { spec: { ...spec, gestalt: 'deck@1' }, ask: 'loose' } })).rejects.toBeInstanceOf(AccessError);
   });
 
   it('keeps where a view put itself only as a map of strings, and says whether another view showed', async () => {
