@@ -10,6 +10,7 @@ plugins:
   - ../../../plugins/flashcard-manager
   - ../../../plugins/source-manager
   - ../../../plugins/concept-explorer
+  - ../../../plugins/zettelkasten
   - ../../../plugins/alphabet-pronunciation-trainer
   # no grants: recording in the Android app needs its WebView to pass the microphone on, which it doesn't yet, so the
   # phrasebook reveals instead of recording there

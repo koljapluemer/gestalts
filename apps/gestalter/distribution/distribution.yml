@@ -10,6 +10,7 @@ plugins:
   - ../../../plugins/flashcard-manager
   - ../../../plugins/source-manager
   - ../../../plugins/concept-explorer
+  - ../../../plugins/zettelkasten
   - ../../../plugins/alphabet-pronunciation-trainer
   - ../../../plugins/transparent-input
   - ../../../plugins/phrasebook

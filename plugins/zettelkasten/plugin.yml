@@ -1,0 +1,8 @@
+id: zettelkasten
+version: 1.0.0
+title: Zettelkasten
+description: >-
+  Luhmann's Zettelkasten over your notes: place each note after another or as a branch under it, starting from one
+  root. Notes not placed yet come up one at a time; tag one no-zettelkasten to keep it out.
+reads: [note@1]
+writes: [note@1]
