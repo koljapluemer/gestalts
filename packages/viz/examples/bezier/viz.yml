@@ -1,0 +1,11 @@
+title: How a Bézier curve is drawn
+intro: |
+  A cubic Bézier curve has four control points, but only passes through the first and the last. Where is it in
+  between? De Casteljau's answer needs nothing but cutting lines at the same fraction $t$, again and again.
+spec: |
+  Show de Casteljau's construction of a cubic Bézier curve at one t: the control polygon, every level of
+  interpolated points, and the point on the curve, tracing the curve up to t. The control points are draggable;
+  t plays from 0 to 1 in a loop. No labels or formulas.
+outro: |
+  Each level has one point fewer, so after three rounds one point is left: the curve at $t$. Drag a control point
+  and the whole curve follows, which is why drawing programs use these curves.

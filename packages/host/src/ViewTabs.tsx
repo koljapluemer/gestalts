@@ -162,12 +162,19 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
 }
 
 /** One view alone, for apps that show one at a time. */
-export function SingleView({ registry, css, view }: { registry: Registry; css: string; view: string }) {
-  const [params, setParams] = useState<Record<string, string>>({});
+/**
+ * One view and nothing else. Its params are its own, or, with `params` and `onParams`, the app's to keep (in the URL,
+ * so a link shows the same place).
+ */
+export function SingleView({ registry, css, view, params: given, onParams }: {
+  registry: Registry; css: string; view: string; params?: Record<string, string>; onParams?: (params: Record<string, string>) => void;
+}) {
+  const [own, setOwn] = useState<Record<string, string>>({});
+  const params = given ?? own;
   const tab = useMemo<Tab>(() => ({ id: `single-${view}`, view, params }), [view, params]);
   const noop = useCallback(() => {}, []);
   // there's nowhere else to show
   const navigate = useCallback(() => false, []);
-  const move = useCallback((_id: string, p: Record<string, string>) => setParams(p), []);
+  const move = useCallback((_id: string, p: Record<string, string>) => (onParams ?? setOwn)(p), [onParams]);
   return <ViewFrame key={view} registry={registry} css={css} tab={tab} hidden={false} navigate={navigate} setTitle={noop} setParams={move} />;
 }

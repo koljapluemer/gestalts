@@ -1,0 +1,12 @@
+title: Predators and prey
+intro: |
+  More prey feed more predators; more predators eat more prey. Lotka and Volterra wrote that down as two equations,
+  and the populations never settle.
+spec: |
+  Simulate the Lotka–Volterra equations. Show prey and predators over time, and the same run as an orbit in the
+  plane of the two populations, both drawn up to the current time while time plays. Sliders for prey growth,
+  predation, predator death and the predators at the start. For comparison, show the orbit of the same system
+  starting with more predators, dashed.
+outro: |
+  Every start gives a closed orbit: the populations come back to where they started, again and again. More
+  predators at the start doesn't calm things down; it makes the swings bigger.

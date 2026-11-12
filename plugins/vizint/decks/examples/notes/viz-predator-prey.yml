@@ -1,0 +1,88 @@
+id: viz-predator-prey
+gestalt: viz@1
+title: Predators and prey
+intro: |
+  More prey feed more predators; more predators eat more prey. Lotka and Volterra wrote that down as two equations,
+  and the populations never settle.
+spec: |
+  Simulate the Lotka–Volterra equations. Show prey and predators over time, and the same run as an orbit in the
+  plane of the two populations, both drawn up to the current time while time plays. Sliders for prey growth,
+  predation, predator death and the predators at the start. For comparison, show the orbit of the same system
+  starting with more predators, dashed.
+outro: |
+  Every start gives a closed orbit: the populations come back to where they started, again and again. More
+  predators at the start doesn't calm things down; it makes the swings bigger.
+source: |
+  // Lotka–Volterra: prey and predators over time, and the same run as an orbit in the plane of the two populations.
+  import { axis, dot, near, polyline, range, rk4, text, trajectory, viz, type Vec } from '@gestalts/viz';
+
+  const T = 40, DT = 0.02, STEPS = T / DT, DELTA = 0.1, PREY0 = 10;
+
+  type Run = { prey: number[]; pred: number[]; top: number };
+
+  function run(alpha: number, beta: number, gamma: number, pred0: number): Run {
+    const f = ([x, y]: readonly number[]) => [alpha * x - beta * x * y, DELTA * x * y - gamma * y];
+    const states = trajectory<number[]>([PREY0, pred0], (s) => rk4(f, s, DT), STEPS);
+    const prey = states.map((s) => s[0]), pred = states.map((s) => s[1]);
+    return { prey, pred, top: Math.max(...prey, ...pred) };
+  }
+
+  /** what stays constant along an orbit; a numeric check of the solver */
+  const invariant = (x: number, y: number, a: number, b: number, g: number) => DELTA * x - g * Math.log(x) + b * y - a * Math.log(y);
+
+  const series = (ys: readonly number[], upto: number): Vec[] => ys.slice(0, upto + 1).map((y, i) => [i * DT, y]);
+
+  export default viz({
+    params: {
+      t: range(0, T, 0, { step: DT, label: 'time' }),
+      alpha: range(0.2, 1.5, 1.1, { step: 0.01, label: 'prey growth' }),
+      beta: range(0.1, 0.8, 0.4, { step: 0.01, label: 'predation' }),
+      gamma: range(0.1, 1, 0.4, { step: 0.01, label: 'predator death' }),
+      pred0: range(1, 15, 6, { step: 0.5, label: 'predators at first' }),
+    },
+    clock: { drives: 't', duration: 16 },
+    variants: { 'more predators at first': { pred0: 12 } },
+    model: ({ alpha, beta, gamma, pred0 }) => run(alpha, beta, gamma, pred0),
+    panels: (_p, m) => {
+      const top = Math.ceil(m.top * 1.05);
+      return {
+        time: { x: [0, T], y: [0, top], aspect: 1.6, min: 260, grow: 2 },
+        phase: { x: [0, top], y: [0, top], aspect: 1, min: 200 },
+      };
+    },
+    scene: ({ t }, m, ui) => {
+      const i = Math.round(t / DT);
+      const other = ui.variant('more predators at first');
+      const orbit = (r: Run): Vec[] => r.prey.map((x, k) => [x, r.pred[k]]);
+      return [
+        axis('bottom', { panel: 'time', label: 'time' }), axis('left', { panel: 'time' }),
+        polyline(series(m.prey, STEPS), { panel: 'time', color: 'border', width: 1 }),
+        polyline(series(m.pred, STEPS), { panel: 'time', color: 'border', width: 1 }),
+        polyline(series(m.prey, i), { panel: 'time', color: 0, link: 'prey' }),
+        polyline(series(m.pred, i), { panel: 'time', color: 1, link: 'pred' }),
+        dot([t, m.prey[i]], { panel: 'time', color: 0 }), dot([t, m.pred[i]], { panel: 'time', color: 1 }),
+        text([T * 0.98, m.top * 1.0], 'prey', { panel: 'time', align: 'end', color: 0, link: 'prey' }),
+        text([T * 0.98, m.top * 0.92], 'predators', { panel: 'time', align: 'end', color: 1, link: 'pred' }),
+        axis('bottom', { panel: 'phase', label: 'prey' }), axis('left', { panel: 'phase', label: 'predators' }),
+        polyline(orbit(other), { panel: 'phase', color: 'muted', width: 1, dash: [3, 4], link: 'variant' }),
+        polyline(orbit(m), { panel: 'phase', color: 'border', width: 1 }),
+        polyline(orbit(m).slice(0, i + 1), { panel: 'phase', color: 'accent' }),
+        dot([m.prey[i], m.pred[i]], { panel: 'phase', color: 'accent', r: 5 }),
+        ...(ui.hover === 'variant' ? [text([m.top * 0.5, m.top * 0.04], 'more predators at first', { panel: 'phase', color: 'muted', size: 12 })] : []),
+      ];
+    },
+    checks: [
+      {
+        name: 'the orbit is closed: the invariant holds along it',
+        expect: (m, p) => {
+          const v0 = invariant(m.prey[0], m.pred[0], p.alpha, p.beta, p.gamma);
+          return m.prey.every((x, k) => near(invariant(x, m.pred[k], p.alpha, p.beta, p.gamma), v0, 1e-4));
+        },
+      },
+      { name: 'populations stay positive', expect: (m) => m.prey.every((x) => x > 0) && m.pred.every((y) => y > 0) },
+      { name: 'few predators: the prey grow at first', params: { pred0: 1 }, expect: (m) => m.prey[1] > m.prey[0] },
+      { name: 'many predators: the prey shrink at first', params: { pred0: 12 }, expect: (m) => m.prey[1] < m.prey[0] },
+    ],
+  });
+built: 334b3d257471b4d9.html
+generator: hand-written example

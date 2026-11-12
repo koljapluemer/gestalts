@@ -1,0 +1,7 @@
+id: vizint
+version: 0.1.0
+title: Visualizations
+description: Interactive visualizations, each between a short text before and after it.
+tags: [viz]
+reads: [viz@1]
+writes: []

@@ -1,0 +1,19 @@
+{
+  "ymls": [
+    "deck-vizint-examples",
+    "viz-bezier",
+    "viz-predator-prey",
+    "viz-psnr-formula",
+    "viz-psnr-kernel",
+    "viz-stroke-order"
+  ],
+  "blobs": [
+    "334b3d257471b4d9.html",
+    "57b12bfe45e6a170.png",
+    "6daa837a40456bc2.html",
+    "72024899bd446cc3.html",
+    "c45eec2e3bfb9adb.png",
+    "cd86e3d22a6b7cc9.html",
+    "f739f745d67f77bc.html"
+  ]
+}

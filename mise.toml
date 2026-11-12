@@ -171,6 +171,22 @@ description = "Production build into apps/loops-for-learning/dist, static files 
 depends = ["setup"]
 run = "pnpm --dir apps/loops-for-learning build"
 
+# --- vizint ---
+
+[tasks."vizint:dev"]
+description = "The vizint app on :5178 with hot reload"
+depends = ["setup"]
+run = "pnpm --dir apps/vizint dev"
+
+[tasks."vizint:build"]
+description = "Production build into apps/vizint/dist, static files to host anywhere"
+depends = ["setup"]
+run = "pnpm --dir apps/vizint build"
+
+[tasks."vizint:deck"]
+description = "Rebuild plugins/vizint's examples deck from packages/viz/examples, and publish it"
+run = ["node plugins/vizint/tools/build-deck.ts", "mise run publish-data plugins/vizint/decks/examples"]
+
 # --- learning-workshop ---
 
 [tasks."workshop:dev"]

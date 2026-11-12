@@ -1,0 +1,10 @@
+title: The stroke order of 木
+intro: |
+  Chinese characters are written stroke by stroke, in a fixed order. 木, tree, has four strokes.
+spec: |
+  Draw 木 (tree) stroke by stroke, in its standard order: horizontal, vertical, left-falling, right-falling. Each
+  stroke is drawn from where the brush starts, with its number appearing at its start. All strokes show faintly
+  before they're drawn. The user plays, pauses, scrubs and resets.
+outro: |
+  Top before bottom, left before right, horizontal before a vertical that crosses it: most characters follow these
+  rules, so knowing a few characters' order helps with the rest.

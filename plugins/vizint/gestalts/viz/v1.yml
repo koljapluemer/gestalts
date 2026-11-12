@@ -1,0 +1,18 @@
+name: viz
+version: 1
+description: >-
+  One interactive visualization between two short texts: `intro` (Markdown) before it, `outro` after it. `spec` says
+  what it should be and is what it's built from; `source` is its `viz.ts` (written with @gestalts/viz), `packages` the
+  extra npm packages it uses ("name@exact-version"), `files` the data files it imports as `files/<label>`. `built` is
+  the page made from them, one offline HTML file; `still` a PNG of it at its defaults. `generator` says what built it.
+fields:
+  title: { type: string, required: true }
+  intro: { type: text }
+  outro: { type: text }
+  spec: { type: text }
+  source: { type: text }
+  packages: { type: string_list }
+  files: { type: blobs }
+  built: { type: blob }
+  still: { type: blob }
+  generator: { type: string }

@@ -2,7 +2,7 @@
 # Everything for development at once, with hot reload, stopped together (Ctrl-C, or when any of it exits):
 #   - the dev desktop node (tray, the repo's plugins, --profile dev) and its settings page
 #   - the learning workshop's Make node (headless, --profile workshop)
-#   - gestalter and loops-for-learning on the dev node, the learning workshop on the Make node
+#   - gestalter, loops-for-learning and vizint on the dev node, the learning workshop on the Make node
 # Each server gets the first free port from its usual one (scripts/free-port.sh), so it runs beside an installed node
 # (7717/7718) and whatever else listens here. Output is prefixed with who wrote it.
 set -euo pipefail
@@ -24,6 +24,7 @@ take gestalter 5173
 take loops 5174
 take workshop 5175
 take settings 5176
+take vizint 5178
 
 # the node binary once, so the two nodes don't wait on each other's cargo
 cargo build -q -p gestalts-node-desktop
@@ -41,6 +42,7 @@ run make env WORKSHOP_NODE_PORT="$make" apps/learning-workshop/scripts/node.sh
 run settings env GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/node/settings dev --port "$settings" --strictPort
 run gestalter env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$gestalter" --strictPort
 run loops env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/loops-for-learning dev --port "$loops" --strictPort
+run vizint env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/vizint dev --port "$vizint" --strictPort
 run workshop env VITE_WORKSHOP_NODE="http://127.0.0.1:$make" pnpm --dir apps/learning-workshop dev --port "$workshop" --strictPort
 
 cat <<EOF
@@ -48,6 +50,7 @@ cat <<EOF
   gestalter           http://localhost:$gestalter/
   loops-for-learning  http://localhost:$loops/
   learning workshop   http://localhost:$workshop/
+  vizint              http://localhost:$vizint/
   node settings       http://localhost:$settings/
   dev node            http://127.0.0.1:$node  (home network :$((node + 1)), profile dev)
   Make node           http://127.0.0.1:$make  (home network :$((make + 1)), profile workshop)

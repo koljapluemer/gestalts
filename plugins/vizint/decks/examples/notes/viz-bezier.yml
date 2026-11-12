@@ -1,0 +1,59 @@
+id: viz-bezier
+gestalt: viz@1
+title: How a Bézier curve is drawn
+intro: |
+  A cubic Bézier curve has four control points, but only passes through the first and the last. Where is it in
+  between? De Casteljau's answer needs nothing but cutting lines at the same fraction $t$, again and again.
+spec: |
+  Show de Casteljau's construction of a cubic Bézier curve at one t: the control polygon, every level of
+  interpolated points, and the point on the curve, tracing the curve up to t. The control points are draggable;
+  t plays from 0 to 1 in a loop. No labels or formulas.
+outro: |
+  Each level has one point fewer, so after three rounds one point is left: the curve at $t$. Drag a control point
+  and the whole curve follows, which is why drawing programs use these curves.
+source: |
+  // How a Bézier curve is made: de Casteljau's construction, at one t, dragging the control points.
+  import { dot, handles, lerpVec, near, points, polyline, range, viz, type Vec } from '@gestalts/viz';
+
+  /** every level of de Casteljau's construction at t; the last level is the point on the curve */
+  function casteljau(p: readonly Vec[], t: number): Vec[][] {
+    const levels: Vec[][] = [[...p]];
+    for (let l = levels[0]; l.length > 1; l = levels[levels.length - 1]) levels.push(l.slice(1).map((q, i) => lerpVec(l[i], q, t)));
+    return levels;
+  }
+
+  const N = 120;
+
+  export default viz({
+    params: {
+      t: range(0, 1, 0.35, { step: 0.001 }),
+      p: points([[0.08, 0.1], [0.25, 0.9], [0.75, 0.9], [0.92, 0.1]]),
+    },
+    clock: { drives: 't', duration: 4, loop: true },
+    panels: { main: { x: [0, 1], y: [0, 1], aspect: 1.6, min: 260 } },
+    model: ({ t, p }) => {
+      const curve = Array.from({ length: N + 1 }, (_, i) => casteljau(p, i / N).at(-1)![0]);
+      const levels = casteljau(p, t);
+      const at = levels.at(-1)![0];
+      return { curve, levels, at, traced: [...curve.slice(0, Math.floor(t * N) + 1), at] };
+    },
+    scene: ({ p }, m) => [
+      polyline(m.curve, { color: 'border', width: 1.5 }),
+      polyline(p, { color: 'muted', width: 1, dash: [4, 4] }),
+      ...m.levels.slice(1, -1).flatMap((l, i) => [
+        polyline(l, { color: i + 1, width: 1.5 }),
+        ...l.map((q) => dot(q, { color: i + 1, r: 3 })),
+      ]),
+      polyline(m.traced, { color: 'accent', width: 3 }),
+      dot(m.at, { color: 'accent', r: 6 }),
+      handles('p'),
+    ],
+    checks: [
+      { name: 'starts at the first control point', params: { t: 0 }, expect: (m, p) => near(m.at, p.p[0]) },
+      { name: 'ends at the last control point', params: { t: 1 }, expect: (m, p) => near(m.at, p.p[3]) },
+      { name: 'a symmetric curve is halfway at t = 0.5', params: { t: 0.5 }, expect: (m) => near(m.at[0], 0.5) },
+      { name: 'one level fewer each step, down to one point', expect: (m) => m.levels.map((l) => l.length).join() === '4,3,2,1' },
+    ],
+  });
+built: f739f745d67f77bc.html
+generator: hand-written example

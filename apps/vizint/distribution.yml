@@ -1,0 +1,4 @@
+# The public app (`id` is its for good): interactive visualizations, one at a time, from its plugins' decks.
+id: vizint
+plugins:
+  - ../../plugins/vizint

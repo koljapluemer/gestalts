@@ -56,7 +56,16 @@ export function mount<S extends ParamSpecs, M>(def: Viz<S, M>, root: HTMLElement
   const style = document.createElement('style');
   style.textContent = CSS;
   document.head.prepend(style);
-  applyTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  // the system's theme, until the page around it says otherwise
+  const dark = matchMedia('(prefers-color-scheme: dark)');
+  let themeFromPage = false;
+  applyTheme(dark.matches ? 'dark' : 'light');
+  dark.addEventListener('change', () => {
+    if (themeFromPage) return;
+    applyTheme(dark.matches ? 'dark' : 'light');
+    theme = readTheme();
+    schedule();
+  });
   addEventListener('error', (e) => post({ source: 'viz', type: 'error', message: String(e.message || e.error) }));
   addEventListener('unhandledrejection', (e) => post({ source: 'viz', type: 'error', message: String(e.reason?.message ?? e.reason) }));
 
@@ -362,6 +371,7 @@ export function mount<S extends ParamSpecs, M>(def: Viz<S, M>, root: HTMLElement
   addEventListener('message', (e: MessageEvent<Down>) => {
     if (e.source !== parent || !e.data || typeof e.data !== 'object') return;
     if (e.data.type === 'theme') {
+      themeFromPage = true;
       applyTheme(e.data.mode === 'dark' ? 'dark' : 'light');
       theme = readTheme();
       schedule();

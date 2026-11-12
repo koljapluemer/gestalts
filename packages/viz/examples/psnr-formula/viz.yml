@@ -1,0 +1,8 @@
+title: Reading the PSNR formula
+intro: |
+  Peak signal-to-noise ratio compares the largest possible pixel value with the error compression introduced.
+spec: |
+  Show PSNR's formula and the long form of the MSE, rendered as TeX. Every part is hoverable; hovering one shows what
+  it means below the formulas. No titles or other labels.
+outro: |
+  Higher is better: identical images have no error at all, and their PSNR is infinite.

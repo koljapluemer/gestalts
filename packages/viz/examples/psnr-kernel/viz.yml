@@ -1,0 +1,12 @@
+title: Collecting the mean squared error
+intro: |
+  How much did compression change an image? Start at the first pixel, compare it with the same pixel in the
+  compressed image, square the difference, and move on.
+spec: |
+  original.png and compressed.png are two small images, the second a compressed version of the first. A 1×1 kernel
+  moves over both, pixel by pixel; a third image shows the squared error of every pixel visited so far as a heatmap.
+  A column lists the last squared errors and, at the bottom, the mean squared error so far. The user sets the
+  kernel's speed and can play, pause, scrub and reset. Hovering a pixel highlights it in all three images.
+outro: |
+  The mean of all those squared differences is the MSE. Compressed images that look alike have a small one; it's the
+  basis of PSNR.

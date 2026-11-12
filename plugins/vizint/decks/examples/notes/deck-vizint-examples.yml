@@ -1,0 +1,10 @@
+id: deck-vizint-examples
+gestalt: deck@1
+name: examples
+title: Examples
+members:
+  - viz-bezier
+  - viz-predator-prey
+  - viz-psnr-formula
+  - viz-psnr-kernel
+  - viz-stroke-order
