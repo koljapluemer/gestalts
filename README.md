@@ -2,7 +2,7 @@
 
 Shared code base for gestalt-based apps: personal plain-text data (ymls and blobs in one folder, each yml naming exactly
 one gestalt) with views on top. The core, the node, the host, the view contract and the note views live here; the apps
-(`gestalter`, `loops-for-learning`, `gestalt-workshop`) are repos of their own. Start with
+(`gestalter` and `loops-for-learning`, whose Make mode contains the former Workshop) are repos of their own. Start with
 [`doc/architecture.md`](doc/architecture.md).
 
 ## Developing
