@@ -10,5 +10,5 @@ port="${WORKSHOP_NODE_PORT:-7727}"
 mkdir -p "$data"
 # from the repo root, so rustup picks up its rust-toolchain.toml
 cd "$here/../.."
-exec cargo run -q -p gestalts-node -- --profile workshop --port "$port" --lan-port "$((port + 1))" \
+exec cargo run -q -p gestalts-node-desktop -- --profile workshop --port "$port" --lan-port "$((port + 1))" \
   --plugins-dir "$here/plugins" serve --data "$data"

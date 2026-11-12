@@ -33,57 +33,57 @@ pnpm typecheck
 pnpm test
 python3 -m unittest discover -s apps/learning-workshop/tests
 apps/learning-workshop/scripts/check-example.sh
-for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
+for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
 [tasks.serve]
 description = "The node headless with the repo's plugins, for working on workers without the desktop shell"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q -p gestalts-node -- --profile dev $(bash scripts/plugin-dirs.sh) serve --data {{usage.dir}}"
+run = "cargo run -q -p gestalts-node-desktop -- --profile dev $(bash scripts/plugin-dirs.sh) serve --data {{usage.dir}}"
 
 [tasks.health-data]
 description = "Print every yml in a data folder that can't be used, and why"
 usage = 'arg "<dir>" help="the data folder (notes/ + blobs/)"'
-run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) health {{usage.dir}}"
+run = "cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health {{usage.dir}}"
 
 [tasks.publish-data]
 description = "Prepare a data folder for publishing as a read-only deck: content-addressed blobs, index.json, checks (after editing a plugin's deck)"
 usage = 'arg "<dir>" help="the data folder, e.g. plugins/phrasebook/decks/<deck>"'
-run = "cargo run -q --release -p gestalts-node -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
+run = "cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
 
-# --- gestalter and the desktop/Android app ---
+# --- gestalts-node: the desktop app ---
 
-[tasks."gestalter:dev"]
-description = "The desktop app (tray, the repo's plugins, dev profile) and gestalter on it, with hot reload, on the first free ports from :5173 and :7737"
+[tasks."node:settings-build"]
+description = "The node's settings page into apps/node/settings/dist, which the desktop app embeds"
+depends = ["setup"]
+run = "pnpm --dir apps/node/settings build"
+
+[tasks."node:dev"]
+description = "The desktop app (tray, the repo's plugins, dev profile) and its settings page with hot reload, on the first free ports from :5176 and :7737"
 depends = ["setup"]
 shell = "bash -c"
 run = """
 trap 'kill 0' EXIT
-page="$(scripts/free-port.sh 5173)"
-# in steps of two: the port after it is this node's home-network port. Clear of an installed gestalter on 7717
+page="$(scripts/free-port.sh 5176)"
+# in steps of two: the port after it is this node's home-network port. Clear of an installed node on 7717
 node="$(scripts/free-port.sh 7737 2)"
-echo "gestalter: http://localhost:$page/ on the node at :$node"
-cargo run -q -p gestalter -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --open-url "http://localhost:$page/" &
-GESTALTER_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$page" --strictPort &
+echo "gestalts-node settings: http://localhost:$page/ on the node at :$node"
+cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --open-url "http://localhost:$page/" &
+GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/node/settings dev --port "$page" --strictPort &
 wait
 """
 
-[tasks."gestalter:build"]
-description = "Production build of the gestalter into apps/gestalter/distribution/dist, which the desktop app embeds"
-depends = ["setup"]
-run = "pnpm --dir apps/gestalter/distribution build"
-
 [tasks."node:package"]
 description = "Desktop app installers for this OS into target/packages"
-depends = ["gestalter:build"]
+depends = ["node:settings-build"]
 shell = "bash -c"
 run = """
 set -euo pipefail
 case "$(uname -s)" in
-  Linux)  cargo packager -p gestalter --release --formats deb,appimage
+  Linux)  cargo packager -p gestalts-node-desktop --release --formats deb,appimage
           cargo generate-rpm -p apps/node/desktop -o target/packages ;;
-  Darwin) cargo packager -p gestalter --release --formats dmg ;;
-  *)      cargo packager -p gestalter --release --formats nsis ;;
+  Darwin) cargo packager -p gestalts-node-desktop --release --formats dmg ;;
+  *)      cargo packager -p gestalts-node-desktop --release --formats nsis ;;
 esac
 """
 
@@ -91,6 +91,29 @@ esac
 description = "Build and install the desktop app on this machine, the way a user gets it"
 depends = ["node:package"]
 run = "bash scripts/install-package.sh target/packages"
+
+# --- gestalter ---
+
+[tasks."gestalter:dev"]
+description = "gestalter with hot reload on the first free port from :5173, on a dev desktop app (tray, the repo's plugins) from :7737"
+depends = ["setup", "node:settings-build"]
+shell = "bash -c"
+run = """
+trap 'kill 0' EXIT
+page="$(scripts/free-port.sh 5173)"
+node="$(scripts/free-port.sh 7737 2)"
+echo "gestalter: http://localhost:$page/ on the node at :$node (its settings: http://127.0.0.1:$node/)"
+cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --background &
+VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$page" --strictPort --open &
+wait
+"""
+
+[tasks."gestalter:build"]
+description = "Production build of gestalter into apps/gestalter/distribution/dist, a static site to host anywhere"
+depends = ["setup"]
+run = "pnpm --dir apps/gestalter/distribution build"
+
+# --- the Android app ---
 
 [tasks."android:check"]
 description = "Clippy on the Android app for arm64 Android (needs the NDK, see apps/gestalter/doc/android.md)"
@@ -105,26 +128,28 @@ cargo clippy --manifest-path apps/node/android/Cargo.toml -q --target aarch64-li
 """
 
 [tasks."android:dev"]
-description = "The Android app on a connected phone or a running emulator, with the page hot-reloading from this machine"
+description = "The Android app on a connected phone or a running emulator, with the page hot-reloading from this machine; the page is $GESTALTS_ANDROID_DISTRIBUTION (default apps/gestalter/distribution-android)"
 depends = ["setup"]
 dir = "apps/node/android"
 shell = "bash -c"
 run = """
 source ../../../scripts/android-env.sh
+source ../../../scripts/android-distribution.sh
 export GESTALTER_PAGE_PORT="$(../../../scripts/free-port.sh 5174)"
 export GESTALTER_HMR_PORT="$(../../../scripts/free-port.sh $((GESTALTER_PAGE_PORT + 1)))"
-cargo tauri android dev --config "{\\"build\\":{\\"devUrl\\":\\"http://localhost:$GESTALTER_PAGE_PORT\\"}}"
+cargo tauri android dev --config "$(distribution_config "http://localhost:$GESTALTER_PAGE_PORT")"
 """
 
 [tasks."android:build"]
-description = "A debug APK for arm64 phones, to install with adb (other targets: cd apps/node/android && cargo tauri android build --debug --apk --target x86_64)"
+description = "A debug APK for arm64 phones, to install with adb, of $GESTALTS_ANDROID_DISTRIBUTION (default apps/gestalter/distribution-android)"
 depends = ["setup"]
 dir = "apps/node/android"
 shell = "bash -c"
 run = """
 set -euo pipefail
 source ../../../scripts/android-env.sh
-cargo tauri android build --debug --apk --target aarch64
+source ../../../scripts/android-distribution.sh
+cargo tauri android build --debug --apk --target aarch64 --config "$(distribution_config)"
 ls gen/android/app/build/outputs/apk/*/debug/*.apk
 """
 

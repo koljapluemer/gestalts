@@ -1,7 +1,13 @@
 # Android
 
-The gestalter on a phone: the same host and plugins as on the desktop, in Android's system WebView (Chrome). The
-notes are kept on the phone and synced with the desktop it paired with, while both are on the same Wi-Fi.
+An app on a phone: its page in Android's system WebView (Chrome), with the same host and plugins as on the desktop.
+The ymls are kept on the phone and synced with the gestalts-node it paired with, while both are on the same Wi-Fi.
+
+The shell (`apps/node/android`: storage, sync, pairing, the commands) is the same for every app; which page it wraps
+is a build input, `GESTALTS_ANDROID_DISTRIBUTION` (from the repo root, default `apps/gestalter/distribution-android`,
+the gestalter). The Android tasks pass it to Tauri as `--config` (`scripts/android-distribution.sh`). The app's id
+and name (`tauri.conf.json`, the Gradle project in `gen/android/`) are still the gestalter's: a second Android app
+needs its own.
 
 ```
 apps/node/android/        the app: Tauri 2 (a Cargo workspace of its own, so the desktop never builds Tauri)
@@ -24,7 +30,7 @@ apps/gestalter/distribution-android/  the page: distribution `gestalter-android`
   icon).
 - **Sync** runs on pairing, when the app comes to the foreground, 0.8 s after a write, and every 15 s while it's in
   the foreground (the page tells the app through `set_active`). Nothing syncs while the app is in the background.
-- **Pairing**: on the desktop, open the settings, then "Devices", which shows a QR code. On the phone, open the phone
+- **Pairing**: in gestalts-node's settings, "Pair a device…" shows a QR code. On the phone, open the phone
   icon and choose "Scan pairing code" (or paste the code). The phone then reaches the desktop over TLS pinned to its
   key, first at the address that worked last, then by mDNS. While it looks, it holds a Wi-Fi multicast lock (Wi-Fi
   drivers drop multicast packets without one). "Forget" ends it on the phone; remove the phone on the desktop too.
@@ -62,11 +68,12 @@ mise run android:build   # a debug APK for arm64 phones: adb install -r gen/andr
 mise run android:check   # clippy for arm64 Android
 ```
 
-For an emulator, build for its architecture: `cd android && cargo tauri android build --debug --apk --target x86_64`.
-In a desktop browser (`pnpm --dir distribution-android dev`), the page keeps the notes in the browser and shows no
-pairing, which is enough for layout work.
+For an emulator, build for its architecture: `cd apps/node/android && source ../../../scripts/android-env.sh && source
+../../../scripts/android-distribution.sh && cargo tauri android build --debug --apk --target x86_64 --config
+"$(distribution_config)"`. In a desktop browser (`pnpm --dir apps/gestalter/distribution-android dev`), the page keeps
+the notes in the browser and shows no pairing, which is enough for layout work.
 
-The SDK levels are 36 (`gen/android/app/build.gradle.kts`). At 37, Android blocks the home network unless the app
+The SDK levels are 36 (`apps/node/android/gen/android/app/build.gradle.kts`). At 37, Android blocks the home network unless the app
 asks for `ACCESS_LOCAL_NETWORK` at runtime. The manifest declares it already, but nothing asks for it yet.
 
 Release builds need a signing key and aren't set up yet ([next-steps.md](next-steps.md)).

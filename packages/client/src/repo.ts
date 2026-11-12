@@ -374,21 +374,12 @@ export class Repo {
     return { text: body.text, provider: body.provider, model: body.model };
   }
 
-  /** The LLM providers as the node has them (never their keys); null without a node. */
+  /** The LLM providers as the node has them (never their keys); null without a node. Its own page changes them. */
   async llmSettings(): Promise<LlmSettings | null> {
     const url = this.nodeUrl();
     if (!url) return null;
     const r = await fetch(`${url}llm/settings`);
     if (!r.ok) throw new Error(`the desktop app answered ${r.status}`);
-    return (await r.json()) as LlmSettings;
-  }
-
-  /** Changes them: an absent field stays, a `key: null` clears that key. */
-  async changeLlmSettings(change: LlmSettingsChange): Promise<LlmSettings> {
-    const url = this.nodeUrl();
-    if (!url) throw new Error('the LLM settings live in the desktop app, which isn\'t connected');
-    const r = await fetch(`${url}llm/settings`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(change) });
-    if (!r.ok) throw new Error(`the desktop app answered ${r.status}: ${await r.text()}`);
     return (await r.json()) as LlmSettings;
   }
 

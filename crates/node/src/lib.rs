@@ -1,6 +1,6 @@
-//! gestalts-node: serves a folder on this computer to the Gestalts apps over HTTP on 127.0.0.1, and hosts plugin
-//! workers. Apps embed it (the gestalter's desktop app adds a tray, its built-in plugins and its web frontend, which
-//! the node serves); `gestalts-node` is the same server headless.
+//! gestalts-node: serves a folder on this computer to the gestalts apps over HTTP on 127.0.0.1, and hosts plugin
+//! workers. The desktop app (`apps/node/desktop`) embeds it with a tray, the repo's plugins and the node's settings
+//! page, which the node serves at `/`; its `serve` subcommand is the same server headless.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -47,13 +47,13 @@ pub struct Opts {
     pub background: bool,
 }
 
-/// What an app brings along: its name, plugins and web frontend compiled into its binary, and the web origins of
-/// other frontends allowed to use it.
+/// What the binary brings along: its name, plugins and settings page compiled in, and the web origins of the apps
+/// allowed to use it.
 #[derive(Clone, Copy)]
 pub struct Embedded {
     /// reported as `app` in `/health`
     pub name: &'static str,
-    /// the web frontend (a static build) served at `/`
+    /// the node's own page (a static build) served at `/`
     pub app: Option<&'static include_dir::Dir<'static>>,
     /// the plugins, one folder each
     pub builtin: Option<&'static include_dir::Dir<'static>>,

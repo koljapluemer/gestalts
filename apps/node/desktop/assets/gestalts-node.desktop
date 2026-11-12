@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=gestalts-node
+Comment=Your ymls in a folder on this computer, synced with your devices, for the gestalts apps
+Exec=gestalts-node
+Icon=gestalts-node
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=false

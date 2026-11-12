@@ -1165,25 +1165,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gestalter"
-version = "0.1.0"
-dependencies = [
- "auto-launch",
- "clap",
- "gestalts-node",
- "include_dir",
- "opener",
- "png",
- "reqwest",
- "rfd",
- "serde",
- "serde_json",
- "serde_yaml_ng",
- "tao",
- "tray-icon",
-]
-
-[[package]]
 name = "gestalts-core"
 version = "0.1.0"
 dependencies = [
@@ -1269,6 +1250,23 @@ dependencies = [
  "tower-http",
  "uuid",
  "zip",
+]
+
+[[package]]
+name = "gestalts-node-desktop"
+version = "0.1.0"
+dependencies = [
+ "auto-launch",
+ "clap",
+ "gestalts-node",
+ "include_dir",
+ "opener",
+ "png",
+ "reqwest",
+ "rfd",
+ "serde_json",
+ "tao",
+ "tray-icon",
 ]
 
 [[package]]

@@ -45,7 +45,7 @@ A view may also ask for:
 
   Every other view keeps the strict sandbox, even if it asks. The build refuses a grant the view didn't ask for.
 
-`network` and `llm` work where a node is: the desktop app, or a page connected to it. `useCapabilities()` says whether
+`network` and `llm` work where a node is: a page using gestalts-node, directly or by syncing with it. `useCapabilities()` says whether
 they do, so a view can offer less instead of failing.
 
 A view imports `react`, `lucide-react`, `@gestalts/view`, `@gestalts/kit`, `@gestalts/learning`, `@gestalts/sources`,

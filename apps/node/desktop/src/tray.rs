@@ -1,6 +1,6 @@
-//! The tray: one desktop app per user, shown as a tray icon. It runs the node, which serves the gestalter on
-//! 127.0.0.1, and opens that in the default browser. The gestalter's Desktop settings use what this app can do (the
-//! folder picker, the file manager, start on login) through the node's `Shell`.
+//! The tray: one desktop app per user, shown as a tray icon. It runs the node on 127.0.0.1 and opens its settings page
+//! in the default browser. That page uses what this app can do (the folder picker, the file manager, start on login)
+//! through the node's `Shell`.
 
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
@@ -14,7 +14,7 @@ use gestalts_node::paths::Paths;
 use gestalts_node::server::{CONTROL_HEADER, FolderInfo, Shell};
 use gestalts_node::{Opts, Server};
 
-use crate::{EMBEDDED, ICON, NAME, OLD_NAME, TITLE};
+use crate::{EMBEDDED, ICON, NAME, OLD_NAMES, TITLE};
 
 pub enum Msg {
     Show,
@@ -42,15 +42,15 @@ fn error_dialog(message: &str) {
     let _ = rfd::MessageDialog::new().set_title(TITLE).set_description(message).set_level(rfd::MessageLevel::Error).show();
 }
 
-/// If we already run on the port, ask that instance to open the gestalter and report `true`.
+/// If we already run on the port, ask that instance to open its settings and report `true`.
 fn hand_over_to_running(opts: &Opts, paths: &Paths) -> Result<bool, String> {
     let base = format!("http://127.0.0.1:{}", opts.port);
     let client = reqwest::blocking::Client::builder().timeout(Duration::from_secs(2)).build().map_err(|e| e.to_string())?;
     let Ok(response) = client.get(format!("{base}/health")).send() else { return Ok(false) };
     let health: serde_json::Value = response.json().unwrap_or_default();
-    if health["app"] == OLD_NAME {
-        return Err(format!("The Gestalts Connector, this app's earlier version, still runs on port {}. Quit it from its tray icon, \
-                            uninstall it, and start {TITLE} again.", opts.port));
+    if let Some(old) = OLD_NAMES.iter().find(|n| health["app"] == **n) {
+        return Err(format!("{old}, this app's earlier version, still runs on port {}. Quit it from its tray icon, uninstall it, \
+                            and start {TITLE} again.", opts.port));
     }
     if health["app"] != NAME { return Err(format!("port {} is used by another program", opts.port)); }
     let token = std::fs::read_to_string(paths.control_token_file()).unwrap_or_default();
@@ -88,7 +88,7 @@ impl Shell for DesktopShell {
 }
 
 fn pick_folder() -> Option<PathBuf> {
-    rfd::FileDialog::new().set_title("Choose your gestalter folder").pick_folder()
+    rfd::FileDialog::new().set_title("Choose your gestalts folder").pick_folder()
 }
 
 /// Start on login under `name` (plus the profile), pointing at the installed binary (or the AppImage, whose mount
@@ -102,11 +102,14 @@ fn autostart(opts: &Opts, name: &str) -> Option<auto_launch::AutoLaunch> {
     auto_launch::AutoLaunchBuilder::new().set_app_name(&name).set_app_path(&exe).set_args(&args).build().ok()
 }
 
-/// "Start on login" chosen under the old name moves to this one.
+/// "Start on login" chosen under an old name moves to this one.
 fn migrate_autostart(opts: &Opts, new: Option<&auto_launch::AutoLaunch>) {
-    let (Some(old), Some(new)) = (autostart(opts, OLD_NAME), new) else { return };
-    if old.is_enabled().unwrap_or(false) && old.disable().is_ok() && let Err(e) = new.enable() {
-        eprintln!("gestalter: cannot move start on login to the new name: {e}");
+    let Some(new) = new else { return };
+    for name in OLD_NAMES {
+        let Some(old) = autostart(opts, name) else { continue };
+        if old.is_enabled().unwrap_or(false) && old.disable().is_ok() && let Err(e) = new.enable() {
+            eprintln!("gestalts-node: cannot move start on login to the new name: {e}");
+        }
     }
 }
 
@@ -129,7 +132,7 @@ struct App {
     open: MenuId,
     choose: MenuId,
     quit: MenuId,
-    /// where the gestalter is: the node's own address, or the dev server's
+    /// where the settings page is: the node's own address, or the dev server's
     open_url: String,
     http: reqwest::blocking::Client,
 }
@@ -146,7 +149,7 @@ impl App {
         { let send = send.clone(); server.spawn(async move { gestalts_node::stop_requested().await; send(Msg::Quit); }); }
 
         let folder_item = MenuItem::new(&label, false, None);
-        let open = MenuItem::new(format!("Open {TITLE}"), true, None);
+        let open = MenuItem::new("Open settings", true, None);
         let choose = MenuItem::new("Choose folder…", true, None);
         let quit = MenuItem::new("Quit", true, None);
         let menu = Menu::new();
@@ -164,21 +167,21 @@ impl App {
             .with_menu(Box::new(menu))
             .with_menu_on_left_click(false)
             .build();
-        // without a tray (e.g. GNOME without an extension), launching the app again still opens the gestalter
-        let tray = tray.map_err(|e| eprintln!("gestalter: no tray icon: {e}")).ok();
+        // without a tray (e.g. GNOME without an extension), launching the app again still opens the settings
+        let tray = tray.map_err(|e| eprintln!("gestalts-node: no tray icon: {e}")).ok();
         let open_url = open_url.unwrap_or_else(|| format!("{}/", server.address));
         let http = reqwest::blocking::Client::builder().timeout(Duration::from_secs(10)).build().map_err(|e| e.to_string())?;
         let app = App { server: Some(server), _tray: tray, folder_item, open: open.id().clone(), choose: choose.id().clone(),
                         quit: quit.id().clone(), open_url, http };
         // launching the app opens it; only the login autostart starts it silently, unless there's no folder yet
-        if !opts.background || no_folder { app.open_gestalter(); }
+        if !opts.background || no_folder { app.open_settings(); }
         Ok(app)
     }
 
     /// Handles one message; `false` means quit.
     fn handle(&mut self, msg: Msg) -> bool {
         match msg {
-            Msg::Show => self.open_gestalter(),
+            Msg::Show => self.open_settings(),
             Msg::FolderChanged(info) => {
                 let label = folder_label(info.as_ref());
                 self.folder_item.set_text(&label);
@@ -186,7 +189,7 @@ impl App {
             }
             Msg::PickFolder(reply) => { let _ = reply.send(pick_folder()); }
             Msg::Quit => return false,
-            Msg::Menu(id) if id == self.open => self.open_gestalter(),
+            Msg::Menu(id) if id == self.open => self.open_settings(),
             Msg::Menu(id) if id == self.choose => self.choose_folder(),
             Msg::Menu(id) if id == self.quit => return false,
             Msg::Menu(_) => {}
@@ -194,11 +197,11 @@ impl App {
         true
     }
 
-    fn open_gestalter(&self) {
+    fn open_settings(&self) {
         if let Err(e) = opener::open_browser(&self.open_url) { error_dialog(&format!("Cannot open {}: {e}", self.open_url)); }
     }
 
-    /// From the tray: the picker, then the node opens the folder as if the gestalter had asked.
+    /// From the tray: the picker, then the node opens the folder as if its settings page had asked.
     fn choose_folder(&self) {
         let (Some(server), Some(path)) = (&self.server, pick_folder()) else { return };
         let sent = self.http.post(format!("{}/control/folder", server.address)).header(CONTROL_HEADER, &server.control_token)

@@ -1,8 +1,12 @@
 [package]
-name = "gestalter"
-description = "The gestalter's desktop app: serves the gestalter, with a folder on this computer as the source of truth, and runs its plugins' workers"
+name = "gestalts-node-desktop"
+description = "gestalts-node on the desktop: a folder on this computer as the source of truth for the gestalts apps, in a tray, with its settings page and the plugins' workers"
 edition.workspace = true
 version.workspace = true
+
+[[bin]]
+name = "gestalts-node"
+path = "src/main.rs"
 
 [dependencies]
 gestalts-node.workspace = true
@@ -16,10 +20,6 @@ rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
 auto-launch = "0.6"
 opener = "0.9"
 
-[build-dependencies]
-serde = { workspace = true, features = ["derive"] }
-serde_yaml_ng.workspace = true
-
 # Linux: StatusNotifierItem over D-Bus, so no GTK/appindicator; it runs its own thread, no event loop needed
 [target.'cfg(target_os = "linux")'.dependencies]
 tray-icon = { version = "0.26", default-features = false, features = ["ksni"] }
@@ -30,28 +30,29 @@ tray-icon = "0.26"
 tao = "0.37"
 
 [package.metadata.packager]
-product-name = "gestalter"
-identifier = "com.koljasam.gestalter"
+product-name = "gestalts-node"
+identifier = "com.koljasam.gestalts-node"
 category = "Productivity"
-description = "Your notes in a folder on this computer: the gestalter, its plugins and their workers"
+description = "Your ymls in a folder on this computer, synced with your devices, for the gestalts apps"
 icons = ["assets/icon.png"]
 authors = ["Kolja Sam"]
 publisher = "Kolja Sam"
-before-packaging-command = "cargo build --release -p gestalter"
+before-packaging-command = "cargo build --release -p gestalts-node-desktop"
 out-dir = "../../../target/packages"
 
 
 [package.metadata.generate-rpm]
-name = "gestalter"
-summary = "Your notes in a folder on this computer: the gestalter, its plugins and their workers"
+name = "gestalts-node"
+summary = "Your ymls in a folder on this computer, synced with your devices, for the gestalts apps"
 license = "proprietary"
 assets = [
-  { source = "../../../target/release/gestalter", dest = "/usr/bin/gestalter", mode = "755" },
-  { source = "assets/gestalter.desktop", dest = "/usr/share/applications/gestalter.desktop", mode = "644" },
-  { source = "assets/icon.png", dest = "/usr/share/icons/hicolor/256x256/apps/gestalter.png", mode = "644" },
+  { source = "../../../target/release/gestalts-node", dest = "/usr/bin/gestalts-node", mode = "755" },
+  { source = "assets/gestalts-node.desktop", dest = "/usr/share/applications/gestalts-node.desktop", mode = "644" },
+  { source = "assets/icon.png", dest = "/usr/share/icons/hicolor/256x256/apps/gestalts-node.png", mode = "644" },
 ]
 
-# the desktop app's earlier name (the .deb can't say so: uninstall that one by hand); the settings
+# the desktop app's earlier names (the .deb can't say so: uninstall those by hand); the settings
 # (`gestalts/config.json`) are the node's and stay
 [package.metadata.generate-rpm.obsoletes]
+gestalter = "*"
 gestalts-connector = "*"

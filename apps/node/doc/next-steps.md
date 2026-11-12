@@ -1,13 +1,15 @@
 # Next steps
 
-gestalter's own steps.
+The desktop and Android apps' own steps.
 
-- [x] **The desktop app serves the gestalter**, as `gestalter` (formerly `gestalts-connector`): see
+- [x] **The desktop app serves the gestalter**, as `gestalter` (formerly `gestalts-connector`).
+- [x] **gestalts-node ships no app**: gestalter is a website on it, the node has its own settings page: see
   [desktop.md](desktop.md).
+- [ ] The deployed apps' origins in `ORIGINS`, once they're deployed.
 - [ ] A webview instead of the default browser, maybe: on Linux it would bring back GTK (webkit2gtk), which the tray
   avoids.
-- [x] **Pairing**: the desktop's settings show a QR code ("Devices"), list the paired devices and forget them; the
-  node does the rest (gestalts' `doc/node.md#pairing-and-the-home-network`).
+- [x] **Pairing**: the node's settings show a QR code ("Devices"), list the paired devices and forget them; the
+  node does the rest (`crates/node/src/lan.rs`, `pairing.rs`).
 - [x] **Android** ([android.md](android.md)): the gestalter in the system WebView over the notes in the app's
   storage (`gestalts_device`), pairing by QR code, syncing while the app is in the foreground, the
   `gestalter-android` distribution, "last synced".

@@ -85,8 +85,10 @@ pauses collection, since what's in use can't be known for sure.
 
 ## The node
 
-`gestalts-node` serves a folder on 127.0.0.1 and runs plugin backends. A folder is marked in `.gestalts/format`; one
-holding ymls without that marker is refused.
+`gestalts-node` (`apps/node/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
+backends. It ships no app: the apps are websites that use it from their own origin (allowed: localhost, the origins
+in `ORIGINS` and the config's `extra_origins`). It brings the gestalts and backends of the repo's `plugins/`, and its
+own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
 
 | Route | |
 |---|---|
@@ -96,7 +98,7 @@ holding ymls without that marker is refused.
 | `/blobs`, `/blobs/{name}`, `/blobs/collect` | |
 | `/services/{plugin}/{path}` | a plugin's backend |
 | `/net` | HTTP for a view, to hosts some plugin declares in `network` (the bridge checks the view's own list first) |
-| `/llm/complete`, `/llm/settings` | completions from the user's providers in their order; keys are kept in the node's config folder and never returned |
-| `/control/*` | the embedding app |
+| `/llm/complete`, `/llm/settings` | completions from the user's providers in their order, and those providers (read only); keys are kept in the node's config folder and never returned |
+| `/control/*` | the node's own settings page (same origin) or the tray (its token): folder, devices and pairing, autostart, changing the LLM settings |
 
 Paired devices reach a subset over TLS on the home network.

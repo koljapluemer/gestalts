@@ -501,8 +501,8 @@ async fn llm_settings(State(s): State<AppState>, headers: HeaderMap) -> Result<R
     Ok(Json(s.llm.view()).into_response())
 }
 
-async fn llm_change(State(s): State<AppState>, headers: HeaderMap, Json(change): Json<SettingsChange>) -> Result<Response, Response> {
-    app_only(&headers, &s).await?;
+/// Control only: the node's own page sets keys, not every web app that may use the node.
+async fn llm_change(State(s): State<AppState>, Json(change): Json<SettingsChange>) -> Result<Response, Response> {
     s.llm.change(change).map(|v| Json(v).into_response()).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response())
 }
 
@@ -729,6 +729,7 @@ pub fn app(state: AppState) -> Router {
         .route("/pairing", post(control_pairing).delete(control_cancel_pairing))
         .route("/devices", get(control_devices))
         .route("/devices/{id}", axum::routing::delete(control_forget_device))
+        .route("/llm/settings", put(llm_change))
         .route_layer(middleware::from_fn_with_state(state.clone(), control_auth));
     Router::new()
         .route("/health", get(health))
@@ -745,7 +746,7 @@ pub fn app(state: AppState) -> Router {
         .route("/services/{service}/{*path}", any(proxy_service))
         .route("/net", post(net_request))
         .route("/llm/complete", post(llm_complete))
-        .route("/llm/settings", get(llm_settings).put(llm_change))
+        .route("/llm/settings", get(llm_settings))
         .nest("/control", control)
         .fallback(get(app_file))
         .layer(middleware::from_fn_with_state(state.clone(), track_origin))
@@ -933,6 +934,23 @@ mod tests {
         assert_eq!(send(&app, from(APP_ORIGIN, "127.0.0.1:7717")).await.0, StatusCode::FORBIDDEN);
         // DNS rebinding: same origin, but not our host name
         assert_eq!(send(&app, from("http://evil.example:7717", "evil.example:7717")).await.0, StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn only_the_node_s_own_page_changes_llm_settings() {
+        let app = app(state(None));
+        let put = |path: &str, origin: &str| axum::http::Request::put(path).header(header::ORIGIN, origin)
+            .header(header::HOST, "127.0.0.1:7717").header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(r#"{"order":["openai","gemini","claude_cli"]}"#)).unwrap();
+        // an app allowed to use the node reads them (no keys), but can't change them
+        let read = axum::http::Request::get("/llm/settings").header(header::ORIGIN, APP_ORIGIN)
+            .header(header::HOST, "127.0.0.1:7717").body(Body::empty()).unwrap();
+        assert_eq!(send(&app, read).await.0, StatusCode::OK);
+        assert_eq!(send(&app, put("/llm/settings", APP_ORIGIN)).await.0, StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(send(&app, put("/control/llm/settings", APP_ORIGIN)).await.0, StatusCode::FORBIDDEN);
+        let (status, body) = send(&app, put("/control/llm/settings", "http://127.0.0.1:7717")).await;
+        assert_eq!(status, StatusCode::OK, "{body}");
+        assert!(body.contains(r#""order":["openai","gemini","claude_cli"]"#), "{body}");
     }
 
     #[tokio::test]

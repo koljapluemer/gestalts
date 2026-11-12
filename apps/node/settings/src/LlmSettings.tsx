@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import { useHostRepo, type LlmProvider, type LlmProviderId, type LlmSettings as Settings, type LlmSettingsChange } from '@gestalts/client';
+import type { LlmProvider, LlmProviderId, LlmSettings as Settings, LlmSettingsChange } from '@gestalts/client';
+import { node } from './control';
 
 const NAMES: Record<LlmProviderId, string> = { gemini: 'Gemini', claude_cli: 'Claude (local CLI)', openai: 'OpenAI' };
 const HINTS: Record<LlmProviderId, string> = {
@@ -10,18 +11,17 @@ const HINTS: Record<LlmProviderId, string> = {
 };
 
 /**
- * The LLM providers views can ask, kept by the desktop app: tried top to bottom, one that is rate-limited skipped for a
- * while. Keys go to the desktop app and never come back to this page.
+ * The LLM providers views can ask, kept by the node: tried top to bottom, one that is rate-limited skipped for a
+ * while. Keys go to the node and never come back to this page.
  */
 export function LlmSettings() {
-  const repo = useHostRepo();
-  const [settings, setSettings] = useState<Settings | null>();
+  const [settings, setSettings] = useState<Settings>();
   const [error, setError] = useState<string>();
-  useEffect(() => { repo.llmSettings().then(setSettings, (e: unknown) => setError(String(e))); }, [repo]);
+  useEffect(() => { node.llmSettings().then(setSettings, (e: unknown) => setError(String(e))); }, []);
 
   const change = (c: LlmSettingsChange) => {
     setError(undefined);
-    repo.changeLlmSettings(c).then(setSettings, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+    node.changeLlmSettings(c).then(setSettings, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
   };
   const move = (id: LlmProviderId, by: number) => {
     if (!settings) return;
@@ -33,11 +33,10 @@ export function LlmSettings() {
     change({ order });
   };
 
-  if (settings === null) return <p className="w-80 text-sm text-base-content/70">LLM providers are set up in the desktop app; connect to it first.</p>;
-  if (!settings) return error ? <p className="w-80 text-sm text-error">{error}</p> : <span className="loading loading-spinner loading-sm" />;
+  if (!settings) return error ? <p className="text-sm text-error">{error}</p> : <span className="loading loading-spinner loading-sm" />;
   const byId = new Map(settings.providers.map((p) => [p.id, p]));
   return (
-    <div className="flex w-80 flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <p className="text-sm text-base-content/70">Views that ask an LLM use these, top to bottom, skipping any that isn't set up or is rate-limited.</p>
       {settings.order.map((id, i) => {
         const p = byId.get(id);
