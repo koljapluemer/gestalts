@@ -8,7 +8,7 @@ if [ -n "$(git status --porcelain)" ]; then
   echo "uncommitted changes: commit first, so the deploy is a commit" >&2; exit 1
 fi
 sha="$(git rev-parse --short HEAD)"
-netlify=(pnpm dlx netlify-cli@27.17.0)
+netlify=(pnpm --package=netlify-cli@27.17.0 dlx netlify)
 
 # app folder (built by `pnpm --dir <folder> build` into <folder>/dist) | Netlify site id | domain
 sites=(
