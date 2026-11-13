@@ -1,0 +1,1 @@
+please clean up the rendering of sources in the relationship list of the Notes view: currently, we have a random badge source, before even the title, then the title, and then a misaligned random year.

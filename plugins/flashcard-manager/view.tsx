@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { MarkdownEditor, storeFile } from '@gestalts/kit';
+import { ConfirmDialog, MarkdownEditor, storeFile } from '@gestalts/kit';
 import { useBlobUrl, useDoc, useQuery, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 type Blob = { file: string; label: string };
@@ -132,6 +132,7 @@ function Editor({ card, onBack, onSaved, onDeleted }: { card?: Item; onBack: () 
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const states = useQuery(card ? { gestalt: 'fsrs-data@1', refs: { to: card.id, field: 'target' }, fields: [], limit: 100 } : null).items;
   const set = (patch: Partial<Draft>) => { setSaved(false); setDraft((d) => ({ ...d, ...patch })); };
   const fail = (e: unknown) => setError(message(e));
@@ -145,12 +146,10 @@ function Editor({ card, onBack, onSaved, onDeleted }: { card?: Item; onBack: () 
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
   const remove = async () => {
-    if (!card || !confirm('Delete this flashcard and its review progress?')) return;
-    try {
-      await Promise.all(states.map((s) => write.remove(s.id)));
-      await write.remove(card.id);
-      onDeleted();
-    } catch (e) { fail(e); }
+    if (!card) return;
+    await Promise.all(states.map((s) => write.remove(s.id)));
+    await write.remove(card.id);
+    onDeleted();
   };
   const attach = async (label: string, f: File) => {
     setError(undefined);
@@ -167,7 +166,7 @@ function Editor({ card, onBack, onSaved, onDeleted }: { card?: Item; onBack: () 
         <button type="button" className="btn btn-sm btn-ghost md:hidden" title="Back to the list" onClick={onBack}><ArrowLeft className="size-4" /></button>
         <span className="flex-1" />
         {saved && <span className="text-sm text-base-content/60">Saved</span>}
-        {card && <button type="button" className="btn btn-sm btn-ghost" onClick={() => void remove()}><Trash2 className="size-4" /> Delete</button>}
+        {card && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}><Trash2 className="size-4" /> Delete</button>}
         <button type="button" className="btn btn-sm btn-primary" disabled={busy || !draft.front.trim()} onClick={() => void save()}>Save</button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
@@ -186,6 +185,11 @@ function Editor({ card, onBack, onSaved, onDeleted }: { card?: Item; onBack: () 
         <input className="input input-sm w-full" placeholder="Aliases, comma separated" value={draft.aliases} onChange={(e) => set({ aliases: e.target.value })} />
         <Concepts value={draft.concepts} onChange={(concepts) => set({ concepts })} onError={fail} />
       </div>
+      {confirming && (
+        <ConfirmDialog title="Delete this flashcard?" onClose={() => setConfirming(false)} onConfirm={remove}>
+          Its review progress will also be deleted. This cannot be undone.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ClipboardPaste, Download, Pencil, Plus, Trash2, Unlink } from 'lucide-react';
-import { MarkdownEditor, Modal, NoteCard, NoteEditor, bibJson, byline, clipboardText, freeKey, ingestBibtex, sourceTitle as titleOf } from '@gestalts/kit';
+import { ConfirmDialog, MarkdownEditor, Modal, NoteCard, NoteEditor, bibJson, byline, clipboardText, freeKey, ingestBibtex, sourceTitle as titleOf } from '@gestalts/kit';
 import {
   ENTRY_TYPES, FIELD_NAMES, FIELDS, bibOf, isEntryType, mergeSource, normalise, parseBibtex, renderBibtex, slug,
   type Bib, type EntryType, type FieldName, type MergeConflict,
@@ -249,6 +249,7 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
   const [error, setError] = useState<string | undefined>(start.error);
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState('');
+  const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<Draft>) => { setNotice(undefined); setDraft((d) => ({ ...d, ...patch })); };
   const setField = (f: FieldName, v: string) => set({ fields: { ...draft.fields, [f]: v } });
   const fail = (e: unknown) => setError(message(e));
@@ -268,8 +269,9 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
   };
 
   const remove = async () => {
-    if (!source || !confirm('Delete this source? Notes about it stay, pointing at nothing.')) return;
-    try { await write.remove(source.id); onDeleted(); } catch (e) { fail(e); }
+    if (!source) return;
+    await write.remove(source.id);
+    onDeleted();
   };
 
   /** The clipboard's BibTeX merged in: what's missing is filled and saved at once; differences wait for a decision. */
@@ -307,7 +309,7 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
         <button type="button" className="btn btn-sm btn-ghost" title="Update this source from the BibTeX in the clipboard" onClick={() => void clipboardText().then(merge, fail)}><ClipboardPaste className="size-4" /> BibTeX</button>
         <span className="flex-1" />
         {notice && <span className="truncate text-sm text-base-content/60">{notice}</span>}
-        {source && <button type="button" className="btn btn-sm btn-ghost" title="Delete" onClick={() => void remove()}><Trash2 className="size-4" /></button>}
+        {source && <button type="button" className="btn btn-sm btn-ghost" title="Delete" onClick={() => setConfirming(true)}><Trash2 className="size-4" /></button>}
         <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={() => void save()}>Save</button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
@@ -344,6 +346,11 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
         <MarkdownEditor value={draft.extra} onChange={(extra: string) => set({ extra })} placeholder="Extra" minHeight="3rem" />
         {source ? <Claims source={source.id} /> : <p className="text-sm text-base-content/60">Save the source to add claims about it.</p>}
       </div>
+      {confirming && (
+        <ConfirmDialog title="Delete this source?" onClose={() => setConfirming(false)} onConfirm={remove}>
+          Notes about it will stay, pointing at nothing. This cannot be undone.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

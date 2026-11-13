@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
-import { AddSource, Modal, SOURCE_LABEL, byline, sourceTitle, useDebounced } from '@gestalts/kit';
+import { AddSource, ConfirmDialog, Modal, SOURCE_LABEL, byline, sourceTitle, useDebounced } from '@gestalts/kit';
 import { useBeliefs, useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const CONCEPT = 'concept@2';
@@ -87,20 +87,22 @@ function ConceptPicker({ onOpen, autoFocus }: { onOpen: (id: string) => void; au
 
 // ---- one note about the concept ----
 
-function Sources({ relationships, concept, onChange, onError }: {
-  relationships: Relationship[]; concept: string; onChange: (r: Relationship[]) => void; onError: (e: unknown) => void;
+function Sources({ relationships, concept, onChange }: {
+  relationships: Relationship[]; concept: string; onChange: (r: Relationship[]) => void;
 }) {
   const write = useWrite();
+  const [deleting, setDeleting] = useState<{ source: Item; index: number }>();
   const targets = [...new Set(relationships.filter((r) => r.to !== concept).map((r) => r.to))];
   const { items } = useQuery(targets.length ? { gestalt: SOURCE, ids: targets, fields: ['title', 'key', 'author', 'editor', 'date'], limit: targets.length } : null);
   const sources = new Map(items.map((s) => [s.id, s]));
   const rows = relationships.flatMap((r, i) => { const s = sources.get(r.to); return s ? [{ r, i, s }] : []; });
-  const remove = async (s: Item, i: number) => {
-    if (!confirm(`Delete the source ${sourceTitle(s.value)}? Other notes about it stay, pointing at nothing.`)) return;
-    try { await write.remove(s.id); onChange(relationships.filter((_, j) => j !== i)); } catch (e) { onError(e); }
+  const remove = async () => {
+    if (!deleting) return;
+    await write.remove(deleting.source.id);
+    onChange(relationships.filter((_, j) => j !== deleting.index));
   };
   if (!rows.length) return null;
-  return (
+  return <>
     <ul className="flex flex-col gap-1">
       {rows.map(({ r, i, s }) => (
         <li key={`${r.to}:${i}`} className="flex items-center gap-1 rounded-box bg-base-200 px-2 py-1">
@@ -111,11 +113,16 @@ function Sources({ relationships, concept, onChange, onError }: {
             </span>
           </span>
           <button type="button" className="btn btn-ghost btn-xs btn-square" title="Detach the source from this note" onClick={() => onChange(relationships.filter((_, j) => j !== i))}><Unlink className="size-3" /></button>
-          <button type="button" className="btn btn-ghost btn-xs btn-square" title="Delete the source" onClick={() => void remove(s, i)}><Trash2 className="size-3" /></button>
+          <button type="button" className="btn btn-ghost btn-xs btn-square" title="Delete the source" onClick={() => setDeleting({ source: s, index: i })}><Trash2 className="size-3" /></button>
         </li>
       ))}
     </ul>
-  );
+    {deleting && (
+      <ConfirmDialog title={`Delete ${sourceTitle(deleting.source.value)}?`} onClose={() => setDeleting(undefined)} onConfirm={remove}>
+        Other notes about this source will stay, pointing at nothing. This cannot be undone.
+      </ConfirmDialog>
+    )}
+  </>;
 }
 
 /**
@@ -133,6 +140,7 @@ function NoteGroup({ id, note, concept, onCreated, onGone, onError }: {
   const [label, setLabel] = useState(savedLabel === LABEL ? '' : savedLabel);
   const [dirty, setDirty] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [written, setWritten] = useState(!!note);
   // what saving needs, current in callbacks that outlive a render
   const latest = useRef({ note, main, label, dirty, written });
@@ -188,8 +196,8 @@ function NoteGroup({ id, note, concept, onCreated, onGone, onError }: {
   };
   const remove = async () => {
     if (!written) { reset(); return; }
-    if (!confirm('Delete this note?')) return;
-    try { await write.remove(id); onGone(id); } catch (e) { onError(e); }
+    await write.remove(id);
+    onGone(id);
   };
 
   const rels = relationsOf(note?.value);
@@ -201,17 +209,22 @@ function NoteGroup({ id, note, concept, onCreated, onGone, onError }: {
         // written elsewhere over several lines: an input would drop the line breaks on the first edit
         ? <textarea className="textarea textarea-lg w-full" aria-label="The note" rows={main.split('\n').length} value={main} onChange={(e) => edit({ main: e.target.value })} />
         : <input className="input input-lg w-full" aria-label="The note" placeholder={written ? '' : 'Something about this concept…'} value={main} onChange={(e) => edit({ main: e.target.value })} />}
-      <Sources relationships={rels} concept={concept} onChange={(r) => void save(r)} onError={onError} />
+      <Sources relationships={rels} concept={concept} onChange={(r) => void save(r)} />
       <div className="flex items-center gap-1">
         <button type="button" className="btn btn-ghost btn-sm" title="Add a source" onClick={() => setAdding(true)}><BookPlus className="size-4" /> Source</button>
         <span className="flex-1" />
         {dirty && <span className="text-xs text-base-content/50">…</span>}
         {(written || main || label) && <>
           <button type="button" className="btn btn-ghost btn-sm btn-square" title="Detach: the note stays, unrelated to this concept" onClick={() => void detach()}><Unlink className="size-4" /></button>
-          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the note" onClick={() => void remove()}><Trash2 className="size-4" /></button>
+          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the note" onClick={() => written ? setConfirming(true) : void remove()}><Trash2 className="size-4" /></button>
         </>}
       </div>
       {adding && <AddSource attached={new Set(rels.map((r) => r.to))} onAdd={addSources} onClose={() => setAdding(false)} />}
+      {confirming && (
+        <ConfirmDialog title="Delete this note?" onClose={() => setConfirming(false)} onConfirm={remove}>
+          This cannot be undone.
+        </ConfirmDialog>
+      )}
     </section>
   );
 }
@@ -368,6 +381,7 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
   const name = str(concept.value.name);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string>();
   const fail = (e: unknown) => setError(message(e));
   const cancelled = useRef(false);
@@ -383,15 +397,12 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
     write.put({ ...rest, name: next, ...(aliases.length ? { aliases } : {}) }).catch(fail);
   };
   const remove = async () => {
-    if (!confirm(`Delete the concept “${name}”? Its notes stay, no longer related to it, and its links go.`)) return;
-    try {
-      const notes = await read.all({ gestalt: NOTE, refs: { to: concept.id, field: 'relationships' } });
-      for (const n of notes) await write.put(noteValue(n.value, str(n.value.main), relationsOf(n.value).filter((r) => r.to !== concept.id)));
-      // a link to nothing says nothing
-      for (const l of await read.all({ gestalt: LINK, refs: { to: concept.id } })) await write.remove(l.id);
-      await write.remove(concept.id);
-      onClosed();
-    } catch (e) { fail(e); }
+    const notes = await read.all({ gestalt: NOTE, refs: { to: concept.id, field: 'relationships' } });
+    for (const n of notes) await write.put(noteValue(n.value, str(n.value.main), relationsOf(n.value).filter((r) => r.to !== concept.id)));
+    // a link to nothing says nothing
+    for (const l of await read.all({ gestalt: LINK, refs: { to: concept.id } })) await write.remove(l.id);
+    await write.remove(concept.id);
+    onClosed();
   };
 
   return (
@@ -409,7 +420,7 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
           <button type="button" className="btn btn-ghost btn-sm btn-square" title="Go to another concept" onClick={() => setSwitching(true)}><ArrowLeftRight className="size-4" /></button>
           <span className="flex-1" />
           {renaming === null && <button type="button" className="btn btn-ghost btn-sm btn-square" title="Rename" onClick={() => setRenaming(name)}><Pencil className="size-4" /></button>}
-          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the concept" onClick={() => void remove()}><Trash2 className="size-4" /></button>
+          <button type="button" className="btn btn-ghost btn-sm btn-square" title="Delete the concept" onClick={() => setConfirming(true)}><Trash2 className="size-4" /></button>
         </div>
         <Aliases concept={concept} onError={fail} />
       </header>
@@ -424,6 +435,11 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
         <Modal onClose={() => setSwitching(false)}>
           <div className="p-4 pt-0"><ConceptPicker autoFocus onOpen={(id) => { setSwitching(false); onOpen(id); }} /></div>
         </Modal>
+      )}
+      {confirming && (
+        <ConfirmDialog title={`Delete “${name}”?`} onClose={() => setConfirming(false)} onConfirm={remove}>
+          Its notes will stay, no longer related to it, and its links will be deleted. This cannot be undone.
+        </ConfirmDialog>
       )}
     </div>
   );

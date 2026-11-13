@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, ExternalLink, Search } from 'lucide-react';
-import { NoteCard, useDebounced } from '@gestalts/kit';
+import { ConfirmDialog, NoteCard, useDebounced } from '@gestalts/kit';
 import {
   useDoc, useHost, useOutline, useParams, useQuery, useRead, useViewState, useWrite,
   type Json, type JsonMap, type OutlineEntry, type OutlineMark, type OutlineSpec, type OutlineStatus,
@@ -143,6 +143,7 @@ function Subject({ id, fromInbox, hasRoot, change, expand, focus, open, skip }: 
   const note = useDoc(NOTE, id);
   const located = useOutline(SPEC, { locate: [id] }, { fields: FIELDS }).entries[0];
   const path = located?.path;
+  const [confirmingUnplace, setConfirmingUnplace] = useState(false);
   const pathKey = path?.map((p) => p.id).join('/');
   useEffect(() => {
     if (!fromInbox && path?.length) expand(path.map((p) => p.id));
@@ -168,8 +169,8 @@ function Subject({ id, fromInbox, hasRoot, change, expand, focus, open, skip }: 
           {!fromInbox && <button type="button" className="btn btn-sm" onClick={() => focus(null)}>Next unplaced</button>}
           {places.length > 0 && (
             <button type="button" className="btn btn-sm" onClick={() => {
-              if (located?.hasChildren && !confirm('What branches from it will float until it is placed again. Unplace it?')) return;
-              void change(id, (x) => withPlaces(x, []));
+              if (located?.hasChildren) setConfirmingUnplace(true);
+              else void change(id, (x) => withPlaces(x, []));
             }}>Unplace</button>
           )}
           {!tags.includes(EXCLUDE) && places.length === 0 && !tags.includes(ROOT) && (
@@ -186,6 +187,12 @@ function Subject({ id, fromInbox, hasRoot, change, expand, focus, open, skip }: 
           </p>
         )}
       </div>
+      {confirmingUnplace && (
+        <ConfirmDialog title="Unplace this note?" confirmLabel="Unplace" onClose={() => setConfirmingUnplace(false)}
+                       onConfirm={() => change(id, (x) => withPlaces(x, []))}>
+          What branches from it will float until it is placed again.
+        </ConfirmDialog>
+      )}
     </section>
   );
 }

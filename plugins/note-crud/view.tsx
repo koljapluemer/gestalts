@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
-import { NoteCard, NoteEditor, useDebounced } from '@gestalts/kit';
+import { ConfirmDialog, NoteCard, NoteEditor, useDebounced } from '@gestalts/kit';
 import { useDoc, useParams, useQuery, useViewState, useWrite, type Item } from '@gestalts/view';
 
 const LIST_FIELDS = ['title', 'main'];
@@ -47,21 +47,22 @@ function List({ selected, onSelect, onNew }: { selected: string | null; onSelect
 function Detail({ id, onBack, onEdit, onDeleted }: { id: string; onBack: () => void; onEdit: () => void; onDeleted: () => void }) {
   const note = useDoc('note@1', id);
   const write = useWrite();
-  const [error, setError] = useState<string>();
+  const [confirming, setConfirming] = useState(false);
   if (!note) return null;
-  const remove = () => {
-    if (confirm('Delete this note?')) write.remove(note.id).then(onDeleted, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
-  };
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex gap-1 border-b border-base-300 p-2">
         <button type="button" className="btn btn-sm btn-ghost md:hidden" onClick={onBack}><ArrowLeft className="size-4" /></button>
         <span className="flex-1" />
         <button type="button" className="btn btn-sm btn-ghost" onClick={onEdit}><Pencil className="size-4" /> Edit</button>
-        <button type="button" className="btn btn-sm btn-ghost" onClick={remove}><Trash2 className="size-4" /> Delete</button>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}><Trash2 className="size-4" /> Delete</button>
       </div>
-      {error && <div role="alert" className="alert alert-error m-2 text-sm">{error}</div>}
       <div className="min-h-0 flex-1 overflow-y-auto p-4"><NoteCard value={note.value} /></div>
+      {confirming && (
+        <ConfirmDialog title="Delete this note?" onClose={() => setConfirming(false)} onConfirm={async () => { await write.remove(note.id); onDeleted(); }}>
+          This cannot be undone.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

@@ -52,6 +52,9 @@ A view imports `react`, `lucide-react`, `@gestalts/view`, `@gestalts/kit`, `@ges
 and any npm package.
 There are no local imports. `plugins/note-queue/view.tsx` is a short real one.
 
+Browser modal APIs (`alert`, `confirm`, and `prompt`) are suppressed in the sandbox. Use the kit's `ConfirmDialog` for
+destructive confirmations so the action, pending state, and write errors remain visible inside the view.
+
 A learning view logs each answer as a `practice-event` (`logPractice` in `@gestalts/learning`) and shows what the
 learner knows with `useBeliefs(conceptIds)`: beliefs the app works out from all practice, live, for just those
 concepts. It needs `concept@2` in `reads`, not the events ([data-format.md](data-format.md)).
