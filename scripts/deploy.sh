@@ -23,6 +23,7 @@ for s in "${sites[@]}"; do
 done
 for s in "${sites[@]}"; do
   IFS='|' read -r dir id domain <<<"$s"
-  "${netlify[@]}" deploy --prod --no-build --dir "$dir/dist" --site "$id" --message "$sha"
+  # --filter: the CLI sees the pnpm workspace and would otherwise ask which package this is
+  "${netlify[@]}" deploy --prod --no-build --filter "$dir" --dir "$PWD/$dir/dist" --site "$id" --message "$sha"
   echo "deployed $sha to https://$domain"
 done
