@@ -43,6 +43,7 @@ mise run android:dev                              # the Android app on a phone o
 mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's deck
 mise run health-data ~/some-folder                # which ymls can't be used, and why
 mise run serve ~/some-folder                      # the node headless with the repo's plugins
+mise run deploy                                   # gestalter, loops-for-learning, vizint to their *.koljasam.com sites
 mise tasks            # everything else
 ```
 

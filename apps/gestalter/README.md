@@ -6,5 +6,5 @@ folder holds your notes; it opens offline once loaded (`public/sw.js`). On Andro
 (`distribution-android/`, [`../node/doc/android.md`](../node/doc/android.md)).
 
 From the repo root: `mise run gestalter:dev` (gestalter with hot reload on a dev node), `mise run gestalter:build`
-(the static site in `distribution/dist`, to host anywhere; its origin then goes into the node's `ORIGINS`),
+(the static site in `distribution/dist`, deployed to gestalter.koljasam.com by `mise run deploy`; its origin is in the node's `ORIGINS`),
 `mise run android:dev`.

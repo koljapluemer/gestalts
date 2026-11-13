@@ -18,9 +18,7 @@ pub const NAME: &str = "gestalts-node";
 /// autostart entry.
 pub const OLD_NAMES: &[&str] = &["gestalter", "gestalts-connector"];
 /// The apps (websites) allowed to use the node, besides localhost.
-pub const ORIGINS: &[&str] = &[
-    // TODO: gestalter's, loops-for-learning's and learning-workshop's origins, once they are deployed
-];
+pub const ORIGINS: &[&str] = &["https://gestalter.koljasam.com", "https://loop.koljasam.com"];
 
 /// The repo's plugins (their gestalts and workers), copied by `build.rs`.
 static BUILTIN: Dir<'static> = include_dir!("$OUT_DIR/plugins");

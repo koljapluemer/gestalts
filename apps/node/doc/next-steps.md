@@ -5,7 +5,7 @@ The desktop and Android apps' own steps.
 - [x] **The desktop app serves the gestalter**, as `gestalter` (formerly `gestalts-connector`).
 - [x] **gestalts-node ships no app**: gestalter is a website on it, the node has its own settings page: see
   [desktop.md](desktop.md).
-- [ ] The deployed apps' origins in `ORIGINS`, once they're deployed.
+- [x] The deployed apps' origins in `ORIGINS` (gestalter.koljasam.com, loop.koljasam.com).
 - [ ] A webview instead of the default browser, maybe: on Linux it would bring back GTK (webkit2gtk), which the tray
   avoids.
 - [x] **Pairing**: the node's settings show a QR code ("Devices"), list the paired devices and forget them; the

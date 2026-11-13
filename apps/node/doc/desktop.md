@@ -28,8 +28,8 @@ every app's Vite server, each on the first free port from its usual one, and pri
 ## The apps on it
 
 An app is a website: it reaches the node across origins (CORS, and Chrome asks once whether the page may use apps on
-this device). Allowed are localhost (any port), the origins in `ORIGINS` (`apps/node/desktop/src/main.rs`; the
-deployed apps' go there once they're deployed) and the config's `extra_origins`. gestalter uses the folder directly
+this device). Allowed are localhost (any port), the origins in `ORIGINS` (`apps/node/desktop/src/main.rs`: the
+deployed gestalter and loops-for-learning) and the config's `extra_origins`. gestalter uses the folder directly
 (`usePluginRepo({ node })`): every write goes to the folder, and the node's `/events` socket brings changes from
 elsewhere (workers, another app, a hand edit) into the open page. loops-for-learning and the learning workshop keep
 their ymls in the browser and sync with a node.
