@@ -168,10 +168,12 @@ impl<B: Storage, T: Storage> Storage for Layered<B, T> {
         self.top.delete_blob(name).await
     }
     async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
-        let mut out = self.top.read_all_ymls().await?;
+        // the folder and the decks at once: both are downloads in a browser
+        let decks = self.deck_refs();
+        let (mut out, from_decks) = futures::future::try_join(self.top.read_all_ymls(), decks.read_all()).await?;
         let seen: std::collections::HashSet<String> = out.iter().map(|(k, _)| k.clone()).collect();
         let mut conflicts = Vec::new();
-        for (k, m) in self.deck_refs().read_all().await? {
+        for (k, m) in from_decks {
             conflicts.extend(m.conflicts);
             if !seen.contains(&k) {
                 out.push((k, m.text));

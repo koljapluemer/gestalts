@@ -60,6 +60,18 @@ function readGestalts(root: string): string[] {
   return existsSync(dir) ? files(dir).filter((f) => f.endsWith('.yml')).sort().map((f) => readFileSync(f, 'utf8')) : [];
 }
 
+/**
+ * Every yml of a published deck as one file, `[{id, text}]`, in its `index.json`'s order: the app reads a deck in one
+ * download instead of one per yml. Made from the deck as it is, so it's never out of date or committed.
+ */
+function deckBundle(dir: string): string {
+  const { ymls } = JSON.parse(readFileSync(join(dir, 'index.json'), 'utf8')) as { ymls: string[] };
+  return JSON.stringify(ymls.flatMap((id) => {
+    const f = join(dir, 'notes', `${id}.yml`);
+    return existsSync(f) ? [{ id, text: readFileSync(f, 'utf8') }] : [];
+  }));
+}
+
 /** The decks in a plugin's `decks/`; each is titled by the `deck` yml in it. */
 function readDecks(pluginId: string, root: string) {
   const dir = join(root, 'decks');
@@ -151,7 +163,8 @@ export function gestaltsPlugins(): PluginOption[] {
     config(config) {
       const root = resolve(config.root ?? process.cwd());
       const allow = [...new Set([root, ...gestaltsPackages(root)].map((dir) => searchForWorkspaceRoot(dir)))];
-      return { resolve: { dedupe: ['react', 'react-dom', 'lucide-react'] }, server: { fs: { allow } } };
+      // the core runs in a module worker (`@gestalts/client`'s core.worker.ts), which imports the wasm
+      return { resolve: { dedupe: ['react', 'react-dom', 'lucide-react'] }, server: { fs: { allow } }, worker: { format: 'es' } };
     },
     configResolved(config) { appRoot = config.root; },
     resolveId(id) { return id === VIRTUAL ? RESOLVED : undefined; },
@@ -173,6 +186,7 @@ export function gestaltsPlugins(): PluginOption[] {
         const m = /^\/decks\/([a-z0-9.-]+)\/([a-z0-9.-]+)\/(.+)$/.exec((req.url ?? '').split('?')[0]);
         if (!m) return next();
         const d = load(appRoot).plugins.find((x) => x.id === m[1])?.decks.find((x) => x.id === m[2]);
+        if (d && m[3] === 'ymls.json') { res.setHeader('content-type', 'application/json'); res.end(deckBundle(d.dir)); return; }
         const file = d && resolve(d.dir, decodeURIComponent(m[3]));
         if (!d || !file || !file.startsWith(d.dir + '/') || !existsSync(file)) { res.statusCode = 404; res.end(); return; }
         res.end(readFileSync(file));
@@ -184,6 +198,7 @@ export function gestaltsPlugins(): PluginOption[] {
           for (const f of files(d.dir)) {
             this.emitFile({ type: 'asset', fileName: `decks/${p.id}/${d.id}/${relative(d.dir, f)}`, source: readFileSync(f) });
           }
+          this.emitFile({ type: 'asset', fileName: `decks/${p.id}/${d.id}/ymls.json`, source: deckBundle(d.dir) });
         }
       }
     },

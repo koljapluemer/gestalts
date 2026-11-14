@@ -36,7 +36,12 @@ async fn subdir(parent: &FileSystemDirectoryHandle, name: &str) -> Result<FileSy
 impl Opfs {
     /// Opens (creating) `dir`, which may be nested like `a/b`.
     pub async fn open(dir: &str) -> Result<Self> {
-        let storage = web_sys::window().ok_or_else(|| StorageError::Io("no window".into()))?.navigator().storage();
+        // a page or a worker (the app runs the core in one)
+        let global = js_sys::global();
+        let storage = match global.dyn_ref::<web_sys::Window>() {
+            Some(w) => w.navigator().storage(),
+            None => global.unchecked_ref::<web_sys::WorkerGlobalScope>().navigator().storage(),
+        };
         let mut d: FileSystemDirectoryHandle = JsFuture::from(storage.get_directory()).await.map_err(js_err)?.unchecked_into();
         for part in dir.split('/').filter(|p| !p.is_empty()) {
             d = subdir(&d, part).await?;

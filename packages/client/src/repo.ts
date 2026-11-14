@@ -1,6 +1,7 @@
 import { logger, type Belief, type BeliefDelta, type Delta, type Health, type Item, type JsonMap, type LlmReply, type LlmRequest, type NetReply, type NetRequest, type OutlineDelta, type OutlinePage, type OutlineQuery, type Page, type Query } from '@gestalts/view';
 import init, { WasmRepo, contentHash as wasmContentHash, newId as wasmNewId, stableId as wasmStableId, stateId as wasmStateId } from '../wasm/gestalts.js';
 import { coalesce } from './coalesce';
+import { localCore, workerCore, type Core } from './core';
 import { nativeHost, type NativeHost, type NativeKind, type NativeStatus, type PairedNodeInfo } from './native';
 
 const log = logger('repo');
@@ -146,23 +147,30 @@ export class Repo {
    */
   firstSync: Promise<void> = Promise.resolve();
 
-  private constructor(private wasm: WasmRepo, private storageKey: string) {}
+  private constructor(private wasm: Core, private storageKey: string) {}
 
   static async open(source: RepoSource): Promise<Repo> {
     const span = log.span('open', { dir: source.dir, decks: (source.decks ?? []).map((d) => d.source) });
-    let wasm: WasmRepo;
+    let wasm: Core;
     try {
+      // the core on this thread too, for ids and hashes, which are asked for synchronously
       await loadCore();
       if (source.native !== undefined) {
+        // the native app's folder is reached through the page (its commands), so its core stays here
         const host = await nativeHost(source.native);
         await host.setGestalts(source.gestalts ?? []);
-        wasm = await WasmRepo.openWith(host, source.decks ?? [], source.gestalts ?? []);
+        wasm = localCore(await WasmRepo.openWith(host, source.decks ?? [], source.gestalts ?? []));
         span.end();
         return await Repo.paired(wasm, host);
       }
-      wasm = source.node !== undefined
-        ? await WasmRepo.openNode(source.node, source.decks ?? [], source.gestalts ?? [])
-        : await WasmRepo.open(source.dir, source.decks ?? [], source.gestalts ?? []);
+      const decks = source.decks ?? [];
+      const gestalts = source.gestalts ?? [];
+      // reading and indexing every yml happens in a worker, so the page stays responsive meanwhile
+      if (typeof Worker !== 'undefined') {
+        wasm = await workerCore(source.node !== undefined ? { kind: 'node', where: source.node, decks, gestalts } : { kind: 'dir', where: source.dir, decks, gestalts });
+      } else {
+        wasm = localCore(source.node !== undefined ? await WasmRepo.openNode(source.node, decks, gestalts) : await WasmRepo.open(source.dir, decks, gestalts));
+      }
     } catch (e) {
       span.fail(e);
       throw e;
@@ -177,7 +185,7 @@ export class Repo {
   }
 
   /** A repo on the node's folder: no sync; the node's change events keep it current. */
-  private static async direct(wasm: WasmRepo, url: string): Promise<Repo> {
+  private static async direct(wasm: Core, url: string): Promise<Repo> {
     const repo = new Repo(wasm, '');
     let folder: string | undefined;
     try { folder = (await nodeHealth(url)).folder?.path; } catch { /* it answered a moment ago; the events will tell */ }
@@ -191,7 +199,7 @@ export class Repo {
    * A repo on a native app's folder: the app syncs it and says what changed. Only visible pages sync on a timer. If
    * the app is paired, `firstSync` waits for its first sync (or failure).
    */
-  private static async paired(wasm: WasmRepo, host: NativeHost): Promise<Repo> {
+  private static async paired(wasm: Core, host: NativeHost): Promise<Repo> {
     const repo = new Repo(wasm, '');
     const native: { host: NativeHost; stop: (() => void)[] } = { host, stop: [] };
     repo.native = native;
@@ -246,7 +254,7 @@ export class Repo {
   private async reindex(ymls: string[], blobs: string[]) {
     try {
       if (ymls.length) await this.serial('reindex', () => this.wasm.reindex(ymls), { ymls: ymls.length });
-      this.pump();
+      await this.pump();
       if (blobs.length) this.blobListeners.forEach((l) => l(blobs));
     } catch (e) {
       log.warn('rereading changed ymls failed', { error: e });
@@ -256,17 +264,26 @@ export class Repo {
   private async reload() {
     try {
       await this.serial('reload', () => this.wasm.reload());
-      this.pump();
+      await this.pump();
     } catch (e) {
       log.warn('rereading the folder failed', { error: e });
     }
   }
 
   /** Hands the core's deltas to the live queries they're for. */
-  private pump() {
-    for (const d of this.wasm.takeDeltas() as Delta[]) this.lives.get(d.sub)?.(d);
-    if (this.beliefLives.size) for (const d of this.wasm.takeBeliefDeltas() as BeliefDelta[]) this.beliefLives.get(d.sub)?.(d);
-    if (this.outlineLives.size) for (const d of this.wasm.takeOutlineDeltas() as OutlineDelta[]) this.outlineLives.get(d.sub)?.(d);
+  private async pump() {
+    try {
+      const [deltas, beliefs, outlines] = await Promise.all([
+        this.wasm.takeDeltas() as Promise<Delta[]>,
+        this.beliefLives.size ? this.wasm.takeBeliefDeltas() as Promise<BeliefDelta[]> : [],
+        this.outlineLives.size ? this.wasm.takeOutlineDeltas() as Promise<OutlineDelta[]> : [],
+      ]);
+      for (const d of deltas) this.lives.get(d.sub)?.(d);
+      for (const d of beliefs) this.beliefLives.get(d.sub)?.(d);
+      for (const d of outlines) this.outlineLives.get(d.sub)?.(d);
+    } catch (e) {
+      log.warn('taking changes from the core failed', { error: e });
+    }
   }
 
   /**
@@ -296,48 +313,48 @@ export class Repo {
   }
 
   /** One page of what `q` asks for. */
-  query(q: Query): Page {
-    return this.wasm.query(asJson(q)) as Page;
+  async query(q: Query): Promise<Page> {
+    return (await this.wasm.query(asJson(q))) as Page;
   }
 
   /** The yml, if it's valid. */
-  get(id: string): Item | undefined {
-    return (this.wasm.get(id) as Item | null) ?? undefined;
+  async get(id: string): Promise<Item | undefined> {
+    return ((await this.wasm.get(id)) as Item | null) ?? undefined;
   }
 
   /** Whether `id` was deleted (is a tombstone); `get` returns nothing for it. */
-  isDeleted(id: string): boolean {
-    return (this.wasm.isDeleted(id));
+  isDeleted(id: string): Promise<boolean> {
+    return this.wasm.isDeleted(id);
   }
 
   /** The first page of `q`, then `onDelta` with each change to it, until `stop`. */
-  live(q: Query, onDelta: (d: Delta) => void): Live {
-    const { sub, page } = this.wasm.subscribe(asJson(q)) as { sub: number; page: Page };
+  async live(q: Query, onDelta: (d: Delta) => void): Promise<Live> {
+    const { sub, page } = (await this.wasm.subscribe(asJson(q))) as { sub: number; page: Page };
     this.lives.set(sub, onDelta);
-    return { page, stop: () => { this.lives.delete(sub); this.wasm.unsubscribe(sub); } };
+    return { page, stop: () => { this.lives.delete(sub); void this.wasm.unsubscribe(sub); } };
   }
 
   /** What is believed about `concepts` now, then `onDelta` with each change to them, until `stop`. */
-  liveBeliefs(concepts: string[], onDelta: (d: BeliefDelta) => void): LiveBeliefs {
-    const { sub, beliefs } = this.wasm.subscribeBeliefs(concepts) as { sub: number; beliefs: Belief[] };
+  async liveBeliefs(concepts: string[], onDelta: (d: BeliefDelta) => void): Promise<LiveBeliefs> {
+    const { sub, beliefs } = (await this.wasm.subscribeBeliefs(concepts)) as { sub: number; beliefs: Belief[] };
     this.beliefLives.set(sub, onDelta);
-    return { beliefs, stop: () => { this.beliefLives.delete(sub); this.wasm.unsubscribe(sub); } };
+    return { beliefs, stop: () => { this.beliefLives.delete(sub); void this.wasm.unsubscribe(sub); } };
   }
 
   /** What an outline answers now, then `onDelta` with each new page, until `stop`. */
-  liveOutline(q: OutlineQuery, onDelta: (d: OutlineDelta) => void): LiveOutline {
-    const { sub, page } = this.wasm.subscribeOutline(JSON.stringify(q)) as { sub: number; page: OutlinePage };
+  async liveOutline(q: OutlineQuery, onDelta: (d: OutlineDelta) => void): Promise<LiveOutline> {
+    const { sub, page } = (await this.wasm.subscribeOutline(JSON.stringify(q))) as { sub: number; page: OutlinePage };
     this.outlineLives.set(sub, onDelta);
-    return { page, stop: () => { this.outlineLives.delete(sub); this.wasm.unsubscribe(sub); } };
+    return { page, stop: () => { this.outlineLives.delete(sub); void this.wasm.unsubscribe(sub); } };
   }
 
   /** Every yml that can't be used, and why. */
-  health(): Health[] {
-    return this.wasm.health() as Health[];
+  async health(): Promise<Health[]> {
+    return (await this.wasm.health()) as Health[];
   }
 
-  gestalts(): GestaltDef[] {
-    return this.wasm.gestalts() as GestaltDef[];
+  async gestalts(): Promise<GestaltDef[]> {
+    return (await this.wasm.gestalts()) as GestaltDef[];
   }
 
   /** Calls `f` with the names of blobs that changed outside this repo. */
@@ -421,7 +438,7 @@ export class Repo {
   }
 
   async readBlob(name: string): Promise<Uint8Array | undefined> {
-    return this.wasm.readBlob(name);
+    return (await this.wasm.readBlob(name)) ?? undefined;
   }
 
   async writeBlob(name: string, bytes: Uint8Array): Promise<void> {
@@ -430,7 +447,7 @@ export class Repo {
   }
 
   private afterWrite() {
-    this.pump();
+    void this.pump();
     if (this.status.mode === 'sync' && this.status.url) {
       clearTimeout(this.syncTimer);
       this.syncTimer = setTimeout(() => void this.sync(), 800);
@@ -473,6 +490,15 @@ export class Repo {
     this.setStatus({ url: null, state: 'off' });
   }
 
+  /**
+   * Closes it and lets go of its index, for a repo nothing uses any more (one replaced before anything was shown from
+   * it): whatever still asks it fails rather than reading freed memory.
+   */
+  dispose() {
+    this.close();
+    try { this.wasm.free(); } catch { /* freed already */ }
+  }
+
   disconnect() {
     if (this.status.mode !== 'sync') return;
     log.info('disconnect');
@@ -498,7 +524,7 @@ export class Repo {
       // only the merge waits in the write queue; the network parts run alongside the app's writes
       await this.wasm.syncFetch(url);
       const merged = await this.serial('sync', () => this.wasm.syncMerge());
-      if (merged.length && this.status.url === url) this.pump();
+      if (merged.length && this.status.url === url) await this.pump();
       const report = (await this.wasm.syncPush()) as SyncReport;
       if (this.status.url !== url) return report;
       log.info('sync done', {

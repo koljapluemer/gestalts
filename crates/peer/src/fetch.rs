@@ -98,8 +98,13 @@ mod imp {
         }
         init.set_headers(&headers);
         let req = Request::new_with_str_and_init(url, &init).map_err(js_err)?;
-        let window = web_sys::window().ok_or_else(|| StorageError::Io("no window".into()))?;
-        let resp: Response = JsFuture::from(window.fetch_with_request(&req))
+        // a page or a worker (the app runs the core in one)
+        let global = js_sys::global();
+        let pending = match global.dyn_ref::<web_sys::Window>() {
+            Some(w) => w.fetch_with_request(&req),
+            None => global.unchecked_ref::<web_sys::WorkerGlobalScope>().fetch_with_request(&req),
+        };
+        let resp: Response = JsFuture::from(pending)
             .await
             .map_err(|e| StorageError::Io(format!("{method} {url}: {}", js_err(e))))?
             .unchecked_into();

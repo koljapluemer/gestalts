@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useOpenRepo, type Repo, type YmlsIn } from '@gestalts/client';
+import { preloadHostQuery, useOpenRepo, type Repo, type YmlsIn } from '@gestalts/client';
 import { deckSources, type PluginEntry, type Registry } from './registry';
-import { installedPlugins, seedInstalls, wantedDecks } from './installs';
+import { INSTALLS_QUERY, installedPlugins, installsOf, seedInstalls, wantedDecks, type Installs } from './installs';
 
 const MOUNTED = (dir: string) => `gestalts-mounted-decks:${dir}`;
 
@@ -30,21 +30,25 @@ export function usePluginRepo(where: YmlsIn, registry: Registry): { repo?: Repo;
     gestalts: registry.plugins.flatMap((p) => p.gestalts),
   }), [whereKey, registry, mounted]);
   const { repo, error } = useOpenRepo(source);
-  const [seeded, setSeeded] = useState<Repo | null>(null);
+  const [seeded, setSeeded] = useState<{ repo: Repo; installs: Installs } | null>(null);
   useEffect(() => {
     if (!repo) return;
     let live = true;
-    void repo.firstSync.then(() => seedInstalls(repo, registry)).then(() => {
+    void repo.firstSync.then(() => seedInstalls(repo, registry)).then(async () => {
+      // followed from now on, so what shows the installs has them at once
+      await preloadHostQuery(repo, INSTALLS_QUERY);
+      const installs = installsOf((await repo.query(INSTALLS_QUERY)).items);
       if (!live) return;
-      const want = wantedDecks(repo, registry).map((d) => d.source);
+      const want = wantedDecks(installs, registry).map((d) => d.source);
       try { localStorage.setItem(MOUNTED(dir), JSON.stringify(want)); } catch { /* not remembered */ }
-      if (want.join() !== mounted.join()) {
-        repo.close(); // the repo with the right decks takes over, and its sync
+      if ([...want].sort().join() !== [...mounted].sort().join()) {
+        // nothing was shown from it yet: the repo with the right decks takes over, and its sync
+        repo.dispose();
         setMounted(want);
-      } else setSeeded(repo);
+      } else setSeeded({ repo, installs });
     });
     return () => { live = false; };
   }, [repo, registry, dir, mounted]);
-  const ready = seeded === repo ? repo : undefined;
-  return { repo: ready, installed: ready ? installedPlugins(ready, registry) : [], decks: ready ? mounted : [], error };
+  const ready = seeded?.repo === repo ? seeded : undefined;
+  return { repo: ready?.repo, installed: ready ? installedPlugins(ready.installs, registry) : [], decks: ready ? mounted : [], error };
 }

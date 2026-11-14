@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useHostQuery, useHostRepo } from '@gestalts/client';
-import { deckEnabled, install, installState, setDeckEnabled, setEnabled, uninstall, wantedDecks } from './installs';
+import { INSTALLS_QUERY, deckEnabled, install, installState, installsOf, setDeckEnabled, setEnabled, uninstall, wantedDecks } from './installs';
 import type { PluginEntry, Registry } from './registry';
 
 const scopeText = (gestalts: string[] | undefined) => (gestalts?.length ? gestalts.join(', ') : 'nothing');
@@ -13,17 +13,17 @@ const scopeText = (gestalts: string[] | undefined) => (gestalts?.length ? gestal
  */
 export function PluginSettings({ registry, mounted, decks }: { registry: Registry; mounted: PluginEntry[]; decks: string[] }) {
   const repo = useHostRepo();
-  useHostQuery({ gestalt: 'plugin-install@1', limit: 500 }); // re-render when installs change
+  const installs = installsOf(useHostQuery(INSTALLS_QUERY));
   const [busy, setBusy] = useState(false);
   const run = (f: () => Promise<unknown>) => { setBusy(true); void f().finally(() => setBusy(false)); };
-  const changed = registry.plugins.some((p) => (p.core || installState(repo, p.manifest.id) === 'installed') !== mounted.includes(p))
-    || wantedDecks(repo, registry).map((d) => d.source).sort().join() !== [...decks].sort().join();
+  const changed = registry.plugins.some((p) => (p.core || installState(installs, p.manifest.id) === 'installed') !== mounted.includes(p))
+    || wantedDecks(installs, registry).map((d) => d.source).sort().join() !== [...decks].sort().join();
   return (
     <div className="flex w-96 max-w-[90vw] flex-col gap-2">
       <p className="text-sm text-base-content/70">Plugins bundled with this app. Uninstalling one keeps what you wrote while using it.</p>
       <ul className="flex flex-col gap-2">
         {registry.plugins.map((p) => {
-          const state = installState(repo, p.manifest.id);
+          const state = installState(installs, p.manifest.id);
           return (
             <li key={p.manifest.id} className="rounded-box border border-base-300 p-2 text-sm">
               <div className="flex items-start gap-2">
@@ -35,7 +35,7 @@ export function PluginSettings({ registry, mounted, decks }: { registry: Registr
                     <div className="mt-1 flex flex-wrap gap-x-3">
                       {p.decks.map((d) => (
                         <label key={d.id} className="label text-xs">
-                          <input type="checkbox" className="checkbox checkbox-xs" checked={deckEnabled(repo, p, d.id)} disabled={busy}
+                          <input type="checkbox" className="checkbox checkbox-xs" checked={deckEnabled(installs, p, d.id)} disabled={busy}
                                  onChange={(e) => run(() => setDeckEnabled(repo, p, d.id, e.target.checked))} />
                           {d.title}
                         </label>

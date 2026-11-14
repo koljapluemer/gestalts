@@ -105,12 +105,10 @@ impl WasmRepo {
         }
         let specs: Vec<DeckSpec> = if decks.is_undefined() || decks.is_null() { vec![] } else { from_js(decks)? };
         let g = Gestalts::builtin_with(&gestalts.iter().map(String::as_str).collect::<Vec<_>>()).map_err(|e| JsError::new(&e))?;
-        let mut mounted = Vec::new();
         let gestalts_for_decks = g.clone();
-        for d in specs {
-            let storage: Dyn = Rc::new(Static::open(&d.url).await.map_err(err)?);
-            mounted.push(Deck { source: d.source, storage });
-        }
+        // each deck's index at once
+        let opened = futures::future::try_join_all(specs.iter().map(|d| Static::open(&d.url))).await.map_err(err)?;
+        let mounted: Vec<Deck<Dyn>> = specs.into_iter().zip(opened).map(|(d, s)| Deck { source: d.source, storage: Rc::new(s) as Dyn }).collect();
         let (storage, layered) = if mounted.is_empty() {
             (writable.clone(), None)
         } else {

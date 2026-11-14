@@ -1169,6 +1169,7 @@ name = "gestalts-core"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "futures",
  "gestalts-merge",
  "pollster",
  "serde",

@@ -1,5 +1,5 @@
-import { stableId, useHostQuery, useHostRepo, type Repo } from '@gestalts/client';
-import type { JsonMap } from '@gestalts/view';
+import { stableId, useHostQuery, type Repo } from '@gestalts/client';
+import type { Item, JsonMap } from '@gestalts/view';
 import { useMemo } from 'react';
 import type { DeckEntry, PluginEntry, Registry } from './registry';
 
@@ -10,7 +10,16 @@ export const installId = (plugin: string) => stableId('plugin', plugin);
 
 export type InstallState = 'installed' | 'disabled' | 'uninstalled';
 
-type Installs = Pick<Repo, 'get'>;
+/** The install ymls, by id, as last answered: what the host decides synchronously from (what to show). */
+export type Installs = { get(id: string): Item | undefined };
+
+/** The query the host follows the installs with; one, so everything showing them shares its answer. */
+export const INSTALLS_QUERY = { gestalt: INSTALL, limit: 500 };
+
+export function installsOf(items: Item[]): Installs {
+  const byId = new Map(items.map((i) => [i.id, i]));
+  return { get: (id) => byId.get(id) };
+}
 
 export function installState(repo: Installs, plugin: string): InstallState {
   const n = repo.get(installId(plugin));
@@ -39,11 +48,19 @@ const installValue = (p: PluginEntry, enabled: boolean): JsonMap => ({
   id: installId(p.manifest.id), gestalt: INSTALL, plugin: p.manifest.id, source: 'built-in', version: p.manifest.version, enabled,
 });
 
+/** The plugin's install as it is now, as `Installs` for it alone. */
+async function current(repo: Repo, p: PluginEntry): Promise<{ installs: Installs; value: JsonMap | undefined }> {
+  const value = (await repo.get(installId(p.manifest.id)))?.value;
+  const item = value && ({ id: installId(p.manifest.id), gestalt: INSTALL, value } as Item);
+  return { installs: installsOf(item ? [item] : []), value };
+}
+
 export async function setDeckEnabled(repo: Repo, p: PluginEntry, deck: string, enabled: boolean): Promise<void> {
-  const decks = { ...decksOff(repo, p) };
+  const now = await current(repo, p);
+  const decks = { ...decksOff(now.installs, p) };
   if (enabled) delete decks[deck];
   else decks[deck] = false;
-  await repo.put({ ...installValue(p, true), ...repo.get(installId(p.manifest.id))?.value, decks });
+  await repo.put({ ...installValue(p, true), ...now.value, decks });
 }
 
 /**
@@ -53,12 +70,12 @@ export async function setDeckEnabled(repo: Repo, p: PluginEntry, deck: string, e
 export async function seedInstalls(repo: Repo, registry: Registry): Promise<void> {
   for (const p of registry.plugins) {
     const id = installId(p.manifest.id);
-    if (!repo.get(id) && !repo.isDeleted(id)) await repo.put(installValue(p, true));
+    if (!(await repo.get(id)) && !(await repo.isDeleted(id))) await repo.put(installValue(p, true));
   }
 }
 
 export async function setEnabled(repo: Repo, p: PluginEntry, enabled: boolean): Promise<void> {
-  await repo.put({ ...installValue(p, enabled), ...repo.get(installId(p.manifest.id))?.value, enabled, version: p.manifest.version });
+  await repo.put({ ...installValue(p, enabled), ...(await current(repo, p)).value, enabled, version: p.manifest.version });
 }
 
 export const install = (repo: Repo, p: PluginEntry) => repo.put(installValue(p, true));
@@ -68,8 +85,6 @@ export const uninstall = (repo: Repo, p: PluginEntry) => repo.delete(installId(p
 
 /** The installed plugins, kept current. */
 export function useInstalled(registry: Registry): PluginEntry[] {
-  const repo = useHostRepo();
-  const installs = useHostQuery({ gestalt: INSTALL, limit: 500 });
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- `installs` stands for the install ymls
-  return useMemo(() => installedPlugins(repo, registry), [repo, registry, installs]);
+  const installs = useHostQuery(INSTALLS_QUERY);
+  return useMemo(() => installedPlugins(installsOf(installs), registry), [registry, installs]);
 }

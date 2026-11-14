@@ -75,7 +75,7 @@ function useNoteWriter(id: string, note: Item | undefined, onCreated?: (id: stri
     queue.current = run;
     return run;
   };
-  return { commit, error, setError, current: () => latest.current ?? { id, gestalt: NOTE } };
+  return { commit, error, setError };
 }
 
 /** What `ids` point at, by id; undefined while still asked; missing ones point at nothing (deleted). */

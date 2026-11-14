@@ -446,6 +446,35 @@ mod tests {
     }
 
     #[test]
+    fn text_finds_by_every_word_and_pages_in_id_order() {
+        pollster::block_on(async {
+            let r = repo();
+            for i in 0..30 {
+                let rare = if i % 10 == 3 { " zebra" } else { "" };
+                r.put(note(&format!("n{i:02}"), &format!("main: apple pie{rare}\n"))).await.unwrap();
+            }
+            r.put(note("x", "main: Zébra alone\n")).await.unwrap();
+            // the second word is the rarer one: it narrows, the first still has to hold
+            let q = Query { text: Some("app zeb".into()), limit: Some(2), ..notes() };
+            let first = r.query(&q);
+            assert_eq!(ids(&first), ["n03", "n13"]);
+            let second = r.query(&Query { cursor: first.next.clone(), ..q.clone() });
+            assert_eq!(ids(&second), ["n23"]);
+            assert!(second.next.is_none());
+            // a common word pages through all of them, in id order, without missing or repeating one
+            let mut seen = Vec::new();
+            let mut cursor = None;
+            loop {
+                let p = r.query(&Query { text: Some("pie".into()), limit: Some(7), cursor, ..notes() });
+                seen.extend(ids(&p).into_iter().map(str::to_owned));
+                if p.next.is_none() { break; }
+                cursor = p.next;
+            }
+            assert_eq!(seen, (0..30).map(|i| format!("n{i:02}")).collect::<Vec<_>>());
+        });
+    }
+
+    #[test]
     fn writes_are_validated() {
         pollster::block_on(async {
             let r = repo();

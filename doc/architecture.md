@@ -15,7 +15,7 @@ packages/view     @gestalts/view: everything a view gets from the app
 packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives); on view and sources
 packages/learning @gestalts/learning: FSRS, practice sessions
 packages/sources  @gestalts/sources: bibliographic sources, BibTeX in and out
-packages/client   the wasm-backed repo; host side only
+packages/client   the wasm-backed repo, its core in a worker; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime
 packages/viz      @gestalts/viz: interactive visualizations (params, clock, model, scene) and their runtime; imports nothing of ours
@@ -33,7 +33,11 @@ so nothing is ever destroyed, but they can't be queried; `gestalts-node health <
 
 ## How data reaches a view
 
-The host holds one index, built once on open and updated per changed id. A view never holds the index:
+The host holds one index, built once on open and updated per changed id. In a browser the core runs in a worker
+(`packages/client/src/core.worker.ts`), so reading and indexing every yml never holds up the page; the native phone
+app's core stays on the page, as its folder is reached through the page. Every repo call is async either way. A
+published deck is read in one download, its `ymls.json` (made by `packages/vite` from the deck). A view never holds
+the index:
 
 - `useQuery` is a **live query**, one bounded page at a time. It must name one gestalt. `useRead` reads once, for a
   check or an action (is this key taken? export everything), never for what the view shows.

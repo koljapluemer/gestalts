@@ -46,8 +46,10 @@ impl Decks<'_> {
     /// Every id of every deck, merged where several hold it.
     pub async fn read_all(&self) -> Result<BTreeMap<String, Merged>> {
         let mut by_id: BTreeMap<String, Vec<(String, String)>> = BTreeMap::new();
-        for d in &self.decks {
-            for (id, t) in d.storage.read_all_ymls().await? {
+        // all at once: each is a download where decks are published
+        let read = futures::future::try_join_all(self.decks.iter().map(|d| d.storage.read_all_ymls())).await?;
+        for (d, ymls) in self.decks.iter().zip(read) {
+            for (id, t) in ymls {
                 by_id.entry(id).or_default().push((d.source.to_owned(), t));
             }
         }

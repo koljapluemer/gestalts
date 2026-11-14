@@ -50,6 +50,8 @@ async function sha256(bytes: Uint8Array): Promise<string> {
  */
 export class Bridge {
   private lives = new Map<number, Pick<Live, 'stop'>>();
+  /** subscriptions asked for and not started yet */
+  private starting = new Set<number>();
   private nextSub = 1;
 
   constructor(private repo: BridgeRepo, private scope: Scope, private env: ViewEnv, private push: (m: Pushed) => void) {}
@@ -64,9 +66,25 @@ export class Bridge {
   }
 
   /** The gestalt of what's at `id` now must be writable too, or a put could turn someone else's yml into one of ours. */
-  private checkExisting(id: unknown) {
-    const old: Item | undefined = typeof id === 'string' ? this.repo.get(id) : undefined;
+  private async checkExisting(id: unknown) {
+    const old: Item | undefined = typeof id === 'string' ? await this.repo.get(id) : undefined;
     if (old) this.checkWrite(old.gestalt);
+  }
+
+  /**
+   * Keeps a live answer under `sub` once it has started; one that starts after the view stopped it (or went) is
+   * stopped at once.
+   */
+  private async follow<L extends { stop: () => void }>(sub: number, start: Promise<L>): Promise<L> {
+    this.starting.add(sub);
+    try {
+      const live = await start;
+      if (!this.starting.has(sub)) { live.stop(); return live; }
+      this.lives.set(sub, live);
+      return live;
+    } finally {
+      this.starting.delete(sub);
+    }
   }
 
   /** https to a host the manifest lists, nothing else: no other scheme, port or credentials. */
@@ -89,8 +107,7 @@ export class Bridge {
       case 'subscribe': {
         this.checkQuery(c.query);
         const sub = this.nextSub++;
-        const live = this.repo.live(c.query, (d) => this.push({ type: 'delta', delta: { ...d, sub } }));
-        this.lives.set(sub, live);
+        const live = await this.follow(sub, this.repo.live(c.query, (d) => this.push({ type: 'delta', delta: { ...d, sub } })));
         return { sub, page: live.page };
       }
       case 'beliefs': {
@@ -98,8 +115,7 @@ export class Bridge {
         if (!this.scope.reads.some((g) => g.startsWith('concept@'))) throw new AccessError('this view doesn\'t declare that it reads concept');
         if (!Array.isArray(c.concepts) || !c.concepts.every((x) => typeof x === 'string')) throw new AccessError('concepts are a list of ids');
         const sub = this.nextSub++;
-        const live = this.repo.liveBeliefs(c.concepts, (d) => this.push({ type: 'beliefs', delta: { ...d, sub } }));
-        this.lives.set(sub, live);
+        const live = await this.follow(sub, this.repo.liveBeliefs(c.concepts, (d) => this.push({ type: 'beliefs', delta: { ...d, sub } })));
         return { sub, beliefs: live.beliefs };
       }
       case 'outline': {
@@ -107,20 +123,20 @@ export class Bridge {
         if (typeof c.query?.spec?.gestalt !== 'string') throw new AccessError('an outline must name the gestalt it is of');
         if (!this.scope.reads.includes(c.query.spec.gestalt)) throw new AccessError(`this view doesn't declare that it reads ${c.query.spec.gestalt}`);
         const sub = this.nextSub++;
-        const live = this.repo.liveOutline(c.query, (d) => this.push({ type: 'outline', delta: { ...d, sub } }));
-        this.lives.set(sub, live);
+        const live = await this.follow(sub, this.repo.liveOutline(c.query, (d) => this.push({ type: 'outline', delta: { ...d, sub } })));
         return { sub, page: live.page };
       }
       case 'unsubscribe':
         this.lives.get(c.sub)?.stop();
         this.lives.delete(c.sub);
+        this.starting.delete(c.sub);
         return null;
       case 'put':
         this.checkWrite(String(c.value.gestalt));
-        this.checkExisting(c.value.id);
+        await this.checkExisting(c.value.id);
         return this.repo.put(c.value);
       case 'delete': {
-        const old = this.repo.get(c.id);
+        const old = await this.repo.get(c.id);
         if (!old) return false;
         this.checkWrite(old.gestalt);
         return this.repo.delete(c.id);
@@ -162,6 +178,7 @@ export class Bridge {
   close() {
     this.lives.forEach((l) => l.stop());
     this.lives.clear();
+    this.starting.clear();
   }
 }
 

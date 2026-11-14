@@ -12,7 +12,8 @@ use serde::{Deserialize, Serialize};
 pub use crate::fetch::Auth;
 use crate::fetch::{Body, Payload, enc, fetch, json, send};
 
-/// A gestalt data folder published as static files, with an `index.json` of `{ymls: [ids], blobs: [names]}`.
+/// A gestalt data folder published as static files, with an `index.json` of `{ymls: [ids], blobs: [names]}`, and, where
+/// the host bundles them, a `ymls.json` of every yml (`[{id, text}]`), so reading them all is one download.
 pub struct Static {
     base: String,
     index: Index,
@@ -77,6 +78,11 @@ impl Storage for Static {
         Err(StorageError::ReadOnly)
     }
     async fn read_all_ymls(&self) -> Result<Vec<(String, String)>> {
+        if let Some(r) = fetch(&format!("{}/ymls.json", self.base), "GET", None).await? {
+            let all: Vec<YmlEntry> = json(r).await?;
+            let listed: std::collections::HashSet<&str> = self.index.ymls.iter().map(String::as_str).collect();
+            return Ok(all.into_iter().filter(|e| listed.contains(e.id.as_str())).map(|e| (e.id, e.text)).collect());
+        }
         let texts = futures::future::try_join_all(self.index.ymls.iter().map(|k| self.read_yml(k))).await?;
         Ok(self.index.ymls.iter().cloned().zip(texts).filter_map(|(k, t)| Some((k, t?))).collect())
     }
@@ -175,14 +181,18 @@ impl Storage for Peer {
         json(r).await
     }
     async fn read_ymls(&self, keys: &[String]) -> Result<Vec<(String, String)>> {
-        let mut out = Vec::new();
-        // in chunks, so a first sync of a large folder doesn't make one huge response
-        for chunk in keys.chunks(500) {
-            let body = serde_json::to_vec(&serde_json::json!({ "ids": chunk })).map_err(|e| StorageError::Io(e.to_string()))?;
-            let r = self.req("/sync/read", "POST", Some(Payload::Json(body))).await?.ok_or_else(|| StorageError::Io("no folder there".into()))?;
-            out.extend(json::<Vec<YmlEntry>>(r).await?.into_iter().map(|e| (e.id, e.text)));
-        }
-        Ok(out)
+        use futures::{StreamExt, TryStreamExt};
+        // in chunks, so a first sync of a large folder doesn't make one huge response; a few at a time, in order
+        let chunks: Vec<Vec<YmlEntry>> = futures::stream::iter(keys.chunks(500))
+            .map(|chunk| async move {
+                let body = serde_json::to_vec(&serde_json::json!({ "ids": chunk })).map_err(|e| StorageError::Io(e.to_string()))?;
+                let r = self.req("/sync/read", "POST", Some(Payload::Json(body))).await?.ok_or_else(|| StorageError::Io("no folder there".into()))?;
+                json::<Vec<YmlEntry>>(r).await
+            })
+            .buffered(4)
+            .try_collect()
+            .await?;
+        Ok(chunks.into_iter().flatten().map(|e| (e.id, e.text)).collect())
     }
     async fn write_ymls(&self, notes: &[(String, String)]) -> Result<()> {
         for chunk in notes.chunks(500) {

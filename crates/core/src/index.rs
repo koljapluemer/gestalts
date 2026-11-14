@@ -327,34 +327,83 @@ impl Index {
 
     /// The ids holding a word that starts with `prefix`.
     fn with_word(&self, prefix: &str) -> BTreeSet<String> {
-        self.by_word.range(prefix.to_owned()..).take_while(|(w, _)| w.starts_with(prefix)).flat_map(|(_, ids)| ids.iter().cloned()).collect()
+        self.word_sets(prefix).flat_map(|ids| ids.iter().cloned()).collect()
     }
 
-    /// The smallest set of ids the indexes say the answer lies within, `None` when none applies.
-    fn narrowed(&self, q: &Query) -> Option<BTreeSet<String>> {
-        let empty = BTreeSet::new;
-        let mut sets: Vec<BTreeSet<String>> = Vec::new();
-        if let Some(ids) = &q.ids {
-            sets.push(ids.iter().cloned().collect());
+    fn word_sets<'a>(&'a self, prefix: &'a str) -> impl Iterator<Item = &'a BTreeSet<String>> + 'a {
+        self.by_word.range(prefix.to_owned()..).take_while(move |(w, _)| w.starts_with(prefix)).map(|(_, ids)| ids)
+    }
+
+    /// The smallest set of ids the indexes say the answer lies within, `None` when none applies. The index's own
+    /// sets are lent, not copied; of a text's words only the most selective one's ids are gathered (its size is
+    /// told from the sets it would join, an upper bound), and only if it's the smallest.
+    fn narrowed(&self, q: &Query) -> Option<Candidates<'_>> {
+        static EMPTY: BTreeSet<String> = BTreeSet::new();
+        let mut best: Option<Candidates<'_>> = q.ids.as_ref().map(|ids| Candidates::Owned(ids.iter().cloned().collect()));
+        let lent = [
+            q.gestalt.as_ref().map(|g| self.by_gestalt.get(g).unwrap_or(&EMPTY)),
+            q.tags.all.first().map(|t| self.by_tag.get(t).unwrap_or(&EMPTY)),
+            q.refs.as_ref().map(|r| self.backrefs.get(&r.to).unwrap_or(&EMPTY)),
+        ];
+        for set in lent.into_iter().flatten() {
+            if best.as_ref().is_none_or(|b| set.len() < b.len()) {
+                best = Some(Candidates::Lent(set));
+            }
         }
-        if let Some(g) = &q.gestalt {
-            sets.push(self.by_gestalt.get(g).cloned().unwrap_or_else(empty));
+        if let Some(text) = q.text.as_deref() {
+            let rarest = words(text).map(|w| (self.word_sets(&w).map(BTreeSet::len).sum::<usize>(), w)).min_by_key(|(n, _)| *n);
+            if let Some((n, w)) = rarest
+                && best.as_ref().is_none_or(|b| n < b.len())
+            {
+                best = Some(Candidates::Owned(self.with_word(&w)));
+            }
         }
-        if let Some(t) = q.tags.all.first() {
-            sets.push(self.by_tag.get(t).cloned().unwrap_or_else(empty));
+        best
+    }
+
+    /// A page in id order (no `order`): the candidates are walked in that order from the cursor on, stopping once
+    /// the page and one more are found, so a page costs about what it finds rather than all that matches.
+    fn page_by_id(&self, q: &Query, limit: usize) -> Page {
+        let after: Option<String> = q.cursor.as_deref().and_then(|c| serde_json::from_str::<(Value, String)>(c).ok()).map(|(_, id)| id);
+        let from = |id: &&String| after.as_ref().is_none_or(|a| id.as_str() > a.as_str());
+        let mut found: Vec<&Entry> = Vec::with_capacity(limit + 1);
+        match self.narrowed(q) {
+            Some(ids) => {
+                for id in ids.iter().filter(from) {
+                    if let Some(e) = self.entries.get(id)
+                        && q.matches(e, self)
+                    {
+                        found.push(e);
+                        if found.len() > limit {
+                            break;
+                        }
+                    }
+                }
+            }
+            None => {
+                for e in self.entries.values().filter(|e| from(&&e.yml.id)) {
+                    if q.matches(e, self) {
+                        found.push(e);
+                        if found.len() > limit {
+                            break;
+                        }
+                    }
+                }
+            }
         }
-        if let Some(r) = &q.refs {
-            sets.push(self.backrefs.get(&r.to).cloned().unwrap_or_else(empty));
-        }
-        if let Some(w) = q.text.as_deref().and_then(|t| words(t).next()) {
-            sets.push(self.with_word(&w));
-        }
-        sets.into_iter().min_by_key(BTreeSet::len)
+        let more = found.len() > limit;
+        found.truncate(limit);
+        let next = more.then(|| found.last()).flatten().and_then(|e| serde_json::to_string(&(Value::Null, &e.yml.id)).ok());
+        let fields = q.fields.as_deref();
+        Page { items: found.iter().filter_map(|e| e.item(fields)).collect(), next }
     }
 
     /// One page of what `q` asks for.
     pub fn page(&self, q: &Query) -> Page {
         let limit = q.limit.unwrap_or(DEFAULT_LIMIT).clamp(1, MAX_LIMIT);
+        if q.order.is_none() {
+            return self.page_by_id(q, limit);
+        }
         let matching: Vec<&Entry> = match self.narrowed(q) {
             Some(ids) => ids.iter().filter_map(|id| self.entries.get(id)).filter(|e| q.matches(e, self)).collect(),
             None => self.entries.values().filter(|e| q.matches(e, self)).collect(),
@@ -376,5 +425,28 @@ impl Index {
             .and_then(|(k, e)| serde_json::to_string(&(k, &e.yml.id)).ok());
         let fields = q.fields.as_deref();
         Page { items: window.iter().filter_map(|(_, e)| e.item(fields)).collect(), next }
+    }
+}
+
+/// The ids a query's answer lies within: one of the index's own sets, or one gathered for the query.
+enum Candidates<'a> {
+    Lent(&'a BTreeSet<String>),
+    Owned(BTreeSet<String>),
+}
+
+impl Candidates<'_> {
+    fn len(&self) -> usize {
+        match self {
+            Candidates::Lent(s) => s.len(),
+            Candidates::Owned(s) => s.len(),
+        }
+    }
+
+    /// In id order.
+    fn iter(&self) -> std::collections::btree_set::Iter<'_, String> {
+        match self {
+            Candidates::Lent(s) => s.iter(),
+            Candidates::Owned(s) => s.iter(),
+        }
     }
 }

@@ -23,7 +23,7 @@ wasm-bindgen-futures = "0.4"
 [dependencies.web-sys]
 version = "0.3"
 features = [
-  "Window", "Navigator", "StorageManager",
+  "Window", "Navigator", "WorkerGlobalScope", "WorkerNavigator", "StorageManager",
   "FileSystemHandle", "FileSystemDirectoryHandle", "FileSystemFileHandle",
   "FileSystemGetFileOptions", "FileSystemGetDirectoryOptions", "FileSystemRemoveOptions",
   "FileSystemWritableFileStream", "WritableStream", "File", "Blob",
