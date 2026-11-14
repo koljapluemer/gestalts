@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
-import { ConfirmDialog, NoteCard, NoteEditor, useDebounced } from '@gestalts/kit';
-import { useDoc, useParams, useQuery, useViewState, useWrite, type Item } from '@gestalts/view';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ConfirmDialog, NoteEditor, NoteTitle, newId, useDebounced } from '@gestalts/kit';
+import { useDoc, useParams, useQuery, useViewState, useWrite } from '@gestalts/view';
 
 const LIST_FIELDS = ['title', 'main'];
 const PAGE = 40;
-
-function firstLine(n: Item): string {
-  const { title, main } = n.value;
-  if (typeof title === 'string' && title) return title;
-  if (typeof main === 'string' && main.trim()) return main.trim().split('\n')[0];
-  return '(empty)';
-}
 
 function List({ selected, onSelect, onNew }: { selected: string | null; onSelect: (id: string) => void; onNew: () => void }) {
   const [search, setSearch] = useViewState<string>('search', '');
@@ -34,7 +27,7 @@ function List({ selected, onSelect, onNew }: { selected: string | null; onSelect
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {items.map((n) => (
           <li key={n.id}>
-            <button type="button" className={`w-full truncate px-3 py-3 text-left hover:bg-base-200 ${n.id === selected ? 'bg-base-300' : ''}`} onClick={() => onSelect(n.id)}>{firstLine(n)}</button>
+            <button type="button" className={`w-full truncate px-3 py-3 text-left hover:bg-base-200 ${n.id === selected ? 'bg-base-300' : ''}`} onClick={() => onSelect(n.id)}><NoteTitle value={n.value} /></button>
           </li>
         ))}
         {hasMore && <li ref={end} className="flex justify-center p-3"><span className="loading loading-spinner loading-sm" /></li>}
@@ -44,21 +37,20 @@ function List({ selected, onSelect, onNew }: { selected: string | null; onSelect
   );
 }
 
-function Detail({ id, onBack, onEdit, onDeleted }: { id: string; onBack: () => void; onEdit: () => void; onDeleted: () => void }) {
+/** The note `id`, always being edited: saved as it's left. `id` may not be written yet: then it's a new note. */
+function Open({ id, onBack, onDeleted }: { id: string; onBack: () => void; onDeleted: () => void }) {
   const note = useDoc('note@1', id);
   const write = useWrite();
   const [confirming, setConfirming] = useState(false);
-  if (!note) return null;
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex gap-1 border-b border-base-300 p-2">
-        <button type="button" className="btn btn-sm btn-ghost md:hidden" onClick={onBack}><ArrowLeft className="size-4" /></button>
+        <button type="button" className="btn btn-sm btn-ghost md:hidden" title="Back to the list" onClick={onBack}><ArrowLeft className="size-4" /></button>
         <span className="flex-1" />
-        <button type="button" className="btn btn-sm btn-ghost" onClick={onEdit}><Pencil className="size-4" /> Edit</button>
-        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}><Trash2 className="size-4" /> Delete</button>
+        {note && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}><Trash2 className="size-4" /> Delete</button>}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-4"><NoteCard value={note.value} /></div>
-      {confirming && (
+      <div className="min-h-0 flex-1 overflow-y-auto"><NoteEditor id={id} autoFocus /></div>
+      {confirming && note && (
         <ConfirmDialog title="Delete this note?" onClose={() => setConfirming(false)} onConfirm={async () => { await write.remove(note.id); onDeleted(); }}>
           This cannot be undone.
         </ConfirmDialog>
@@ -67,32 +59,22 @@ function Detail({ id, onBack, onEdit, onDeleted }: { id: string; onBack: () => v
   );
 }
 
-/** The note `id` in the editor, once it's loaded. */
-function Editing({ id, onDone }: { id: string; onDone: (saved?: Item) => void }) {
-  const note = useDoc('note@1', id);
-  if (!note) return null;
-  return <div className="h-full overflow-y-auto"><NoteEditor note={note} onDone={onDone} /></div>;
-}
-
 /**
  * On a phone, the list or the note; on anything wider, side by side. Where it is is its params (so another view can
- * send it to a note): `note`, the note shown, and `edit=1` to edit it, or to write a new one without `note`.
+ * send it to a note): `note`, the note open, always in the editor. A new note opens under an id of its own, and is
+ * written once it has something in it.
  */
 export default function NoteCrud() {
   const [params, setParams] = useParams();
   const selected = params.note ?? null;
-  const editing = params.edit === '1';
-  const show = (note: string | null, edit = false) => setParams({ ...(note ? { note } : {}), ...(edit ? { edit: '1' } : {}) });
-  const done = (saved?: Item) => show(saved?.id ?? selected);
+  const show = (note: string | null) => setParams(note ? { note } : {});
   return (
     <div className="flex h-full bg-base-100">
-      <div className={`h-full w-full border-base-300 md:w-80 md:shrink-0 md:border-r ${selected || editing ? 'hidden md:block' : ''}`}>
-        <List selected={selected} onSelect={(id) => show(id)} onNew={() => show(null, true)} />
+      <div className={`h-full w-full border-base-300 md:w-80 md:shrink-0 md:border-r ${selected ? 'hidden md:block' : ''}`}>
+        <List selected={selected} onSelect={(id) => show(id)} onNew={() => show(newId())} />
       </div>
-      <div className={`h-full min-w-0 flex-1 ${selected || editing ? '' : 'hidden md:block'}`}>
-        {editing && !selected && <div className="h-full overflow-y-auto"><NoteEditor onDone={done} /></div>}
-        {editing && selected && <Editing key={selected} id={selected} onDone={done} />}
-        {!editing && selected && <Detail key={selected} id={selected} onBack={() => show(null)} onEdit={() => show(selected, true)} onDeleted={() => show(null)} />}
+      <div className={`h-full min-w-0 flex-1 ${selected ? '' : 'hidden md:block'}`}>
+        {selected && <Open key={selected} id={selected} onBack={() => show(null)} onDeleted={() => show(null)} />}
       </div>
     </div>
   );

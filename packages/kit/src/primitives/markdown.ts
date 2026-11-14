@@ -65,6 +65,7 @@ function escaped(text: string, at: number) {
 export const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 let links: MarkdownLinks = {};
+let inlineOnly = false;
 
 export type EmbedKind = 'image' | 'video' | 'audio' | 'file';
 
@@ -117,6 +118,8 @@ const extensions: MarkedExtension = {
       renderer(t) {
         const { target, label, embed } = t as RefToken;
         if (embed) {
+          // a line of text shows what's embedded by name
+          if (inlineOnly) return `<span class="text-base-content/70">${escapeHtml(label ?? target)}</span>`;
           const src = links.embed?.(target);
           return src
             ? embedHtml(target, src, label)
@@ -143,8 +146,11 @@ const SANITIZE = {
 
 let hooked = false;
 
-/** Markdown as sanitized HTML. External links open in a new tab; note links are handled by the app. */
-export function renderMarkdown(text: string, with_: MarkdownLinks = {}): string {
+/**
+ * Markdown as sanitized HTML. External links open in a new tab; note links are handled by the app. `inline`: one line
+ * of text (a title), without paragraphs, and embeds by their name.
+ */
+export function renderMarkdown(text: string, with_: MarkdownLinks = {}, { inline = false }: { inline?: boolean } = {}): string {
   if (!hooked) {
     // registered on first use: DOMPurify needs a DOM, which tests importing this module may not have
     DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -156,10 +162,12 @@ export function renderMarkdown(text: string, with_: MarkdownLinks = {}): string 
     hooked = true;
   }
   links = with_;
+  inlineOnly = inline;
   try {
-    return DOMPurify.sanitize(marked.parse(text, { async: false }), SANITIZE);
+    return DOMPurify.sanitize(inline ? marked.parseInline(text, { async: false }) : marked.parse(text, { async: false }), SANITIZE);
   } finally {
     links = {};
+    inlineOnly = false;
   }
 }
 

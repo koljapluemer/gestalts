@@ -18,6 +18,8 @@ type Props = {
   /** files pasted or dropped into the editor (they're not inserted as text) */
   onFiles?: (files: File[]) => void;
   onView?: (view: EditorView | null) => void;
+  /** the editor lost focus */
+  onBlur?: () => void;
   placeholder?: string;
   /** smallest height of the text, CSS */
   minHeight?: string;
@@ -25,10 +27,10 @@ type Props = {
 };
 
 /** A Markdown field: `[[` completion, references marked and openable, pasted or dropped files handed on. */
-export function MarkdownEditor({ value, onChange, onSave, search, onOpen, labelOf, onFiles, onView, placeholder, minHeight = '6rem', autofocus }: Props) {
+export function MarkdownEditor({ value, onChange, onSave, search, onOpen, labelOf, onFiles, onView, onBlur, placeholder, minHeight = '6rem', autofocus }: Props) {
   // the extensions are made once; they reach the latest props through this holder, kept current by the effect
-  const [props] = useState(() => new Latest({ search, onOpen, labelOf, onFiles }));
-  useEffect(() => { props.set({ search, onOpen, labelOf, onFiles }); });
+  const [props] = useState(() => new Latest({ search, onOpen, labelOf, onFiles, onBlur }));
+  useEffect(() => { props.set({ search, onOpen, labelOf, onFiles, onBlur }); });
   const [extensions] = useState(() => [
     markdown(),
     EditorView.theme({ '.cm-content': { minHeight } }),
@@ -41,6 +43,7 @@ export function MarkdownEditor({ value, onChange, onSave, search, onOpen, labelO
     EditorView.domEventHandlers({
       paste: (e) => handFiles(e.clipboardData?.files, e, props.current.onFiles),
       drop: (e) => handFiles(e.dataTransfer?.files, e, props.current.onFiles),
+      blur: () => { props.current.onBlur?.(); return false; },
     }),
   ]);
   return (

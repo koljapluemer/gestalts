@@ -76,5 +76,7 @@ describe('where a view is', () => {
     expect(h.params()).toEqual({ note: 'n' });
     await expect(h.call({ op: 'openView', view: 'note-crud', params: { note: 'n' } })).resolves.toBe(false);
     expect(h.opened).toEqual([{ view: 'note-crud', params: { note: 'n' } }]);
+    await h.call({ op: 'openView', view: 'source-manager', params: { source: 's' }, newTab: true });
+    expect(h.opened.at(-1)).toEqual({ view: 'source-manager', params: { source: 's' }, newTab: true });
   });
 });

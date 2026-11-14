@@ -73,7 +73,7 @@ export type Fixture = ViewHost & {
   /** where the view last put itself (`setParams`) */
   params(): Record<string, string>;
   /** the views it asked to show, in order */
-  opened: { view: string; params?: Record<string, string> }[];
+  opened: { view: string; params?: Record<string, string>; newTab?: boolean }[];
   /** moves the view elsewhere, as the app would */
   move(params: Record<string, string>): void;
   /** changes what is believed, as practice elsewhere would */
@@ -100,7 +100,7 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
   ymls.forEach(put);
   const blobs = new Map<string, Uint8Array>();
   let params: Record<string, string> = {};
-  const opened: { view: string; params?: Record<string, string> }[] = [];
+  const opened: { view: string; params?: Record<string, string>; newTab?: boolean }[] = [];
   const moved = new Set<(p: Record<string, string>) => void>();
   const errors: ViewError[] = [];
   const subs = new Map<number, { query: Query; order: string[]; listener?: (d: Delta) => void }>();
@@ -157,7 +157,7 @@ export function fixtureHost(ymls: JsonMap[] = [], beliefs: Belief[] = []): Fixtu
       case 'setState': case 'setTitle': return null;
       case 'setParams': params = c.params; return null;
       // nothing else runs here to show
-      case 'openView': opened.push({ view: c.view, ...(c.params ? { params: c.params } : {}) }); return false;
+      case 'openView': opened.push({ view: c.view, ...(c.params ? { params: c.params } : {}), ...(c.newTab ? { newTab: true } : {}) }); return false;
     }
   };
   return {

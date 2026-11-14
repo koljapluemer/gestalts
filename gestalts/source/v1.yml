@@ -5,7 +5,8 @@ description: >-
   apart from its id so it can change. Names are `family, given` (or `family, suffix, given`; without a comma, one name
   that is never split, e.g. an organisation), in order. `doi` is kept lowercase without a resolver prefix, `isbn` as
   ISBN-13 digits. `license` is an SPDX id (`CC-BY-SA-4.0`) when reuse depends on it. `aliases` are other ways to find
-  it. Claims about it are notes relating to it.
+  it. `concepts` maps the concepts it is about to how strongly they come up in it, from 0 to 1. Claims about it are
+  notes relating to it.
 fields:
   key: { type: string, required: true }
   entrytype:
@@ -40,3 +41,4 @@ fields:
   tags: { type: string_list }
   extra: { type: text }
   blobs: { type: blobs }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }

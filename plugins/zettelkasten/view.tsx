@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronRight, ExternalLink, Search } from 'lucide-react';
-import { ConfirmDialog, NoteCard, useDebounced } from '@gestalts/kit';
+import { ChevronDown, ChevronRight, Pencil, Search } from 'lucide-react';
+import { ConfirmDialog, NoteCard, NoteTitle, useDebounced } from '@gestalts/kit';
 import {
   useDoc, useHost, useOutline, useParams, useQuery, useRead, useViewState, useWrite,
   type Json, type JsonMap, type OutlineEntry, type OutlineMark, type OutlineSpec, type OutlineStatus,
@@ -20,10 +20,13 @@ type Rel = { to: string; label: string };
 type Place = 'after' | 'branch';
 const newSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
 
-function firstLine(v: JsonMap): string {
-  if (typeof v.title === 'string' && v.title.trim()) return v.title.trim();
-  if (typeof v.main === 'string' && v.main.trim()) return v.main.trim().split('\n')[0];
-  return '(empty)';
+/** The way to a note, as its ancestors' headlines. */
+function Path({ path }: { path: { id: string; value: JsonMap }[] }) {
+  return (
+    <p className="text-xs break-words text-base-content/60">
+      {path.map((p, i) => <span key={p.id}>{i > 0 && ' › '}<NoteTitle value={p.value} /></span>)}
+    </p>
+  );
 }
 const rels = (v: JsonMap): Rel[] => (Array.isArray(v.relationships) ? v.relationships.filter((r): r is Rel => Boolean(r) && typeof r === 'object' && !Array.isArray(r) && typeof (r as JsonMap).to === 'string') : []);
 const isPlace = (r: Rel) => r.label === FOLLOWS || r.label === BRANCHES;
@@ -159,10 +162,10 @@ function Subject({ id, fromInbox, hasRoot, change, expand, focus, open, skip }: 
         <div className="flex items-center gap-2 text-sm">
           <span className="font-semibold">{located ? STATUS[located.status] : '…'}</span>
           <span className="flex-1" />
-          <button type="button" className="btn btn-ghost btn-xs" title="Open in Notes" onClick={() => open(id)}><ExternalLink className="size-4" /></button>
+          <button type="button" className="btn btn-ghost btn-xs" title="Edit in Notes" onClick={() => open(id)}><Pencil className="size-4" /> Edit</button>
         </div>
-        {path && path.length > 0 && <p className="truncate text-xs text-base-content/60">{path.map((p) => firstLine(p.value)).join(' › ')}</p>}
-        <div className="max-h-64 overflow-y-auto"><NoteCard value={v} /></div>
+        {path && path.length > 0 && <Path path={path} />}
+        <NoteCard value={v} />
         {located?.marks.map((m, i) => <Fix key={i} id={id} mark={m} value={v} change={change} focus={focus} />)}
         <div className="flex flex-wrap gap-2">
           {fromInbox && <button type="button" className="btn btn-sm" onClick={skip}>Skip</button>}
@@ -201,7 +204,7 @@ function Subject({ id, fromInbox, hasRoot, change, expand, focus, open, skip }: 
 function Fix({ id, mark, value, change, focus }: { id: string; mark: OutlineMark; value: JsonMap; change: Change; focus: (id: string | null) => void }) {
   const places = rels(value).filter(isPlace);
   const targets = useQuery(mark.kind === 'placedTwice' ? { gestalt: NOTE, ids: places.map((p) => p.to), fields: ['title', 'main'] } : null).items;
-  const title = (to: string) => { const t = targets.find((i) => i.id === to); return t ? firstLine(t.value) : 'a missing note'; };
+  const title = (to: string) => { const t = targets.find((i) => i.id === to); return t ? <NoteTitle value={t.value} /> : 'a missing note'; };
   return (
     <div role="alert" className="alert alert-warning flex flex-col items-start gap-2 text-sm">
       <span>{MARK[mark.kind]}</span>
@@ -240,8 +243,8 @@ function Targets({ subject, place }: { subject: string; place: (target: string, 
       <ul className="flex flex-col gap-1">
         {located.map((e) => (
           <li key={e.item.id} className="rounded-box bg-base-200 p-2 text-sm">
-            {e.path && e.path.length > 0 && <p className="truncate text-xs text-base-content/60">{e.path.map((p) => firstLine(p.value)).join(' › ')}</p>}
-            <p className="truncate">{firstLine(e.item.value)}</p>
+            {e.path && e.path.length > 0 && <Path path={e.path} />}
+            <p className="break-words"><NoteTitle value={e.item.value} /></p>
             <PlaceButtons entry={e} subject={subject} below={e.belowSubject === true} place={place} />
           </li>
         ))}
@@ -292,7 +295,7 @@ function Attention({ ctx }: { ctx: TreeCtx }) {
                   ? <button type="button" className="btn btn-ghost btn-xs btn-square mt-1.5" aria-label={open ? 'Hide what hangs on it' : 'Show what hangs on it'} onClick={() => setUnfolded(open ? unfolded.filter((x) => x !== id) : [...unfolded, id])}>{open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button>
                   : <span className="inline-block w-6 shrink-0" />}
                 <button type="button" className="min-w-0 flex-1 rounded-box p-2 text-left text-sm hover:bg-base-200" onClick={() => ctx.focus(id)}>
-                  <span className="block truncate">{firstLine(e.item.value)}</span>
+                  <span className="block break-words"><NoteTitle value={e.item.value} /></span>
                   <span className="block text-xs text-base-content/60">{e.marks.map((m) => MARK[m.kind]).join(' ')}</span>
                 </button>
               </div>
@@ -356,8 +359,8 @@ function Row({ entry, depth, ctx }: { entry: OutlineEntry; depth: number; ctx: T
         {entry.hasChildren
           ? <button type="button" className="btn btn-ghost btn-xs btn-square" aria-label={open ? 'Collapse' : 'Expand'} onClick={() => ctx.toggle(id)}>{open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button>
           : <span className="inline-block w-6 shrink-0" />}
-        <button type="button" className="min-w-0 flex-1 truncate py-1 text-left" onClick={() => ctx.select(selected ? null : id)}>
-          {firstLine(entry.item.value)}
+        <button type="button" className="min-w-0 flex-1 py-1 text-left break-words" onClick={() => ctx.select(selected ? null : id)}>
+          <NoteTitle value={entry.item.value} />
         </button>
         {entry.marks.length > 0 && <span className="badge badge-warning badge-xs" title={entry.marks.map((m) => MARK[m.kind]).join(' ')}>!</span>}
       </div>
@@ -377,7 +380,7 @@ function RowActions({ entry, depth, ctx }: { entry: OutlineEntry; depth: number;
     <div className="flex flex-wrap items-center gap-2 py-1" style={{ paddingLeft: `${depth * 1.25 + 1.75}rem` }}>
       {subject && located && <PlaceButtons entry={entry} subject={subject} below={located.belowSubject === true} place={ctx.place} />}
       <button type="button" className="btn btn-xs" onClick={() => ctx.focus(id)}>Focus</button>
-      <button type="button" className="btn btn-xs btn-ghost" title="Open in Notes" onClick={() => ctx.open(id)}><ExternalLink className="size-4" /></button>
+      <button type="button" className="btn btn-xs btn-ghost" title="Edit in Notes" onClick={() => ctx.open(id)}><Pencil className="size-4" /> Edit</button>
     </div>
   );
 }

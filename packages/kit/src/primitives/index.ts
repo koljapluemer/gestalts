@@ -7,3 +7,4 @@ export { inCodeOrMath, insertReference, referenceAt, referenceCompletion, refere
 export { embedKind, escapeHtml, mathAt, references, renderMarkdown, type EmbedKind } from './markdown';
 export { MarkdownEditor } from './MarkdownEditor';
 export { useDebounced } from './useDebounced';
+export { newId } from './ids';

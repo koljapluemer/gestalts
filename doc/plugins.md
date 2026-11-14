@@ -66,14 +66,24 @@ and a setter; the app keeps them with the tab, so a reload comes back there. Wha
 draft) belongs in `useViewState`.
 
 `useHost().openView(view, params)` shows another view: its most recently used tab, moved to `params`, else a new tab.
-It answers whether the app could, since an app may not have that view (a preview has none). Notes takes `note` (an id)
-and `edit=1`, so Quick note's Save and Edit is:
+It answers whether the app could, since an app may not have that view (a preview has none). Notes takes `note` (an id,
+always opened in the editor), so Quick note's Save and Edit is:
 
 ```tsx
-await openView('note-crud', { note: id, edit: '1' });
+await openView('note-crud', { note: id });
 ```
 
+`openView(view, params, { newTab: true })` opens it in a new browser tab instead, where there are browser tabs (in the
+desktop and phone apps it opens as without). That tab's link is `?open=<view>&<param>=<value>…`, which works pasted
+too: the app opens that view at those params in a tab of its own. Notes takes `note`, the concept explorer `concept`,
+Academic sources `source`.
+
 Params are strings. A view that takes them says which in its doc comment.
+
+The kit has the pieces these views share: `ListInput` for aliases and tags (chips, never a comma-separated input),
+`NoteTitle` for a note as one line of Markdown, and `ItemPicker` (with `NotePicker` and `ConceptPicker`) for finding
+something to attach, keyboard-driven. Leave out what mustn't be offered in the query (`links.none`), not after its
+`limit`.
 
 ## Backends
 

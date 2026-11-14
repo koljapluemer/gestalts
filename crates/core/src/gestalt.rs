@@ -649,6 +649,9 @@ mod tests {
         assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: blogpost\n").contains("entrytype"));
         assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\nauthor: [{family: Doe}]\n").contains("author"));
         assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\njournal: X\n").contains("not a prop of source@1"));
+        // the concepts it is about, each with how strongly
+        assert!(matches!(state("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\nconcepts: {c1: 0.5, c2: 1}\n"), YmlState::Valid(_)));
+        assert!(invalid("s", "id: s\ngestalt: source@1\nkey: k\nentrytype: misc\nconcepts: {c1: 2}\n").contains("concepts"));
 
         let def = Gestalts::builtin().get("source@1").unwrap().clone();
         let y = Yml::parse("s", ok);

@@ -121,3 +121,23 @@ export function useTabs(distribution: string, defaults: string[]): [Tab[], (tabs
   const set = useCallback((next: Tab[] | ((now: Tab[]) => Tab[])) => write(key, typeof next === 'function' ? next(current(key, defaults)) : next), [key, defaults]);
   return [tabs, set];
 }
+
+/** The URL param naming a view to open (`?open=note-crud&note=…`): every other param is one of its params. */
+export const OPEN_PARAM = 'open';
+
+/** A link that opens `view` at `params` in a tab of its own: `?open=<view>&<param>=<value>…`. */
+export function openSearch(view: string, params: Record<string, string> = {}): string {
+  const q = new URLSearchParams({ [OPEN_PARAM]: view });
+  for (const [k, v] of Object.entries(params)) if (k !== OPEN_PARAM) q.append(k, v);
+  return `?${q.toString()}`;
+}
+
+/** What an `openSearch` link asks to open, or null for any other URL. */
+export function parseOpen(search: string): { view: string; params: Record<string, string> } | null {
+  const q = new URLSearchParams(search);
+  const view = q.get(OPEN_PARAM);
+  if (!view) return null;
+  const params: Record<string, string> = {};
+  q.forEach((v, k) => { if (k !== OPEN_PARAM && !(k in params)) params[k] = v; });
+  return { view, params };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { closeTab, moveBefore, openTab, parseTabs, routeTo, serializeTabs, type Tab } from './tabs';
+import { closeTab, moveBefore, openSearch, openTab, parseOpen, parseTabs, routeTo, serializeTabs, type Tab } from './tabs';
 
 const tab = (id: string, view = 'note-crud'): Tab => ({ id, view, params: {} });
 const ids = (tabs: Tab[]) => tabs.map((t) => t.id);
@@ -70,5 +70,18 @@ describe('showing a view from another', () => {
     const r = routeTo(tabs, [], 'quick-note', { x: '1' });
     expect(ids(r.tabs)).toEqual(['a', 'q', 'b', r.id]);
     expect(r.tabs.at(-1)).toMatchObject({ view: 'quick-note', params: { x: '1' } });
+  });
+});
+
+describe('open links', () => {
+  it('round-trip a view and its params', () => {
+    const search = openSearch('note-crud', { note: 'a b&c', x: '1' });
+    expect(search.startsWith('?open=note-crud&')).toBe(true);
+    expect(parseOpen(search)).toEqual({ view: 'note-crud', params: { note: 'a b&c', x: '1' } });
+  });
+
+  it('are nothing without a view', () => {
+    expect(parseOpen('?tab=abc')).toBeNull();
+    expect(parseOpen('')).toBeNull();
   });
 });

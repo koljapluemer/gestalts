@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeftRight, BookPlus, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
-import { AddSource, ConfirmDialog, Modal, SOURCE_LABEL, byline, sourceTitle, useDebounced } from '@gestalts/kit';
-import { useBeliefs, useQuery, useRead, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
+import { ArrowLeftRight, BookPlus, Pencil, Trash2, Unlink } from 'lucide-react';
+import { AddSource, ConceptPicker, ConfirmDialog, ListInput, Modal, NotePicker, SOURCE_LABEL, byline, newId, sourceTitle } from '@gestalts/kit';
+import { useBeliefs, useParams, useQuery, useRead, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const CONCEPT = 'concept@2';
 const NOTE = 'note@1';
@@ -15,15 +15,6 @@ const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
 const fold = (s: string) => s.trim().toLowerCase();
-
-/** A uuid v4 for a note before it's written, so it keeps its place on screen (a sandboxed frame has no randomUUID). */
-function newId(): string {
-  const b = crypto.getRandomValues(new Uint8Array(16));
-  b[6] = (b[6] & 0x0f) | 0x40;
-  b[8] = (b[8] & 0x3f) | 0x80;
-  const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
 
 type Relationship = { to: string; label: string };
 const relationsOf = (v: JsonMap | undefined): Relationship[] => (Array.isArray(v?.relationships) ? (v.relationships as Relationship[]) : []);
@@ -39,50 +30,6 @@ function withLabel(relationships: Relationship[], concept: string, label: string
   const l = label.trim() || LABEL;
   const i = relationships.findIndex((r) => r.to === concept);
   return i < 0 ? [...relationships, { to: concept, label: l }] : relationships.map((r, j) => (j === i ? { ...r, label: l } : r));
-}
-
-// ---- finding or making a concept ----
-
-function ConceptPicker({ onOpen, autoFocus }: { onOpen: (id: string) => void; autoFocus?: boolean }) {
-  const read = useRead();
-  const write = useWrite();
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const text = useDebounced(search, 150).trim();
-  const name = search.trim();
-  const { items } = useQuery(text ? { gestalt: CONCEPT, text, fields: ['name', 'aliases'], limit: 8 } : null);
-  /** named so, or going by that name */
-  const same = (c: Item) => [str(c.value.name), ...strings(c.value.aliases)].some((n) => fold(n) === fold(name));
-  /** the concept named exactly so, else a new one; asked afresh, as the suggestions may lag behind the typing */
-  const openOrCreate = async () => {
-    if (!name || busy) return;
-    setBusy(true);
-    setError(undefined);
-    try {
-      const { items: found } = await read.page({ gestalt: CONCEPT, text: name, fields: ['name', 'aliases'], limit: 50 });
-      const existing = found.find((c) => fold(str(c.value.name)) === fold(name)) ?? found.find(same);
-      onOpen(existing ? existing.id : (await write.put({ gestalt: CONCEPT, name })).id);
-    } catch (e) { setError(message(e)); } finally { setBusy(false); }
-  };
-  return (
-    <div className="flex flex-col gap-1">
-      <input className="input w-full" type="search" placeholder="Find or create a concept…" value={search} autoFocus={autoFocus}
-             onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void openOrCreate(); }} />
-      {text && items.map((c) => (
-        <button key={c.id} type="button" className="btn btn-ghost btn-sm justify-start gap-2 font-normal" onClick={() => onOpen(c.id)}>
-          <span className="truncate">{str(c.value.name)}</span>
-          {strings(c.value.aliases).length > 0 && <span className="min-w-0 truncate text-xs text-base-content/50">{strings(c.value.aliases).join(', ')}</span>}
-        </button>
-      ))}
-      {name && !items.some(same) && (
-        <button type="button" className="btn btn-ghost btn-sm justify-start truncate font-normal" disabled={busy} onClick={() => void openOrCreate()}>
-          <Plus className="size-4" /> Create “{name}”
-        </button>
-      )}
-      {error && <p role="alert" className="text-sm text-error">{error}</p>}
-    </div>
-  );
 }
 
 // ---- one note about the concept ----
@@ -231,6 +178,23 @@ function NoteGroup({ id, note, concept, onCreated, onGone, onError }: {
 
 // ---- the concept ----
 
+/** An existing note, found by its text, related to the concept too; only notes not related to it yet are offered. */
+function AttachNote({ concept, onAttached, onError }: { concept: string; onAttached: (id: string) => void; onError: (e: unknown) => void }) {
+  const read = useRead();
+  const write = useWrite();
+  const attach = async (picked: Item) => {
+    try {
+      // the whole note as it is now: the search shows only some of its props
+      const n = (await read.page({ gestalt: NOTE, ids: [picked.id], limit: 1 })).items[0];
+      if (!n) throw new Error('That note is gone.');
+      const rels = relationsOf(n.value);
+      if (!rels.some((r) => r.to === concept)) await write.put({ ...n.value, relationships: [...rels, { to: concept, label: LABEL }] });
+      onAttached(n.id);
+    } catch (e) { onError(e); }
+  };
+  return <NotePicker unrelatedTo={concept} placeholder="Attach an existing note…" onPick={(n) => void attach(n)} />;
+}
+
 /** Every note relating to the concept, from whenever it was written, and one empty one at the end to write the next. */
 function Notes({ concept, onError }: { concept: string; onError: (e: unknown) => void }) {
   const { items, hasMore, more } = useQuery({ gestalt: NOTE, refs: { to: concept, field: 'relationships' }, limit: 200 });
@@ -263,67 +227,20 @@ function Notes({ concept, onError }: { concept: string; onError: (e: unknown) =>
     <div className="flex flex-col gap-3">
       {rows.map((r) => <NoteGroup key={r.id} id={r.id} note={r.note} concept={concept} onCreated={onCreated} onGone={onGone} onError={onError} />)}
       {hasMore && <div ref={end} className="flex justify-center p-3"><span className="loading loading-spinner loading-sm" /></div>}
+      <AttachNote concept={concept} onAttached={onCreated} onError={onError} />
     </div>
   );
 }
 
-/** One alias: shown as a chip, edited in place on a click; emptied, it goes. */
-function Alias({ value, onSave, onRemove }: { value: string; onSave: (v: string) => void; onRemove: () => void }) {
-  const [editing, setEditing] = useState<string | null>(null);
-  const cancelled = useRef(false);
-  const done = () => {
-    const next = editing ?? value;
-    setEditing(null);
-    if (cancelled.current) { cancelled.current = false; return; }
-    if (next.trim() !== value) onSave(next);
-  };
-  if (editing !== null) {
-    return (
-      <input className="input input-xs w-40" aria-label="Alias" autoFocus value={editing} onChange={(e) => setEditing(e.target.value)} onBlur={done}
-             onKeyDown={(e) => {
-               if (e.key === 'Enter') e.currentTarget.blur();
-               if (e.key === 'Escape') { cancelled.current = true; e.currentTarget.blur(); }
-             }} />
-    );
-  }
-  return (
-    <span className="badge badge-ghost gap-0.5 pr-0.5">
-      <button type="button" className="cursor-text" title="Edit the alias" onClick={() => setEditing(value)}>{value}</button>
-      <button type="button" className="btn btn-ghost btn-xs btn-circle size-4 min-h-0" title="Remove the alias" onClick={onRemove}><X className="size-3" /></button>
-    </span>
-  );
-}
-
-/** Other names the concept goes by: edited in place, added by typing (commas or Enter separate them). */
+/** Other names the concept goes by. */
 function Aliases({ concept, onError }: { concept: Item; onError: (e: unknown) => void }) {
   const write = useWrite();
   const name = str(concept.value.name);
-  const aliases = strings(concept.value.aliases);
-  const [adding, setAdding] = useState('');
-  /** each name once, apart from the concept's own name */
-  const save = (next: string[]) => {
-    const seen = new Set([fold(name)]);
-    const clean = next.map((a) => a.trim()).filter((a) => a && !seen.has(fold(a)) && seen.add(fold(a)));
+  const save = (aliases: string[]) => {
     const { aliases: _old, ...rest } = concept.value;
-    write.put(clean.length ? { ...rest, aliases: clean } : rest).catch(onError);
+    write.put(aliases.length ? { ...rest, aliases } : rest).catch(onError);
   };
-  const add = (text: string) => {
-    const fresh = text.split(',').map((a) => a.trim()).filter(Boolean);
-    setAdding('');
-    if (fresh.length) save([...aliases, ...fresh]);
-  };
-  return (
-    <div className="flex flex-wrap items-center gap-1 px-4 pb-2">
-      <span className="text-xs text-base-content/60">also</span>
-      {aliases.map((a, i) => (
-        <Alias key={`${a}:${i}`} value={a} onSave={(v) => save(aliases.map((x, j) => (j === i ? v : x)))} onRemove={() => save(aliases.filter((_, j) => j !== i))} />
-      ))}
-      <input className="input input-ghost input-xs w-36" aria-label="Add an alias" placeholder="Add an alias…" value={adding}
-             onChange={(e) => { if (e.target.value.endsWith(',')) add(e.target.value); else setAdding(e.target.value); }}
-             onKeyDown={(e) => { if (e.key === 'Enter') add(adding); if (e.key === 'Escape') setAdding(''); }}
-             onBlur={() => add(adding)} />
-    </div>
-  );
+  return <ListInput className="px-4 pb-2" label="Alias" prefix="also" exclude={[name]} value={strings(concept.value.aliases)} onChange={save} />;
 }
 
 // ---- how it relates, and how well it's known ----
@@ -433,7 +350,7 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
       </div>
       {switching && (
         <Modal onClose={() => setSwitching(false)}>
-          <div className="p-4 pt-0"><ConceptPicker autoFocus onOpen={(id) => { setSwitching(false); onOpen(id); }} /></div>
+          <div className="p-4 pt-0"><ConceptPicker size="md" autoFocus onPick={(id) => { setSwitching(false); onOpen(id); }} /></div>
         </Modal>
       )}
       {confirming && (
@@ -447,14 +364,16 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
 
 /** Always one concept open; without one, finding or making one. */
 export default function ConceptExplorer() {
-  const [concept, setConcept] = useViewState<string | null>('concept', null);
+  const [params, setParams] = useParams();
+  const concept = params.concept ?? null;
+  const setConcept = (id: string | null) => setParams(id ? { concept: id } : {});
   const { items, loading } = useQuery(concept ? { gestalt: CONCEPT, ids: [concept], limit: 1 } : null);
   const item = items[0];
   if (concept && loading) return <div className="flex h-full items-center justify-center bg-base-100"><span className="loading loading-spinner" /></div>;
   if (!item) {
     return (
       <div className="flex h-full justify-center bg-base-100 p-4 pt-[15vh]">
-        <div className="w-full max-w-xl"><ConceptPicker autoFocus onOpen={setConcept} /></div>
+        <div className="w-full max-w-xl"><ConceptPicker size="md" autoFocus onPick={setConcept} /></div>
       </div>
     );
   }

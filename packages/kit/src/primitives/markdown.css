@@ -27,3 +27,5 @@
 .gist-extra { font-size: 0.9em; color: color-mix(in oklab, var(--color-base-content) 70%, transparent); }
 .gist-card hr, .gist-canvas hr { margin-block: 0.5em; }
 .gist-when { font-size: 0.9em; color: color-mix(in oklab, var(--color-base-content) 70%, transparent); }
+/* one line of Markdown, in a list or a title */
+.md-inline { line-height: inherit; }

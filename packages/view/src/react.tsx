@@ -471,7 +471,11 @@ export function useHost() {
     id: init.id,
     title: init.title,
     setTitle: (title: string) => { void host.call({ op: 'setTitle', title }); },
-    /** Shows `view` (its most recent tab, moved to `params` if given); whether the app could, as it may lack that view. */
-    openView: (view: string, params?: Params): Promise<boolean> => host.call({ op: 'openView', view, ...(params ? { params } : {}) }),
+    /**
+     * Shows `view` (its most recent tab, moved to `params` if given); whether the app could, as it may lack that view.
+     * `newTab`: in a new browser tab, where the app has browser tabs; elsewhere as without it.
+     */
+    openView: (view: string, params?: Params, { newTab = false }: { newTab?: boolean } = {}): Promise<boolean> =>
+      host.call({ op: 'openView', view, ...(params ? { params } : {}), ...(newTab ? { newTab } : {}) }),
   }), [host, init]);
 }

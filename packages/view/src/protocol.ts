@@ -58,8 +58,11 @@ export type Call =
   | { op: 'setState'; state: JsonMap }
   | { op: 'setTitle'; title: string }
   | { op: 'setParams'; params: Record<string, string> }
-  /** shows `view`: its most recent tab, moved to `params` if given, else a new one */
-  | { op: 'openView'; view: string; params?: Record<string, string> };
+  /**
+   * shows `view`: its most recent tab, moved to `params` if given, else a new one; `newTab`: in a new browser tab
+   * instead, where there are browser tabs (else as without it)
+   */
+  | { op: 'openView'; view: string; params?: Record<string, string>; newTab?: boolean };
 
 /** What each call answers. */
 export type Answers = {

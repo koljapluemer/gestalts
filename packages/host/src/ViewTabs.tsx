@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useHostRepo, useServices, type Repo } from '@gestalts/client';
 import type { JsonMap } from '@gestalts/view';
@@ -6,14 +6,31 @@ import { FrameView, type RunnableView } from './frame/FrameView';
 import type { ViewEnv } from './frame/bridge';
 import { useInstalled } from './installs';
 import { findPlugin, type PluginEntry, type Registry } from './registry';
-import { closeTab, moveBefore, openTab, routeTo, useTabs, withParams, type Tab } from './tabs';
+import { closeTab, moveBefore, openSearch, openTab, parseOpen, routeTo, useTabs, withParams, type Tab } from './tabs';
 
 const subscribeUrl = (l: () => void) => { addEventListener('popstate', l); addEventListener('gestalts:url', l); return () => { removeEventListener('popstate', l); removeEventListener('gestalts:url', l); }; };
 const useTabParam = () => useSyncExternalStore(subscribeUrl, () => new URLSearchParams(location.search).get('tab'));
 
-function selectTab(id: string) {
-  history.pushState(null, '', `${location.pathname}?tab=${encodeURIComponent(id)}`);
+const useOpenAsked = () => useSyncExternalStore(subscribeUrl, () => location.search);
+
+function selectTab(id: string, replace = false) {
+  const url = `${location.pathname}?tab=${encodeURIComponent(id)}`;
+  if (replace) history.replaceState(null, '', url);
+  else history.pushState(null, '', url);
   dispatchEvent(new Event('gestalts:url'));
+}
+
+/**
+ * `view` at `params` in a new browser tab of this app (an `?open=` link); false where there are no browser tabs (the
+ * desktop and phone apps) or the browser wouldn't open one.
+ */
+function openInBrowserTab(view: string, params?: Record<string, string>): boolean {
+  // inside the desktop or phone app (Tauri) there's no browser to open a tab in
+  if ('__TAURI_INTERNALS__' in window) return false;
+  const w = window.open(`${location.pathname}${openSearch(view, params)}`, '_blank');
+  if (!w) return false;
+  w.opener = null;
+  return true;
 }
 
 /** Frames kept alive behind the active tab, so going back is instant. Phones hold fewer. */
@@ -40,7 +57,7 @@ function serviceFor(repo: Repo, plugin: string): ViewEnv['service'] {
   };
 }
 
-type Navigate = (view: string, params?: Record<string, string>) => boolean;
+type Navigate = (view: string, params?: Record<string, string>, newTab?: boolean) => boolean;
 
 function ViewFrame({ registry, css, tab, hidden, navigate, setTitle, setParams }: {
   registry: Registry; css: string; tab: Tab; hidden: boolean;
@@ -110,9 +127,10 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
   };
   const offered = installed.filter((p) => availability(p) !== 'missing');
   /** a view asked to show `view` (moved to `params`): in its most recent tab, else a new one; not if it can't run here */
-  const navigate = useCallback<Navigate>((view, params) => {
+  const navigate = useCallback<Navigate>((view, params, newTab) => {
     const p = installed.find((x) => x.manifest.id === view);
     if (!p || availability(p) !== 'ok') return false;
+    if (newTab && openInBrowserTab(view, params)) return true;
     const r = routeTo(tabs, recent, view, params);
     setTabs(r.tabs);
     selectTab(r.id);
@@ -122,6 +140,20 @@ export function ViewTabs({ registry, css, title, end }: { registry: Registry; cs
   const setParams = useCallback((id: string, params: Record<string, string>) => {
     setTabs((now) => (JSON.stringify(now.find((t) => t.id === id)?.params) === JSON.stringify(params) ? now : withParams(now, id, params)));
   }, [setTabs]);
+  // an `?open=` link: a tab of its own (the tabs are shared with the app's other windows, whose tabs stay where they are)
+  const search = useOpenAsked();
+  useEffect(() => {
+    const ask = parseOpen(search);
+    if (!ask) return;
+    const p = installed.find((x) => x.manifest.id === ask.view);
+    // a view with a backend waits until it's known whether that runs
+    if (p && needsBackend(p) && services === undefined) return;
+    if (!p || availability(p) !== 'ok') { history.replaceState(null, '', location.pathname); dispatchEvent(new Event('gestalts:url')); return; }
+    const r = openTab(tabs, ask.view, ask.params);
+    setTabs(r.tabs);
+    selectTab(r.id, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per link; `availability` reads `services`
+  }, [search, installed, services]);
   const alive = tabs.filter((t) => recent.includes(t.id) && installed.some((p) => p.manifest.id === t.view));
 
   return (

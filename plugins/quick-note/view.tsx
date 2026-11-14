@@ -37,7 +37,7 @@ export default function QuickNote() {
       const note = await write.put({ gestalt: 'note@1', ...(main.trim() ? { main } : {}), ...(blobs.length ? { blobs } : {}) });
       setMain('');
       setBlobs([]);
-      if (then === 'edit' && await openView('note-crud', { note: note.id, edit: '1' })) setStatus({});
+      if (then === 'edit' && await openView('note-crud', { note: note.id })) setStatus({});
       else setStatus({ saved: then === 'edit' ? "Saved. There's no Notes view here to edit it in." : 'Saved.' });
       box.current?.focus();
     } catch (e) {

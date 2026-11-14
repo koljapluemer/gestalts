@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ClipboardPaste, Download, Pencil, Plus, Trash2, Unlink } from 'lucide-react';
-import { ConfirmDialog, MarkdownEditor, Modal, NoteCard, NoteEditor, bibJson, byline, clipboardText, freeKey, ingestBibtex, sourceTitle as titleOf } from '@gestalts/kit';
+import { ArrowLeft, ClipboardPaste, Download, Pencil, Plus, Trash2, Unlink, X } from 'lucide-react';
+import {
+  ConceptPicker, ConfirmDialog, ListInput, MarkdownEditor, Modal, NoteCard, NoteEditor, NotePicker, bibJson, byline, clipboardText, freeKey, ingestBibtex, sourceTitle as titleOf,
+} from '@gestalts/kit';
 import {
   ENTRY_TYPES, FIELD_NAMES, FIELDS, bibOf, isEntryType, mergeSource, normalise, parseBibtex, renderBibtex, slug,
   type Bib, type EntryType, type FieldName, type MergeConflict,
 } from '@gestalts/sources';
-import { useCapabilities, useDoc, useQuery, useRead, useService, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
+import { useCapabilities, useDoc, useHost, useParams, useQuery, useRead, useService, useViewState, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
 const SOURCE = 'source@1';
 const NOTE = 'note@1';
+const CONCEPT = 'concept@2';
+/** how strongly a concept comes up in a source when it's first attached */
+const STRENGTH = 0.5;
 const PAGE = 40;
 const DEFAULT_LABEL = 'source';
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
-const split = (s: string) => [...new Set(s.split(',').map((x) => x.trim()).filter(Boolean))];
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 const many = (f: FieldName) => FIELDS[f] === 'name' || FIELDS[f] === 'list';
 
@@ -35,7 +39,7 @@ type Draft = {
   fields: Partial<Record<FieldName, string>>;
   /** fields shown beyond the type's defaults and those that have a value */
   added: FieldName[];
-  aliases: string; tags: string; extra: string;
+  aliases: string[]; tags: string[]; extra: string;
 };
 
 function fieldText(v: unknown): string {
@@ -49,8 +53,8 @@ function draftOf(v: Record<string, unknown>, keep?: Draft): Draft {
     key: b.key, entrytype: b.entrytype, title: b.title ?? '',
     fields: Object.fromEntries(FIELD_NAMES.filter((f) => b[f] !== undefined).map((f) => [f, fieldText(b[f])])),
     added: keep?.added ?? [],
-    aliases: keep ? keep.aliases : strings(v.aliases).join(', '),
-    tags: keep ? keep.tags : strings(v.tags).join(', '),
+    aliases: keep ? keep.aliases : strings(v.aliases),
+    tags: keep ? keep.tags : strings(v.tags),
     extra: keep ? keep.extra : str(v.extra),
   };
 }
@@ -64,9 +68,11 @@ function bibOfDraft(d: Draft): Bib {
   return normalise(raw);
 }
 
-function sourceValue(id: string | undefined, bib: Bib, d: Draft, blobs: unknown): JsonMap {
-  const aliases = split(d.aliases);
-  const tags = split(d.tags);
+/** What the form saves: its fields, and what it doesn't edit (`blobs`, `concepts`) as `live` has it now. */
+function sourceValue(id: string | undefined, bib: Bib, d: Draft, live: JsonMap | undefined): JsonMap {
+  const { aliases, tags } = d;
+  const blobs = live?.blobs;
+  const concepts = live?.concepts;
   return {
     ...(id ? { id } : {}),
     gestalt: SOURCE,
@@ -75,6 +81,7 @@ function sourceValue(id: string | undefined, bib: Bib, d: Draft, blobs: unknown)
     ...(tags.length ? { tags } : {}),
     ...(d.extra.trim() ? { extra: d.extra } : {}),
     ...(Array.isArray(blobs) && blobs.length ? { blobs: blobs as JsonMap[] } : {}),
+    ...(concepts && typeof concepts === 'object' && !Array.isArray(concepts) && Object.keys(concepts).length ? { concepts } : {}),
   };
 }
 
@@ -135,66 +142,43 @@ function withRelations(n: Item, relationships: Relationship[]): JsonMap {
   return relationships.length ? { ...rest, relationships } : rest;
 }
 
-function ClaimLabel({ value, onSave }: { value: string; onSave: (label: string) => void }) {
-  const [label, setLabel] = useState(value);
-  return (
-    <input className="input input-xs w-40" aria-label="How it relates, e.g. source p. 34" value={label} onChange={(e) => setLabel(e.target.value)}
-           onBlur={() => { const l = label.trim() || DEFAULT_LABEL; if (l !== value) onSave(l); }} />
-  );
-}
-
+/** A claim this source makes: a note relating to it, labelled `source`. */
 function NewClaim({ source, onError }: { source: string; onError: (e: unknown) => void }) {
   const write = useWrite();
-  const [title, setTitle] = useState('');
   const [main, setMain] = useState('');
-  const [label, setLabel] = useState(DEFAULT_LABEL);
   const [busy, setBusy] = useState(false);
   const add = async () => {
     setBusy(true);
     try {
-      await write.put({ gestalt: NOTE, ...(title.trim() ? { title: title.trim() } : {}), main, relationships: [{ to: source, label: label.trim() || DEFAULT_LABEL }] });
-      setTitle(''); setMain(''); setLabel(DEFAULT_LABEL);
+      await write.put({ gestalt: NOTE, main, relationships: [{ to: source, label: DEFAULT_LABEL }] });
+      setMain('');
     } catch (e) { onError(e); } finally { setBusy(false); }
   };
   return (
     <div className="flex flex-col gap-2 rounded-box border border-base-300 p-2">
-      <input className="input input-sm w-full" placeholder="Title (optional)" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <MarkdownEditor value={main} onChange={setMain} placeholder="A claim this source makes" minHeight="3rem" />
-      <div className="flex items-center gap-2">
-        <input className="input input-sm min-w-0 flex-1" aria-label="Label" placeholder="source p. 34" value={label} onChange={(e) => setLabel(e.target.value)} />
+      <MarkdownEditor value={main} onChange={setMain} placeholder="A claim this source makes" minHeight="3rem" onSave={() => { if (main.trim()) void add(); }} />
+      <div className="flex justify-end">
         <button type="button" className="btn btn-sm btn-primary" disabled={busy || !main.trim()} onClick={() => void add()}><Plus className="size-4" /> Add claim</button>
       </div>
     </div>
   );
 }
 
-function AttachNote({ source, attached, onError }: { source: string; attached: Set<string>; onError: (e: unknown) => void }) {
-  const write = useWrite();
-  const [search, setSearch] = useState('');
-  const text = useDebounced(search, 150).trim();
-  const found = useQuery(text ? { gestalt: NOTE, text, limit: 8 } : null).items.filter((n) => !attached.has(n.id));
-  const attach = (n: Item) => write.put(withRelations(n, [...relationsOf(n), { to: source, label: DEFAULT_LABEL }])).then(() => setSearch(''), onError);
-  return (
-    <div className="flex flex-col gap-1">
-      <input className="input input-sm w-full" placeholder="Attach an existing note…" value={search} onChange={(e) => setSearch(e.target.value)} />
-      {found.map((n) => (
-        <button key={n.id} type="button" className="btn btn-ghost btn-xs justify-start truncate font-normal" onClick={() => void attach(n)}>
-          {str(n.value.title) || str(n.value.main).slice(0, 80) || n.id}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function Claims({ source }: { source: string }) {
+  const read = useRead();
   const write = useWrite();
   const { items, hasMore, more } = useQuery({ gestalt: NOTE, refs: { to: source, field: 'relationships' }, limit: 100 });
-  const [editing, setEditing] = useState<Item>();
+  const [editing, setEditing] = useState<string>();
   const [error, setError] = useState<string>();
   const fail = (e: unknown) => setError(message(e));
-  const relabel = (n: Item, index: number, label: string) =>
-    write.put(withRelations(n, relationsOf(n).map((r, j) => (j === index ? { ...r, label } : r)))).catch(fail);
   const detach = (n: Item, index: number) => write.put(withRelations(n, relationsOf(n).filter((_, j) => j !== index))).catch(fail);
+  /** the note as it is now (what the search shows is only some of its props), related to the source too */
+  const attach = async (picked: Item) => {
+    try {
+      const n = (await read.page({ gestalt: NOTE, ids: [picked.id], limit: 1 })).items[0];
+      if (n && !relationsOf(n).some((r) => r.to === source)) await write.put(withRelations(n, [...relationsOf(n), { to: source, label: DEFAULT_LABEL }]));
+    } catch (e) { fail(e); }
+  };
   const rows = items.flatMap((n) => relationsOf(n).flatMap((r, i) => (r.to === source ? [{ n, r, i }] : [])));
   return (
     <section className="flex flex-col gap-2">
@@ -204,17 +188,86 @@ function Claims({ source }: { source: string }) {
         <div key={`${n.id}:${i}`} className="flex flex-col gap-2 rounded-box border border-base-300 p-2">
           <NoteCard value={n.value} />
           <div className="flex items-center gap-1">
-            <ClaimLabel key={r.label} value={r.label} onSave={(l) => void relabel(n, i, l)} />
+            {r.label !== DEFAULT_LABEL && <span className="text-xs text-base-content/60">{r.label}</span>}
             <span className="flex-1" />
-            <button type="button" className="btn btn-ghost btn-xs" title="Edit the note" onClick={() => setEditing(n)}><Pencil className="size-3" /></button>
+            <button type="button" className="btn btn-ghost btn-xs" title="Edit the note" onClick={() => setEditing(n.id)}><Pencil className="size-3" /></button>
             <button type="button" className="btn btn-ghost btn-xs" title="Detach: the note stays, unrelated to this source" onClick={() => void detach(n, i)}><Unlink className="size-3" /></button>
           </div>
         </div>
       ))}
       {hasMore && <button type="button" className="btn btn-ghost btn-sm" onClick={more}>More</button>}
       <NewClaim source={source} onError={fail} />
-      <AttachNote source={source} attached={new Set(items.map((n) => n.id))} onError={fail} />
-      {editing && <Modal onClose={() => setEditing(undefined)}><NoteEditor key={editing.id} note={editing} onDone={() => setEditing(undefined)} /></Modal>}
+      <NotePicker unrelatedTo={source} placeholder="Attach an existing note…" onPick={(n) => void attach(n)} />
+      {editing && <Modal onClose={() => setEditing(undefined)}><NoteEditor key={editing} id={editing} /></Modal>}
+    </section>
+  );
+}
+
+// ---- concepts: what the source is about, and how strongly ----
+
+/** `concepts` of a source: concept id → how strongly it comes up there, 0..1. */
+function conceptsOf(v: JsonMap): Record<string, number> {
+  const c = v.concepts;
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return {};
+  return Object.fromEntries(Object.entries(c).filter((e): e is [string, number] => typeof e[1] === 'number'));
+}
+
+/** How strongly a concept comes up: a slider, saved once it's let go. */
+function Strength({ value, onSave }: { value: number; onSave: (v: number) => void }) {
+  // where it's been moved to, until what's saved has caught up with it (or while it's held)
+  const [moved, setMoved] = useState<number | null>(null);
+  const [held, setHeld] = useState(false);
+  const [seen, setSeen] = useState(value);
+  if (seen !== value) { setSeen(value); if (!held) setMoved(null); }
+  const v = moved ?? value;
+  const done = () => { setHeld(false); if (moved === null || moved === value) setMoved(null); else onSave(moved); };
+  return (
+    <label className="flex shrink-0 items-center gap-2" title="How strongly it comes up in this source">
+      <input type="range" className="range range-xs w-28" min={0} max={1} step={0.1} value={v} aria-label="How strongly it comes up"
+             onPointerDown={() => setHeld(true)} onChange={(e) => setMoved(Number(e.target.value))}
+             onPointerUp={done} onKeyUp={done} onBlur={() => { if (held || moved !== null) done(); }} />
+      <span className="w-8 text-right text-xs tabular-nums text-base-content/60">{v.toFixed(1)}</span>
+    </label>
+  );
+}
+
+/** The concepts this source is about, each with how strongly; found, or made, by name. */
+function Concepts({ source }: { source: Item }) {
+  const read = useRead();
+  const write = useWrite();
+  const { openView } = useHost();
+  const [error, setError] = useState<string>();
+  const map = conceptsOf(source.value);
+  const ids = Object.keys(map);
+  const { items } = useQuery(ids.length ? { gestalt: CONCEPT, ids, fields: ['name'], limit: ids.length } : null);
+  const names = new Map(items.map((c) => [c.id, str(c.value.name)]));
+  /** the source as it is now, with its concepts changed by `f` */
+  const change = async (f: (m: Record<string, number>) => Record<string, number>) => {
+    setError(undefined);
+    try {
+      const now = (await read.page({ gestalt: SOURCE, ids: [source.id], limit: 1 })).items[0];
+      if (!now) throw new Error('That source is gone.');
+      const next = f(conceptsOf(now.value));
+      const { concepts: _old, ...rest } = now.value;
+      await write.put(Object.keys(next).length ? { ...rest, concepts: next } : rest);
+    } catch (e) { setError(message(e)); }
+  };
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-sm font-semibold">Concepts</h3>
+      {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
+      {ids.map((id) => (
+        <div key={id} className="flex items-center gap-2">
+          <button type="button" className="link link-hover min-w-0 flex-1 text-left text-sm break-words" title="Open in the concept explorer"
+                  onClick={() => void openView('concept-explorer', { concept: id })}>
+            {names.get(id) ?? <code className="text-xs text-base-content/50">{id}</code>}
+          </button>
+          <Strength value={map[id]} onSave={(v) => void change((m) => ({ ...m, [id]: v }))} />
+          <button type="button" className="btn btn-ghost btn-xs btn-square" title="Remove the concept from this source"
+                  onClick={() => void change((m) => { const { [id]: _gone, ...rest } = m; return rest; })}><X className="size-3" /></button>
+        </div>
+      ))}
+      <ConceptPicker exclude={new Set(ids)} placeholder="Add a concept it's about…" onPick={(id) => void change((m) => (id in m ? m : { ...m, [id]: STRENGTH }))} />
     </section>
   );
 }
@@ -261,7 +314,7 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
       const bib = bibOfDraft(d);
       const key = await freeKey(read, bib.key, source?.id);
       if (key !== bib.key && source) throw new Error(`Another source has the key '${bib.key}'.`);
-      const saved = await write.put(sourceValue(source?.id, { ...bib, key }, d, source?.value.blobs));
+      const saved = await write.put(sourceValue(source?.id, { ...bib, key }, d, source?.value));
       setDraft((d) => ({ ...d, key }));
       setNotice((n) => (key !== bib.key ? `Saved, as '${key}': '${bib.key}' was taken.` : n ?? 'Saved.'));
       onSaved(saved);
@@ -341,10 +394,10 @@ function Editor({ source, incoming, onBack, onSaved, onDeleted }: {
             {more.map((f) => <option key={f} value={f}>{f}</option>)}
           </select>
         )}
-        <input className="input input-sm w-full" placeholder="Aliases, comma separated: other ways you'd look for it" value={draft.aliases} onChange={(e) => set({ aliases: e.target.value })} />
-        <input className="input input-sm w-full" placeholder="Tags, comma separated" value={draft.tags} onChange={(e) => set({ tags: e.target.value })} />
+        <ListInput label="Alias" prefix="aliases" placeholder="Another way you'd look for it…" value={draft.aliases} onChange={(aliases) => set({ aliases })} />
+        <ListInput label="Tag" prefix="tags" value={draft.tags} onChange={(tags) => set({ tags })} />
         <MarkdownEditor value={draft.extra} onChange={(extra: string) => set({ extra })} placeholder="Extra" minHeight="3rem" />
-        {source ? <Claims source={source.id} /> : <p className="text-sm text-base-content/60">Save the source to add claims about it.</p>}
+        {source ? <><Concepts source={source} /><Claims source={source.id} /></> : <p className="text-sm text-base-content/60">Save the source to add concepts and claims about it.</p>}
       </div>
       {confirming && (
         <ConfirmDialog title="Delete this source?" onClose={() => setConfirming(false)} onConfirm={remove}>
@@ -459,10 +512,18 @@ const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isConte
 
 /** On a phone, the list or one pane; on anything wider, side by side. */
 export default function SourceManager() {
-  const [selected, setSelected] = useViewState<string | null>('selected', null);
+  const [params, setParams] = useParams();
+  const selected = params.source ?? null;
+  const setSelected = (id: string | null) => setParams(id ? { source: id } : {});
   const [pane, setPane] = useState<Pane>(() => (selected ? { kind: 'source', id: selected, n: 0 } : { kind: 'none' }));
   const open = (id: string, incoming?: Bib) => { setSelected(id); setPane((p) => ({ kind: 'source', id, incoming, n: (p.kind === 'source' ? p.n : 0) + 1 })); };
   const close = () => { setSelected(null); setPane({ kind: 'none' }); };
+  // moved to a source from elsewhere (another view, a link): that one shows
+  useEffect(() => {
+    if (selected && !(pane.kind === 'source' && pane.id === selected)) setPane((p) => ({ kind: 'source', id: selected, n: (p.kind === 'source' ? p.n : 0) + 1 }));
+    if (!selected && pane.kind === 'source') setPane({ kind: 'none' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- follows the param only
+  }, [selected]);
   const { ingest, status, busy, fail } = useIngest(open);
   const fromClipboard = () => void clipboardText().then(ingest, fail);
   // Ctrl+V anywhere but in a field adds what's pasted

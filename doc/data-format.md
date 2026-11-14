@@ -59,7 +59,7 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | `concept-link@1` | `from`, `to` (concepts), `weight` 0..1: evidence about `from` says this much about `to`; optional `kind`, `source` |
 | `practice-event@1` | `subject` (what was practised: an item, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin` |
 | `flashcard@1` | Markdown `front`; optional `context` (small print with the front), `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`), `sources` (credits, to sources) |
-| `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `license` (SPDX), `aliases`, `tags`, `extra`, `blobs` |
+| `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `license` (SPDX), `aliases`, `tags`, `extra`, `blobs`, `concepts` (`{concept id: 0..1}`, how strongly each comes up in it) |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
 | `practice-session@1` | one session's timing and trials |
