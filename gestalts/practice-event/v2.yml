@@ -1,0 +1,20 @@
+name: practice-event
+version: 2
+description: >-
+  Something came up in practice, as it happened: `subject` is what was practised (an item, an item model when its item
+  wasn't kept, or a concept itself when there's no item, like a word heard in a video), `origin` where it came up when
+  that isn't the subject (the video), `view` which view logged it. `rating` runs from -2 (went very badly) over 0 (came
+  up, no score) to 2 (went very well). `response` names what kind of answer it was, a key of the subject's `responses`
+  (or its model's), like the mistake a picked option stands for. `instance` says which item exactly, in its model's
+  terms (`version`, `seed`, `labels`), and `ms` how long the answer took. What an event says about concepts is worked
+  out when it's read, from the subject's `concepts` and `responses` and the `concept-link`s at that time, so a better
+  model or graph reinterprets all past practice.
+fields:
+  subject: { type: ref, required: true }
+  origin: { type: ref }
+  view: { type: string, required: true }
+  at: { type: datetime, required: true }
+  rating: { type: integer, required: true, one_of: [-2, -1, 0, 1, 2] }
+  response: { type: string }
+  instance: { type: map }
+  ms: { type: integer, min: 0 }

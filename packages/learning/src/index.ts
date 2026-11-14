@@ -3,5 +3,5 @@ export { MODEL as FSRS_MODEL, Rating, fsrsDataValue, fsrsStates, getScheduler, i
 export { IDLE_MS, SESSION_GAP_MS, PracticeSession, type SessionEvent } from './session';
 export { usePracticeSession, useLocalReviews, saveReview, type PracticeLog } from './practice';
 export { DUE_PREFERENCE, FLASHCARD_DUE_PREFERENCE, facetOf, isStruggling, nextItem, rate } from './drill';
-export { logPractice, practiceEvent, ratingOf, type ConceptStrengths, type EventRating } from './evidence';
+export { logPractice, practiceEvent, ratingOf, type ConceptStrengths, type EventDetails, type EventRating } from './evidence';
 export { lessonPlan, mainConcept, rankNew, sideStrength, variantGroups, type NewItem, type Practising } from './variants';

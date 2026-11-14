@@ -59,7 +59,7 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes, sources and concepts), `blobs`; all optional |
 | `concept@2` | `name`, `aliases`: something that can be learned, in any domain, at any level of abstraction |
 | `concept-link@1` | `from`, `to` (concepts), `weight` 0..1: evidence about `from` says this much about `to`; optional `kind`, `source` |
-| `practice-event@1` | `subject` (what was practised: an item, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin` |
+| `practice-event@2` | `subject` (what was practised: an item, an item model, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin`, `response` (what kind of answer: a key of the subject's or its model's `responses`), `instance` (which item exactly, in its model's terms) and `ms` (how long it took). `practice-event@1` is the same without the last three; both are read alike, and `logPractice` writes `@1` unless it needs `@2` |
 | `flashcard@1` | Markdown `front`; optional `context` (small print with the front), `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`), `sources` (credits, to sources) |
 | `multiple-choice@1` | Markdown `prompt` and `options` (`[{text, correct?, response?}]`); optional `instruction`, `concepts`, `responses`, `chance` (how often a guess is right), `model` (the item model it was made by) and `instance` (what it was made from), `tags`, `aliases`, `sources` |
 | `item-model@1` | `name`: a procedure that makes items (a generator of exercises); optional `title`, `engine` (the code that runs it), `version`, `params`, `concepts` (what its items practise), `responses` (`{key: {label, concepts}}`: what each kind of answer is evidence about), `chance`, `tags`, `aliases`, `sources` |
@@ -90,11 +90,12 @@ right", a letter; a misconception is a concept too, phrased as the skill it lack
 **item model** (`item-model`) is a procedure that makes items, like a generator of exercises: its items point to it by
 `model` and practise what it says; it is not a concept. A **practice event** is what happened when a learner met an
 item. An item or item model may name `responses`, the kinds of answer it can tell apart (a typical mistake), each with
-the concepts that answer is evidence about; for now beliefs use only `concepts` and an event's `rating`.
+the concepts that answer is evidence about: an event naming one also counts for those concepts. An item or item model
+may say its `chance`, how often a guess is right (0.25 with four options), so a right answer on it counts for less.
 
 Practice is logged as it happened, one `practice-event` per answer (or per thing that came up), never as conclusions
 about concepts. What it says about concepts is worked out by the core (`crates/core/src/mastery.rs`) from the events,
-the `concepts` of their subjects and the links as they are now, so a better graph or model reinterprets all past
+the `concepts`, `responses` and `chance` of their subjects (or their subjects' models) and the links as they are now, so a better graph or model reinterprets all past
 practice. Views get beliefs (a mean and spread per concept) for the concepts they show, live, with `useBeliefs`; they
 never load the events. The model and how it keeps up are described in that file.
 

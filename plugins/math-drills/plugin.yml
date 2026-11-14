@@ -5,5 +5,5 @@ description: >-
   Multiple-choice maths drills, one deck per topic: pick the right answer first time. What you get right and wrong
   feeds what you know about each concept, and the decks show it.
 tags: [learning]
-reads: [deck@1, item-model@1, multiple-choice@1, concept@2, concept-link@1, practice-event@1, practice-session@1, source@1]
-writes: [practice-event@1, practice-session@1]
+reads: [deck@1, item-model@1, multiple-choice@1, concept@2, concept-link@1, practice-event@2, practice-session@1, source@1]
+writes: [practice-event@2, practice-session@1]

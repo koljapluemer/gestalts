@@ -1,5 +1,5 @@
-//! What a learner knows, estimated from what happened: `practice-event@1`s, the `concepts` of what they practised, and
-//! the `concept-link@1`s between concepts. Nothing here is stored: beliefs are worked out from the index, so a better
+//! What a learner knows, estimated from what happened: `practice-event`s (either version), the `concepts` and
+//! `responses` of what they practised, and the `concept-link@1`s between concepts. Nothing here is stored: beliefs are worked out from the index, so a better
 //! graph or model reinterprets all past practice. They are kept up to date as the index changes, and views only ever
 //! get the beliefs they ask for ([`crate::repo::Repo::subscribe_beliefs`]), never the events.
 //!
@@ -11,6 +11,11 @@
 //!   it practises more, and for concepts the belief is less sure about. Each then grows surer.
 //! - An event whose subject is a concept is the same with that concept alone at weight 1. A subject that is neither
 //!   (deleted, or practising nothing) says nothing.
+//! - An event naming a `response` (the mistake a picked option stands for) also practises that response's concepts,
+//!   from the subject's `responses`, else its `model`'s. Where a concept is in both, the larger weight counts.
+//! - A subject with a `chance` (its own, else its model's) can be right by guessing: the outcome is predicted as
+//!   `c + (1 − c)·σ(η)` (the 3PL item response model's guessing floor), so a right answer says less about the concepts
+//!   the likelier a guess was. Without one it is 0, the plain logistic model.
 //! - Rating 0 ("came up, no score") counts as seen and moves nothing.
 //! - A change on a concept spreads along its outgoing links, scaled by each link's weight and damped, for at most
 //!   `hops` steps and never to a concept this event already reached, so cycles end. Linked concepts grow surer too, by
@@ -22,7 +27,8 @@
 //!
 //! Keeping up: an event later than every one replayed so far is one more step. Anything else (an earlier event arriving
 //! by sync, an event edited or deleted, a link or an item's `concepts` changing, a concept appearing) marks the
-//! beliefs stale, and the next read replays everything.
+//! beliefs stale, and the next read replays everything. So does a change to what an item or item model says about
+//! responses or guessing.
 
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
@@ -33,14 +39,20 @@ use serde_yaml_ng::{Mapping, Value};
 use crate::index::{Entry, Index};
 use crate::merge::parse_iso_datetime;
 
-/// What practice is logged as.
-pub const EVENT: &str = "practice-event@1";
+/// What practice is logged as: every version, read alike (later ones only add optional props).
+pub const EVENTS: [&str; 2] = ["practice-event@1", "practice-event@2"];
 /// How concepts relate.
 pub const LINK: &str = "concept-link@1";
 /// A subject of this gestalt (any version) is a concept itself.
 const CONCEPT: &str = "concept";
 /// The prop through which a yml says what it practises: concept id to weight.
 const CONCEPTS: &str = "concepts";
+/// The prop naming kinds of answer, each with the `concepts` it is evidence about.
+const RESPONSES: &str = "responses";
+/// The prop saying how often a guess is right.
+const CHANCE: &str = "chance";
+/// The prop through which an item names the item model it was made by.
+const MODEL: &str = "model";
 
 const DAY_MS: f64 = 86_400_000.0;
 const LIMIT: f64 = 6.0;
@@ -122,10 +134,11 @@ struct Event {
     at: String,
     subject: String,
     rating: i64,
+    response: Option<String>,
 }
 
 fn event_of(e: &Entry) -> Option<Event> {
-    if e.gestalt() != Some(EVENT) {
+    if !EVENTS.contains(&e.gestalt()?) {
         return None;
     }
     let at = e.yml.get("at")?.as_str()?.to_owned();
@@ -134,6 +147,7 @@ fn event_of(e: &Entry) -> Option<Event> {
         at,
         subject: e.yml.get("subject")?.as_str()?.to_owned(),
         rating: e.yml.get("rating")?.as_i64()?,
+        response: e.yml.get("response").and_then(Value::as_str).map(str::to_owned),
     })
 }
 
@@ -149,11 +163,35 @@ fn is_concept(e: &Entry) -> bool {
     e.gestalt().and_then(|g| g.split('@').next()) == Some(CONCEPT)
 }
 
+/// A `{concept id: weight}` map, leaving out weights of 0.
+fn weights_in(v: &Value) -> Option<BTreeMap<String, f64>> {
+    let m: &Mapping = v.as_mapping()?;
+    Some(m.iter().filter_map(|(k, w)| Some((k.as_str()?.to_owned(), w.as_f64()?))).filter(|(_, w)| *w > 0.0).collect())
+}
+
 /// What a yml practises, if it says: concept id to weight, leaving out weights of 0.
 fn concepts_of(e: &Entry) -> Option<BTreeMap<String, f64>> {
     e.gestalt()?;
-    let m: &Mapping = e.yml.get(CONCEPTS)?.as_mapping()?;
-    Some(m.iter().filter_map(|(k, w)| Some((k.as_str()?.to_owned(), w.as_f64()?))).filter(|(_, w)| *w > 0.0).collect())
+    weights_in(e.yml.get(CONCEPTS)?)
+}
+
+/// The kinds of answer a yml tells apart, if it says: each with the concepts it is evidence about.
+fn responses_of(e: &Entry) -> Option<BTreeMap<String, BTreeMap<String, f64>>> {
+    e.gestalt()?;
+    let m: &Mapping = e.yml.get(RESPONSES)?.as_mapping()?;
+    Some(m.iter().filter_map(|(k, r)| Some((k.as_str()?.to_owned(), r.get(CONCEPTS).and_then(weights_in).unwrap_or_default()))).collect())
+}
+
+/// How often a guess is right, if a yml says.
+fn chance_of(e: &Entry) -> Option<f64> {
+    e.gestalt()?;
+    e.yml.get(CHANCE)?.as_f64()
+}
+
+/// The item model a yml was made by, if it names one.
+fn model_of(e: &Entry) -> Option<String> {
+    e.gestalt()?;
+    e.yml.get(MODEL)?.as_str().map(str::to_owned)
 }
 
 /// Everything about a yml the beliefs depend on; two equal ones change nothing.
@@ -162,12 +200,28 @@ struct Inputs {
     event: Option<Event>,
     link: Option<(String, String, f64)>,
     concepts: Option<BTreeMap<String, f64>>,
+    responses: Option<BTreeMap<String, BTreeMap<String, f64>>>,
+    chance: Option<f64>,
+    model: Option<String>,
     concept: bool,
 }
 
 impl Inputs {
     fn of(e: Option<&Entry>) -> Self {
-        e.map_or_else(Inputs::default, |e| Inputs { event: event_of(e), link: link_of(e), concepts: concepts_of(e), concept: is_concept(e) })
+        e.map_or_else(Inputs::default, |e| Inputs {
+            event: event_of(e),
+            link: link_of(e),
+            concepts: concepts_of(e),
+            responses: responses_of(e),
+            chance: chance_of(e),
+            model: model_of(e),
+            concept: is_concept(e),
+        })
+    }
+
+    /// Whether this says anything about how other ymls' events read.
+    fn shapes_events(&self) -> bool {
+        self.link.is_some() || self.concepts.is_some() || self.responses.is_some() || self.chance.is_some() || self.model.is_some() || self.concept
     }
 }
 
@@ -198,7 +252,7 @@ impl Mastery {
         if before == after {
             return false;
         }
-        let only_a_new_event = before == Inputs::default() && after.link.is_none() && after.concepts.is_none() && !after.concept;
+        let only_a_new_event = before == Inputs::default() && !after.shapes_events();
         match after.event {
             Some(e) if only_a_new_event && !self.stale && self.tail.as_ref().is_none_or(|t| e.key > *t) => {
                 self.tail = Some(e.key);
@@ -212,7 +266,7 @@ impl Mastery {
     /// Replays what hasn't been: everything when stale, else the pending events.
     fn catch_up(&mut self, index: &Index) {
         if self.stale {
-            let mut events: Vec<Event> = index.of_gestalt(EVENT).filter_map(event_of).collect();
+            let mut events: Vec<Event> = EVENTS.iter().flat_map(|g| index.of_gestalt(g)).filter_map(event_of).collect();
             events.sort_by(|a, b| a.key.cmp(&b.key));
             self.states.clear();
             self.pending.clear();
@@ -246,10 +300,24 @@ impl Mastery {
 
     fn apply(&mut self, e: &Event, index: &Index, links: &BTreeMap<String, Vec<(String, f64)>>) {
         let t = e.key.0;
-        let weights: Vec<(String, f64)> = match index.get(&e.subject) {
-            Some(s) if is_concept(s) => vec![(e.subject.clone(), 1.0)],
-            Some(s) => concepts_of(s).into_iter().flatten().collect(),
-            None => vec![],
+        let subject = index.get(&e.subject);
+        let model = subject.and_then(model_of).and_then(|m| index.get(&m));
+        let (weights, chance): (Vec<(String, f64)>, f64) = match subject {
+            Some(s) if is_concept(s) => (vec![(e.subject.clone(), 1.0)], 0.0),
+            Some(s) => {
+                let mut weights = concepts_of(s).unwrap_or_default();
+                // what the answer given is evidence about, beyond what the item practises
+                let response = e.response.as_ref().and_then(|r| {
+                    let of = |y: &Entry| responses_of(y).and_then(|mut rs| rs.remove(r));
+                    of(s).or_else(|| model.and_then(of))
+                });
+                for (c, w) in response.into_iter().flatten() {
+                    let v = weights.entry(c).or_insert(0.0);
+                    *v = v.max(w);
+                }
+                (weights.into_iter().collect(), chance_of(s).or_else(|| model.and_then(chance_of)).unwrap_or(0.0))
+            }
+            None => (vec![], 0.0),
         };
         if weights.is_empty() {
             return;
@@ -261,15 +329,27 @@ impl Mastery {
         }
         let Some(y) = outcome(e.rating) else { return };
         let total: f64 = weights.iter().map(|(_, w)| w).sum();
-        let p = sigmoid(weights.iter().map(|(id, w)| w * self.states[id].mean).sum::<f64>() / total);
-        let info = p * (1.0 - p);
+        let s = sigmoid(weights.iter().map(|(id, w)| w * self.states[id].mean).sum::<f64>() / total);
+        // the prediction with a guessing floor: p = c + (1 − c)·s, its slope in the logit d, and what follows for the
+        // log likelihood's gradient (y − p)·d/(p(1 − p)) and information d²/(p(1 − p)); both are the plain logistic
+        // ones, exactly, when c is 0
+        let c = chance.clamp(0.0, 1.0);
+        let p = c + (1.0 - c) * s;
+        let d = (1.0 - c) * s * (1.0 - s);
+        let q = p * (1.0 - p);
+        if q <= 0.0 || d <= 0.0 {
+            return;
+        }
+        let r = d / q;
+        let gradient = (y - p) * r;
+        let info = d * r;
         // every concept is updated against the same prediction, then the changes spread
         let changes: Vec<(String, f64, f64)> = weights
             .iter()
             .map(|(id, w)| {
                 let s = &self.states[id];
                 let variance = 1.0 / (1.0 / s.variance + w * w * info);
-                (id.clone(), *w, variance * w * (y - p))
+                (id.clone(), *w, variance * w * gradient)
             })
             .collect();
         let mut reached: BTreeSet<String> = weights.iter().map(|(id, _)| id.clone()).collect();

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { Credits, Markdown } from '@gestalts/kit';
-import { logPractice, usePracticeSession, type PracticeLog } from '@gestalts/learning';
-import { useBeliefs, useDoc, useParams, useQuery, useWrite, type Belief, type QueryResult } from '@gestalts/view';
+import { logPractice, usePracticeSession, type EventDetails, type PracticeLog } from '@gestalts/learning';
+import { useBeliefs, useDoc, useParams, useQuery, useWrite, type Belief, type JsonMap, type QueryResult } from '@gestalts/view';
 
 /**
  * Multiple-choice drills, one deck per topic. A topic is an `item-model@1`, its questions the `multiple-choice@1`s
  * made by it (`model`). Reveal the options, pick one: only the first pick counts, logged as a practice event (+1 right,
- * −1 wrong) on the question, which practises the topic's concepts. A wrong option is greyed out and you keep going;
- * the right one moves on. How well each topic is known comes from the app's beliefs about its main concept.
+ * −1 wrong) on the question, with the picked option's `response` (the mistake it stands for), the question's
+ * `instance` and the time from showing the question to the pick. The app reads the response as evidence about the
+ * mistake's concepts, and the question's `chance` as how likely a guess was. A wrong option is greyed out and you keep
+ * going; the right one moves on. How well each topic is known comes from the app's beliefs about its main concept.
  *
  * Params: `model` (an item model's id; none lists the topics).
  */
@@ -16,7 +18,7 @@ import { useBeliefs, useDoc, useParams, useQuery, useWrite, type Belief, type Qu
 const VIEW = 'math-drills';
 const NEXT_MS = 500;
 
-type Option = { text: string; correct: boolean };
+type Option = { text: string; correct: boolean; response?: string };
 type Model = { id: string; title: string; main: string | null; sources: unknown };
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -82,17 +84,19 @@ function Bar({ belief }: { belief?: Belief }) {
 
 // ---------- one question ----------
 
-function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: () => void; onAnswered: (id: string, right: boolean) => void; onNext: () => void }) {
+function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: () => void; onAnswered: (id: string, right: boolean, details: EventDetails) => void; onNext: () => void }) {
   const doc = useDoc('multiple-choice@1', id);
   const [revealed, setRevealed] = useState(false);
   const [picked, setPicked] = useState<number[]>([]);
   const answered = useRef(false);
+  const shownAt = useRef(0);
   const raw = doc?.value.options;
   // shuffled once per question, so picking doesn't reorder them
   const options = useMemo(() => shuffled((Array.isArray(raw) ? (raw as Record<string, unknown>[]) : [])
-    .map((o): Option => ({ text: str(o.text), correct: o.correct === true }))), [raw]);
+    .map((o): Option => ({ text: str(o.text), correct: o.correct === true, ...(str(o.response) ? { response: str(o.response) } : {}) }))), [raw]);
   const done = picked.some((i) => options[i]?.correct);
-  useEffect(() => { onShown(); }, [onShown]);
+  // on the clock event time stamps use, so the time to a pick is the click's own `timeStamp` less this
+  useEffect(() => { shownAt.current = performance.now(); onShown(); }, [onShown]);
   useEffect(() => {
     if (!done) return;
     const t = setTimeout(onNext, NEXT_MS);
@@ -100,8 +104,16 @@ function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: ()
   }, [done, onNext]);
 
   if (!doc) return <div className="flex flex-1 items-center justify-center"><span className="loading loading-spinner" /></div>;
-  const pick = (i: number) => {
-    if (!answered.current) { answered.current = true; onAnswered(id, options[i].correct); }
+  const pick = (i: number, at: number) => {
+    if (!answered.current) {
+      answered.current = true;
+      const instance = doc.value.instance;
+      onAnswered(id, options[i].correct, {
+        ...(options[i].response ? { response: options[i].response } : {}),
+        ...(instance && typeof instance === 'object' && !Array.isArray(instance) ? { instance: instance as JsonMap } : {}),
+        ms: at - shownAt.current,
+      });
+    }
     setPicked((p) => [...p, i]);
   };
   return (
@@ -118,7 +130,7 @@ function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: ()
             const chosen = picked.includes(i);
             const cls = chosen ? (o.correct ? RIGHT : WRONG) : OUTLINE;
             return (
-              <button key={i} type="button" className={`${cls} text-xl`} disabled={chosen || done} onClick={() => pick(i)}>
+              <button key={i} type="button" className={`${cls} text-xl`} disabled={chosen || done} onClick={(e) => pick(i, e.timeStamp)}>
                 <Markdown text={o.text} inline />
               </button>
             );
@@ -155,9 +167,9 @@ function Questions({ ids, log }: { ids: string[]; log: PracticeLog }) {
   const [current, setCurrent] = useState(() => draw(ids, null));
   const [error, setError] = useState<string | null>(null);
   const next = useCallback(() => setCurrent((last) => draw(ids, last)), [ids]);
-  const answered = (id: string, right: boolean) => {
+  const answered = (id: string, right: boolean, details: EventDetails) => {
     const fail = (e: unknown) => setError(message(e));
-    logPractice(write, id, VIEW, right ? 1 : -1, new Date()).catch(fail);
+    logPractice(write, id, VIEW, right ? 1 : -1, new Date(), details).catch(fail);
     log.trial().catch(fail);
   };
   return (

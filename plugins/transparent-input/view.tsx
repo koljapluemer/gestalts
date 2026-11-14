@@ -589,7 +589,7 @@ function Watch({ source, native, setNative, onBack }: { source: Item; native: st
       created.current.add(concept);
       await write.put({ id: concept, gestalt: 'concept@2', name });
     }
-    await write.put(practiceEvent(concept, 'transparent-input', 0, new Date(), source.id));
+    await write.put(practiceEvent(concept, 'transparent-input', 0, new Date(), { origin: source.id }));
     pendingLinks.current.add(concept);
   }, [write, language, source.id]);
 

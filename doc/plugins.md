@@ -57,7 +57,9 @@ destructive confirmations so the action, pending state, and write errors remain 
 
 A learning view logs each answer as a `practice-event` (`logPractice` in `@gestalts/learning`) and shows what the
 learner knows with `useBeliefs(conceptIds)`: beliefs the app works out from all practice, live, for just those
-concepts. It needs `concept@2` in `reads`, not the events ([data-format.md](data-format.md)).
+concepts. It needs `concept@2` in `reads`, not the events ([data-format.md](data-format.md)). `logPractice` writes
+`practice-event@1`, so that is what a view declares in `writes` (and `reads`), unless it passes a `response`,
+`instance` or `ms` (what kind of answer, which item, how long), which take `practice-event@2`.
 
 ## Where a view is
 

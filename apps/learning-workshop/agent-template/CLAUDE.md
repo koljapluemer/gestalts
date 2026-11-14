@@ -29,6 +29,7 @@ write is refused with the reason. Keep ymls small and link them.
 | `multiple-choice@1` | `prompt` and `options: [{text, correct?, response?}]` (Markdown, `$…$` maths), `instruction?`, `concepts?`, `responses?: {<key>: {label, concepts}}`, `chance?`, `model?` (its `item-model@1`), `instance?`, `tags[]?`, `sources?` |
 | `item-model@1` | a generator of items: `name`, `title?`, `engine?`, `version?`, `params?`, `concepts?`, `responses?`, `chance?`. Its items name it as `model` |
 | `practice-event@1` | one answer, as it happened: written by `logPractice` |
+| `practice-event@2` | the same, saying more: written by `logPractice` when given `{ response, instance, ms }` (what kind of answer, a key of the item's `responses`; which item; how long) |
 | `deck@1` | `name`, `title?`, `members[]` |
 | `fsrs-data@1` | written by `saveReview` |
 | `practice-session@1` | written by `usePracticeSession` |
@@ -71,7 +72,9 @@ const { beliefs } = useBeliefs(conceptIds);           // Map id -> {mean, sd, p 
 ```
 
 A learning view logs each answer with `logPractice(write, cardId, '<view id>', ratingOf(grade), new Date())` and shows
-progress with `useBeliefs`. Never load `practice-event@1`s to work out what someone knows: the app does that.
+progress with `useBeliefs`. Never load `practice-event`s to work out what someone knows: the app does that. A view whose
+items name `responses` (like `multiple-choice@1`) passes the picked option's as `{ response }` and declares
+`practice-event@2`.
 
 Ask only for what you show: use `limit`, `fields` and `text`, and let the app do the finding. Never load everything to
 filter it yourself.

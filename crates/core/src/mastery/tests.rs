@@ -55,6 +55,28 @@ impl World {
         self
     }
 
+    /// A `practice-event@2` `minutes` after the first, naming the kind of answer if given.
+    fn answer(&mut self, subject: &str, rating: i64, minutes: i64, response: Option<&str>) -> &mut Self {
+        self.events += 1;
+        let at = iso_datetime(NOW - 1000 * MIN + minutes * MIN);
+        let response = response.map(|r| format!("response: {r}\nms: 3000\n")).unwrap_or_default();
+        self.put(&format!("e{}", self.events), &format!("gestalt: practice-event@2\nsubject: {subject}\nview: t\nat: {at}\nrating: {rating}\n{response}"));
+        self
+    }
+
+    /// An item model whose `wrong` answer is evidence about `mistake`, with a guessing `chance` if given.
+    fn model(&mut self, id: &str, mistake: &str, chance: Option<f64>) -> &mut Self {
+        let chance = chance.map(|c| format!("chance: {c}\n")).unwrap_or_default();
+        self.put(id, &format!("gestalt: item-model@1\nname: {id}\nconcepts: {{c: 1}}\nresponses: {{wrong: {{label: a mistake, concepts: {{{mistake}: 1}}}}}}\n{chance}"));
+        self
+    }
+
+    /// A multiple-choice question practising `c`, made by `model`, with its own `extra` props.
+    fn question(&mut self, id: &str, model: &str, extra: &str) -> &mut Self {
+        self.put(id, &format!("gestalt: multiple-choice@1\nprompt: q\noptions: [{{text: a, correct: true}}, {{text: b, response: wrong}}]\nconcepts: {{c: 1}}\nmodel: {model}\n{extra}"));
+        self
+    }
+
     fn at(&mut self, concept: &str, now: i64) -> Belief {
         self.mastery.beliefs(&self.index, &[concept.to_owned()], now).remove(0)
     }
@@ -218,6 +240,78 @@ fn what_beliefs_dont_depend_on_changes_nothing() {
     w.put("n", "gestalt: note@1\nmain: hi\n");
     assert!(!w.mastery.stale);
     assert!(w.mastery.pending.is_empty());
+}
+
+#[test]
+fn both_event_versions_read_alike() {
+    let one = World::new().card("f", &[("c", 1.0)]).event("f", 2, 0).event("f", -1, 1).get("c");
+    let two = World::new().card("f", &[("c", 1.0)]).answer("f", 2, 0, None).answer("f", -1, 1, None).get("c");
+    assert_eq!(one, two);
+}
+
+#[test]
+fn a_response_is_evidence_about_its_concepts_only_when_given() {
+    let mut w = World::new();
+    w.model("m", "mistake", None).question("q", "m", "").answer("q", -1, 0, Some("wrong"));
+    let mistake = w.get("mistake");
+    assert!(mistake.mean < 0.0);
+    assert_eq!(mistake.evidence, 1);
+    assert!(w.get("c").mean < 0.0);
+    // a wrong answer that names no response, or one nobody explains, says nothing about the mistake
+    let mut w = World::new();
+    w.model("m", "mistake", None).question("q", "m", "").answer("q", -1, 0, None).answer("q", -1, 1, Some("unknown"));
+    assert_eq!(w.get("mistake").evidence, 0);
+    assert_eq!(w.get("c").evidence, 2);
+}
+
+#[test]
+fn an_item_explains_its_own_responses_before_its_model() {
+    let mut w = World::new();
+    w.model("m", "from-model", None).question("q", "m", "responses: {wrong: {label: x, concepts: {from-item: 1}}}\n");
+    w.answer("q", -1, 0, Some("wrong"));
+    assert_eq!(w.get("from-item").evidence, 1);
+    assert_eq!(w.get("from-model").evidence, 0);
+}
+
+#[test]
+fn an_item_model_may_be_the_subject() {
+    let mut w = World::new();
+    w.model("m", "mistake", None).answer("m", -1, 0, Some("wrong"));
+    assert!(w.get("c").mean < 0.0 && w.get("mistake").mean < 0.0);
+}
+
+#[test]
+fn a_right_answer_says_less_the_likelier_a_guess() {
+    let right = |chance: Option<f64>| World::new().model("m", "x", chance).question("q", "m", "").answer("q", 1, 0, None).get("c");
+    let (sure, guessable) = (right(None), right(Some(0.25)));
+    assert!(guessable.mean > 0.0 && guessable.mean < sure.mean);
+    assert!(guessable.sd > sure.sd, "and leaves it less sure");
+    // no chance is chance 0, to the bit
+    assert_eq!(right(Some(0.0)), sure);
+    // an item's own chance comes before its model's
+    let own = World::new().model("m", "x", Some(0.25)).question("q", "m", "chance: 0\n").answer("q", 1, 0, None).get("c");
+    assert_eq!(own, sure);
+}
+
+#[test]
+fn what_an_item_or_model_says_about_answers_is_replayed() {
+    let mut w = World::new();
+    w.model("m", "mistake", None).question("q", "m", "").answer("q", 1, 0, None);
+    w.get("c");
+    // answers in order are steps
+    w.answer("q", -1, 1, Some("wrong"));
+    assert!(!w.mastery.stale);
+    assert_eq!(w.get("mistake"), w.fresh("mistake"));
+    // the model now says the mistake is about something else, and a guess is likely: the past reads anew
+    w.model("m", "other", Some(0.5));
+    assert!(w.mastery.stale);
+    assert_eq!(w.get("other").evidence, 1);
+    assert_eq!(w.get("mistake").evidence, 0);
+    assert_eq!(w.get("c"), w.fresh("c"));
+    // the question made by another model
+    w.model("m2", "third", None).question("q", "m2", "");
+    assert_eq!(w.get("third").evidence, 1);
+    assert_eq!(w.get("third"), w.fresh("third"));
 }
 
 #[test]

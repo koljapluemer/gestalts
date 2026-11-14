@@ -463,6 +463,7 @@ const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/concept/v2.yml"),
     include_str!("../../../gestalts/concept-link/v1.yml"),
     include_str!("../../../gestalts/practice-event/v1.yml"),
+    include_str!("../../../gestalts/practice-event/v2.yml"),
     include_str!("../../../gestalts/concept-practice-event/v1.yml"),
     include_str!("../../../gestalts/flashcard/v1.yml"),
     include_str!("../../../gestalts/item-model/v1.yml"),
@@ -629,6 +630,16 @@ mod tests {
         assert!(matches!(state("e", "id: e\ngestalt: practice-event@1\nsubject: c\norigin: v\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 0\n"), YmlState::Valid(_)));
         invalid("e", "id: e\ngestalt: practice-event@1\nsubject: f\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 3\n");
         invalid("e", "id: e\ngestalt: practice-event@1\nsubject: f\nat: 2026-11-11T10:00:00Z\nrating: 1\n");
+    }
+
+    #[test]
+    fn a_practice_event_2_may_say_what_kind_of_answer_it_was() {
+        let ok = "id: e\ngestalt: practice-event@2\nsubject: q\nview: math-drills\nat: 2026-11-11T10:00:00Z\nrating: -1\nresponse: truncate\ninstance: {version: 1, seed: 7, labels: {n: 3}}\nms: 4100\n";
+        assert!(matches!(state("e", ok), YmlState::Valid(_)));
+        assert!(matches!(state("e", "id: e\ngestalt: practice-event@2\nsubject: f\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 1\n"), YmlState::Valid(_)));
+        invalid("e", "id: e\ngestalt: practice-event@2\nsubject: f\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 1\nms: -5\n");
+        // the old version stays closed
+        invalid("e", "id: e\ngestalt: practice-event@1\nsubject: f\nview: x\nat: 2026-11-11T10:00:00Z\nrating: 1\nresponse: r\n");
     }
 
     #[test]
