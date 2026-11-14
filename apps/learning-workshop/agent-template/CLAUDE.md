@@ -26,6 +26,8 @@ write is refused with the reason. Keep ymls small and link them.
 | `concept@2` | `name`, `aliases[]?`: something learnable, any domain, any level. No tree: concepts relate through links |
 | `concept-link@1` | `from`, `to` (concept ids), `weight` 0..1 (how much evidence on `from` says about `to`), `kind?`, `source?`. Directed, cycles fine |
 | `flashcard@1` | `front`, `context?` (small print with the front), `back?`, `extra?`, `tags[]?`, `aliases[]?`, `blobs?` (labels `front`, `back`, `audio`), `concepts?: {<concept id>: 0..1}`, `sources?: [{to: <source id>, label}]` (credits) |
+| `multiple-choice@1` | `prompt` and `options: [{text, correct?, response?}]` (Markdown, `$…$` maths), `instruction?`, `concepts?`, `responses?: {<key>: {label, concepts}}`, `chance?`, `model?` (its `item-model@1`), `instance?`, `tags[]?`, `sources?` |
+| `item-model@1` | a generator of items: `name`, `title?`, `engine?`, `version?`, `params?`, `concepts?`, `responses?`, `chance?`. Its items name it as `model` |
 | `practice-event@1` | one answer, as it happened: written by `logPractice` |
 | `deck@1` | `name`, `title?`, `members[]` |
 | `fsrs-data@1` | written by `saveReview` |

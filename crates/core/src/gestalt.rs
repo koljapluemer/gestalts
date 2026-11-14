@@ -465,6 +465,8 @@ const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/practice-event/v1.yml"),
     include_str!("../../../gestalts/concept-practice-event/v1.yml"),
     include_str!("../../../gestalts/flashcard/v1.yml"),
+    include_str!("../../../gestalts/item-model/v1.yml"),
+    include_str!("../../../gestalts/multiple-choice/v1.yml"),
     include_str!("../../../gestalts/source/v1.yml"),
     include_str!("../../../gestalts/deck/v1.yml"),
     include_str!("../../../gestalts/fsrs-data/v1.yml"),
@@ -638,6 +640,25 @@ mod tests {
         invalid("f", "id: f\ngestalt: flashcard@1\nback: a\n");
         assert!(invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nconcepts: {c1: 1.5}\n").contains("concepts.c1"));
         invalid("f", "id: f\ngestalt: flashcard@1\nfront: q\nblobs: [{file: a.png, label: front}, {file: b.png, label: front}]\n");
+    }
+
+    #[test]
+    fn an_item_model_says_what_its_items_practise_and_what_answers_mean() {
+        let ok = "id: m\ngestalt: item-model@1\nname: round\nengine: x/round\nversion: 1\nparams: {n: [1, 2]}\nconcepts: {c1: 1}\nresponses: {truncate: {label: cut off, concepts: {c2: 1}}}\nchance: 0.25\n";
+        assert!(matches!(state("m", ok), YmlState::Valid(_)));
+        assert!(matches!(state("m", "id: m\ngestalt: item-model@1\nname: round\n"), YmlState::Valid(_)));
+        invalid("m", "id: m\ngestalt: item-model@1\nname: r\nresponses: {truncate: {concepts: {c2: 1}}}\n");
+        invalid("m", "id: m\ngestalt: item-model@1\nname: r\nresponses: {truncate: {label: x, concepts: {c2: 2}}}\n");
+        invalid("m", "id: m\ngestalt: item-model@1\nname: r\nchance: 1.5\n");
+    }
+
+    #[test]
+    fn a_multiple_choice_has_options_and_may_come_from_a_model() {
+        let ok = "id: q\ngestalt: multiple-choice@1\ninstruction: 'Round:'\nprompt: '$3.96$'\noptions: [{text: '$4.0$', correct: true}, {text: '$3.9$', response: truncate}]\nconcepts: {c1: 1}\nchance: 0.5\nmodel: m\ninstance: {labels: {kind: up}}\n";
+        assert!(matches!(state("q", ok), YmlState::Valid(_)));
+        invalid("q", "id: q\ngestalt: multiple-choice@1\nprompt: x\noptions: [{text: a, correct: true}]\n");
+        invalid("q", "id: q\ngestalt: multiple-choice@1\nprompt: x\noptions: [{correct: true}, {text: b}]\n");
+        invalid("q", "id: q\ngestalt: multiple-choice@1\noptions: [{text: a}, {text: b}]\n");
     }
 
     #[test]

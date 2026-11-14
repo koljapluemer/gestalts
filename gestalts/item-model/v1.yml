@@ -1,0 +1,28 @@
+name: item-model
+version: 1
+description: >-
+  A procedure that makes practice items, like a generator of exercises, and what they practise: not a concept, and not
+  an item itself. `engine` names the code that runs it (`stembridge/round_sig_figs`), for a view that can; `version`
+  changes whenever the items it makes for the same input do. `params` describes what an item may be made from
+  (`{n: [1, 2, 3]}`), in the engine's terms. `concepts` maps the concepts its items practise to how strongly, from 0 to
+  1. `responses` names the kinds of answer it knows how to tell apart, like a typical mistake (`truncate`), each with a
+  `label` and the `concepts` that answer is evidence about. `chance` is how often a guess is right (0.25 with four
+  options). Items made from it point to it by their `model`.
+fields:
+  name: { type: string, required: true }
+  title: { type: string }
+  engine: { type: string }
+  version: { type: integer, min: 0 }
+  params: { type: map }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  responses:
+    type: map
+    values:
+      type: map
+      fields:
+        label: { type: string, required: true }
+        concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  chance: { type: number, min: 0, max: 1 }
+  tags: { type: string_list }
+  aliases: { type: string_list }
+  sources: { type: relationships, targets: [source] }

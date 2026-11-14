@@ -22,7 +22,7 @@ run = [
 
 [tasks.check]
 description = "Tests, lints, typechecks, every deck's health and the agent templates' examples"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 shell = "bash -c"
 run = """
 set -euo pipefail
@@ -38,6 +38,14 @@ python3 -m unittest discover -s apps/vizint-workshop/tests
 apps/vizint-workshop/scripts/check-examples.sh
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
+
+[tasks.icons]
+description = "Regenerate every web and native app icon from its icon.svg (or the shared orange diamond)"
+run = "bash scripts/icons.sh"
+
+[tasks."icons:check"]
+description = "Check that every frontend and native package has its icon wired in"
+run = "node scripts/check-icons.ts"
 
 [tasks.dev]
 description = "Everything with hot reload: the dev desktop node and its settings page, the workshop's Make node, gestalter, loops-for-learning and the learning workshop, each on the first free port from its usual one"
@@ -68,7 +76,7 @@ run = "bash scripts/deploy.sh"
 
 [tasks."node:settings-build"]
 description = "The node's settings page into apps/node/settings/dist, which the desktop app embeds"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/node/settings build"
 
 [tasks."node:dev"]
@@ -88,7 +96,7 @@ wait
 
 [tasks."node:package"]
 description = "Desktop app installers for this OS into target/packages"
-depends = ["node:settings-build"]
+depends = ["node:settings-build", "icons:check"]
 shell = "bash -c"
 run = """
 set -euo pipefail
@@ -123,7 +131,7 @@ wait
 
 [tasks."gestalter:build"]
 description = "Production build of gestalter into apps/gestalter/distribution/dist, a static site to host anywhere"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/gestalter/distribution build"
 
 # --- the Android app ---
@@ -155,7 +163,7 @@ cargo tauri android dev --config "$(distribution_config "http://localhost:$GESTA
 
 [tasks."android:build"]
 description = "A debug APK for arm64 phones, to install with adb, of $GESTALTS_ANDROID_DISTRIBUTION (default apps/gestalter/distribution-android)"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 dir = "apps/node/android"
 shell = "bash -c"
 run = """
@@ -175,7 +183,7 @@ run = "pnpm --dir apps/loops-for-learning dev"
 
 [tasks."loops:build"]
 description = "Production build into apps/loops-for-learning/dist, static files to host anywhere"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/loops-for-learning build"
 
 # --- vizint ---
@@ -187,12 +195,22 @@ run = "pnpm --dir apps/vizint dev"
 
 [tasks."vizint:build"]
 description = "Production build into apps/vizint/dist, static files to host anywhere"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/vizint build"
 
 [tasks."vizint:deck"]
 description = "Rebuild plugins/vizint's examples deck from packages/viz/examples, and publish it"
 run = ["node plugins/vizint/tools/build-deck.ts", "mise run publish-data plugins/vizint/decks/examples"]
+
+[tasks."math-drills:decks"]
+description = "Rebuild plugins/math-drills' decks from Stembridge's topic exports (default ../stembridge), and publish them"
+usage = 'arg "[stembridge]" default="../stembridge" help="the stembridge repo"'
+shell = "bash -c"
+run = """
+set -euo pipefail
+uv run plugins/math-drills/tools/build_decks.py {{usage.stembridge}}
+for d in plugins/math-drills/decks/*/; do mise run publish-data "$d"; done
+"""
 
 # --- vizint-workshop ---
 
@@ -212,7 +230,7 @@ run = "apps/vizint-workshop/scripts/node.sh"
 
 [tasks."vizint-workshop:build"]
 description = "Production build into apps/vizint-workshop/dist"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/vizint-workshop build"
 
 # --- learning-workshop ---
@@ -233,7 +251,7 @@ run = "apps/learning-workshop/scripts/node.sh"
 
 [tasks."workshop:build"]
 description = "Production build into apps/learning-workshop/dist"
-depends = ["setup"]
+depends = ["setup", "icons:check"]
 run = "pnpm --dir apps/learning-workshop build"
 
 [tasks."workshop:agent-stats"]

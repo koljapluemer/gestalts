@@ -1,0 +1,24 @@
+id: mc-24875b339665ded5
+gestalt: multiple-choice@1
+instruction: 'Find the value of:'
+prompt: $8 \times \left(3 + 6 - 8\right) - 3$
+options:
+- text: $5$
+  correct: true
+- text: $-16$
+  response: add-before-multiply
+- text: $6$
+- text: $4$
+concepts:
+  concept-547f4a7a793bef9e: 1
+  concept-2a80703a0f759b82: 0.7
+chance: 0.25
+model: item-model-stembridge-bodmas
+instance:
+  labels:
+    numbers: 5
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

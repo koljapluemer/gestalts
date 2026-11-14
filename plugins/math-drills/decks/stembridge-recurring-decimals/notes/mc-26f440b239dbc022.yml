@@ -1,0 +1,23 @@
+id: mc-26f440b239dbc022
+gestalt: multiple-choice@1
+instruction: 'Write as a recurring decimal:'
+prompt: $4\,\frac{8}{9}$
+options:
+- text: $4.\overline{8}$
+  correct: true
+- text: $9.\overline{3}$
+- text: $3.\overline{142857}$
+- text: $3.\overline{27}$
+concepts:
+  concept-00cbd63c561c05da: 0.3
+  concept-c17d3666cb6590e3: 1
+chance: 0.25
+model: item-model-stembridge-recurring-decimals
+instance:
+  labels:
+    denominator: 9
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

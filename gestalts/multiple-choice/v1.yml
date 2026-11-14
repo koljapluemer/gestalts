@@ -1,0 +1,36 @@
+name: multiple-choice
+version: 1
+description: >-
+  A question answered by picking one of given options. `prompt` is Markdown (with `$…$` maths), `instruction` a short
+  line shown above it ("Round to the nearest tenth:"). Each option has Markdown `text`, `correct` on the right one(s),
+  and may name a `response`: a key of `responses` (its own, or its `model`'s) saying what picking it is evidence about.
+  `concepts` maps the concepts it practises to how strongly, from 0 to 1, and `chance` is how often a guess is right.
+  When it was made by an `item-model`, `model` points to it and `instance` holds what it was made from (`labels`, and
+  when known `version` and `seed`), in that model's terms.
+fields:
+  instruction: { type: string }
+  prompt: { type: text, required: true }
+  options:
+    type: list
+    required: true
+    min: 2
+    items:
+      type: map
+      fields:
+        text: { type: text, required: true }
+        correct: { type: bool }
+        response: { type: string }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  responses:
+    type: map
+    values:
+      type: map
+      fields:
+        label: { type: string, required: true }
+        concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  chance: { type: number, min: 0, max: 1 }
+  model: { type: ref, targets: [item-model] }
+  instance: { type: map }
+  tags: { type: string_list }
+  aliases: { type: string_list }
+  sources: { type: relationships, targets: [source] }

@@ -1,0 +1,26 @@
+id: mc-e8e6e2e0d21b2d4b
+gestalt: multiple-choice@1
+instruction: 'Round to the nearest tenth:'
+prompt: $99.97$
+options:
+- text: $100.0$
+  correct: true
+- text: $100$
+  response: trailing-zero
+- text: $99.9$
+  response: truncate
+- text: $99.97$
+  response: wrong-place
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-8d17f4312de0db8d: 1
+chance: 0.25
+model: item-model-stembridge-round-tenth
+instance:
+  labels:
+    kind: carry
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

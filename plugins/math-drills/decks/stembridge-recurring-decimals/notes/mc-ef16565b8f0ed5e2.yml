@@ -1,0 +1,23 @@
+id: mc-ef16565b8f0ed5e2
+gestalt: multiple-choice@1
+instruction: 'Write as a recurring decimal:'
+prompt: $8\,\frac{2}{11}$
+options:
+- text: $8.\overline{18}$
+  correct: true
+- text: $9.\overline{81}$
+- text: $4.\overline{4}$
+- text: $4.\overline{714285}$
+concepts:
+  concept-00cbd63c561c05da: 0.3
+  concept-c17d3666cb6590e3: 1
+chance: 0.25
+model: item-model-stembridge-recurring-decimals
+instance:
+  labels:
+    denominator: 11
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

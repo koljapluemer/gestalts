@@ -1,0 +1,35 @@
+id: item-model-stembridge-round-sig-figs
+gestalt: item-model@1
+name: round_sig_figs
+title: Round to significant figures
+engine: stembridge/round_sig_figs
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+responses:
+  truncate:
+    label: cut off instead of rounding
+    concepts:
+      concept-5229237569cea1d8: 1
+  dp:
+    label: rounded to n decimal places, not n significant figures
+    concepts:
+      concept-1706034fa7fe23aa: 1
+  place-holder-zeros:
+    label: dropped the place-holder zeros
+    concepts:
+      concept-34a2e4cae3ecd066: 1
+  trailing-zero:
+    label: dropped a significant trailing zero
+    concepts:
+      concept-461c0ab0cbb75a79: 1
+  sf-count:
+    label: one significant figure too few or too many
+    concepts:
+      concept-a4c2d854abc61f41: 1
+chance: 0.25
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

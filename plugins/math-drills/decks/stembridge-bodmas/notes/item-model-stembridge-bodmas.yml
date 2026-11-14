@@ -1,0 +1,23 @@
+id: item-model-stembridge-bodmas
+gestalt: item-model@1
+name: bodmas
+title: BODMAS
+engine: stembridge/bodmas
+concepts:
+  concept-547f4a7a793bef9e: 1
+  concept-2a80703a0f759b82: 0.7
+responses:
+  left-to-right:
+    label: worked strictly left to right
+    concepts:
+      concept-2a80703a0f759b82: 1
+  add-before-multiply:
+    label: did + and − before × and ÷
+    concepts:
+      concept-2a80703a0f759b82: 1
+chance: 0.25
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

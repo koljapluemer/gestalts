@@ -1,0 +1,27 @@
+id: mc-8fbedd7a1c243980
+gestalt: multiple-choice@1
+instruction: 'Express correct to 5 significant figures:'
+prompt: $5946564$
+options:
+- text: $5946600$
+  correct: true
+- text: $59466$
+  response: place-holder-zeros
+- text: $5946500$
+  response: truncate
+- text: $5947000$
+  response: sf-count
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+chance: 0.25
+model: item-model-stembridge-round-sig-figs
+instance:
+  labels:
+    n: 5
+    kind: large
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

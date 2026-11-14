@@ -1,0 +1,31 @@
+id: item-model-stembridge-round-tenth
+gestalt: item-model@1
+name: round_tenth
+title: Round to the nearest tenth
+engine: stembridge/round_tenth
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-8d17f4312de0db8d: 1
+responses:
+  truncate:
+    label: cut off instead of rounding
+    concepts:
+      concept-5229237569cea1d8: 1
+  double-round:
+    label: 'rounded twice: to hundredths, then to tenths'
+    concepts:
+      concept-40241f681715e593: 1
+  wrong-place:
+    label: rounded to the wrong place
+    concepts:
+      concept-4d17ad85cc8ef71e: 1
+  trailing-zero:
+    label: dropped the zero after a carry (4 instead of 4.0)
+    concepts:
+      concept-461c0ab0cbb75a79: 1
+chance: 0.25
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

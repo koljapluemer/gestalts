@@ -1,0 +1,23 @@
+id: mc-933334c0f03b9ee5
+gestalt: multiple-choice@1
+instruction: 'Write as a recurring decimal:'
+prompt: $4\,\frac{1}{3}$
+options:
+- text: $4.\overline{3}$
+  correct: true
+- text: $5.\overline{63}$
+- text: $7.\overline{714285}$
+- text: $4.\overline{285714}$
+concepts:
+  concept-00cbd63c561c05da: 0.3
+  concept-c17d3666cb6590e3: 1
+chance: 0.25
+model: item-model-stembridge-recurring-decimals
+instance:
+  labels:
+    denominator: 3
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

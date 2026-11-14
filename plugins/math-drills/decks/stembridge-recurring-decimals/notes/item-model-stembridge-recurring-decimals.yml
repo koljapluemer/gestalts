@@ -1,0 +1,14 @@
+id: item-model-stembridge-recurring-decimals
+gestalt: item-model@1
+name: recurring_decimals
+title: Recurring decimals
+engine: stembridge/recurring_decimals
+concepts:
+  concept-00cbd63c561c05da: 0.3
+  concept-c17d3666cb6590e3: 1
+chance: 0.25
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

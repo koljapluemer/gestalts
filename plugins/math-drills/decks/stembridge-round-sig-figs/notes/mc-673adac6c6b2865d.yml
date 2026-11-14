@@ -1,0 +1,27 @@
+id: mc-673adac6c6b2865d
+gestalt: multiple-choice@1
+instruction: 'Express correct to 4 significant figures:'
+prompt: $3539412$
+options:
+- text: $3539000$
+  correct: true
+- text: $3539$
+  response: place-holder-zeros
+- text: $3540000$
+  response: sf-count
+- text: $3539400$
+  response: sf-count
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+chance: 0.25
+model: item-model-stembridge-round-sig-figs
+instance:
+  labels:
+    n: 4
+    kind: large
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

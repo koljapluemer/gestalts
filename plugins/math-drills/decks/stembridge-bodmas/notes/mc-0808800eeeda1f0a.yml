@@ -1,0 +1,24 @@
+id: mc-0808800eeeda1f0a
+gestalt: multiple-choice@1
+instruction: 'Find the value of:'
+prompt: $7 \times 4 + 1$
+options:
+- text: $29$
+  correct: true
+- text: $35$
+  response: add-before-multiply
+- text: $30$
+- text: $28$
+concepts:
+  concept-547f4a7a793bef9e: 1
+  concept-2a80703a0f759b82: 0.7
+chance: 0.25
+model: item-model-stembridge-bodmas
+instance:
+  labels:
+    numbers: 3
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

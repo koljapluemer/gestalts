@@ -1,0 +1,26 @@
+id: mc-3e14953f931d2079
+gestalt: multiple-choice@1
+instruction: 'Express correct to 2 significant figures:'
+prompt: $71.3$
+options:
+- text: $71$
+  correct: true
+- text: $70$
+  response: sf-count
+- text: $71.3$
+  response: sf-count
+- text: $72$
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+chance: 0.25
+model: item-model-stembridge-round-sig-figs
+instance:
+  labels:
+    n: 2
+    kind: decimal
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

@@ -1,0 +1,20 @@
+id: mc-a4cb83d1700222e9
+gestalt: multiple-choice@1
+instruction: 'Simplify, giving your answer as a fraction in its simplest form:'
+prompt: $\frac{25+30}{21+9}$
+options:
+- text: $\frac{11}{6}$
+  correct: true
+- text: $\frac{26}{31}$
+- text: $\frac{31}{11}$
+- text: $\frac{19}{8}$
+concepts:
+  concept-547f4a7a793bef9e: 0.2
+  concept-08c8843900e181f9: 1
+chance: 0.25
+model: item-model-stembridge-simplify-fraction
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

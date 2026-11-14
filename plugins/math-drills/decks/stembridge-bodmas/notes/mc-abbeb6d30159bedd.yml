@@ -1,0 +1,24 @@
+id: mc-abbeb6d30159bedd
+gestalt: multiple-choice@1
+instruction: 'Find the value of:'
+prompt: $7 + 2 + 8 \times 5$
+options:
+- text: $49$
+  correct: true
+- text: $85$
+  response: left-to-right
+- text: $50$
+- text: $48$
+concepts:
+  concept-547f4a7a793bef9e: 1
+  concept-2a80703a0f759b82: 0.7
+chance: 0.25
+model: item-model-stembridge-bodmas
+instance:
+  labels:
+    numbers: 4
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

@@ -1,0 +1,27 @@
+id: mc-8eb81826de5c119a
+gestalt: multiple-choice@1
+instruction: 'Express correct to 1 significant figure:'
+prompt: $376$
+options:
+- text: $400$
+  correct: true
+- text: $4$
+  response: place-holder-zeros
+- text: $300$
+  response: truncate
+- text: $380$
+  response: sf-count
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+chance: 0.25
+model: item-model-stembridge-round-sig-figs
+instance:
+  labels:
+    n: 1
+    kind: large
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

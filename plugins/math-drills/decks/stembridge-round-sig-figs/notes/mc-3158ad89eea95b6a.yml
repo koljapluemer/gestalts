@@ -1,0 +1,27 @@
+id: mc-3158ad89eea95b6a
+gestalt: multiple-choice@1
+instruction: 'Express correct to 3 significant figures:'
+prompt: $0.0089531$
+options:
+- text: $0.00895$
+  correct: true
+- text: $0.009$
+  response: dp
+- text: $0.0090$
+  response: sf-count
+- text: $0.008953$
+  response: sf-count
+concepts:
+  concept-9a6aefb4a7505ff2: 0.4
+  concept-83d283e389f6444d: 1
+chance: 0.25
+model: item-model-stembridge-round-sig-figs
+instance:
+  labels:
+    n: 3
+    kind: small
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

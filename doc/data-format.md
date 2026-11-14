@@ -33,7 +33,9 @@ merge:                # optional, over what the field types imply
   keys: { name: conflict }
 ```
 
-Definitions are closed: a prop not listed makes a yml invalid. `id` and `gestalt` belong to every yml.
+Definitions are closed: a prop not listed makes a yml invalid. `id` and `gestalt` belong to every yml. Only the top
+level is closed: a `map` checks the `fields` it lists (and `values`, for every key) and takes any other key, so
+`{ type: map }` alone is an open map.
 
 | Type | Value |
 |---|---|
@@ -59,6 +61,8 @@ Text merges by line, lists of references as sets, and everything else per key, c
 | `concept-link@1` | `from`, `to` (concepts), `weight` 0..1: evidence about `from` says this much about `to`; optional `kind`, `source` |
 | `practice-event@1` | `subject` (what was practised: an item, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin` |
 | `flashcard@1` | Markdown `front`; optional `context` (small print with the front), `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`), `sources` (credits, to sources) |
+| `multiple-choice@1` | Markdown `prompt` and `options` (`[{text, correct?, response?}]`); optional `instruction`, `concepts`, `responses`, `chance` (how often a guess is right), `model` (the item model it was made by) and `instance` (what it was made from), `tags`, `aliases`, `sources` |
+| `item-model@1` | `name`: a procedure that makes items (a generator of exercises); optional `title`, `engine` (the code that runs it), `version`, `params`, `concepts` (what its items practise), `responses` (`{key: {label, concepts}}`: what each kind of answer is evidence about), `chance`, `tags`, `aliases`, `sources` |
 | `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `license` (SPDX), `aliases`, `tags`, `extra`, `blobs`, `concepts` (`{concept id: 0..1}`, how strongly each comes up in it) |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
@@ -79,6 +83,14 @@ the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the 
 Concepts form no hierarchy. How they relate is said by `concept-link`s: directed (knowing how to say a word is good
 evidence of recognising it, not the other way round), weighted, cycles allowed, any number of them, and each a claim
 by its `source` (a deck, the user, a model), so several can stand about one pair; they count as their mean.
+
+Four things are kept apart. A **concept** is what is learned and never observed directly: BODMAS, "× and ÷ go left to
+right", a letter; a misconception is a concept too, phrased as the skill it lacks ("rounding, not cutting off"). An
+**item** is what a learner meets and answers, which produces evidence: a `flashcard`, a `multiple-choice`, a video. An
+**item model** (`item-model`) is a procedure that makes items, like a generator of exercises: its items point to it by
+`model` and practise what it says; it is not a concept. A **practice event** is what happened when a learner met an
+item. An item or item model may name `responses`, the kinds of answer it can tell apart (a typical mistake), each with
+the concepts that answer is evidence about; for now beliefs use only `concepts` and an event's `rating`.
 
 Practice is logged as it happened, one `practice-event` per answer (or per thing that came up), never as conclusions
 about concepts. What it says about concepts is worked out by the core (`crates/core/src/mastery.rs`) from the events,

@@ -1,0 +1,9 @@
+id: source-stembridge
+gestalt: source@1
+key: stembridge
+entrytype: software
+title: 'Stembridge: maths practice for the Zimbabwe O-level exam'
+organization:
+- Stembridge
+url: https://github.com/koljapluemer/stembridge
+license: CC-BY-4.0

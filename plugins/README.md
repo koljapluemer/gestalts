@@ -15,3 +15,11 @@ concept per phrase, shared by every way of saying it (to whom, how politely), an
 owns (`function: greet`, `situation: restaurant`, `social: politeness`), so decks meet there. Cards adapted from
 Wikivoyage credit it on the card (`sources`); each deck's `LICENSE.md` says the rest. The Vietnamese pronoun variants
 marked `own: true` were written for the deck and want a native speaker's check.
+
+`math-drills/tools/build_decks.py` (`uv run`) generates the `stembridge-*` decks, one per topic, from the topic exports
+of [Stembridge](https://github.com/koljapluemer/stembridge) (a sibling checkout, `../stembridge` by default): a topic
+becomes an `item-model@1` with a `multiple-choice@1` per exercise (TeX in `$…$`), and the concepts it touches become
+`math: <name>` concepts with their `part-of` links, shared between decks. Stembridge owns the exercises, the concepts and
+what each distractor means; this tool only translates. After Stembridge regenerates (a new topic, changed exercises):
+`mise run math-drills:decks`, which rebuilds every `stembridge-*` deck, drops those whose topic is gone and publishes
+them. CC BY 4.0, credited on every item.

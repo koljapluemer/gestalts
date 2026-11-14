@@ -1,0 +1,20 @@
+id: mc-7d82666eabcd9ffa
+gestalt: multiple-choice@1
+instruction: 'Simplify, giving your answer as a fraction in its simplest form:'
+prompt: $\frac{8+28-4}{12}$
+options:
+- text: $\frac{8}{3}$
+  correct: true
+- text: $\frac{15}{23}$
+- text: $\frac{1}{2}$
+- text: $\frac{27}{5}$
+concepts:
+  concept-547f4a7a793bef9e: 0.2
+  concept-08c8843900e181f9: 1
+chance: 0.25
+model: item-model-stembridge-simplify-fraction
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

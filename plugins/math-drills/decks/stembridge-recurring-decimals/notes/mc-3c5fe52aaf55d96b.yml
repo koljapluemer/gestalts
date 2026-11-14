@@ -1,0 +1,23 @@
+id: mc-3c5fe52aaf55d96b
+gestalt: multiple-choice@1
+instruction: 'Write as a recurring decimal:'
+prompt: $9\,\frac{6}{7}$
+options:
+- text: $9.\overline{857142}$
+  correct: true
+- text: $6.\overline{571428}$
+- text: $4.\overline{36}$
+- text: $8.\overline{81}$
+concepts:
+  concept-00cbd63c561c05da: 0.3
+  concept-c17d3666cb6590e3: 1
+chance: 0.25
+model: item-model-stembridge-recurring-decimals
+instance:
+  labels:
+    denominator: 7
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

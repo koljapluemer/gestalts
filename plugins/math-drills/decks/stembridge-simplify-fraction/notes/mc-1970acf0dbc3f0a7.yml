@@ -1,0 +1,20 @@
+id: mc-1970acf0dbc3f0a7
+gestalt: multiple-choice@1
+instruction: 'Simplify, giving your answer as a fraction in its simplest form:'
+prompt: $\frac{20-15+20}{30}$
+options:
+- text: $\frac{5}{6}$
+  correct: true
+- text: $\frac{6}{5}$
+- text: $\frac{13}{7}$
+- text: $\frac{23}{11}$
+concepts:
+  concept-547f4a7a793bef9e: 0.2
+  concept-08c8843900e181f9: 1
+chance: 0.25
+model: item-model-stembridge-simplify-fraction
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from

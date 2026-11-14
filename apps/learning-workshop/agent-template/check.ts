@@ -8,7 +8,7 @@ let failed = false;
 const fail = (msg: string) => { failed = true; console.log(`✗ ${msg}`); };
 
 /** What this view may touch, in the workshop's data; anything a plugin defines isn't there. */
-const CORE = ['note@1', 'source@1', 'concept@2', 'concept-link@1', 'practice-event@1', 'flashcard@1', 'deck@1', 'fsrs-data@1', 'practice-session@1'];
+const CORE = ['note@1', 'source@1', 'concept@2', 'concept-link@1', 'practice-event@1', 'flashcard@1', 'multiple-choice@1', 'item-model@1', 'deck@1', 'fsrs-data@1', 'practice-session@1'];
 
 let npm: string[] = [];
 if (!existsSync('view.tsx')) {

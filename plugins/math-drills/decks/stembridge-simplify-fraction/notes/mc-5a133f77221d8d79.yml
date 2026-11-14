@@ -1,0 +1,20 @@
+id: mc-5a133f77221d8d79
+gestalt: multiple-choice@1
+instruction: 'Simplify, giving your answer as a fraction in its simplest form:'
+prompt: $\frac{8+26-24}{8}$
+options:
+- text: $\frac{5}{4}$
+  correct: true
+- text: $\frac{29}{4}$
+- text: $\frac{16}{23}$
+- text: $\frac{32}{23}$
+concepts:
+  concept-547f4a7a793bef9e: 0.2
+  concept-08c8843900e181f9: 1
+chance: 0.25
+model: item-model-stembridge-simplify-fraction
+tags:
+- math-drills
+sources:
+- to: source-stembridge
+  label: from
