@@ -1,0 +1,17 @@
+id: typing-word-7f3de329d0d4e647
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: phút
+gloss: minute
+keystrokes:
+  telex: phust
+  vni: phu1t
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-869e4ca24adce61e: 0.2
+tags:
+  - vietnamese-typing-practice

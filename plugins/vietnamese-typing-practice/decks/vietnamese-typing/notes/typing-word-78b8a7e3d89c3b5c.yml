@@ -1,0 +1,21 @@
+id: typing-word-78b8a7e3d89c3b5c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: văn phòng
+gloss: office
+keystrokes:
+  telex: vawn phofng
+  vni: va8n pho2ng
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+  - at: 6
+    mark: ̀
+    key: huyền
+concepts:
+  concept-57bd6e00ecb0c9bd: 0.2
+  concept-72538903b271cf7b: 0.5
+  concept-95d9c242b1d99012: 0.5
+tags:
+  - vietnamese-typing-practice

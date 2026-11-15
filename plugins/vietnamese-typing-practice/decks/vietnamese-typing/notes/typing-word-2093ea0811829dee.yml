@@ -1,0 +1,17 @@
+id: typing-word-2093ea0811829dee
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: áo
+gloss: shirt
+keystrokes:
+  telex: aos
+  vni: ao1
+marks:
+  - at: 0
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-8ca484fab719869d: 0.2
+tags:
+  - vietnamese-typing-practice

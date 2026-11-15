@@ -1,0 +1,21 @@
+id: typing-word-5de871e277d32102
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tuyết
+gloss: snow
+keystrokes:
+  telex: tuyeest
+  vni: tuye61t
+marks:
+  - at: 3
+    mark: ̂
+    key: ê
+  - at: 3
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-410029fb1cd3f4dd: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

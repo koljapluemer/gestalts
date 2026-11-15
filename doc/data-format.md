@@ -84,6 +84,12 @@ Decks share a concept by writing the same yml under the same id, so their builde
 of something with a code (a country) takes its id from the code, not its name, so a rename keeps it
 (`plugins/world-map/tools/concepts.ts`, used by world-map's and flags-practice's builders).
 
+A name says what kind of concept it is. What belongs to a language carries its ISO 639-3 code: `vie:xin chào` is a
+word (or expression), `vie: say hello` (with a space) something to say (the phrasebook's intents), `vie-script: sắc` a
+part of its writing (a tone mark, a marked letter), and `lang: vie` the language. Concepts no language owns are
+`<kind>: <name>` (`function: greet`, `geography: France`). `iso639_3` in `@gestalts/learning` gives the code of a
+language tag (`vi`, `pt-BR`).
+
 Concepts form no hierarchy. How they relate is said by `concept-link`s: directed (knowing how to say a word is good
 evidence of recognising it, not the other way round), weighted, cycles allowed, any number of them, and each a claim
 by its `source` (a deck, the user, a model), so several can stand about one pair; they count as their mean.

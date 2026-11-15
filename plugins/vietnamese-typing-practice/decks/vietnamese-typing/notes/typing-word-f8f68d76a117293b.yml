@@ -1,0 +1,17 @@
+id: typing-word-f8f68d76a117293b
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: em gái
+gloss: younger sister
+keystrokes:
+  telex: em gais
+  vni: em gai1
+marks:
+  - at: 4
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-ca730636090eb730: 0.2
+tags:
+  - vietnamese-typing-practice

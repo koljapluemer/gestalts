@@ -1,0 +1,17 @@
+id: typing-word-fcfdf14702f3fa62
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đen
+gloss: black
+keystrokes:
+  telex: dden
+  vni: d9en
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+concepts:
+  concept-1d4da65321ff1ea2: 0.2
+  concept-dc88b7e466f66e29: 1
+tags:
+  - vietnamese-typing-practice

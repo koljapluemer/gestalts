@@ -1,0 +1,28 @@
+id: typing-word-579bc7fd9f6473a9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tiếng Việt
+gloss: Vietnamese
+keystrokes:
+  telex: tieesng Vieejt
+  vni: tie61ng Vie65t
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 8
+    mark: ̂
+    key: ê
+  - at: 8
+    mark: ̣
+    key: nặng
+concepts:
+  concept-126bc4768373b614: 0.25
+  concept-3cf550b4234f77f6: 0.25
+  concept-565421a9814dd807: 0.5
+  concept-d10a0a3fb5d5a105: 0.2
+tags:
+  - vietnamese-typing-practice

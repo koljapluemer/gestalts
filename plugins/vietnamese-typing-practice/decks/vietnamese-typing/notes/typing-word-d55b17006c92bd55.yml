@@ -1,0 +1,17 @@
+id: typing-word-d55b17006c92bd55
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: thích
+gloss: like
+keystrokes:
+  telex: thisch
+  vni: thi1ch
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-ebb6dc935ad5542f: 0.2
+tags:
+  - vietnamese-typing-practice

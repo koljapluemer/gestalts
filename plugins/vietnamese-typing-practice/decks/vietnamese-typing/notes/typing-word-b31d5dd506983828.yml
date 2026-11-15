@@ -1,0 +1,21 @@
+id: typing-word-b31d5dd506983828
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xe đạp
+gloss: bicycle
+keystrokes:
+  telex: xe ddajp
+  vni: xe d9a5p
+marks:
+  - at: 3
+    mark: đ
+    key: đ
+  - at: 4
+    mark: ̣
+    key: nặng
+concepts:
+  concept-2cc228e6bde810d3: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

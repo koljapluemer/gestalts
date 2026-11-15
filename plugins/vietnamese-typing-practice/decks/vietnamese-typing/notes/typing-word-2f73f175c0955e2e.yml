@@ -1,0 +1,28 @@
+id: typing-word-2f73f175c0955e2e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: điện thoại
+gloss: phone
+keystrokes:
+  telex: ddieejn thoaij
+  vni: d9ie65n thoai5
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ̣
+    key: nặng
+  - at: 8
+    mark: ̣
+    key: nặng
+concepts:
+  concept-078e084ddd16073c: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-565421a9814dd807: 0.25
+  concept-dc88b7e466f66e29: 0.25
+tags:
+  - vietnamese-typing-practice

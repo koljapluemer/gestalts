@@ -1,0 +1,24 @@
+id: typing-word-07831d10bf7c8c99
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cuộc họp
+gloss: meeting
+keystrokes:
+  telex: cuoojc hojp
+  vni: cuo65c ho5p
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ̣
+    key: nặng
+  - at: 6
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.666667
+  concept-84f57279315ad393: 0.2
+  concept-e3325579098c8e0d: 0.333333
+tags:
+  - vietnamese-typing-practice

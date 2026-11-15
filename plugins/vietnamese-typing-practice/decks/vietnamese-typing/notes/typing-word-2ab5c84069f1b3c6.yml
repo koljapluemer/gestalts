@@ -1,0 +1,21 @@
+id: typing-word-2ab5c84069f1b3c6
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đói
+gloss: hungry
+keystrokes:
+  telex: ddois
+  vni: d9oi1
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-355cf276ac9acaeb: 0.2
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

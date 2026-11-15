@@ -1,0 +1,21 @@
+id: typing-word-7d1a87442739819e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: số
+gloss: number
+keystrokes:
+  telex: soos
+  vni: so61
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-ae822c592d7124b4: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

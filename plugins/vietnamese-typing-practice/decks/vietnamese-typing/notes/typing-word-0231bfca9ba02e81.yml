@@ -1,0 +1,21 @@
+id: typing-word-0231bfca9ba02e81
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: một
+gloss: one
+keystrokes:
+  telex: moojt
+  vni: mo65t
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.5
+  concept-bf0d1b3b46e3a02e: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,17 @@
+id: typing-word-fe103dc47e098135
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nhỏ
+gloss: small
+keystrokes:
+  telex: nhor
+  vni: nho3
+marks:
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 1
+  concept-3f529d97388de918: 0.2
+tags:
+  - vietnamese-typing-practice

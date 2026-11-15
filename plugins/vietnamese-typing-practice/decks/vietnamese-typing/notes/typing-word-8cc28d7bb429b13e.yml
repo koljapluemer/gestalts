@@ -1,0 +1,17 @@
+id: typing-word-8cc28d7bb429b13e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chạy
+gloss: run
+keystrokes:
+  telex: chayj
+  vni: chay5
+marks:
+  - at: 2
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 1
+  concept-a9726d07867fdc00: 0.2
+tags:
+  - vietnamese-typing-practice

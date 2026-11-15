@@ -1,0 +1,13 @@
+id: typing-word-3958a4a67364091e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: em trai
+gloss: younger brother
+keystrokes:
+  telex: em trai
+  vni: em trai
+marks: []
+concepts:
+  concept-8457998d16130c2a: 0.2
+tags:
+  - vietnamese-typing-practice

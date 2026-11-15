@@ -1,0 +1,21 @@
+id: typing-word-3b863cb71576623e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: thể thao
+gloss: sports
+keystrokes:
+  telex: theer thao
+  vni: the63 thao
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-2b0fc6ca56e0d360: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

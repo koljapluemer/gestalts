@@ -1,0 +1,17 @@
+id: typing-word-471b15800a0e807a
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đi
+gloss: go
+keystrokes:
+  telex: ddi
+  vni: d9i
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+concepts:
+  concept-56594f1ba5a82ab6: 0.2
+  concept-dc88b7e466f66e29: 1
+tags:
+  - vietnamese-typing-practice

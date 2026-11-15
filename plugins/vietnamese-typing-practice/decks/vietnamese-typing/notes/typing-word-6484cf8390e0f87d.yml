@@ -1,0 +1,21 @@
+id: typing-word-6484cf8390e0f87d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bếp
+gloss: kitchen
+keystrokes:
+  telex: beesp
+  vni: be61p
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-9b0af585e0dc5c44: 0.2
+tags:
+  - vietnamese-typing-practice

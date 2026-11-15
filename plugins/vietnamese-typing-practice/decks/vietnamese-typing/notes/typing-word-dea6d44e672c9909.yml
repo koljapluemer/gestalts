@@ -1,0 +1,17 @@
+id: typing-word-dea6d44e672c9909
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: núi
+gloss: mountain
+keystrokes:
+  telex: nuis
+  vni: nui1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-47f567f4fcd7fd1c: 0.2
+tags:
+  - vietnamese-typing-practice

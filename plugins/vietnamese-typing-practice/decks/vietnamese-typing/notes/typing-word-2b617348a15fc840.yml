@@ -1,0 +1,17 @@
+id: typing-word-2b617348a15fc840
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bảy
+gloss: seven
+keystrokes:
+  telex: bayr
+  vni: bay3
+marks:
+  - at: 1
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 1
+  concept-2bf5b5b76a0d4236: 0.2
+tags:
+  - vietnamese-typing-practice

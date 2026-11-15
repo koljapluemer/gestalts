@@ -1,0 +1,25 @@
+id: typing-word-a2a970e1200ea5c4
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nước
+gloss: water
+keystrokes:
+  telex: nuwowsc
+  vni: nu7o71c
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 2
+    mark: ̛
+    key: ơ
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-6dc166805aeda499: 0.333333
+  concept-a72c8e899127c1cc: 0.333333
+  concept-b5bbcd6e9a79fceb: 0.2
+tags:
+  - vietnamese-typing-practice

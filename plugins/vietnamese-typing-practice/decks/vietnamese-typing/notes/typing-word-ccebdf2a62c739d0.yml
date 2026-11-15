@@ -1,0 +1,17 @@
+id: typing-word-ccebdf2a62c739d0
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: lạnh
+gloss: cold
+keystrokes:
+  telex: lajnh
+  vni: la5nh
+marks:
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 1
+  concept-ecff6c6be4a9fc51: 0.2
+tags:
+  - vietnamese-typing-practice

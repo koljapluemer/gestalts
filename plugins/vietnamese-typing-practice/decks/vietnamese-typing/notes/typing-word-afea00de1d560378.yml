@@ -1,0 +1,17 @@
+id: typing-word-afea00de1d560378
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: học
+gloss: study
+keystrokes:
+  telex: hojc
+  vni: ho5c
+marks:
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 1
+  concept-3db52d49c6f5acf7: 0.2
+tags:
+  - vietnamese-typing-practice

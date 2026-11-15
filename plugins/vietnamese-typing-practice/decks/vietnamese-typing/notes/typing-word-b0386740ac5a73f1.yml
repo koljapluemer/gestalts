@@ -1,0 +1,17 @@
+id: typing-word-b0386740ac5a73f1
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bút
+gloss: pen
+keystrokes:
+  telex: bust
+  vni: bu1t
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-59a9fa7c9cbd9adc: 0.2
+tags:
+  - vietnamese-typing-practice

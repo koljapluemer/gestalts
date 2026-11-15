@@ -1,0 +1,21 @@
+id: typing-word-e6eb354c8b7e199d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: dễ
+gloss: easy
+keystrokes:
+  telex: deex
+  vni: de64
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+  - at: 1
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-588cf3a683f8807f: 0.2
+tags:
+  - vietnamese-typing-practice

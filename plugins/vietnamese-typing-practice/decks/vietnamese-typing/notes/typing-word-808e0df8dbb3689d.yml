@@ -1,0 +1,21 @@
+id: typing-word-808e0df8dbb3689d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: phố
+gloss: street
+keystrokes:
+  telex: phoos
+  vni: pho61
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-7cc45fa4eecd988b: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

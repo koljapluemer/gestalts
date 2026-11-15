@@ -1,0 +1,17 @@
+id: typing-word-c52e2ae0afba82fe
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nóng
+gloss: hot
+keystrokes:
+  telex: nosng
+  vni: no1ng
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-5da0886c8ea0c929: 0.2
+tags:
+  - vietnamese-typing-practice

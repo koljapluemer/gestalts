@@ -1,0 +1,17 @@
+id: typing-word-27682e518dcfd26f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: túi
+gloss: bag
+keystrokes:
+  telex: tuis
+  vni: tui1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-9f4b1a1bf95d3f25: 0.2
+tags:
+  - vietnamese-typing-practice

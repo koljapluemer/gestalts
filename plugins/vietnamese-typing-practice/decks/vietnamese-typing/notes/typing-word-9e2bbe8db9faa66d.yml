@@ -1,0 +1,13 @@
+id: typing-word-9e2bbe8db9faa66d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nhanh
+gloss: fast
+keystrokes:
+  telex: nhanh
+  vni: nhanh
+marks: []
+concepts:
+  concept-1a44bea2b7d49d6b: 0.2
+tags:
+  - vietnamese-typing-practice

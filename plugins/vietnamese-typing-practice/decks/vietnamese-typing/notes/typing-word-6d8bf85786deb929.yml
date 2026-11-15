@@ -1,0 +1,17 @@
+id: typing-word-6d8bf85786deb929
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chó
+gloss: dog
+keystrokes:
+  telex: chos
+  vni: cho1
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-6ff7b50d219b2847: 0.2
+tags:
+  - vietnamese-typing-practice

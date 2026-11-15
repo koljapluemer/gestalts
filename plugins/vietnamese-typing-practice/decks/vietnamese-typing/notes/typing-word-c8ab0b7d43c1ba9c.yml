@@ -1,0 +1,17 @@
+id: typing-word-c8ab0b7d43c1ba9c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mưa
+gloss: rain
+keystrokes:
+  telex: muwa
+  vni: mu7a
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+concepts:
+  concept-97de4afa4de4e485: 0.2
+  concept-a72c8e899127c1cc: 1
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,17 @@
+id: typing-word-e6ac75df2032f106
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: giá
+gloss: price
+keystrokes:
+  telex: gias
+  vni: gia1
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-6922cedb887d8f76: 0.2
+tags:
+  - vietnamese-typing-practice

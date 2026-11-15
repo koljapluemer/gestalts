@@ -1,0 +1,21 @@
+id: typing-word-b224805e1139bf4e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: gia đình
+gloss: family
+keystrokes:
+  telex: gia ddifnh
+  vni: gia d9i2nh
+marks:
+  - at: 4
+    mark: đ
+    key: đ
+  - at: 5
+    mark: ̀
+    key: huyền
+concepts:
+  concept-15ea83575bc1e078: 0.2
+  concept-95d9c242b1d99012: 0.5
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,13 @@
+id: typing-word-707a3c64c7c00e52
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cam
+gloss: orange
+keystrokes:
+  telex: cam
+  vni: cam
+marks: []
+concepts:
+  concept-3f3457e704fc9c95: 0.2
+tags:
+  - vietnamese-typing-practice

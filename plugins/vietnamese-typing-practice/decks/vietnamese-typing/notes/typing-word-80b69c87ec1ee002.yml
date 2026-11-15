@@ -1,0 +1,25 @@
+id: typing-word-80b69c87ec1ee002
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đến
+gloss: come
+keystrokes:
+  telex: ddeesn
+  vni: d9e61n
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̂
+    key: ê
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-565421a9814dd807: 0.333333
+  concept-81c5607242deb28f: 0.2
+  concept-dc88b7e466f66e29: 0.333333
+tags:
+  - vietnamese-typing-practice

@@ -97,7 +97,8 @@ describe('what the learner knows', () => {
   });
 
   it('names concepts per language, like the decks do', () => {
-    expect(conceptName('de-DE', ' gehen ')).toBe('de:gehen');
+    expect(conceptName('de-DE', ' gehen ')).toBe('deu:gehen');
+    expect(conceptName('vi', 'xin chào')).toBe('vie:xin chào');
   });
 });
 

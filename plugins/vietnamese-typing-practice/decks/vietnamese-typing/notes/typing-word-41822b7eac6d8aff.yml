@@ -1,0 +1,17 @@
+id: typing-word-41822b7eac6d8aff
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: trẻ em
+gloss: children
+keystrokes:
+  telex: trer em
+  vni: tre3 em
+marks:
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 1
+  concept-70d75f9211a0600a: 0.2
+tags:
+  - vietnamese-typing-practice

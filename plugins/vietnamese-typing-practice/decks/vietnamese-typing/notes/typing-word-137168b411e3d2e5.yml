@@ -1,0 +1,21 @@
+id: typing-word-137168b411e3d2e5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: viết
+gloss: write
+keystrokes:
+  telex: vieest
+  vni: vie61t
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-6f7bfbfb5fe46c24: 0.2
+tags:
+  - vietnamese-typing-practice

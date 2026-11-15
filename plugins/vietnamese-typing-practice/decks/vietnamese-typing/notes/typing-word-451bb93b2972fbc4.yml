@@ -1,0 +1,17 @@
+id: typing-word-451bb93b2972fbc4
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mũ
+gloss: hat
+keystrokes:
+  telex: mux
+  vni: mu4
+marks:
+  - at: 1
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 1
+  concept-d29cd0b9d0531987: 0.2
+tags:
+  - vietnamese-typing-practice

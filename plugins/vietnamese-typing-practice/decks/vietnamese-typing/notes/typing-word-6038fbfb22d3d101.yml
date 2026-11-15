@@ -1,0 +1,13 @@
+id: typing-word-6038fbfb22d3d101
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nghe
+gloss: listen
+keystrokes:
+  telex: nghe
+  vni: nghe
+marks: []
+concepts:
+  concept-2b54ce3457ede2f6: 0.2
+tags:
+  - vietnamese-typing-practice

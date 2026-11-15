@@ -1,0 +1,21 @@
+id: typing-word-cc496e3ccdfd69c8
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: trứng
+gloss: egg
+keystrokes:
+  telex: truwsng
+  vni: tru71ng
+marks:
+  - at: 2
+    mark: ̛
+    key: ư
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-a72c8e899127c1cc: 0.5
+  concept-d034347e9d845c68: 0.2
+tags:
+  - vietnamese-typing-practice

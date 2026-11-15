@@ -1,0 +1,21 @@
+id: typing-word-54e203ba29224bef
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mới
+gloss: new
+keystrokes:
+  telex: mowis
+  vni: mo7i1
+marks:
+  - at: 1
+    mark: ̛
+    key: ơ
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-6dc166805aeda499: 0.5
+  concept-76f59b0f3403a041: 0.2
+tags:
+  - vietnamese-typing-practice

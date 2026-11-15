@@ -16,8 +16,9 @@ that yml doesn't reach them. That is a product question of its own.
   are merged (`crates/core/src/decks.rs`). Schemas, validation (`health`), references, blobs and overlays exist.
 - No deck is hand-written. Each is built by a script in its plugin's `tools/` from data elsewhere (phrase lists,
   Stembridge's exports, `world-map/tools/data`), which deletes and rewrites it. An editor of deck ymls would be
-  overwritten by the next build. One builder reads another plugin's data: flags-practice's reads world-map's
-  `tools/data` (country names, regions) and its concept rule.
+  overwritten by the next build. Two builders read another plugin's data: flags-practice's reads world-map's
+  `tools/data` (country names, regions) and its concept rule; vietnamese-typing-practice's copies concepts from the
+  phrasebook's built Vietnamese deck.
 - `packages/vite` bundles every deck into the app build; only the list of decks is fixed at build time. The client
   reads any published folder (`Static` in `crates/peer`).
 - Learners' `fsrs-data`, practice events and beliefs point at deck ids.

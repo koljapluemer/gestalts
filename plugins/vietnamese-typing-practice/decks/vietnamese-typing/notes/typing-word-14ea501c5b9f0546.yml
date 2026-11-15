@@ -1,0 +1,21 @@
+id: typing-word-14ea501c5b9f0546
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hiểu
+gloss: understand
+keystrokes:
+  telex: hieeur
+  vni: hie6u3
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-bfa0f0a66cc3879b: 0.2
+tags:
+  - vietnamese-typing-practice

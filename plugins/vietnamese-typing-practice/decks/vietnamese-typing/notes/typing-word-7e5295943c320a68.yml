@@ -1,0 +1,17 @@
+id: typing-word-7e5295943c320a68
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: công ty
+gloss: company
+keystrokes:
+  telex: coong ty
+  vni: co6ng ty
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+concepts:
+  concept-e3325579098c8e0d: 1
+  concept-f34852a688e63f82: 0.2
+tags:
+  - vietnamese-typing-practice

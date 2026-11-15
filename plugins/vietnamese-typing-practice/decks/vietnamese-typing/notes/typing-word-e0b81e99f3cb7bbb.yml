@@ -1,0 +1,21 @@
+id: typing-word-e0b81e99f3cb7bbb
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hồng
+gloss: pink
+keystrokes:
+  telex: hoofng
+  vni: ho62ng
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+  - at: 1
+    mark: ̀
+    key: huyền
+concepts:
+  concept-68c9a3f4f7b7872a: 0.2
+  concept-95d9c242b1d99012: 0.5
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-4e4739982ec2b0fd
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: biển
+gloss: sea
+keystrokes:
+  telex: bieern
+  vni: bie63n
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-2d8b48fa0b815c19: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

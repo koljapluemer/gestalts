@@ -1,0 +1,17 @@
+id: typing-word-e2a2e6542dc083d6
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: sách
+gloss: book
+keystrokes:
+  telex: sasch
+  vni: sa1ch
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-507ad7d187b59c1a: 0.2
+tags:
+  - vietnamese-typing-practice

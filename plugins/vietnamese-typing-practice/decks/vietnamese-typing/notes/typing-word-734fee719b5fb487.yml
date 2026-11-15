@@ -1,0 +1,21 @@
+id: typing-word-734fee719b5fb487
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: trắng
+gloss: white
+keystrokes:
+  telex: trawsng
+  vni: tra81ng
+marks:
+  - at: 2
+    mark: ̆
+    key: ă
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-72538903b271cf7b: 0.5
+  concept-a1795c1f1181a8f3: 0.2
+tags:
+  - vietnamese-typing-practice

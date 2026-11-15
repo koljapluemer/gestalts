@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Expand } from 'lucide-react';
-import { facetOf, fsrsStates, practiceEvent, type FsrsStates } from '@gestalts/learning';
+import { facetOf, fsrsStates, iso639_3, practiceEvent, type FsrsStates } from '@gestalts/learning';
 import { useCapabilities, useDoc, useLlm, useNet, useQuery, useViewState, useWrite, type Item, type JsonMap, type NetResponse, type QueryResult } from '@gestalts/view';
 
 /**
@@ -215,8 +215,8 @@ class Glosser {
 
 // ---------- what the learner knows ----------
 
-/** A concept per flemma of a language, named like the decks name theirs (`grc:κιννάμωμον`). */
-export const conceptName = (language: string, flemma: string) => `${language.split('-')[0].toLowerCase()}:${flemma.normalize('NFC').trim()}`;
+/** A concept per flemma of a language, named like the decks name theirs, by its ISO 639-3 code (`grc:κιννάμωμον`). */
+export const conceptName = (language: string, flemma: string) => `${iso639_3(language)}:${flemma.normalize('NFC').trim()}`;
 
 /** How strongly seeing a word's card while watching practises it. */
 export const EXPOSURE_STRENGTH = 0.05;

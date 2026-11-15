@@ -1,0 +1,21 @@
+id: typing-word-0db307a63eac8697
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bài hát
+gloss: song
+keystrokes:
+  telex: baif hast
+  vni: bai2 ha1t
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+  - at: 5
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-95d9c242b1d99012: 0.5
+  concept-bc2f55abe707846c: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-e4f5d5f0ce587c9f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đêm
+gloss: night
+keystrokes:
+  telex: ddeem
+  vni: d9e6m
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̂
+    key: ê
+concepts:
+  concept-0a9aebf5ea59f3d1: 0.2
+  concept-565421a9814dd807: 0.5
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

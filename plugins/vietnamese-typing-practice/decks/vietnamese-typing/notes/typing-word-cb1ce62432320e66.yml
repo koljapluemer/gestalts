@@ -1,0 +1,17 @@
+id: typing-word-cb1ce62432320e66
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: gió
+gloss: wind
+keystrokes:
+  telex: gios
+  vni: gio1
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-e111ac8617b8517b: 0.2
+tags:
+  - vietnamese-typing-practice

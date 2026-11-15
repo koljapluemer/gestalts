@@ -681,6 +681,9 @@ importers:
       '@gestalts/view':
         specifier: workspace:*
         version: link:../view
+      iso-639-3:
+        specifier: 3.0.1
+        version: 3.0.1
       ts-fsrs:
         specifier: 6.0.0
         version: 6.0.0
@@ -2228,6 +2231,9 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  iso-639-3@3.0.1:
+    resolution: {integrity: sha512-SdljCYXOexv/JmbQ0tvigHN43yECoscVpe2y2hlEqy/CStXQlroPhZLj7zKLRiGqLJfw8k7B973UAMDoQczVgQ==}
 
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
@@ -4076,6 +4082,8 @@ snapshots:
       is-extglob: 2.1.1
 
   isexe@2.0.0: {}
+
+  iso-639-3@3.0.1: {}
 
   jiti@2.7.0: {}
 

@@ -1,0 +1,17 @@
+id: typing-word-d2b2c6566f69436d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cây
+gloss: tree
+keystrokes:
+  telex: caay
+  vni: ca6y
+marks:
+  - at: 1
+    mark: ̂
+    key: â
+concepts:
+  concept-997f895dc1d297a6: 0.2
+  concept-ed07d4945fefdb8a: 1
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,29 @@
+id: typing-word-3589125af87986e7
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mặt trời
+gloss: sun
+keystrokes:
+  telex: mawjt trowif
+  vni: ma85t tro7i2
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 6
+    mark: ̛
+    key: ơ
+  - at: 6
+    mark: ̀
+    key: huyền
+concepts:
+  concept-3cf550b4234f77f6: 0.25
+  concept-6dc166805aeda499: 0.25
+  concept-72538903b271cf7b: 0.25
+  concept-95d9c242b1d99012: 0.25
+  concept-f9ac6eb8571430f9: 0.2
+tags:
+  - vietnamese-typing-practice

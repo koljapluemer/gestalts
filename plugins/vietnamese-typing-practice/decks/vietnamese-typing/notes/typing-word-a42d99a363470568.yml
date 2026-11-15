@@ -1,0 +1,17 @@
+id: typing-word-a42d99a363470568
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: khát
+gloss: thirsty
+keystrokes:
+  telex: khast
+  vni: kha1t
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-01e58101663129c5: 0.2
+  concept-126bc4768373b614: 1
+tags:
+  - vietnamese-typing-practice

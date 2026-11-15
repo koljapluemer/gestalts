@@ -1,0 +1,21 @@
+id: typing-word-410e93b39a955e5f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chậm
+gloss: slow
+keystrokes:
+  telex: chaajm
+  vni: cha65m
+marks:
+  - at: 2
+    mark: ̂
+    key: â
+  - at: 2
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.5
+  concept-6bf1c8eff3b83ef9: 0.2
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

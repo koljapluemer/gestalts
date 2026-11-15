@@ -1,0 +1,17 @@
+id: typing-word-a1e141ecd45b7e5d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tháng
+gloss: month
+keystrokes:
+  telex: thasng
+  vni: tha1ng
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-8663b1cd2a9ad1d0: 0.2
+tags:
+  - vietnamese-typing-practice

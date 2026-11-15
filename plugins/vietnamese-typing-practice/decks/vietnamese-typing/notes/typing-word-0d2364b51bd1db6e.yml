@@ -1,0 +1,17 @@
+id: typing-word-0d2364b51bd1db6e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nói
+gloss: speak
+keystrokes:
+  telex: nois
+  vni: noi1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-f57d5e734f6faa97: 0.2
+tags:
+  - vietnamese-typing-practice

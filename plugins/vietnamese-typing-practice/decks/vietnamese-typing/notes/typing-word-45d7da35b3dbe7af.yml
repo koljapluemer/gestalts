@@ -1,0 +1,17 @@
+id: typing-word-45d7da35b3dbe7af
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bàn
+gloss: table
+keystrokes:
+  telex: bafn
+  vni: ba2n
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+concepts:
+  concept-95d9c242b1d99012: 1
+  concept-ab0dd84e2a866d7d: 0.2
+tags:
+  - vietnamese-typing-practice

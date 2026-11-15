@@ -1,0 +1,21 @@
+id: typing-word-6bdc2759e6cd23e9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: giáo viên
+gloss: teacher
+keystrokes:
+  telex: giaos vieen
+  vni: giao1 vie6n
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 7
+    mark: ̂
+    key: ê
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-d672f6489f7d9368: 0.2
+tags:
+  - vietnamese-typing-practice

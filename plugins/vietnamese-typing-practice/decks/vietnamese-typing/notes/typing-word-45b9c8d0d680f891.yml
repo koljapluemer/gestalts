@@ -1,0 +1,21 @@
+id: typing-word-45b9c8d0d680f891
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ghế
+gloss: chair
+keystrokes:
+  telex: ghees
+  vni: ghe61
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-c40642ff61db5bc2: 0.2
+tags:
+  - vietnamese-typing-practice

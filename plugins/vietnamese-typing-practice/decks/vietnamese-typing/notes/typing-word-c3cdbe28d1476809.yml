@@ -1,0 +1,21 @@
+id: typing-word-c3cdbe28d1476809
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tốt
+gloss: good
+keystrokes:
+  telex: toost
+  vni: to61t
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-1143c1c1cb653d53: 0.2
+  concept-126bc4768373b614: 0.5
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

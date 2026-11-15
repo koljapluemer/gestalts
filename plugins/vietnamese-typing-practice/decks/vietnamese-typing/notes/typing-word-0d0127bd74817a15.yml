@@ -1,0 +1,17 @@
+id: typing-word-0d0127bd74817a15
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bò
+gloss: cow
+keystrokes:
+  telex: bof
+  vni: bo2
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+concepts:
+  concept-95d9c242b1d99012: 1
+  concept-dbf1a15194817975: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-84fce3b948a4162e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nắng
+gloss: sunshine
+keystrokes:
+  telex: nawsng
+  vni: na81ng
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-2b3a02fecdff7fe3: 0.2
+  concept-72538903b271cf7b: 0.5
+tags:
+  - vietnamese-typing-practice

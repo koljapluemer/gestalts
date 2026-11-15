@@ -1,0 +1,21 @@
+id: typing-word-6919d962bc37d1eb
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mở
+gloss: open
+keystrokes:
+  telex: mowr
+  vni: mo73
+marks:
+  - at: 1
+    mark: ̛
+    key: ơ
+  - at: 1
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-5dc9619ebc6cb2e5: 0.2
+  concept-6dc166805aeda499: 0.5
+tags:
+  - vietnamese-typing-practice

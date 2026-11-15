@@ -1,0 +1,25 @@
+id: typing-word-e25b3986d0b3cc79
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: lớp học
+gloss: classroom
+keystrokes:
+  telex: lowsp hojc
+  vni: lo71p ho5c
+marks:
+  - at: 1
+    mark: ̛
+    key: ơ
+  - at: 1
+    mark: ́
+    key: sắc
+  - at: 5
+    mark: ̣
+    key: nặng
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-295e1020468ab696: 0.2
+  concept-3cf550b4234f77f6: 0.333333
+  concept-6dc166805aeda499: 0.333333
+tags:
+  - vietnamese-typing-practice

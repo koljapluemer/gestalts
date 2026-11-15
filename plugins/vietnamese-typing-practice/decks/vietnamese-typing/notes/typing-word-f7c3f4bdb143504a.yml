@@ -1,0 +1,21 @@
+id: typing-word-f7c3f4bdb143504a
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mệt
+gloss: tired
+keystrokes:
+  telex: meejt
+  vni: me65t
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.5
+  concept-4caa50a1503792f9: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

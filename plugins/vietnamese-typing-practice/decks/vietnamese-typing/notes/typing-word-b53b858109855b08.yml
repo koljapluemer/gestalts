@@ -1,0 +1,17 @@
+id: typing-word-b53b858109855b08
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ảnh
+gloss: photo
+keystrokes:
+  telex: arnh
+  vni: a3nh
+marks:
+  - at: 0
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 1
+  concept-e54a01c1b847d961: 0.2
+tags:
+  - vietnamese-typing-practice

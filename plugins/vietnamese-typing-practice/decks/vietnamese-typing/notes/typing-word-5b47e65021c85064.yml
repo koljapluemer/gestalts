@@ -1,0 +1,20 @@
+id: typing-word-5b47e65021c85064
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nhà hàng
+gloss: restaurant
+keystrokes:
+  telex: nhaf hafng
+  vni: nha2 ha2ng
+marks:
+  - at: 2
+    mark: ̀
+    key: huyền
+  - at: 5
+    mark: ̀
+    key: huyền
+concepts:
+  concept-95d9c242b1d99012: 1
+  concept-d64d7435b8dd5edf: 0.2
+tags:
+  - vietnamese-typing-practice

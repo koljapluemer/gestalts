@@ -1,0 +1,17 @@
+id: typing-word-1a13add5a0157735
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chân
+gloss: leg
+keystrokes:
+  telex: chaan
+  vni: cha6n
+marks:
+  - at: 2
+    mark: ̂
+    key: â
+concepts:
+  concept-d31a748283f20daf: 0.2
+  concept-ed07d4945fefdb8a: 1
+tags:
+  - vietnamese-typing-practice

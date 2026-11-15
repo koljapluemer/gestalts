@@ -1,0 +1,21 @@
+id: typing-word-55debcaf0a6b6af5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đỏ
+gloss: red
+keystrokes:
+  telex: ddor
+  vni: d9o3
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-5b8054136c9391ff: 0.2
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

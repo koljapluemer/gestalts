@@ -1,0 +1,17 @@
+id: typing-word-3d506a76a545d23f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: yêu
+gloss: love
+keystrokes:
+  telex: yeeu
+  vni: ye6u
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+concepts:
+  concept-565421a9814dd807: 1
+  concept-dfaec0966349e70b: 0.2
+tags:
+  - vietnamese-typing-practice

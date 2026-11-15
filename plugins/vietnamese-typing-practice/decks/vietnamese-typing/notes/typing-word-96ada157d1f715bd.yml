@@ -1,0 +1,21 @@
+id: typing-word-96ada157d1f715bd
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: muối
+gloss: salt
+keystrokes:
+  telex: muoois
+  vni: muo6i1
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-763760e710513b97: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

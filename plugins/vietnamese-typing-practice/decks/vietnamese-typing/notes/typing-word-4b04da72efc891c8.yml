@@ -1,0 +1,21 @@
+id: typing-word-4b04da72efc891c8
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: quần
+gloss: pants
+keystrokes:
+  telex: quaafn
+  vni: qua62n
+marks:
+  - at: 2
+    mark: ̂
+    key: â
+  - at: 2
+    mark: ̀
+    key: huyền
+concepts:
+  concept-95d9c242b1d99012: 0.5
+  concept-adbca665a57b7340: 0.2
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

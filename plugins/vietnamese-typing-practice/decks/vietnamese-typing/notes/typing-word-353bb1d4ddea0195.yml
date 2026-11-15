@@ -1,0 +1,21 @@
+id: typing-word-353bb1d4ddea0195
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cửa
+gloss: door
+keystrokes:
+  telex: cuwar
+  vni: cu7a3
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 1
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-02a7775ecf90fd2b: 0.2
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-a72c8e899127c1cc: 0.5
+tags:
+  - vietnamese-typing-practice

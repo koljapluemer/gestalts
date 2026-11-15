@@ -1,0 +1,21 @@
+id: typing-word-c86d6fa42cfeaf6f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ngựa
+gloss: horse
+keystrokes:
+  telex: nguwaj
+  vni: ngu7a5
+marks:
+  - at: 2
+    mark: ̛
+    key: ư
+  - at: 2
+    mark: ̣
+    key: nặng
+concepts:
+  concept-19290a5fb7ddd72e: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-a72c8e899127c1cc: 0.5
+tags:
+  - vietnamese-typing-practice

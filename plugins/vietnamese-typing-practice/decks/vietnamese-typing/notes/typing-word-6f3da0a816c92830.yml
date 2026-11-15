@@ -1,0 +1,21 @@
+id: typing-word-6f3da0a816c92830
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cà phê
+gloss: coffee
+keystrokes:
+  telex: caf phee
+  vni: ca2 phe6
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+  - at: 5
+    mark: ̂
+    key: ê
+concepts:
+  concept-565421a9814dd807: 0.5
+  concept-95d9c242b1d99012: 0.5
+  concept-9ad7f7157b391271: 0.2
+tags:
+  - vietnamese-typing-practice

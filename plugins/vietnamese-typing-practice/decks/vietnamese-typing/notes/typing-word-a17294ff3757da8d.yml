@@ -1,0 +1,28 @@
+id: typing-word-a17294ff3757da8d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cửa sổ
+gloss: window
+keystrokes:
+  telex: cuwar soor
+  vni: cu7a3 so63
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 1
+    mark: ̉
+    key: hỏi
+  - at: 5
+    mark: ̂
+    key: ô
+  - at: 5
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-a72c8e899127c1cc: 0.25
+  concept-a9bb53eb875ffd65: 0.2
+  concept-e3325579098c8e0d: 0.25
+tags:
+  - vietnamese-typing-practice

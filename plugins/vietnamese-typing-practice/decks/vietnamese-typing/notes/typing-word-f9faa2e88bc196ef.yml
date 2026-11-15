@@ -1,0 +1,21 @@
+id: typing-word-f9faa2e88bc196ef
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chúng tôi
+gloss: we
+keystrokes:
+  telex: chusng tooi
+  vni: chu1ng to6i
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 7
+    mark: ̂
+    key: ô
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-349577b806859680: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

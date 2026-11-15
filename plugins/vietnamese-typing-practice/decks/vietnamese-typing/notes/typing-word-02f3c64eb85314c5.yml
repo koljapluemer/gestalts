@@ -1,0 +1,17 @@
+id: typing-word-02f3c64eb85314c5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bán
+gloss: sell
+keystrokes:
+  telex: basn
+  vni: ba1n
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-a80c58cedeb963a6: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-e1285ca4ee75decf
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chị gái
+gloss: older sister
+keystrokes:
+  telex: chij gais
+  vni: chi5 gai1
+marks:
+  - at: 2
+    mark: ̣
+    key: nặng
+  - at: 5
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-3cf550b4234f77f6: 0.5
+  concept-883ac3a32ea0026d: 0.2
+tags:
+  - vietnamese-typing-practice

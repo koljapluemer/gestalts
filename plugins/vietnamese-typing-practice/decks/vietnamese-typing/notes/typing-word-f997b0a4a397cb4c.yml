@@ -1,0 +1,17 @@
+id: typing-word-f997b0a4a397cb4c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: con gái
+gloss: daughter
+keystrokes:
+  telex: con gais
+  vni: con gai1
+marks:
+  - at: 5
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-8287e7de6def905f: 0.2
+tags:
+  - vietnamese-typing-practice

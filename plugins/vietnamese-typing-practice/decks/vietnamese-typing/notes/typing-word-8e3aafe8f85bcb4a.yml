@@ -1,0 +1,17 @@
+id: typing-word-8e3aafe8f85bcb4a
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: có
+gloss: have
+keystrokes:
+  telex: cos
+  vni: co1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-770660134094992f: 0.2
+tags:
+  - vietnamese-typing-practice

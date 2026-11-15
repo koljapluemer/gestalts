@@ -1,0 +1,17 @@
+id: typing-word-e530a4ec95132d4f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tôi
+gloss: I
+keystrokes:
+  telex: tooi
+  vni: to6i
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+concepts:
+  concept-7ec02c0dc614babd: 0.2
+  concept-e3325579098c8e0d: 1
+tags:
+  - vietnamese-typing-practice

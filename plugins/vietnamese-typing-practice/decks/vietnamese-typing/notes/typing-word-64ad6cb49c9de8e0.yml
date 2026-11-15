@@ -1,0 +1,17 @@
+id: typing-word-64ad6cb49c9de8e0
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nâu
+gloss: brown
+keystrokes:
+  telex: naau
+  vni: na6u
+marks:
+  - at: 1
+    mark: ̂
+    key: â
+concepts:
+  concept-032cdf578c3b1c42: 0.2
+  concept-ed07d4945fefdb8a: 1
+tags:
+  - vietnamese-typing-practice

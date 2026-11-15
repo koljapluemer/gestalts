@@ -1,0 +1,25 @@
+id: typing-word-7f4e3281d3057d0e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đứng
+gloss: stand
+keystrokes:
+  telex: dduwsng
+  vni: d9u71ng
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-7f2287098165a851: 0.2
+  concept-a72c8e899127c1cc: 0.333333
+  concept-dc88b7e466f66e29: 0.333333
+tags:
+  - vietnamese-typing-practice

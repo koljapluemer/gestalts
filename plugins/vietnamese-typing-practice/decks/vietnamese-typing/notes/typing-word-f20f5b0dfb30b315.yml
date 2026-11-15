@@ -1,0 +1,13 @@
+id: typing-word-f20f5b0dfb30b315
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: sao
+gloss: star
+keystrokes:
+  telex: sao
+  vni: sao
+marks: []
+concepts:
+  concept-1dea03ce2637b267: 0.2
+tags:
+  - vietnamese-typing-practice

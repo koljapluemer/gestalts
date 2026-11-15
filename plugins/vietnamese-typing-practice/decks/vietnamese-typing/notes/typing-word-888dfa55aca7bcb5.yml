@@ -1,0 +1,17 @@
+id: typing-word-888dfa55aca7bcb5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chín
+gloss: nine
+keystrokes:
+  telex: chisn
+  vni: chi1n
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-cf99847e237e476f: 0.2
+tags:
+  - vietnamese-typing-practice

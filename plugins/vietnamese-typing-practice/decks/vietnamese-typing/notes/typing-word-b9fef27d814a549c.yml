@@ -1,0 +1,17 @@
+id: typing-word-b9fef27d814a549c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hôm nay
+gloss: today
+keystrokes:
+  telex: hoom nay
+  vni: ho6m nay
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+concepts:
+  concept-a40cf73352e462d8: 0.2
+  concept-e3325579098c8e0d: 1
+tags:
+  - vietnamese-typing-practice

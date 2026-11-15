@@ -1,0 +1,17 @@
+id: typing-word-20a807b26746f955
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: gà
+gloss: chicken
+keystrokes:
+  telex: gaf
+  vni: ga2
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+concepts:
+  concept-8236707f1b38062e: 0.2
+  concept-95d9c242b1d99012: 1
+tags:
+  - vietnamese-typing-practice

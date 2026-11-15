@@ -1,0 +1,17 @@
+id: typing-word-c452420738770799
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mũi
+gloss: nose
+keystrokes:
+  telex: muix
+  vni: mui4
+marks:
+  - at: 1
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 1
+  concept-9c749d5507c2798f: 0.2
+tags:
+  - vietnamese-typing-practice

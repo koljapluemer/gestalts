@@ -1,0 +1,25 @@
+id: typing-word-19fcf7ce164d8517
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: buổi sáng
+gloss: morning
+keystrokes:
+  telex: buooir sasng
+  vni: buo6i3 sa1ng
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ̉
+    key: hỏi
+  - at: 6
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-1a2e4e1f3c21cf27: 0.333333
+  concept-e3325579098c8e0d: 0.333333
+  concept-ef49ff84c7c43620: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,13 @@
+id: typing-word-6f28a8326a158e31
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: phim
+gloss: movie
+keystrokes:
+  telex: phim
+  vni: phim
+marks: []
+concepts:
+  concept-1a2081a61343ff55: 0.2
+tags:
+  - vietnamese-typing-practice

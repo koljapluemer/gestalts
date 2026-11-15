@@ -1,0 +1,21 @@
+id: typing-word-3dc0a234e3b8374f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: biết
+gloss: know
+keystrokes:
+  telex: bieest
+  vni: bie61t
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-9ba0cec6f03d03b3: 0.2
+tags:
+  - vietnamese-typing-practice

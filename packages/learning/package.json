@@ -6,7 +6,7 @@
   "exports": { ".": "./src/index.ts" },
   "files": ["src"],
   "scripts": { "typecheck": "tsc -p ." },
-  "dependencies": { "@gestalts/view": "workspace:*", "ts-fsrs": "6.0.0" },
+  "dependencies": { "@gestalts/view": "workspace:*", "iso-639-3": "3.0.1", "ts-fsrs": "6.0.0" },
   "peerDependencies": { "react": "19.3.1" },
   "devDependencies": { "react": "19.3.1" }
 }

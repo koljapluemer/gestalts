@@ -1,0 +1,17 @@
+id: typing-word-a1a3f6eb7c48b13c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tím
+gloss: purple
+keystrokes:
+  telex: tism
+  vni: ti1m
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-e9fd97f82831d467: 0.2
+tags:
+  - vietnamese-typing-practice

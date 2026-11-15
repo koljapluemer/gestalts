@@ -1,0 +1,17 @@
+id: typing-word-3938b2f858775eb5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ga tàu
+gloss: train station
+keystrokes:
+  telex: ga tauf
+  vni: ga tau2
+marks:
+  - at: 4
+    mark: ̀
+    key: huyền
+concepts:
+  concept-663cc56718139ff4: 0.2
+  concept-95d9c242b1d99012: 1
+tags:
+  - vietnamese-typing-practice

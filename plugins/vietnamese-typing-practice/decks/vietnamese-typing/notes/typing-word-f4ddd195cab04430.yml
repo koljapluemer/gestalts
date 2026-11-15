@@ -1,0 +1,13 @@
+id: typing-word-f4ddd195cab04430
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tai
+gloss: ear
+keystrokes:
+  telex: tai
+  vni: tai
+marks: []
+concepts:
+  concept-04ad4c0897298423: 0.2
+tags:
+  - vietnamese-typing-practice

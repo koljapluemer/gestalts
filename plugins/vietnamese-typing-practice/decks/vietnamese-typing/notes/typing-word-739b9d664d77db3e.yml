@@ -1,0 +1,13 @@
+id: typing-word-739b9d664d77db3e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hai
+gloss: two
+keystrokes:
+  telex: hai
+  vni: hai
+marks: []
+concepts:
+  concept-67e11709cbb5eee5: 0.2
+tags:
+  - vietnamese-typing-practice

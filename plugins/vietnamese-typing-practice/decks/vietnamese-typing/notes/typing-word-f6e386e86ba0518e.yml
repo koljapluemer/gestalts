@@ -1,0 +1,21 @@
+id: typing-word-f6e386e86ba0518e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đóng
+gloss: close
+keystrokes:
+  telex: ddosng
+  vni: d9o1ng
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-af0f679a8b570d8a: 0.2
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

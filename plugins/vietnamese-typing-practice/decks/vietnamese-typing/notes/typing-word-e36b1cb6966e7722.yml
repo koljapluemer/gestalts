@@ -1,0 +1,17 @@
+id: typing-word-e36b1cb6966e7722
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tám
+gloss: eight
+keystrokes:
+  telex: tasm
+  vni: ta1m
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-f694b6a0a53e24c3: 0.2
+tags:
+  - vietnamese-typing-practice

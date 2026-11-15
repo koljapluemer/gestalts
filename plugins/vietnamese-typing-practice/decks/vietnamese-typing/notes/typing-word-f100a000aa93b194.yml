@@ -1,0 +1,21 @@
+id: typing-word-f100a000aa93b194
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đẹp
+gloss: beautiful
+keystrokes:
+  telex: ddejp
+  vni: d9e5p
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-27968f95612a1261: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-dc88b7e466f66e29: 0.5
+tags:
+  - vietnamese-typing-practice

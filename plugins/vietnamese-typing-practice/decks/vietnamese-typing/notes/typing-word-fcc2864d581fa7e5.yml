@@ -1,0 +1,17 @@
+id: typing-word-fcc2864d581fa7e5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mát
+gloss: cool
+keystrokes:
+  telex: mast
+  vni: ma1t
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-60b04dc2fc5c9136: 0.2
+tags:
+  - vietnamese-typing-practice

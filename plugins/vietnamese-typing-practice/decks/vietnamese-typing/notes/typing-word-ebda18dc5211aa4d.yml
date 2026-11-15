@@ -1,0 +1,21 @@
+id: typing-word-ebda18dc5211aa4d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: đọc
+gloss: read
+keystrokes:
+  telex: ddojc
+  vni: d9o5c
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.5
+  concept-dc88b7e466f66e29: 0.5
+  concept-f34a65ef7606a600: 0.2
+tags:
+  - vietnamese-typing-practice

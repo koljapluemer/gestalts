@@ -1,0 +1,17 @@
+id: typing-word-0ec84c3fdadbdb8c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: không
+gloss: no
+keystrokes:
+  telex: khoong
+  vni: kho6ng
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+concepts:
+  concept-0418a19388bebbf7: 0.2
+  concept-e3325579098c8e0d: 1
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,17 @@
+id: typing-word-b8216256c432b8ce
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ăn
+gloss: eat
+keystrokes:
+  telex: awn
+  vni: a8n
+marks:
+  - at: 0
+    mark: ̆
+    key: ă
+concepts:
+  concept-72538903b271cf7b: 1
+  concept-bc880d7d6e3fec18: 0.2
+tags:
+  - vietnamese-typing-practice

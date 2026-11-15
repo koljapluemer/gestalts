@@ -1,0 +1,21 @@
+id: typing-word-c5571993c386e5e9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chết
+gloss: die
+keystrokes:
+  telex: cheest
+  vni: che61t
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-4cc812e021cf1b10: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

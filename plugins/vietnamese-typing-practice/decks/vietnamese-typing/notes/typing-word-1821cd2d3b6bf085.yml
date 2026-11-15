@@ -1,0 +1,17 @@
+id: typing-word-1821cd2d3b6bf085
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: năm nay
+gloss: this year
+keystrokes:
+  telex: nawm nay
+  vni: na8m nay
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+concepts:
+  concept-09e59ece3db32e78: 0.2
+  concept-72538903b271cf7b: 1
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,17 @@
+id: typing-word-127f1dca79c943bb
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: khỏe
+gloss: healthy
+keystrokes:
+  telex: khoer
+  vni: khoe3
+marks:
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 1
+  concept-ea2f6cab8f1e1259: 0.2
+tags:
+  - vietnamese-typing-practice

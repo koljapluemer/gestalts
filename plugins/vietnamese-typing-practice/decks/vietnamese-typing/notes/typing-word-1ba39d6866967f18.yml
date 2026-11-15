@@ -1,0 +1,25 @@
+id: typing-word-1ba39d6866967f18
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: thức ăn
+gloss: food
+keystrokes:
+  telex: thuwsc awn
+  vni: thu71c a8n
+marks:
+  - at: 2
+    mark: ̛
+    key: ư
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 5
+    mark: ̆
+    key: ă
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-72538903b271cf7b: 0.333333
+  concept-73b0414f03298074: 0.2
+  concept-a72c8e899127c1cc: 0.333333
+tags:
+  - vietnamese-typing-practice

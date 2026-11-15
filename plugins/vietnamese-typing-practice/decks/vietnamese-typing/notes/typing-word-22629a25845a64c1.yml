@@ -1,0 +1,17 @@
+id: typing-word-22629a25845a64c1
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: năm
+gloss: five
+keystrokes:
+  telex: nawm
+  vni: na8m
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+concepts:
+  concept-72538903b271cf7b: 1
+  concept-dc2283baf3049325: 0.2
+tags:
+  - vietnamese-typing-practice

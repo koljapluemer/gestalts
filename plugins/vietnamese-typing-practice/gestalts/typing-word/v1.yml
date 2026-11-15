@@ -1,0 +1,27 @@
+name: typing-word
+version: 1
+description: >-
+  A Vietnamese word or expression to type, of the kind its `model` makes: `text` (NFC) as shown, `gloss` its meaning,
+  `keystrokes` the keys that type it with TELEX and with VNI. `marks` are its tone marks and marked letters, each at
+  its position `at` in `text`: the letter typed there contains `mark` (lowercased and decomposed, NFD) if the mark is
+  right, and `key` is the response a missing one stands for. `concepts` maps the concepts it practises to how
+  strongly, from 0 to 1.
+fields:
+  model: { type: ref, required: true, targets: [item-model] }
+  text: { type: string, required: true }
+  gloss: { type: string }
+  keystrokes:
+    type: map
+    fields:
+      telex: { type: string, required: true }
+      vni: { type: string, required: true }
+  marks:
+    type: list
+    items:
+      type: map
+      fields:
+        at: { type: integer, required: true, min: 0 }
+        mark: { type: string, required: true }
+        key: { type: string, required: true }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }
+  tags: { type: string_list }

@@ -1,0 +1,17 @@
+id: typing-word-83faa6b00e44329c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xe hơi
+gloss: car
+keystrokes:
+  telex: xe howi
+  vni: xe ho7i
+marks:
+  - at: 4
+    mark: ̛
+    key: ơ
+concepts:
+  concept-6dc166805aeda499: 1
+  concept-b3ef64e9f6aa3805: 0.2
+tags:
+  - vietnamese-typing-practice

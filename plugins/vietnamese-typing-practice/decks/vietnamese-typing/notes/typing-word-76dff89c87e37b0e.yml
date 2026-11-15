@@ -1,0 +1,21 @@
+id: typing-word-76dff89c87e37b0e
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tuổi
+gloss: age
+keystrokes:
+  telex: tuooir
+  vni: tuo6i3
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-e3325579098c8e0d: 0.5
+  concept-e61a7b5dd63032d4: 0.2
+tags:
+  - vietnamese-typing-practice

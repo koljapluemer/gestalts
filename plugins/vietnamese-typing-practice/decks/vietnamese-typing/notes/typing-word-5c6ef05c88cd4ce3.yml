@@ -1,0 +1,21 @@
+id: typing-word-5c6ef05c88cd4ce3
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: giấy
+gloss: paper
+keystrokes:
+  telex: giaays
+  vni: gia6y1
+marks:
+  - at: 2
+    mark: ̂
+    key: â
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-3fab1c1b6fe27ac1: 0.2
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

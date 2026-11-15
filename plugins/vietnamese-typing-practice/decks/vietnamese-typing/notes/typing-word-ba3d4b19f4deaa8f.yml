@@ -1,0 +1,13 @@
+id: typing-word-ba3d4b19f4deaa8f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mua
+gloss: buy
+keystrokes:
+  telex: mua
+  vni: mua
+marks: []
+concepts:
+  concept-62ac4237b4e3a32b: 0.2
+tags:
+  - vietnamese-typing-practice

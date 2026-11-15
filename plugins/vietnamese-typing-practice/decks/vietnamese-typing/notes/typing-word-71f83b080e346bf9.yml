@@ -1,0 +1,21 @@
+id: typing-word-71f83b080e346bf9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bánh mì
+gloss: bread
+keystrokes:
+  telex: basnh mif
+  vni: ba1nh mi2
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+  - at: 6
+    mark: ̀
+    key: huyền
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-171d695f8e8f93da: 0.2
+  concept-95d9c242b1d99012: 0.5
+tags:
+  - vietnamese-typing-practice

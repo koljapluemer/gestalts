@@ -1,0 +1,17 @@
+id: typing-word-c52914d25634dd22
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tên
+gloss: name
+keystrokes:
+  telex: teen
+  vni: te6n
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+concepts:
+  concept-3102a7ba5a0a48ba: 0.2
+  concept-565421a9814dd807: 1
+tags:
+  - vietnamese-typing-practice

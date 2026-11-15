@@ -1,0 +1,21 @@
+id: typing-word-2fa9223271a7e65f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xấu
+gloss: bad
+keystrokes:
+  telex: xaaus
+  vni: xa6u1
+marks:
+  - at: 1
+    mark: ̂
+    key: â
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-4c0eb6513a8aef9c: 0.2
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

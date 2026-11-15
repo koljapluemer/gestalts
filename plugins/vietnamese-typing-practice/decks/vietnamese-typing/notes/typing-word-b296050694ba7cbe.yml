@@ -1,0 +1,24 @@
+id: typing-word-b296050694ba7cbe
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tạm biệt
+gloss: goodbye
+keystrokes:
+  telex: tajm bieejt
+  vni: ta5m bie65t
+marks:
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 6
+    mark: ̂
+    key: ê
+  - at: 6
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.666667
+  concept-565421a9814dd807: 0.333333
+  concept-b70199d1d5805e67: 0.2
+tags:
+  - vietnamese-typing-practice

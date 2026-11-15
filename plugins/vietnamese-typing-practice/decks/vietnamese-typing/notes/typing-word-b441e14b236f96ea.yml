@@ -1,0 +1,21 @@
+id: typing-word-b441e14b236f96ea
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: âm nhạc
+gloss: music
+keystrokes:
+  telex: aam nhajc
+  vni: a6m nha5c
+marks:
+  - at: 0
+    mark: ̂
+    key: â
+  - at: 5
+    mark: ̣
+    key: nặng
+concepts:
+  concept-2e66bb0fcea2a6e2: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

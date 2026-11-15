@@ -1,0 +1,17 @@
+id: typing-word-176011db82ef0c7b
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: khó
+gloss: difficult
+keystrokes:
+  telex: khos
+  vni: kho1
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-c3fbcb265d424914: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-2157a9dac1194932
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: tiếng Anh
+gloss: English
+keystrokes:
+  telex: tieesng Anh
+  vni: tie61ng Anh
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-565421a9814dd807: 0.5
+  concept-8fe53b2a1ee61afa: 0.2
+tags:
+  - vietnamese-typing-practice

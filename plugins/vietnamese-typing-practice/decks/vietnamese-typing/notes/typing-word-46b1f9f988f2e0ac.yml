@@ -1,0 +1,13 @@
+id: typing-word-46b1f9f988f2e0ac
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: chim
+gloss: bird
+keystrokes:
+  telex: chim
+  vni: chim
+marks: []
+concepts:
+  concept-f9a6b4d9d0512e71: 0.2
+tags:
+  - vietnamese-typing-practice

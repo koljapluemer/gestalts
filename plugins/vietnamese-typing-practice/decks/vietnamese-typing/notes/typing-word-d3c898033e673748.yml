@@ -1,0 +1,25 @@
+id: typing-word-d3c898033e673748
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: quần áo
+gloss: clothes
+keystrokes:
+  telex: quaafn aos
+  vni: qua62n ao1
+marks:
+  - at: 2
+    mark: ̂
+    key: â
+  - at: 2
+    mark: ̀
+    key: huyền
+  - at: 5
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-95d9c242b1d99012: 0.333333
+  concept-b5321553cea3092a: 0.2
+  concept-ed07d4945fefdb8a: 0.333333
+tags:
+  - vietnamese-typing-practice

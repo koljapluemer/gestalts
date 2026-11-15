@@ -1,0 +1,21 @@
+id: typing-word-fda96d3724bafbd5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: khách sạn
+gloss: hotel
+keystrokes:
+  telex: khasch sajn
+  vni: kha1ch sa5n
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 7
+    mark: ̣
+    key: nặng
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-3cf550b4234f77f6: 0.5
+  concept-a884183c43c0695f: 0.2
+tags:
+  - vietnamese-typing-practice

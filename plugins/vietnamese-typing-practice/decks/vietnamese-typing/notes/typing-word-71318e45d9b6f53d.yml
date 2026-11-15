@@ -1,0 +1,24 @@
+id: typing-word-71318e45d9b6f53d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bóng đá
+gloss: football
+keystrokes:
+  telex: bosng ddas
+  vni: bo1ng d9a1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+  - at: 5
+    mark: đ
+    key: đ
+  - at: 6
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.666667
+  concept-dc88b7e466f66e29: 0.333333
+  concept-e7ef8a58f6173bb5: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,24 @@
+id: typing-word-a13e08ae9101fd47
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: mặt trăng
+gloss: moon
+keystrokes:
+  telex: mawjt trawng
+  vni: ma85t tra8ng
+marks:
+  - at: 1
+    mark: ̆
+    key: ă
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 6
+    mark: ̆
+    key: ă
+concepts:
+  concept-364b405c6f126c00: 0.2
+  concept-3cf550b4234f77f6: 0.333333
+  concept-72538903b271cf7b: 0.666667
+tags:
+  - vietnamese-typing-practice

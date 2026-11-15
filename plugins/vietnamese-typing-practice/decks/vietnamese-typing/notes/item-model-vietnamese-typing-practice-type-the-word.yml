@@ -1,0 +1,56 @@
+id: item-model-vietnamese-typing-practice-type-the-word
+gestalt: item-model@1
+name: type-the-word
+title: Type the word as shown
+engine: vietnamese-typing-practice/type-the-word
+responses:
+  sắc:
+    label: wrong or missing sắc
+    concepts:
+      concept-126bc4768373b614: 1
+  huyền:
+    label: wrong or missing huyền
+    concepts:
+      concept-95d9c242b1d99012: 1
+  hỏi:
+    label: wrong or missing hỏi
+    concepts:
+      concept-1a2e4e1f3c21cf27: 1
+  ngã:
+    label: wrong or missing ngã
+    concepts:
+      concept-4a799879fe30d914: 1
+  nặng:
+    label: wrong or missing nặng
+    concepts:
+      concept-3cf550b4234f77f6: 1
+  ă:
+    label: wrong or missing ă
+    concepts:
+      concept-72538903b271cf7b: 1
+  â:
+    label: wrong or missing â
+    concepts:
+      concept-ed07d4945fefdb8a: 1
+  ê:
+    label: wrong or missing ê
+    concepts:
+      concept-565421a9814dd807: 1
+  ô:
+    label: wrong or missing ô
+    concepts:
+      concept-e3325579098c8e0d: 1
+  ơ:
+    label: wrong or missing ơ
+    concepts:
+      concept-6dc166805aeda499: 1
+  ư:
+    label: wrong or missing ư
+    concepts:
+      concept-a72c8e899127c1cc: 1
+  đ:
+    label: wrong or missing đ
+    concepts:
+      concept-dc88b7e466f66e29: 1
+tags:
+  - vietnamese-typing-practice

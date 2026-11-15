@@ -1,0 +1,17 @@
+id: typing-word-f8308c8a2ae4c91d
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cơm
+gloss: rice
+keystrokes:
+  telex: cowm
+  vni: co7m
+marks:
+  - at: 1
+    mark: ̛
+    key: ơ
+concepts:
+  concept-04c3339cc49355d2: 0.2
+  concept-6dc166805aeda499: 1
+tags:
+  - vietnamese-typing-practice

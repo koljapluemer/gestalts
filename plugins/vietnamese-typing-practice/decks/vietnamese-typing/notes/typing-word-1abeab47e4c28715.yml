@@ -1,0 +1,13 @@
+id: typing-word-1abeab47e4c28715
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: con trai
+gloss: son
+keystrokes:
+  telex: con trai
+  vni: con trai
+marks: []
+concepts:
+  concept-83fd775b573943e7: 0.2
+tags:
+  - vietnamese-typing-practice

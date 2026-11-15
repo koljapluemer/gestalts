@@ -1,0 +1,29 @@
+id: typing-word-61e2f157d1e5aca1
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: trường học
+gloss: school
+keystrokes:
+  telex: truwowfng hojc
+  vni: tru7o72ng ho5c
+marks:
+  - at: 2
+    mark: ̛
+    key: ư
+  - at: 3
+    mark: ̛
+    key: ơ
+  - at: 3
+    mark: ̀
+    key: huyền
+  - at: 8
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.25
+  concept-6dc166805aeda499: 0.25
+  concept-95d9c242b1d99012: 0.25
+  concept-a72c8e899127c1cc: 0.25
+  concept-d1bbd4ffe75861af: 0.2
+tags:
+  - vietnamese-typing-practice

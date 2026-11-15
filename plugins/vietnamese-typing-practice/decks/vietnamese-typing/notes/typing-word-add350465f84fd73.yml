@@ -1,0 +1,21 @@
+id: typing-word-add350465f84fd73
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xin lỗi
+gloss: sorry
+keystrokes:
+  telex: xin looix
+  vni: xin lo6i4
+marks:
+  - at: 5
+    mark: ̂
+    key: ô
+  - at: 5
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 0.5
+  concept-d9796172d20435fe: 0.2
+  concept-e3325579098c8e0d: 0.5
+tags:
+  - vietnamese-typing-practice

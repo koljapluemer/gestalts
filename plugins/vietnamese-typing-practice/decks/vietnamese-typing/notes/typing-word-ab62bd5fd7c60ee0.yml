@@ -1,0 +1,28 @@
+id: typing-word-ab62bd5fd7c60ee0
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: buổi tối
+gloss: evening
+keystrokes:
+  telex: buooir toois
+  vni: buo6i3 to6i1
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 2
+    mark: ̉
+    key: hỏi
+  - at: 6
+    mark: ̂
+    key: ô
+  - at: 6
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.25
+  concept-1a2e4e1f3c21cf27: 0.25
+  concept-e3325579098c8e0d: 0.5
+  concept-e39b578b8662c1b9: 0.2
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,21 @@
+id: typing-word-998f990c6598d6fb
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: trái cây
+gloss: fruit
+keystrokes:
+  telex: trais caay
+  vni: trai1 ca6y
+marks:
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 6
+    mark: ̂
+    key: â
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-949f8ea93fc89edb: 0.2
+  concept-ed07d4945fefdb8a: 0.5
+tags:
+  - vietnamese-typing-practice

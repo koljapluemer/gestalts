@@ -1,0 +1,13 @@
+id: typing-word-c847afc45b20de01
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: heo
+gloss: pig
+keystrokes:
+  telex: heo
+  vni: heo
+marks: []
+concepts:
+  concept-84c9bbb375c9bbdf: 0.2
+tags:
+  - vietnamese-typing-practice

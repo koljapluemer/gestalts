@@ -1,0 +1,25 @@
+id: typing-word-d5cf6ca411f3a087
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: ngôn ngữ
+gloss: language
+keystrokes:
+  telex: ngoon nguwx
+  vni: ngo6n ngu74
+marks:
+  - at: 2
+    mark: ̂
+    key: ô
+  - at: 7
+    mark: ̛
+    key: ư
+  - at: 7
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 0.333333
+  concept-7fc537fe516cd1b9: 0.2
+  concept-a72c8e899127c1cc: 0.333333
+  concept-e3325579098c8e0d: 0.333333
+tags:
+  - vietnamese-typing-practice

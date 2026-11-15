@@ -1,0 +1,21 @@
+id: typing-word-a95b560d3da5ecc6
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bạn bè
+gloss: friends
+keystrokes:
+  telex: bajn bef
+  vni: ba5n be2
+marks:
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 5
+    mark: ̀
+    key: huyền
+concepts:
+  concept-17ee61beb7cc69b7: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-95d9c242b1d99012: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,13 @@
+id: typing-word-e9c7f0b52df4abec
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hoa
+gloss: flower
+keystrokes:
+  telex: hoa
+  vni: hoa
+marks: []
+concepts:
+  concept-8244d04210bdfa57: 0.2
+tags:
+  - vietnamese-typing-practice

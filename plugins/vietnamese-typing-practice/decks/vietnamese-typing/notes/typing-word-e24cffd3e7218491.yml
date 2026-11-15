@@ -1,0 +1,21 @@
+id: typing-word-e24cffd3e7218491
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: miệng
+gloss: mouth
+keystrokes:
+  telex: mieejng
+  vni: mie65ng
+marks:
+  - at: 2
+    mark: ̂
+    key: ê
+  - at: 2
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.5
+  concept-43bb3d39e181b1d3: 0.2
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,28 @@
+id: typing-word-72815dd020aae8f8
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nghề nghiệp
+gloss: job
+keystrokes:
+  telex: ngheef nghieejp
+  vni: nghe62 nghie65p
+marks:
+  - at: 3
+    mark: ̂
+    key: ê
+  - at: 3
+    mark: ̀
+    key: huyền
+  - at: 9
+    mark: ̂
+    key: ê
+  - at: 9
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 0.25
+  concept-565421a9814dd807: 0.5
+  concept-95d9c242b1d99012: 0.25
+  concept-c47643a7c50418a4: 0.2
+tags:
+  - vietnamese-typing-practice

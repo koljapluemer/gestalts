@@ -1,0 +1,17 @@
+id: typing-word-61c35c223fb69143
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: vàng
+gloss: yellow
+keystrokes:
+  telex: vafng
+  vni: va2ng
+marks:
+  - at: 1
+    mark: ̀
+    key: huyền
+concepts:
+  concept-4a33583b14813019: 0.2
+  concept-95d9c242b1d99012: 1
+tags:
+  - vietnamese-typing-practice

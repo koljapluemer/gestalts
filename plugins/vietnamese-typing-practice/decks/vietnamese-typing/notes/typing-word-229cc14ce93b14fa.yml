@@ -1,0 +1,17 @@
+id: typing-word-229cc14ce93b14fa
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xe máy
+gloss: motorbike
+keystrokes:
+  telex: xe mays
+  vni: xe may1
+marks:
+  - at: 4
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-ffce94e2ce472c0a: 0.2
+tags:
+  - vietnamese-typing-practice

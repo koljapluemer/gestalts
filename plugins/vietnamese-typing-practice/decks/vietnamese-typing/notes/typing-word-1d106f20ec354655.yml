@@ -1,0 +1,29 @@
+id: typing-word-1d106f20ec354655
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: câu trả lời
+gloss: answer
+keystrokes:
+  telex: caau trar lowif
+  vni: ca6u tra3 lo7i2
+marks:
+  - at: 1
+    mark: ̂
+    key: â
+  - at: 6
+    mark: ̉
+    key: hỏi
+  - at: 9
+    mark: ̛
+    key: ơ
+  - at: 9
+    mark: ̀
+    key: huyền
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.25
+  concept-6dc166805aeda499: 0.25
+  concept-95d9c242b1d99012: 0.25
+  concept-e0689a09617c59aa: 0.2
+  concept-ed07d4945fefdb8a: 0.25
+tags:
+  - vietnamese-typing-practice

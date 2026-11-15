@@ -1,0 +1,25 @@
+id: typing-word-143e4042b682727b
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: địa chỉ
+gloss: address
+keystrokes:
+  telex: ddiaj chir
+  vni: d9ia5 chi3
+marks:
+  - at: 0
+    mark: đ
+    key: đ
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 6
+    mark: ̉
+    key: hỏi
+concepts:
+  concept-0acbb1dd2a09b130: 0.2
+  concept-1a2e4e1f3c21cf27: 0.333333
+  concept-3cf550b4234f77f6: 0.333333
+  concept-dc88b7e466f66e29: 0.333333
+tags:
+  - vietnamese-typing-practice

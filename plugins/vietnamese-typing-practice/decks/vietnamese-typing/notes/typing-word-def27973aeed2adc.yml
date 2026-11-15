@@ -1,0 +1,21 @@
+id: typing-word-def27973aeed2adc
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cảm ơn
+gloss: thank you
+keystrokes:
+  telex: carm own
+  vni: ca3m o7n
+marks:
+  - at: 1
+    mark: ̉
+    key: hỏi
+  - at: 4
+    mark: ̛
+    key: ơ
+concepts:
+  concept-1a2e4e1f3c21cf27: 0.5
+  concept-6dc166805aeda499: 0.5
+  concept-f3de2c7551ce4098: 0.2
+tags:
+  - vietnamese-typing-practice

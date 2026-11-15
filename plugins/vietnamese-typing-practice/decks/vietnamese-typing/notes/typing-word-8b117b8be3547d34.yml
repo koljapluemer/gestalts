@@ -1,0 +1,13 @@
+id: typing-word-8b117b8be3547d34
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xanh
+gloss: blue
+keystrokes:
+  telex: xanh
+  vni: xanh
+marks: []
+concepts:
+  concept-69e3c74d7ea6a4d3: 0.2
+tags:
+  - vietnamese-typing-practice

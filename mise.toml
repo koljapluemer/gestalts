@@ -220,6 +220,10 @@ run = ["node plugins/world-map/tools/build-deck.ts", "mise run publish-data plug
 description = "Rebuild plugins/flags-practice's deck from its tools/data and world-map's, and publish it"
 run = ["node plugins/flags-practice/tools/build-deck.ts", "mise run publish-data plugins/flags-practice/decks/flags"]
 
+[tasks."vietnamese-typing-practice:deck"]
+description = "Rebuild plugins/vietnamese-typing-practice's deck from its tools/data and the phrasebook's Vietnamese deck, and publish it"
+run = ["node plugins/vietnamese-typing-practice/tools/build-deck.ts", "mise run publish-data plugins/vietnamese-typing-practice/decks/vietnamese-typing"]
+
 # --- vizint-workshop ---
 
 [tasks."vizint-workshop:dev"]

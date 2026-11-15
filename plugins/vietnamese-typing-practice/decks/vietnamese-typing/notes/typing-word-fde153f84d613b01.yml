@@ -1,0 +1,17 @@
+id: typing-word-fde153f84d613b01
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: xe buýt
+gloss: bus
+keystrokes:
+  telex: xe buyst
+  vni: xe buy1t
+marks:
+  - at: 5
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-c8c444f01503223f: 0.2
+tags:
+  - vietnamese-typing-practice

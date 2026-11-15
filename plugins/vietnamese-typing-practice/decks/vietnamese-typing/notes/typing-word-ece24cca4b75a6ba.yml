@@ -1,0 +1,17 @@
+id: typing-word-ece24cca4b75a6ba
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bơi
+gloss: swim
+keystrokes:
+  telex: bowi
+  vni: bo7i
+marks:
+  - at: 1
+    mark: ̛
+    key: ơ
+concepts:
+  concept-0cbe7bbc104b3af3: 0.2
+  concept-6dc166805aeda499: 1
+tags:
+  - vietnamese-typing-practice

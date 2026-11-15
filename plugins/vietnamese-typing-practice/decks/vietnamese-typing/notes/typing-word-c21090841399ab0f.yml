@@ -1,0 +1,17 @@
+id: typing-word-c21090841399ab0f
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: dạy
+gloss: teach
+keystrokes:
+  telex: dayj
+  vni: day5
+marks:
+  - at: 1
+    mark: ̣
+    key: nặng
+concepts:
+  concept-3cf550b4234f77f6: 1
+  concept-ef07d90b89b58b6a: 0.2
+tags:
+  - vietnamese-typing-practice

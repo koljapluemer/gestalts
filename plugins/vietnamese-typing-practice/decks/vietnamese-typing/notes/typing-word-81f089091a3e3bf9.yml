@@ -1,0 +1,17 @@
+id: typing-word-81f089091a3e3bf9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: sáu
+gloss: six
+keystrokes:
+  telex: saus
+  vni: sau1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-ddc4213ab80d5e15: 0.2
+tags:
+  - vietnamese-typing-practice

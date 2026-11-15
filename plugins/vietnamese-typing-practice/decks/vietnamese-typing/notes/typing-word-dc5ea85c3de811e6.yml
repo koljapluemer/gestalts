@@ -1,0 +1,17 @@
+id: typing-word-dc5ea85c3de811e6
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cá
+gloss: fish
+keystrokes:
+  telex: cas
+  vni: ca1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-55586c8aa9c04739: 0.2
+tags:
+  - vietnamese-typing-practice

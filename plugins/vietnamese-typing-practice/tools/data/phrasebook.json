@@ -1,0 +1,10 @@
+[
+  ["vie: say hello", "xin chào"],
+  ["vie: say goodbye", "tạm biệt"],
+  ["vie: say thank you", "cảm ơn"],
+  ["vie: apologise", "xin lỗi"],
+  ["vie: say yes", "vâng"],
+  ["vie: say no", "không"],
+  ["vie: address as bạn", "bạn"],
+  ["vie: self as tôi", "tôi"]
+]

@@ -1,0 +1,21 @@
+id: typing-word-89d757e06cc0f06a
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: sữa
+gloss: milk
+keystrokes:
+  telex: suwax
+  vni: su7a4
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 1
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 0.5
+  concept-8b46fba09f3efb48: 0.2
+  concept-a72c8e899127c1cc: 0.5
+tags:
+  - vietnamese-typing-practice

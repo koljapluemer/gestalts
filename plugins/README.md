@@ -38,3 +38,12 @@ another's, like France's territories) and `lookalikes.json` (groups of flags tha
 `flag@1` practising a `flag: <name>` concept, linked both ways (weight 0.1) to world-map's `geography: <name>`
 concept of the country, whose yml it writes the same as world-map does. A flag's wrong options are its look-alikes,
 else its region's countries from world-map's `tools/data/countries.json`.
+
+`vietnamese-typing-practice/tools/build-deck.ts` (`mise run vietnamese-typing-practice:deck`) generates the
+vietnamese-typing deck from `tools/data/vie.json` (sam-learns-things' typingpractice word list, from linguanodon). What
+a mark of written Vietnamese is, and how TELEX and VNI type it, lives in `tools/script.ts`, and only there: the deck
+carries each word's keystrokes and marks, so the view knows no Vietnamese. Each word is a `typing-word@1` practising
+`vie:<word>` (0.2: it is copied, not recalled) and the `vie-script: <mark>` concepts of its tones and marked letters,
+by each one's share; the item model has a response per mark. `tools/data/phrasebook.json` pairs phrasebook intents
+with the word that mostly says them (linked 0.5 intent → word, 0.1 back); those concepts and `lang: vie` are copied
+from the phrasebook's built deck, so rebuild that first.

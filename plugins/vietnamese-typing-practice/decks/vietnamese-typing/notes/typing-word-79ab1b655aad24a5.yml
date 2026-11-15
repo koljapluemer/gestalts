@@ -1,0 +1,17 @@
+id: typing-word-79ab1b655aad24a5
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: thịt
+gloss: meat
+keystrokes:
+  telex: thijt
+  vni: thi5t
+marks:
+  - at: 2
+    mark: ̣
+    key: nặng
+concepts:
+  concept-14e81b4b3e93e2e0: 0.2
+  concept-3cf550b4234f77f6: 1
+tags:
+  - vietnamese-typing-practice

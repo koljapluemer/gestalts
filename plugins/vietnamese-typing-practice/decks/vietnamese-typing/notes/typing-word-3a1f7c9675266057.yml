@@ -1,0 +1,25 @@
+id: typing-word-3a1f7c9675266057
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hóa đơn
+gloss: bill
+keystrokes:
+  telex: hoas ddown
+  vni: hoa1 d9o7n
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+  - at: 4
+    mark: đ
+    key: đ
+  - at: 5
+    mark: ̛
+    key: ơ
+concepts:
+  concept-126bc4768373b614: 0.333333
+  concept-6dc166805aeda499: 0.333333
+  concept-7cd07934ea85747a: 0.2
+  concept-dc88b7e466f66e29: 0.333333
+tags:
+  - vietnamese-typing-practice

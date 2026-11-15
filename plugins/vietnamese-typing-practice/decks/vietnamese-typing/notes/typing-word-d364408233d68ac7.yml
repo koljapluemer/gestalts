@@ -1,0 +1,27 @@
+id: typing-word-d364408233d68ac7
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bệnh viện
+gloss: hospital
+keystrokes:
+  telex: beejnh vieejn
+  vni: be65nh vie65n
+marks:
+  - at: 1
+    mark: ̂
+    key: ê
+  - at: 1
+    mark: ̣
+    key: nặng
+  - at: 7
+    mark: ̂
+    key: ê
+  - at: 7
+    mark: ̣
+    key: nặng
+concepts:
+  concept-1fc547d2a17aee8f: 0.2
+  concept-3cf550b4234f77f6: 0.5
+  concept-565421a9814dd807: 0.5
+tags:
+  - vietnamese-typing-practice

@@ -1,0 +1,17 @@
+id: typing-word-20142adccc384aa9
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: hôm qua
+gloss: yesterday
+keystrokes:
+  telex: hoom qua
+  vni: ho6m qua
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+concepts:
+  concept-15867435ad08858f: 0.2
+  concept-e3325579098c8e0d: 1
+tags:
+  - vietnamese-typing-practice

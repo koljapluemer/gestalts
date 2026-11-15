@@ -1,0 +1,17 @@
+id: typing-word-077f96ca1d559bff
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: cũ
+gloss: old
+keystrokes:
+  telex: cux
+  vni: cu4
+marks:
+  - at: 1
+    mark: ̃
+    key: ngã
+concepts:
+  concept-4a799879fe30d914: 1
+  concept-8dd8fcbaf61644df: 0.2
+tags:
+  - vietnamese-typing-practice

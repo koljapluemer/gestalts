@@ -1,0 +1,21 @@
+id: typing-word-dd0bfdcc0de1415c
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: bốn
+gloss: four
+keystrokes:
+  telex: boosn
+  vni: bo61n
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 0.5
+  concept-e3325579098c8e0d: 0.5
+  concept-fd68952a205dca4d: 0.2
+tags:
+  - vietnamese-typing-practice

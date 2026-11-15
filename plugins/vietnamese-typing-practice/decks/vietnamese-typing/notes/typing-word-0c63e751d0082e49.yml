@@ -1,0 +1,29 @@
+id: typing-word-0c63e751d0082e49
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: nước ngoài
+gloss: abroad
+keystrokes:
+  telex: nuwowsc ngoaif
+  vni: nu7o71c ngoai2
+marks:
+  - at: 1
+    mark: ̛
+    key: ư
+  - at: 2
+    mark: ̛
+    key: ơ
+  - at: 2
+    mark: ́
+    key: sắc
+  - at: 8
+    mark: ̀
+    key: huyền
+concepts:
+  concept-0d85ba1cd1a01a92: 0.2
+  concept-126bc4768373b614: 0.25
+  concept-6dc166805aeda499: 0.25
+  concept-95d9c242b1d99012: 0.25
+  concept-a72c8e899127c1cc: 0.25
+tags:
+  - vietnamese-typing-practice

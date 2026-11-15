@@ -1,0 +1,17 @@
+id: typing-word-01cb79234ea25c63
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: vé
+gloss: ticket
+keystrokes:
+  telex: ves
+  vni: ve1
+marks:
+  - at: 1
+    mark: ́
+    key: sắc
+concepts:
+  concept-126bc4768373b614: 1
+  concept-8dd3ef61c667a04e: 0.2
+tags:
+  - vietnamese-typing-practice

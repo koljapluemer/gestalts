@@ -1,0 +1,17 @@
+id: typing-word-9797669cc4d609ee
+gestalt: typing-word@1
+model: item-model-vietnamese-typing-practice-type-the-word
+text: sông
+gloss: river
+keystrokes:
+  telex: soong
+  vni: so6ng
+marks:
+  - at: 1
+    mark: ̂
+    key: ô
+concepts:
+  concept-e08dda2ce2a8c538: 0.2
+  concept-e3325579098c8e0d: 1
+tags:
+  - vietnamese-typing-practice
