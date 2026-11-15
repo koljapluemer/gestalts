@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: MYS
 priority: 1
 concepts:
-  concept-8ab7035810a197f4: 1
+  concept-66e7ea4cb7de9d58: 1
 chance: 0
 tags:
   - world-map

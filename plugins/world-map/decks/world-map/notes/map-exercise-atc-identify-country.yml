@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: ATC
 priority: 3
 concepts:
-  concept-bb9b8065ea540f51: 1
+  concept-1f4dbc632d14605d: 1
 chance: 0.5
 tags:
   - world-map

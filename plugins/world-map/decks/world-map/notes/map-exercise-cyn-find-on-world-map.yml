@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: CYN
 priority: 1
 concepts:
-  concept-502212830e1e6e7a: 1
+  concept-675faa9f9f37ed7f: 1
 chance: 0
 tags:
   - world-map

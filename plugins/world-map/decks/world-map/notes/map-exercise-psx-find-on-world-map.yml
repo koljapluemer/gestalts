@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: PSX
 priority: 1
 concepts:
-  concept-cf953e351bb3268a: 1
+  concept-011ea9e0efd6bb1b: 1
 chance: 0
 tags:
   - world-map

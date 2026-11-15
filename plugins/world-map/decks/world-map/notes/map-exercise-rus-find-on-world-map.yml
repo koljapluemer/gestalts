@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: RUS
 priority: 2
 concepts:
-  concept-919048da4797a8e0: 1
+  concept-7e90fc99482c6dd3: 1
 chance: 0
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: GIN
 priority: 1
 concepts:
-  concept-1f33bc0c34be9f2e: 1
+  concept-c2a21cfb8a502de6: 1
 chance: 0
 tags:
   - world-map

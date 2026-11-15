@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: CPV
 priority: 3
 concepts:
-  concept-e0349e5d13381fcb: 1
+  concept-e6d0b51125ccaa30: 1
 chance: 0.5
 tags:
   - world-map

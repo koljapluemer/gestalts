@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: CIV
 priority: 1
 concepts:
-  concept-04867669d063031a: 1
+  concept-284526ce475ef896: 1
 chance: 0
 tags:
   - world-map

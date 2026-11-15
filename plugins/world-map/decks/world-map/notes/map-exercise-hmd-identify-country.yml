@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: HMD
 priority: 3
 concepts:
-  concept-55fd107861263c3d: 1
+  concept-d3e188ad0388ca56: 1
 chance: 0.5
 tags:
   - world-map

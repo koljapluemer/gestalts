@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: SUR
 priority: 1
 concepts:
-  concept-efe8cc59c9bf30b4: 1
+  concept-45a7d484cadc5d4d: 1
 chance: 0
 tags:
   - world-map

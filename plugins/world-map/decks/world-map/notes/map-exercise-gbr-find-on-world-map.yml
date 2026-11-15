@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: GBR
 priority: 2
 concepts:
-  concept-004a8257e0d12ea0: 1
+  concept-936ad0e514b1b27b: 1
 chance: 0
 tags:
   - world-map

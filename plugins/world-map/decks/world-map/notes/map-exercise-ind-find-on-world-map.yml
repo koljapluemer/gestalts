@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: IND
 priority: 2
 concepts:
-  concept-8e4c330b9871414d: 1
+  concept-fbb3172a4ea13f92: 1
 chance: 0
 tags:
   - world-map

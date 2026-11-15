@@ -27,5 +27,6 @@ them. CC BY 4.0, credited on every item.
 `world-map/tools/build-deck.ts` (`mise run world-map:deck`) generates the world-map deck from `tools/data`, exported
 once from sam-learns-things' world-map (which countries have which exercise, zoom levels, distractors, groups) with
 Natural Earth's shapes. It projects the shapes with d3-geo, so the view gets SVG paths and only scales and moves them.
-Each country is a `geography: <name>` concept, each kind of exercise an `item-model@1`, each exercise a
-`map-exercise@1` (a gestalt of the plugin's, with `country-group@1` and `map@1`).
+Each country is a `geography: <name>` concept, its id keyed by its code (`tools/concepts.ts`, shared with
+flags-practice), each kind of exercise an `item-model@1`, each exercise a `map-exercise@1` (a gestalt of the plugin's,
+with `country-group@1` and `map@1`).

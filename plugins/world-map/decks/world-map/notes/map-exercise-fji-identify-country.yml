@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: FJI
 priority: 3
 concepts:
-  concept-ce2df159fc1d1a50: 1
+  concept-0587be9dffdde63b: 1
 chance: 0.5
 tags:
   - world-map

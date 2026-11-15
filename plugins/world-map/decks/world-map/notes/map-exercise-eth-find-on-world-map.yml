@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ETH
 priority: 1
 concepts:
-  concept-5b9306bc3d05e33c: 1
+  concept-ea18cdfcc02acf3c: 1
 chance: 0
 tags:
   - world-map

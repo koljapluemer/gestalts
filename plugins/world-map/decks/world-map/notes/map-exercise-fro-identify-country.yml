@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: FRO
 priority: 3
 concepts:
-  concept-27e5a86b2daee99a: 1
+  concept-b5476e95690e5afc: 1
 chance: 0.5
 tags:
   - world-map

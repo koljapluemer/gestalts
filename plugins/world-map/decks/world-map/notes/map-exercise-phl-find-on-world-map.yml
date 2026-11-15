@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: PHL
 priority: 1
 concepts:
-  concept-5b21c11244fe31a2: 1
+  concept-a04ec29311de2fd6: 1
 chance: 0
 tags:
   - world-map

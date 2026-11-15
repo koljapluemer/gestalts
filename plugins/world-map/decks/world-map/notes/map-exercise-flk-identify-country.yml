@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: FLK
 priority: 3
 concepts:
-  concept-1b4e09e9cef0db28: 1
+  concept-997f764ee0a5ca3d: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: DNK
 priority: 1
 concepts:
-  concept-a70deb896f89d650: 1
+  concept-af720b4586ca9918: 1
 chance: 0
 tags:
   - world-map

@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
+import { geographyConcept } from './tools/concepts.ts';
 
 type Yml = {
   id: string; gestalt: string; name?: string; members?: string[]; model?: string; country?: string; group?: string;
@@ -47,7 +48,9 @@ describe('the world-map deck', () => {
 
   it('has one concept per country', () => {
     expect(of('concept@2')).toHaveLength(codes.size);
-    for (const c of of('concept@2')) expect(c.name).toMatch(/^geography: /);
+    for (const [code, r] of Object.entries(geometry.regions)) {
+      expect(byId.get(geographyConcept(code))?.name, code).toBe(`geography: ${r.name}`);
+    }
   });
 
   it('has exercises on known countries, practising that country with the chance of their kind', () => {
@@ -58,8 +61,7 @@ describe('the world-map deck', () => {
       expect(codes.has(e.country!), e.id).toBe(true);
       expect(e.chance).toBe(CHANCE[model!.name!]);
       expect(model!.chance).toBe(CHANCE[model!.name!]);
-      const [id] = Object.keys(e.concepts!);
-      expect(byId.get(id)?.name).toBe(`geography: ${geometry.regions[e.country!].name}`);
+      expect(Object.keys(e.concepts!)).toEqual([geographyConcept(e.country!)]);
       expect([1, 2, 3]).toContain(e.priority);
       expect(e.tags).toContain('world-map');
       for (const d of e.distractors ?? []) expect(codes.has(d), `${e.id}: ${d}`).toBe(true);

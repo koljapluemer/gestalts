@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: BRN
 priority: 3
 concepts:
-  concept-667ff34fba17c21f: 1
+  concept-f89e9de033b9dd16: 1
 chance: 0.5
 tags:
   - world-map

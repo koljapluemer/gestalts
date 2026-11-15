@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: CAF
 priority: 1
 concepts:
-  concept-ad62e772106c0e44: 1
+  concept-9819f96b7caf600a: 1
 chance: 0
 tags:
   - world-map

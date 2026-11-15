@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: PLW
 priority: 3
 concepts:
-  concept-e2b5b2b41cf8b5e4: 1
+  concept-b36ad8b62cbc94c4: 1
 chance: 0.5
 tags:
   - world-map

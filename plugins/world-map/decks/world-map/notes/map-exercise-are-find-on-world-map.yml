@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ARE
 priority: 1
 concepts:
-  concept-d9fde69d4f0b9939: 1
+  concept-7c07d30e39bf3e4c: 1
 chance: 0
 tags:
   - world-map

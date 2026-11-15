@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: PYF
 priority: 3
 concepts:
-  concept-066f68011d36acf8: 1
+  concept-c96b96b4c7d9472c: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: GMB
 priority: 1
 concepts:
-  concept-8cc86094a2fe6cf9: 1
+  concept-eaa33435125be2b4: 1
 chance: 0
 tags:
   - world-map

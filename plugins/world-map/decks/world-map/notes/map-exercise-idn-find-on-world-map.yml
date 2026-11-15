@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: IDN
 priority: 1
 concepts:
-  concept-29076c11b98b3448: 1
+  concept-ea1b8fe891ac5c2f: 1
 chance: 0
 tags:
   - world-map

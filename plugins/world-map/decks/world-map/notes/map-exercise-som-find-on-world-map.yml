@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: SOM
 priority: 1
 concepts:
-  concept-b77a40313d282c0d: 1
+  concept-01852bcaae1bcfaf: 1
 chance: 0
 tags:
   - world-map

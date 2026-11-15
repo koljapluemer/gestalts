@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: PRT
 priority: 1
 concepts:
-  concept-f02b8d9d625625ed: 1
+  concept-f916fd3796eb5433: 1
 chance: 0
 tags:
   - world-map

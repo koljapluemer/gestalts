@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: KAS
 priority: 3
 concepts:
-  concept-3e45f0a8c6871d40: 1
+  concept-293e00679fc8b7fd: 1
 chance: 0.5
 tags:
   - world-map

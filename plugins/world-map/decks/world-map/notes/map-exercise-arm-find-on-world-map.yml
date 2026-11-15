@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ARM
 priority: 3
 concepts:
-  concept-993fb7c8af403790: 1
+  concept-431fd8bc5f0bdf75: 1
 chance: 0
 tags:
   - world-map

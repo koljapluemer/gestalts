@@ -5,17 +5,18 @@
 //   bounds. d3-geo runs here, not in the view, so the view only scales and moves; the projection has no rotation, so
 //   every view of it is the same paths under another affine transform. Paths are made at a world about REF px wide,
 //   so d3's resampling and clipping at the antimeridian are what the old app drew.
-// - every country is a `concept@2` (`geography: <name>`), each exercise kind an `item-model@1`, and each enabled
-//   exercise of a country (countries.json) a `map-exercise@1`; each country group (groups.json) a `country-group@1`
-//   with a group-sequence `map-exercise@1` per country in it.
+// - every country is a `concept@2` (`geography: <name>`, its id from its code by tools/concepts.ts, which
+//   flags-practice's builder shares), each exercise kind an `item-model@1`, and each enabled exercise of a country
+//   (countries.json) a `map-exercise@1`; each country group (groups.json) a `country-group@1` with a group-sequence
+//   `map-exercise@1` per country in it.
 //
 //   node plugins/world-map/tools/build-deck.ts && mise run publish-data plugins/world-map/decks/world-map
-import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { geoCentroid, geoMercator, geoPath } from 'd3-geo';
 import type { Feature, FeatureCollection } from 'geojson';
 import { stringify } from 'yaml';
+import { geographyConcept, geographyName } from './concepts.ts';
 
 const plugin = resolve(import.meta.dirname, '..');
 const data = join(plugin, 'tools/data');
@@ -43,9 +44,6 @@ const geo = await json<FeatureCollection>('map.geo.json');
 const countries = await json<Countries>('countries.json');
 const groups = await json<Groups>('groups.json');
 
-const sha = (text: string) => createHash('sha256').update(text).digest('hex').slice(0, 16);
-/** the rule every deck's builder shares, so decks touching one concept hold the same yml */
-const conceptId = (name: string) => `concept-${sha(name)}`;
 const round = (v: number) => Math.round(v * 10 ** DIGITS) / 10 ** DIGITS;
 const num = (v: number) => String(round(v) || 0);
 
@@ -125,9 +123,8 @@ await put({ id: 'map-world', gestalt: 'map@1', name: 'world', title: 'World', ge
 
 const concept = new Map<string, string>();
 for (const [code, name] of names) {
-  const c = `geography: ${name}`;
-  concept.set(code, conceptId(c));
-  await put({ id: conceptId(c), gestalt: 'concept@2', name: c });
+  concept.set(code, geographyConcept(code));
+  await put({ id: geographyConcept(code), gestalt: 'concept@2', name: geographyName(name) });
 }
 
 const KINDS = {

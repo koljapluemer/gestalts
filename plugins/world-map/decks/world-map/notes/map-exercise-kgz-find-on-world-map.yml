@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: KGZ
 priority: 1
 concepts:
-  concept-7f7f34b129669a0c: 1
+  concept-fa7f7786bedaa6e4: 1
 chance: 0
 tags:
   - world-map

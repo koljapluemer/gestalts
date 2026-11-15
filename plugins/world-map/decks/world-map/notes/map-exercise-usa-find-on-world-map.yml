@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: USA
 priority: 2
 concepts:
-  concept-bd15af04377084fd: 1
+  concept-e0881bba024d532b: 1
 chance: 0
 tags:
   - world-map

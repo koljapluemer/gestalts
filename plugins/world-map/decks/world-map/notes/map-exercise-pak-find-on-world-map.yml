@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: PAK
 priority: 1
 concepts:
-  concept-0e42c36fe29bb665: 1
+  concept-0a26eeae65230795: 1
 chance: 0
 tags:
   - world-map

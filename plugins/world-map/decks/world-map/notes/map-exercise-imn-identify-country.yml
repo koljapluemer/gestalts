@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: IMN
 priority: 3
 concepts:
-  concept-ff1142d8c7f3c982: 1
+  concept-992f27988e3f67b0: 1
 chance: 0.5
 tags:
   - world-map

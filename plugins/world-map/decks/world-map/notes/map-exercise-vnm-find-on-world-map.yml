@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: VNM
 priority: 1
 concepts:
-  concept-d537caea7b7e6cdf: 1
+  concept-bc96456af9f25b7f: 1
 chance: 0
 tags:
   - world-map

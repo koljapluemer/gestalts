@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: MMR
 priority: 1
 concepts:
-  concept-7d27754b41cce86d: 1
+  concept-82ef07c15d6ebfa4: 1
 chance: 0
 tags:
   - world-map

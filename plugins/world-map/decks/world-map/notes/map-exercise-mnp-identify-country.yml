@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: MNP
 priority: 3
 concepts:
-  concept-728a8b78c9037744: 1
+  concept-62fa90a158bee70e: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: UZB
 priority: 1
 concepts:
-  concept-91db229a0706aab2: 1
+  concept-4b138e552bd051b8: 1
 chance: 0
 tags:
   - world-map

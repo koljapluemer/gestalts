@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ESP
 priority: 2
 concepts:
-  concept-6cf0a2f327638d4b: 1
+  concept-3ae00be42d584ca3: 1
 chance: 0
 tags:
   - world-map

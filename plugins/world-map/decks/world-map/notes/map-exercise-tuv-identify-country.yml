@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: TUV
 priority: 3
 concepts:
-  concept-8491651ba2734ec1: 1
+  concept-b618211fdf66a178: 1
 chance: 0.5
 tags:
   - world-map

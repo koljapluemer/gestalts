@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: SOL
 priority: 1
 concepts:
-  concept-53caa5d6d42d67eb: 1
+  concept-9bb21579a1c13f06: 1
 chance: 0
 tags:
   - world-map

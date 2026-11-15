@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: WSM
 priority: 3
 concepts:
-  concept-fa2110eb88fde546: 1
+  concept-9036518b151d4387: 1
 chance: 0.5
 tags:
   - world-map

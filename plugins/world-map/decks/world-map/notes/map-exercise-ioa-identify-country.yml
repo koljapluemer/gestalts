@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: IOA
 priority: 3
 concepts:
-  concept-bed407ebe99d7998: 1
+  concept-b7149dcdd3929a57: 1
 chance: 0.5
 tags:
   - world-map

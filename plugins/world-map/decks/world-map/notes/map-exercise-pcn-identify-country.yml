@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: PCN
 priority: 3
 concepts:
-  concept-413b0c55cc587842: 1
+  concept-c6bc66123fe85634: 1
 chance: 0.5
 tags:
   - world-map

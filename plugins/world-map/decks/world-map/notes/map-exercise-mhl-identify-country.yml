@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: MHL
 priority: 3
 concepts:
-  concept-fd5053f33e69081c: 1
+  concept-bfe69ec9a93add6d: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: TUR
 priority: 1
 concepts:
-  concept-bc62b6d046f26c4c: 1
+  concept-8f5ab8a417babf90: 1
 chance: 0
 tags:
   - world-map

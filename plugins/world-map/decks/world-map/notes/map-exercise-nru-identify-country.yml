@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: NRU
 priority: 3
 concepts:
-  concept-fafb53ddba991679: 1
+  concept-d072f7afae8e7676: 1
 chance: 0.5
 tags:
   - world-map

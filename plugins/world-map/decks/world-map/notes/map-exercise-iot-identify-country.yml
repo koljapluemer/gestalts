@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: IOT
 priority: 3
 concepts:
-  concept-5f2e97c4e8faa730: 1
+  concept-7ef89def6cb39018: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: PNG
 priority: 1
 concepts:
-  concept-e7ef198dba5a2af2: 1
+  concept-f40b0f40d31c3830: 1
 chance: 0
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: HUN
 priority: 1
 concepts:
-  concept-71673ce5076d4f14: 1
+  concept-97e9ef434d45146e: 1
 chance: 0
 tags:
   - world-map

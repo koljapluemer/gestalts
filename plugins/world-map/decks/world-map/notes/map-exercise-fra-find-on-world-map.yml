@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: FRA
 priority: 2
 concepts:
-  concept-5e0fa7aaf1a00415: 1
+  concept-0a5b16348c83fb63: 1
 chance: 0
 tags:
   - world-map

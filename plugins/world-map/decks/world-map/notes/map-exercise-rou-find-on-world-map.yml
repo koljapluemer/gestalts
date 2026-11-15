@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ROU
 priority: 1
 concepts:
-  concept-e748e0f44be4967b: 1
+  concept-c861069a170d6dfc: 1
 chance: 0
 tags:
   - world-map

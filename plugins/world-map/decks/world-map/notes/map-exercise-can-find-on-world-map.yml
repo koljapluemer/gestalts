@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: CAN
 priority: 1
 concepts:
-  concept-bfd1b76d0ff7f492: 1
+  concept-f7ed3e04173dbb3a: 1
 chance: 0
 tags:
   - world-map

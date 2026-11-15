@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: SLB
 priority: 3
 concepts:
-  concept-1a4edef6162ee04d: 1
+  concept-40a0853b1a94315c: 1
 chance: 0.5
 tags:
   - world-map

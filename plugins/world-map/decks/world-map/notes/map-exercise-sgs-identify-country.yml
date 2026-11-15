@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: SGS
 priority: 3
 concepts:
-  concept-308332aff1bc09a4: 1
+  concept-592821f9267181e2: 1
 chance: 0.5
 tags:
   - world-map

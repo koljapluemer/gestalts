@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: JPN
 priority: 1
 concepts:
-  concept-ed9285ca505176a8: 1
+  concept-ae67025bb9698557: 1
 chance: 0
 tags:
   - world-map

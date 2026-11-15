@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ZWE
 priority: 1
 concepts:
-  concept-a32818454b898aee: 1
+  concept-3be3ed751f2cbdb5: 1
 chance: 0
 tags:
   - world-map

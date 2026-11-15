@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: TLS
 priority: 2
 concepts:
-  concept-175cbf4cef985dbb: 1
+  concept-eba91bf0218004b3: 1
 chance: 0.5
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: GEO
 priority: 1
 concepts:
-  concept-c063efbc4bcd12b0: 1
+  concept-b3f380ef4c95eba2: 1
 chance: 0
 tags:
   - world-map

@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: ISL
 priority: 1
 concepts:
-  concept-e183dcf0ba4a324f: 1
+  concept-94b760e6984b7343: 1
 chance: 0
 tags:
   - world-map

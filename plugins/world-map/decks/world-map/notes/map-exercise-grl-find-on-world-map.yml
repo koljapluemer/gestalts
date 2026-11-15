@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: GRL
 priority: 2
 concepts:
-  concept-0b24a025a59bdbb3: 1
+  concept-d01316217797c016: 1
 chance: 0
 tags:
   - world-map

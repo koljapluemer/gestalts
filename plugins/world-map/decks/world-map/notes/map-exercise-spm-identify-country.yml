@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: SPM
 priority: 3
 concepts:
-  concept-c7402f10970e87e7: 1
+  concept-75dc6de7b9186933: 1
 chance: 0.5
 tags:
   - world-map

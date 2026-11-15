@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: COM
 priority: 3
 concepts:
-  concept-bdfa16ebcb947609: 1
+  concept-171d059c90268377: 1
 chance: 0.5
 tags:
   - world-map

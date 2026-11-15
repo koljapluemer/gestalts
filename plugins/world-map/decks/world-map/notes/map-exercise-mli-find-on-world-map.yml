@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: MLI
 priority: 1
 concepts:
-  concept-8319d1506a6e36bb: 1
+  concept-797dcb5ea158e0e4: 1
 chance: 0
 tags:
   - world-map

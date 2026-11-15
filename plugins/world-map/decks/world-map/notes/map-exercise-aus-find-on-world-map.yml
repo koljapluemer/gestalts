@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: AUS
 priority: 2
 concepts:
-  concept-740daab8fe1e358f: 1
+  concept-ac508b55f926ff0f: 1
 chance: 0
 tags:
   - world-map

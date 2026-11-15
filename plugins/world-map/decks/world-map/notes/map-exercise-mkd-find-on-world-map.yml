@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: MKD
 priority: 1
 concepts:
-  concept-510e824afd0865b6: 1
+  concept-af11157deb5e9e99: 1
 chance: 0
 tags:
   - world-map

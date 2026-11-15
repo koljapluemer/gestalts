@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: AFG
 priority: 1
 concepts:
-  concept-f891ff9f32b5e55b: 1
+  concept-d8198775770b6ce4: 1
 chance: 0
 tags:
   - world-map

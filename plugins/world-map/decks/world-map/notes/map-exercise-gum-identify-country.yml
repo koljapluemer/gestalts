@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: GUM
 priority: 3
 concepts:
-  concept-0f895cef6a05e070: 1
+  concept-c55c8b79cf3edd85: 1
 chance: 0.5
 tags:
   - world-map

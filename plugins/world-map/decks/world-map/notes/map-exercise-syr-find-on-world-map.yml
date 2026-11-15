@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: SYR
 priority: 1
 concepts:
-  concept-289298253158d6b2: 1
+  concept-d85f7f2c11191d14: 1
 chance: 0
 tags:
   - world-map

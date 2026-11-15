@@ -4,7 +4,7 @@ model: item-model-world-map-identify-country
 country: NCL
 priority: 3
 concepts:
-  concept-5f97fe73a5e42720: 1
+  concept-fe6b6fde0e52b705: 1
 chance: 0.5
 tags:
   - world-map

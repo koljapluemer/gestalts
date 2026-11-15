@@ -4,7 +4,7 @@ model: item-model-world-map-find-on-world-map
 country: NLD
 priority: 1
 concepts:
-  concept-291b215dd80412f3: 1
+  concept-3c4ccccd5de06156: 1
 chance: 0
 tags:
   - world-map
