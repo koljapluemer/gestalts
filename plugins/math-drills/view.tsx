@@ -49,7 +49,8 @@ function mainConcept(concepts: unknown): string | null {
 
 // ---------- the look ----------
 
-// picked options keep their colour: no `disabled`, which daisy greys out, but no clicks either
+// picked options keep their colour: neither `disabled` nor `aria-disabled`, both of which daisy greys out; the click
+// guard and `pointer-events-none` stop further picks
 const OPTION = 'btn btn-lg h-auto min-h-12 py-2 text-xl font-normal';
 const RIGHT = `${OPTION} btn-success pointer-events-none`;
 const WRONG = `${OPTION} btn-soft btn-error pointer-events-none line-through`;
@@ -130,7 +131,7 @@ function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: ()
             const chosen = picked.includes(i);
             const cls = chosen ? (o.correct ? RIGHT : WRONG) : done ? `${OPTION} pointer-events-none` : OPTION;
             return (
-              <button key={i} type="button" className={cls} aria-disabled={chosen || done} onClick={(e) => { if (!chosen && !done) pick(i, e.timeStamp); }}>
+              <button key={i} type="button" className={cls} onClick={(e) => { if (!chosen && !done) pick(i, e.timeStamp); }}>
                 <Markdown text={o.text} inline />
               </button>
             );
