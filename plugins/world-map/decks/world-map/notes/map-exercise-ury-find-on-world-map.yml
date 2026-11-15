@@ -1,0 +1,10 @@
+id: map-exercise-ury-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: URY
+priority: 1
+concepts:
+  concept-24033e7a749a2fcc: 1
+chance: 0
+tags:
+  - world-map

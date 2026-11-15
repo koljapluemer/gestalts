@@ -1,0 +1,10 @@
+id: map-exercise-slb-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: SLB
+priority: 3
+concepts:
+  concept-1a4edef6162ee04d: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-tuv-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: TUV
+priority: 3
+concepts:
+  concept-8491651ba2734ec1: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-npl-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: NPL
+priority: 1
+concepts:
+  concept-f614dd6913187acb: 1
+chance: 0
+tags:
+  - world-map

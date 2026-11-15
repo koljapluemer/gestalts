@@ -1,0 +1,13 @@
+id: country-group-caribbean-west
+gestalt: country-group@1
+name: caribbean-west
+title: Caribbean (West)
+countries:
+  - CUB
+  - JAM
+  - CYM
+  - HTI
+  - DOM
+  - PRI
+  - BHS
+  - TCA

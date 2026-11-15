@@ -1,0 +1,10 @@
+id: map-exercise-gha-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: GHA
+priority: 1
+concepts:
+  concept-1e6ec1a39595c261: 1
+chance: 0
+tags:
+  - world-map

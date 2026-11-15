@@ -1,0 +1,10 @@
+id: map-exercise-per-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: PER
+priority: 1
+concepts:
+  concept-40354d7c161e67e3: 1
+chance: 0
+tags:
+  - world-map

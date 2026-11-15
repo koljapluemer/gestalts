@@ -1,0 +1,11 @@
+id: map-exercise-lca-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: LCA
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-afafce678db54980: 1
+chance: 0.5
+tags:
+  - world-map

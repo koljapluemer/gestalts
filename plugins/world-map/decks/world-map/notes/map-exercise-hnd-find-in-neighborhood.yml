@@ -1,0 +1,11 @@
+id: map-exercise-hnd-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: HND
+zoom: 129
+priority: 1
+concepts:
+  concept-37665fe1dd72fc73: 1
+chance: 0
+tags:
+  - world-map

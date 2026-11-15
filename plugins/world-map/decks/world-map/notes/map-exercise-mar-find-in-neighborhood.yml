@@ -1,0 +1,11 @@
+id: map-exercise-mar-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: MAR
+zoom: 163
+priority: 1
+concepts:
+  concept-32d6c7d209dcc881: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-tjk-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TJK
+zoom: 127
+priority: 1
+concepts:
+  concept-9b97958dddcdbbe2: 1
+chance: 0
+tags:
+  - world-map

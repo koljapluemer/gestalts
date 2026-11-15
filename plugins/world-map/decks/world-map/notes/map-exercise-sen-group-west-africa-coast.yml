@@ -1,0 +1,11 @@
+id: map-exercise-sen-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: SEN
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-b824eb6b563d8938: 1
+chance: 0.5
+tags:
+  - world-map

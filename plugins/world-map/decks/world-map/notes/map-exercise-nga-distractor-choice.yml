@@ -1,0 +1,17 @@
+id: map-exercise-nga-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: NGA
+zoom: 117
+distractors:
+  - BEN
+  - CMR
+  - TCD
+  - NER
+  - NIC
+priority: 1
+concepts:
+  concept-5a5c4987467490b8: 1
+chance: 0.5
+tags:
+  - world-map

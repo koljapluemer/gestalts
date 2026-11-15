@@ -1,0 +1,11 @@
+id: map-exercise-aia-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: AIA
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-38627b55bc7fbcf3: 1
+chance: 0.5
+tags:
+  - world-map

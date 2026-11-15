@@ -1,0 +1,10 @@
+id: map-exercise-nzl-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: NZL
+priority: 2
+concepts:
+  concept-112e6c09a80ccae2: 1
+chance: 0
+tags:
+  - world-map

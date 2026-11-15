@@ -1,0 +1,16 @@
+id: map-exercise-tjk-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: TJK
+zoom: 130
+distractors:
+  - AFG
+  - CHN
+  - KGZ
+  - UZB
+priority: 1
+concepts:
+  concept-9b97958dddcdbbe2: 1
+chance: 0.5
+tags:
+  - world-map

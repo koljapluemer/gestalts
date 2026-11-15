@@ -1,0 +1,11 @@
+id: map-exercise-are-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ARE
+zoom: 130
+priority: 1
+concepts:
+  concept-d9fde69d4f0b9939: 1
+chance: 0
+tags:
+  - world-map

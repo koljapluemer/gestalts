@@ -1,0 +1,10 @@
+id: map-exercise-bih-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: BIH
+priority: 1
+concepts:
+  concept-12c8467963d21ccd: 1
+chance: 0
+tags:
+  - world-map

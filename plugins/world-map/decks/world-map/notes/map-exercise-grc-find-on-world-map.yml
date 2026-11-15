@@ -1,0 +1,10 @@
+id: map-exercise-grc-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: GRC
+priority: 1
+concepts:
+  concept-28a2a906cc7f92a5: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-est-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: EST
+priority: 1
+concepts:
+  concept-b3c30fea3e0484bf: 1
+chance: 0
+tags:
+  - world-map

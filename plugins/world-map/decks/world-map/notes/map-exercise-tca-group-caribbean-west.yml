@@ -1,0 +1,11 @@
+id: map-exercise-tca-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: TCA
+group: country-group-caribbean-west
+priority: 3
+concepts:
+  concept-41755b0f6dfd8544: 1
+chance: 0.5
+tags:
+  - world-map

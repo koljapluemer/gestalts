@@ -1,0 +1,15 @@
+id: map-exercise-sle-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: SLE
+zoom: 127
+distractors:
+  - GIN
+  - LBR
+  - BFA
+priority: 1
+concepts:
+  concept-940aaf5acdb3e0da: 1
+chance: 0.5
+tags:
+  - world-map

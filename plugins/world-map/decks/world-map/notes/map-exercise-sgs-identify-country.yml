@@ -1,0 +1,10 @@
+id: map-exercise-sgs-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: SGS
+priority: 3
+concepts:
+  concept-308332aff1bc09a4: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-isr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: ISR
+priority: 1
+concepts:
+  concept-abe12da76fbf8af4: 1
+chance: 0
+tags:
+  - world-map

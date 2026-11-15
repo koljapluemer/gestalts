@@ -1,0 +1,10 @@
+id: map-exercise-ven-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: VEN
+priority: 1
+concepts:
+  concept-6e1bc70a0fffc92a: 1
+chance: 0
+tags:
+  - world-map

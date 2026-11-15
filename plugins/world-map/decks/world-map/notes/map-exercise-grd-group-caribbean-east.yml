@@ -1,0 +1,11 @@
+id: map-exercise-grd-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: GRD
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-d3e2436c0710eb17: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-bgr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: BGR
+priority: 1
+concepts:
+  concept-dec464ac521ec50f: 1
+chance: 0
+tags:
+  - world-map

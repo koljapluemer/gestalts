@@ -1,0 +1,11 @@
+id: map-exercise-jam-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: JAM
+group: country-group-caribbean-west
+priority: 1
+concepts:
+  concept-8dba8e3a188311b7: 1
+chance: 0.5
+tags:
+  - world-map

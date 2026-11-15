@@ -1,0 +1,10 @@
+id: map-exercise-omn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: OMN
+priority: 1
+concepts:
+  concept-0373df4c2c81c9cb: 1
+chance: 0
+tags:
+  - world-map

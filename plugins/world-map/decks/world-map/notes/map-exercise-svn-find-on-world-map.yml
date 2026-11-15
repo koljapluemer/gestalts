@@ -1,0 +1,10 @@
+id: map-exercise-svn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: SVN
+priority: 1
+concepts:
+  concept-22c0e8042e98f94f: 1
+chance: 0
+tags:
+  - world-map

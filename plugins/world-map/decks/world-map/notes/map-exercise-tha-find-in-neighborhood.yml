@@ -1,0 +1,11 @@
+id: map-exercise-tha-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: THA
+zoom: 140
+priority: 1
+concepts:
+  concept-145db6da3d20c5a7: 1
+chance: 0
+tags:
+  - world-map

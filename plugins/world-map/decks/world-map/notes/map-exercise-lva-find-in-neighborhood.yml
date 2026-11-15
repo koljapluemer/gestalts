@@ -1,0 +1,11 @@
+id: map-exercise-lva-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: LVA
+zoom: 130
+priority: 1
+concepts:
+  concept-55dfd1dfa2c180b6: 1
+chance: 0
+tags:
+  - world-map

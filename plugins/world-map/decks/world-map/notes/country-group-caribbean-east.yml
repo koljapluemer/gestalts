@@ -1,0 +1,22 @@
+id: country-group-caribbean-east
+gestalt: country-group@1
+name: caribbean-east
+title: Caribbean (East)
+countries:
+  - VIR
+  - VGB
+  - AIA
+  - MAF
+  - SXM
+  - BLM
+  - KNA
+  - ATG
+  - MSR
+  - DMA
+  - LCA
+  - VCT
+  - BRB
+  - GRD
+  - TTO
+  - CUW
+  - ABW

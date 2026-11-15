@@ -1,0 +1,10 @@
+id: map-exercise-wlf-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: WLF
+priority: 3
+concepts:
+  concept-023b3b1b9ecdc65d: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-mwi-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: MWI
+zoom: 149
+priority: 1
+concepts:
+  concept-1adfc6ce94369b65: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-msr-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: MSR
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-8c205af6430a975a: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-imn-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: IMN
+priority: 3
+concepts:
+  concept-ff1142d8c7f3c982: 1
+chance: 0.5
+tags:
+  - world-map

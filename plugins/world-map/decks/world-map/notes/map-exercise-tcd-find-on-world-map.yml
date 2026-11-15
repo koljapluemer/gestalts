@@ -1,0 +1,10 @@
+id: map-exercise-tcd-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: TCD
+priority: 1
+concepts:
+  concept-ee11a22461dddab5: 1
+chance: 0
+tags:
+  - world-map

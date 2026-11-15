@@ -212,6 +212,10 @@ uv run plugins/math-drills/tools/build_decks.py {{usage.stembridge}}
 for d in plugins/math-drills/decks/*/; do mise run publish-data "$d"; done
 """
 
+[tasks."world-map:deck"]
+description = "Rebuild plugins/world-map's deck from its tools/data, and publish it"
+run = ["node plugins/world-map/tools/build-deck.ts", "mise run publish-data plugins/world-map/decks/world-map"]
+
 # --- vizint-workshop ---
 
 [tasks."vizint-workshop:dev"]

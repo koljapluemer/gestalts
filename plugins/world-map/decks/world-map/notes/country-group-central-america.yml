@@ -1,0 +1,12 @@
+id: country-group-central-america
+gestalt: country-group@1
+name: central-america
+title: Central America
+countries:
+  - GTM
+  - BLZ
+  - HND
+  - SLV
+  - NIC
+  - CRI
+  - PAN

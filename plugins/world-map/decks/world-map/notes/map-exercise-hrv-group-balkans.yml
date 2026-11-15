@@ -1,0 +1,11 @@
+id: map-exercise-hrv-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: HRV
+group: country-group-balkans
+priority: 1
+concepts:
+  concept-44cf9c108064d78c: 1
+chance: 0.5
+tags:
+  - world-map

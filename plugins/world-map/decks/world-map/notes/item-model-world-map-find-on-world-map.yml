@@ -1,0 +1,8 @@
+id: item-model-world-map-find-on-world-map
+gestalt: item-model@1
+name: find-on-world-map
+title: Find it on the world map
+engine: world-map/find-on-world-map
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-ben-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: BEN
+group: country-group-west-africa-coast
+priority: 2
+concepts:
+  concept-8c294baa313f1ccd: 1
+chance: 0.5
+tags:
+  - world-map

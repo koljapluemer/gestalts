@@ -1,0 +1,10 @@
+id: map-exercise-che-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: CHE
+priority: 1
+concepts:
+  concept-6e8fb36f5d858df7: 1
+chance: 0
+tags:
+  - world-map

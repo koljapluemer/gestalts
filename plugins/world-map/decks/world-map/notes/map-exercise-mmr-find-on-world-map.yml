@@ -1,0 +1,10 @@
+id: map-exercise-mmr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: MMR
+priority: 1
+concepts:
+  concept-7d27754b41cce86d: 1
+chance: 0
+tags:
+  - world-map

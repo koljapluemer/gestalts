@@ -1,0 +1,11 @@
+id: map-exercise-bgr-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BGR
+zoom: 120
+priority: 1
+concepts:
+  concept-dec464ac521ec50f: 1
+chance: 0
+tags:
+  - world-map

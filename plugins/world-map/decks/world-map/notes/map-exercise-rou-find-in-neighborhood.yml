@@ -1,0 +1,11 @@
+id: map-exercise-rou-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ROU
+zoom: 150
+priority: 1
+concepts:
+  concept-e748e0f44be4967b: 1
+chance: 0
+tags:
+  - world-map

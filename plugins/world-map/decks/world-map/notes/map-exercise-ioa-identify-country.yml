@@ -1,0 +1,10 @@
+id: map-exercise-ioa-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: IOA
+priority: 3
+concepts:
+  concept-bed407ebe99d7998: 1
+chance: 0.5
+tags:
+  - world-map

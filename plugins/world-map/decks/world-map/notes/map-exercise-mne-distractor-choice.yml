@@ -1,0 +1,17 @@
+id: map-exercise-mne-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: MNE
+zoom: 133
+distractors:
+  - ALB
+  - BIH
+  - HRV
+  - KOS
+  - SRB
+priority: 2
+concepts:
+  concept-afacc099f8bd5c36: 1
+chance: 0.5
+tags:
+  - world-map

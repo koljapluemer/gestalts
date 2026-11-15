@@ -1,0 +1,10 @@
+id: map-exercise-arm-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: ARM
+priority: 3
+concepts:
+  concept-993fb7c8af403790: 1
+chance: 0
+tags:
+  - world-map

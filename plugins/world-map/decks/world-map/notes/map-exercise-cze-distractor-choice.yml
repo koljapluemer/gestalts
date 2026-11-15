@@ -1,0 +1,15 @@
+id: map-exercise-cze-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: CZE
+zoom: 126
+distractors:
+  - AUT
+  - POL
+  - SVK
+priority: 1
+concepts:
+  concept-524eb9fc1c32b3b7: 1
+chance: 0.5
+tags:
+  - world-map

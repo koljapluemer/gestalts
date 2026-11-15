@@ -1,0 +1,10 @@
+id: map-exercise-png-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: PNG
+priority: 1
+concepts:
+  concept-e7ef198dba5a2af2: 1
+chance: 0
+tags:
+  - world-map

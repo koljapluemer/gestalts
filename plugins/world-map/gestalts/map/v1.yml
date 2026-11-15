@@ -1,0 +1,11 @@
+name: map
+version: 1
+description: >-
+  A map to practise on: `geometry` is a JSON blob of its regions in raw Mercator units (`{bounds, regions: {code:
+  {name, d, centroid, bounds}}}`, `d` an SVG path), already projected, so a view only scales and moves it. `sources`
+  credits where the shapes come from.
+fields:
+  name: { type: string, required: true }
+  title: { type: string }
+  geometry: { type: blob, required: true }
+  sources: { type: relationships, targets: [source] }

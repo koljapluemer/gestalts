@@ -1,0 +1,11 @@
+id: map-exercise-cuw-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: CUW
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-06db4d6425be47a5: 1
+chance: 0.5
+tags:
+  - world-map

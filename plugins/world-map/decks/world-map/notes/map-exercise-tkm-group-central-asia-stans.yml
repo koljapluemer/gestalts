@@ -1,0 +1,11 @@
+id: map-exercise-tkm-group-central-asia-stans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: TKM
+group: country-group-central-asia-stans
+priority: 1
+concepts:
+  concept-f46f6bee87356287: 1
+chance: 0.5
+tags:
+  - world-map

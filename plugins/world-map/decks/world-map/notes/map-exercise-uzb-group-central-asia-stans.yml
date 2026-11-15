@@ -1,0 +1,11 @@
+id: map-exercise-uzb-group-central-asia-stans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: UZB
+group: country-group-central-asia-stans
+priority: 1
+concepts:
+  concept-91db229a0706aab2: 1
+chance: 0.5
+tags:
+  - world-map

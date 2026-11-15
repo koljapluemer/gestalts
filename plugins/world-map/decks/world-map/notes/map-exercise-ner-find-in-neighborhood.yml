@@ -1,0 +1,11 @@
+id: map-exercise-ner-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: NER
+zoom: 130
+priority: 1
+concepts:
+  concept-3e3e96b2e24332b6: 1
+chance: 0
+tags:
+  - world-map

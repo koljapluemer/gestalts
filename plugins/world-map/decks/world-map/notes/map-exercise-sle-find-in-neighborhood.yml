@@ -1,0 +1,11 @@
+id: map-exercise-sle-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SLE
+zoom: 114
+priority: 1
+concepts:
+  concept-940aaf5acdb3e0da: 1
+chance: 0
+tags:
+  - world-map

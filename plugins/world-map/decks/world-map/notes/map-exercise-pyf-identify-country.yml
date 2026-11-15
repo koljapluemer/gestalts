@@ -1,0 +1,10 @@
+id: map-exercise-pyf-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: PYF
+priority: 3
+concepts:
+  concept-066f68011d36acf8: 1
+chance: 0.5
+tags:
+  - world-map

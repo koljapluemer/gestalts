@@ -1,0 +1,10 @@
+id: map-exercise-syc-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: SYC
+priority: 3
+concepts:
+  concept-1a99f5c2e2031dcf: 1
+chance: 0.5
+tags:
+  - world-map

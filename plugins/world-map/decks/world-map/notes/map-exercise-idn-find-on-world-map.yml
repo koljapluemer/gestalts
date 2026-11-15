@@ -1,0 +1,10 @@
+id: map-exercise-idn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: IDN
+priority: 1
+concepts:
+  concept-29076c11b98b3448: 1
+chance: 0
+tags:
+  - world-map

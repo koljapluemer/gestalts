@@ -1,0 +1,11 @@
+id: map-exercise-dma-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: DMA
+group: country-group-caribbean-east
+priority: 2
+concepts:
+  concept-7f73a60055560d98: 1
+chance: 0.5
+tags:
+  - world-map

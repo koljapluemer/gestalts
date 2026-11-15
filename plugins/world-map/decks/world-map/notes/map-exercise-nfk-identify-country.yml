@@ -1,0 +1,10 @@
+id: map-exercise-nfk-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: NFK
+priority: 3
+concepts:
+  concept-e0e89646e5b1f53d: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,17 @@
+id: map-exercise-ken-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: KEN
+zoom: 118
+distractors:
+  - ETH
+  - SDS
+  - SOM
+  - TZA
+  - UGA
+priority: 1
+concepts:
+  concept-576fa1705375d837: 1
+chance: 0.5
+tags:
+  - world-map

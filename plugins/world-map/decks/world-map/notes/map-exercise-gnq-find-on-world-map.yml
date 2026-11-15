@@ -1,0 +1,10 @@
+id: map-exercise-gnq-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: GNQ
+priority: 1
+concepts:
+  concept-303f61697ac22bdb: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-lao-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: LAO
+zoom: 162
+priority: 1
+concepts:
+  concept-475b681175b9c768: 1
+chance: 0
+tags:
+  - world-map

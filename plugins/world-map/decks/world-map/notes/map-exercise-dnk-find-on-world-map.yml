@@ -1,0 +1,10 @@
+id: map-exercise-dnk-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: DNK
+priority: 1
+concepts:
+  concept-a70deb896f89d650: 1
+chance: 0
+tags:
+  - world-map

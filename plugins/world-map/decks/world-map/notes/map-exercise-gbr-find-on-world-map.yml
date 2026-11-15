@@ -1,0 +1,10 @@
+id: map-exercise-gbr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: GBR
+priority: 2
+concepts:
+  concept-004a8257e0d12ea0: 1
+chance: 0
+tags:
+  - world-map

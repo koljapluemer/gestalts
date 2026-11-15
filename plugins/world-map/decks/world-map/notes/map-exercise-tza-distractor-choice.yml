@@ -1,0 +1,20 @@
+id: map-exercise-tza-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: TZA
+zoom: 117
+distractors:
+  - BDI
+  - COD
+  - KEN
+  - MWI
+  - MOZ
+  - RWA
+  - UGA
+  - ZMB
+priority: 1
+concepts:
+  concept-4d85cc7475260fce: 1
+chance: 0.5
+tags:
+  - world-map

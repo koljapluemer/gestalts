@@ -1,0 +1,11 @@
+id: map-exercise-dma-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: DMA
+zoom: 106
+priority: 2
+concepts:
+  concept-7f73a60055560d98: 1
+chance: 0
+tags:
+  - world-map

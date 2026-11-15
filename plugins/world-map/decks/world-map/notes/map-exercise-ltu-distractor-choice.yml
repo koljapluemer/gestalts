@@ -1,0 +1,16 @@
+id: map-exercise-ltu-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: LTU
+zoom: 127
+distractors:
+  - BLR
+  - LVA
+  - POL
+  - EST
+priority: 1
+concepts:
+  concept-add4855960e601fe: 1
+chance: 0.5
+tags:
+  - world-map

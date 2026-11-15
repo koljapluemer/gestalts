@@ -1,0 +1,11 @@
+id: map-exercise-kaz-group-central-asia-stans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: KAZ
+group: country-group-central-asia-stans
+priority: 1
+concepts:
+  concept-f92e78410e759b77: 1
+chance: 0.5
+tags:
+  - world-map

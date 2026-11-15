@@ -1,0 +1,17 @@
+id: map-exercise-jor-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: JOR
+zoom: 126
+distractors:
+  - IRQ
+  - ISR
+  - PSX
+  - SAU
+  - SYR
+priority: 1
+concepts:
+  concept-b5015350f9de2da7: 1
+chance: 0.5
+tags:
+  - world-map

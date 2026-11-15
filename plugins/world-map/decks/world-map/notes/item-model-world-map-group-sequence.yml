@@ -1,0 +1,8 @@
+id: item-model-world-map-group-sequence
+gestalt: item-model@1
+name: group-sequence
+title: Name each country of a group
+engine: world-map/group-sequence
+chance: 0.5
+tags:
+  - world-map

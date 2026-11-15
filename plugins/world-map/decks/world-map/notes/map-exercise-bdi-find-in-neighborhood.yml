@@ -1,0 +1,11 @@
+id: map-exercise-bdi-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BDI
+zoom: 122
+priority: 2
+concepts:
+  concept-31ecefd11360e652: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-tjk-group-central-asia-stans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: TJK
+group: country-group-central-asia-stans
+priority: 1
+concepts:
+  concept-9b97958dddcdbbe2: 1
+chance: 0.5
+tags:
+  - world-map

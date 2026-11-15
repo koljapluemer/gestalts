@@ -1,0 +1,11 @@
+id: map-exercise-bfa-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BFA
+zoom: 125
+priority: 1
+concepts:
+  concept-32d5a809ad1ee8e2: 1
+chance: 0
+tags:
+  - world-map

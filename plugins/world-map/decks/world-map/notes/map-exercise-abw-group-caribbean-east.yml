@@ -1,0 +1,11 @@
+id: map-exercise-abw-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: ABW
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-3c931284f8e86382: 1
+chance: 0.5
+tags:
+  - world-map

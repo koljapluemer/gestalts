@@ -1,0 +1,11 @@
+id: map-exercise-mne-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: MNE
+group: country-group-balkans
+priority: 2
+concepts:
+  concept-afacc099f8bd5c36: 1
+chance: 0.5
+tags:
+  - world-map

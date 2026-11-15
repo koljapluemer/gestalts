@@ -1,0 +1,11 @@
+id: country-group-central-asia-stans
+gestalt: country-group@1
+name: central-asia-stans
+title: Central Asia (-stans)
+countries:
+  - KAZ
+  - KGZ
+  - TJK
+  - AFG
+  - TKM
+  - UZB

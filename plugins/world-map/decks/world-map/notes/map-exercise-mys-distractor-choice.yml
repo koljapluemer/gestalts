@@ -1,0 +1,15 @@
+id: map-exercise-mys-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: MYS
+zoom: 121
+distractors:
+  - BRN
+  - IDN
+  - THA
+priority: 1
+concepts:
+  concept-8ab7035810a197f4: 1
+chance: 0.5
+tags:
+  - world-map

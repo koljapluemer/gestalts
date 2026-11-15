@@ -1,0 +1,11 @@
+id: map-exercise-sds-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SDS
+zoom: 130
+priority: 1
+concepts:
+  concept-1753ba3c0f68b72a: 1
+chance: 0
+tags:
+  - world-map

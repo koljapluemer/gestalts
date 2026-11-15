@@ -1,0 +1,98 @@
+{
+  "balkans": {
+    "countries": [
+      "SVN",
+      "HRV",
+      "BIH",
+      "SRB",
+      "MNE",
+      "KOS",
+      "MKD",
+      "ALB",
+      "GRC",
+      "BGR"
+    ],
+    "enabled": true,
+    "name": "Balkans"
+  },
+  "caribbean-east": {
+    "countries": [
+      "VIR",
+      "VGB",
+      "AIA",
+      "MAF",
+      "SXM",
+      "BLM",
+      "KNA",
+      "ATG",
+      "MSR",
+      "DMA",
+      "LCA",
+      "VCT",
+      "BRB",
+      "GRD",
+      "TTO",
+      "CUW",
+      "ABW"
+    ],
+    "enabled": true,
+    "name": "Caribbean (East)"
+  },
+  "caribbean-west": {
+    "countries": [
+      "CUB",
+      "JAM",
+      "CYM",
+      "HTI",
+      "DOM",
+      "PRI",
+      "BHS",
+      "TCA"
+    ],
+    "enabled": true,
+    "name": "Caribbean (West)"
+  },
+  "central-america": {
+    "countries": [
+      "GTM",
+      "BLZ",
+      "HND",
+      "SLV",
+      "NIC",
+      "CRI",
+      "PAN"
+    ],
+    "enabled": true,
+    "name": "Central America"
+  },
+  "central-asia-stans": {
+    "countries": [
+      "KAZ",
+      "KGZ",
+      "TJK",
+      "AFG",
+      "TKM",
+      "UZB"
+    ],
+    "enabled": true,
+    "name": "Central Asia (-stans)"
+  },
+  "west-africa-coast": {
+    "countries": [
+      "MRT",
+      "SEN",
+      "GMB",
+      "GNB",
+      "GIN",
+      "SLE",
+      "LBR",
+      "CIV",
+      "GHA",
+      "TGO",
+      "BEN",
+      "NGA"
+    ],
+    "enabled": true,
+    "name": "West Africa (Coast)"
+  }
+}

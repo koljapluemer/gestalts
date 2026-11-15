@@ -1,0 +1,15 @@
+id: map-exercise-chl-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: CHL
+zoom: 117
+distractors:
+  - ARG
+  - BOL
+  - PER
+priority: 1
+concepts:
+  concept-6a09fcde05174353: 1
+chance: 0.5
+tags:
+  - world-map

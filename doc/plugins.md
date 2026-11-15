@@ -85,7 +85,8 @@ Params are strings. A view that takes them says which in its doc comment.
 The kit has the pieces these views share: `ListInput` for aliases and tags (chips, never a comma-separated input),
 `NoteTitle` for a note as one line of Markdown, and `ItemPicker` (with `NotePicker` and `ConceptPicker`) for finding
 something to attach, keyboard-driven. Leave out what mustn't be offered in the query (`links.none`), not after its
-`limit`.
+`limit`. `usePanZoom` pans and zooms an element by drag, wheel and pinch (d3-zoom, built in, so it needs no network)
+and reports every change for the view to apply; `plugins/world-map` uses it.
 
 ## Backends
 

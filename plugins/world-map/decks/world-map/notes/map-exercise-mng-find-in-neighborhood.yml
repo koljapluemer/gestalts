@@ -1,0 +1,11 @@
+id: map-exercise-mng-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: MNG
+zoom: 141
+priority: 1
+concepts:
+  concept-a162960ffd8d9461: 1
+chance: 0
+tags:
+  - world-map

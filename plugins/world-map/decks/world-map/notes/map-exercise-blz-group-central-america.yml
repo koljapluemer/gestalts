@@ -1,0 +1,11 @@
+id: map-exercise-blz-group-central-america
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: BLZ
+group: country-group-central-america
+priority: 2
+concepts:
+  concept-6410a4a632b732ad: 1
+chance: 0.5
+tags:
+  - world-map

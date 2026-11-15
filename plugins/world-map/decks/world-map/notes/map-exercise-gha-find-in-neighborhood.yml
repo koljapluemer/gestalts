@@ -1,0 +1,11 @@
+id: map-exercise-gha-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GHA
+zoom: 142
+priority: 1
+concepts:
+  concept-1e6ec1a39595c261: 1
+chance: 0
+tags:
+  - world-map

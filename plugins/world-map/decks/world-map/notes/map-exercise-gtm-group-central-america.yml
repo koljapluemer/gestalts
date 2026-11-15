@@ -1,0 +1,11 @@
+id: map-exercise-gtm-group-central-america
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: GTM
+group: country-group-central-america
+priority: 1
+concepts:
+  concept-c4ae3d5452de38d3: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-tgo-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TGO
+zoom: 125
+priority: 1
+concepts:
+  concept-fe4909c948d0530c: 1
+chance: 0
+tags:
+  - world-map

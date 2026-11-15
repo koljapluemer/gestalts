@@ -1,0 +1,11 @@
+id: map-exercise-cub-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: CUB
+group: country-group-caribbean-west
+priority: 2
+concepts:
+  concept-5248eee2cd958af3: 1
+chance: 0.5
+tags:
+  - world-map

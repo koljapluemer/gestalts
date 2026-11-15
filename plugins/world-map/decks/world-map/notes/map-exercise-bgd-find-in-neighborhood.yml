@@ -1,0 +1,11 @@
+id: map-exercise-bgd-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BGD
+zoom: 135
+priority: 1
+concepts:
+  concept-5deb119fe9bcbd83: 1
+chance: 0
+tags:
+  - world-map

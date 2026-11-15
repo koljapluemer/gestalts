@@ -1,0 +1,11 @@
+id: map-exercise-kgz-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: KGZ
+zoom: 140
+priority: 1
+concepts:
+  concept-7f7f34b129669a0c: 1
+chance: 0
+tags:
+  - world-map

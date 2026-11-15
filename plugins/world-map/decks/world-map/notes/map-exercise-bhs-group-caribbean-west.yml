@@ -1,0 +1,11 @@
+id: map-exercise-bhs-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: BHS
+group: country-group-caribbean-west
+priority: 2
+concepts:
+  concept-eaaf52bae18ed7a3: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-sol-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SOL
+zoom: 136
+priority: 1
+concepts:
+  concept-53caa5d6d42d67eb: 1
+chance: 0
+tags:
+  - world-map

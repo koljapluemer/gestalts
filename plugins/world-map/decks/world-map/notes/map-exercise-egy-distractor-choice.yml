@@ -1,0 +1,16 @@
+id: map-exercise-egy-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: EGY
+zoom: 116
+distractors:
+  - ISR
+  - LBY
+  - PSX
+  - SDN
+priority: 1
+concepts:
+  concept-aadd37701726fce2: 1
+chance: 0.5
+tags:
+  - world-map

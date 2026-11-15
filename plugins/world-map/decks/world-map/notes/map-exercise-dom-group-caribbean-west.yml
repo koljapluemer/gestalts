@@ -1,0 +1,11 @@
+id: map-exercise-dom-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: DOM
+group: country-group-caribbean-west
+priority: 2
+concepts:
+  concept-afdaa11832d1d7d7: 1
+chance: 0.5
+tags:
+  - world-map

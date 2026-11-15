@@ -1,0 +1,10 @@
+id: map-exercise-mrt-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: MRT
+priority: 1
+concepts:
+  concept-21f0df8d6d85ac30: 1
+chance: 0
+tags:
+  - world-map

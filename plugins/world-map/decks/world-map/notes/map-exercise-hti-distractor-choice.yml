@@ -1,0 +1,35 @@
+id: map-exercise-hti-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: HTI
+zoom: 120
+distractors:
+  - AIA
+  - ATG
+  - ABW
+  - BHS
+  - BRB
+  - VGB
+  - CYM
+  - CUB
+  - CUW
+  - DMA
+  - DOM
+  - GRD
+  - JAM
+  - MSR
+  - PRI
+  - LCA
+  - SXM
+  - MAF
+  - KNA
+  - VCT
+  - TTO
+  - TCA
+  - VIR
+priority: 2
+concepts:
+  concept-669cbf545f59c082: 1
+chance: 0.5
+tags:
+  - world-map

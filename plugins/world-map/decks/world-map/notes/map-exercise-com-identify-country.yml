@@ -1,0 +1,10 @@
+id: map-exercise-com-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: COM
+priority: 3
+concepts:
+  concept-bdfa16ebcb947609: 1
+chance: 0.5
+tags:
+  - world-map

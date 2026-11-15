@@ -1,0 +1,10 @@
+id: map-exercise-bol-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: BOL
+priority: 1
+concepts:
+  concept-2ef497b3ff3f982e: 1
+chance: 0
+tags:
+  - world-map

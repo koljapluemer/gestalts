@@ -1,0 +1,16 @@
+id: map-exercise-imn-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: IMN
+zoom: 104
+distractors:
+  - JEY
+  - GGY
+  - ALD
+  - FRO
+priority: 3
+concepts:
+  concept-ff1142d8c7f3c982: 1
+chance: 0.5
+tags:
+  - world-map

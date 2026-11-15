@@ -1,0 +1,17 @@
+id: map-exercise-uga-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: UGA
+zoom: 122
+distractors:
+  - COD
+  - KEN
+  - RWA
+  - SDS
+  - TZA
+priority: 1
+concepts:
+  concept-868c2dbf5d078da3: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,16 @@
+id: map-exercise-ven-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: VEN
+zoom: 117
+distractors:
+  - COL
+  - GUY
+  - GNB
+  - SUR
+priority: 1
+concepts:
+  concept-6e1bc70a0fffc92a: 1
+chance: 0.5
+tags:
+  - world-map

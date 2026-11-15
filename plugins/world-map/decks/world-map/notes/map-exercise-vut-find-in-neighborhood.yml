@@ -1,0 +1,11 @@
+id: map-exercise-vut-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: VUT
+zoom: 125
+priority: 3
+concepts:
+  concept-eaed04c0ef9fd879: 1
+chance: 0
+tags:
+  - world-map

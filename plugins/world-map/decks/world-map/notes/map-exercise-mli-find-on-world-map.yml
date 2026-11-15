@@ -1,0 +1,10 @@
+id: map-exercise-mli-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: MLI
+priority: 1
+concepts:
+  concept-8319d1506a6e36bb: 1
+chance: 0
+tags:
+  - world-map

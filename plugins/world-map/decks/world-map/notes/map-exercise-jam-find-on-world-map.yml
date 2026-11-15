@@ -1,0 +1,10 @@
+id: map-exercise-jam-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: JAM
+priority: 1
+concepts:
+  concept-8dba8e3a188311b7: 1
+chance: 0
+tags:
+  - world-map

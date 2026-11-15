@@ -1,0 +1,11 @@
+id: map-exercise-est-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: EST
+zoom: 115
+priority: 1
+concepts:
+  concept-b3c30fea3e0484bf: 1
+chance: 0
+tags:
+  - world-map

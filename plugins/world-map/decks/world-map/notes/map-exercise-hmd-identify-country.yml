@@ -1,0 +1,10 @@
+id: map-exercise-hmd-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: HMD
+priority: 3
+concepts:
+  concept-55fd107861263c3d: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,17 @@
+id: map-exercise-cog-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: COG
+zoom: 121
+distractors:
+  - AGO
+  - CMR
+  - CAF
+  - COD
+  - GAB
+priority: 1
+concepts:
+  concept-716168282b628c8f: 1
+chance: 0.5
+tags:
+  - world-map

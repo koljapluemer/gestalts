@@ -1,0 +1,15 @@
+id: map-exercise-bwa-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: BWA
+zoom: 118
+distractors:
+  - NAM
+  - ZAF
+  - ZWE
+priority: 1
+concepts:
+  concept-810b89b79a4cfef4: 1
+chance: 0.5
+tags:
+  - world-map

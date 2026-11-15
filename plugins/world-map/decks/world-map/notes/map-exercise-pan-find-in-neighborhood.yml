@@ -1,0 +1,11 @@
+id: map-exercise-pan-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: PAN
+zoom: 126
+priority: 1
+concepts:
+  concept-2f84e2f029356cef: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-tca-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TCA
+zoom: 110
+priority: 3
+concepts:
+  concept-41755b0f6dfd8544: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,16 @@
+id: map-exercise-ben-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: BEN
+zoom: 125
+distractors:
+  - BFA
+  - NER
+  - NGA
+  - TGO
+priority: 2
+concepts:
+  concept-8c294baa313f1ccd: 1
+chance: 0.5
+tags:
+  - world-map

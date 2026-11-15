@@ -1,0 +1,11 @@
+id: map-exercise-zmb-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ZMB
+zoom: 120
+priority: 1
+concepts:
+  concept-0b609cd2df240b29: 1
+chance: 0
+tags:
+  - world-map

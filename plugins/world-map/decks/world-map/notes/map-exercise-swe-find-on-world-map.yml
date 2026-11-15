@@ -1,0 +1,10 @@
+id: map-exercise-swe-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: SWE
+priority: 1
+concepts:
+  concept-2d72b34fa13cd1dc: 1
+chance: 0
+tags:
+  - world-map

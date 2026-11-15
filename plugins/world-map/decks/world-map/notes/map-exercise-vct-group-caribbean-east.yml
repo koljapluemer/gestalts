@@ -1,0 +1,11 @@
+id: map-exercise-vct-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: VCT
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-1d7475b2fc447e53: 1
+chance: 0.5
+tags:
+  - world-map

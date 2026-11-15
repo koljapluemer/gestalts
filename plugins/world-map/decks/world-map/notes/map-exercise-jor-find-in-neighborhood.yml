@@ -1,0 +1,11 @@
+id: map-exercise-jor-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: JOR
+zoom: 120
+priority: 1
+concepts:
+  concept-b5015350f9de2da7: 1
+chance: 0
+tags:
+  - world-map

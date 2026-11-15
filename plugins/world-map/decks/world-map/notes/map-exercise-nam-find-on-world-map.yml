@@ -1,0 +1,10 @@
+id: map-exercise-nam-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: NAM
+priority: 1
+concepts:
+  concept-71891c3c199a4941: 1
+chance: 0
+tags:
+  - world-map

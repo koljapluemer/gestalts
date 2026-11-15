@@ -1,0 +1,10 @@
+id: map-exercise-aut-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: AUT
+priority: 1
+concepts:
+  concept-c6c563fb1e95c80a: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,17 @@
+id: country-group-west-africa-coast
+gestalt: country-group@1
+name: west-africa-coast
+title: West Africa (Coast)
+countries:
+  - MRT
+  - SEN
+  - GMB
+  - GNB
+  - GIN
+  - SLE
+  - LBR
+  - CIV
+  - GHA
+  - TGO
+  - BEN
+  - NGA

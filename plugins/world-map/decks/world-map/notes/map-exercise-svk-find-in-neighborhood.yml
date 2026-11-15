@@ -1,0 +1,11 @@
+id: map-exercise-svk-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SVK
+zoom: 131
+priority: 1
+concepts:
+  concept-e361deb558b2faed: 1
+chance: 0
+tags:
+  - world-map

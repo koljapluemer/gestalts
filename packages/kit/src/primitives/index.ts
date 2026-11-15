@@ -8,3 +8,4 @@ export { embedKind, escapeHtml, mathAt, references, renderMarkdown, type EmbedKi
 export { MarkdownEditor } from './MarkdownEditor';
 export { useDebounced } from './useDebounced';
 export { newId } from './ids';
+export { usePanZoom, type PanZoom, type PanZoomTransform } from './usePanZoom';

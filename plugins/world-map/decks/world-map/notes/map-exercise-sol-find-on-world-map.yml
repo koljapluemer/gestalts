@@ -1,0 +1,10 @@
+id: map-exercise-sol-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: SOL
+priority: 1
+concepts:
+  concept-53caa5d6d42d67eb: 1
+chance: 0
+tags:
+  - world-map

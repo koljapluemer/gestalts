@@ -1,0 +1,11 @@
+id: map-exercise-ben-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BEN
+zoom: 120
+priority: 2
+concepts:
+  concept-8c294baa313f1ccd: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-ind-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: IND
+priority: 2
+concepts:
+  concept-8e4c330b9871414d: 1
+chance: 0
+tags:
+  - world-map

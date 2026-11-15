@@ -1,0 +1,8 @@
+id: item-model-world-map-find-in-neighborhood
+gestalt: item-model@1
+name: find-in-neighborhood
+title: Find it in its neighborhood
+engine: world-map/find-in-neighborhood
+chance: 0
+tags:
+  - world-map

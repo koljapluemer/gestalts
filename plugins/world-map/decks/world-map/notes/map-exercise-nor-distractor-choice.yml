@@ -1,0 +1,14 @@
+id: map-exercise-nor-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: NOR
+zoom: 121
+distractors:
+  - FIN
+  - SWE
+priority: 1
+concepts:
+  concept-790f6b5e09f4db08: 1
+chance: 0.5
+tags:
+  - world-map

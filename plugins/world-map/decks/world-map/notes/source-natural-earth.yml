@@ -1,0 +1,8 @@
+id: source-natural-earth
+gestalt: source@1
+key: naturalearth
+entrytype: online
+title: "Natural Earth: Admin 0 – Countries"
+organization:
+  - Natural Earth
+url: https://www.naturalearthdata.com

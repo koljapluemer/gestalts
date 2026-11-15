@@ -1,0 +1,11 @@
+id: map-exercise-sxm-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: SXM
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-1282069e76b3ce91: 1
+chance: 0.5
+tags:
+  - world-map

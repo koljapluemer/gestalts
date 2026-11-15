@@ -1,0 +1,11 @@
+id: map-exercise-pol-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: POL
+zoom: 130
+priority: 1
+concepts:
+  concept-4c67e38fd4cbafb1: 1
+chance: 0
+tags:
+  - world-map

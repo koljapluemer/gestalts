@@ -1,0 +1,10 @@
+id: map-exercise-kos-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: KOS
+priority: 1
+concepts:
+  concept-93bb3a1e7a695c83: 1
+chance: 0
+tags:
+  - world-map

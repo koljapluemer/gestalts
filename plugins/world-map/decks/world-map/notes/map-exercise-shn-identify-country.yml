@@ -1,0 +1,10 @@
+id: map-exercise-shn-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: SHN
+priority: 3
+concepts:
+  concept-1bd9e36b106fb3c3: 1
+chance: 0.5
+tags:
+  - world-map

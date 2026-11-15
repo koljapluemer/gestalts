@@ -1,0 +1,8 @@
+id: item-model-world-map-identify-country
+gestalt: item-model@1
+name: identify-country
+title: Which country is this?
+engine: world-map/identify-country
+chance: 0.5
+tags:
+  - world-map

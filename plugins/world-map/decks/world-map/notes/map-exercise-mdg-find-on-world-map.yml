@@ -1,0 +1,10 @@
+id: map-exercise-mdg-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: MDG
+priority: 1
+concepts:
+  concept-c00e74b5bf0531bc: 1
+chance: 0
+tags:
+  - world-map

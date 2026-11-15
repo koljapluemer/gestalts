@@ -1,0 +1,10 @@
+id: map-exercise-sur-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: SUR
+priority: 1
+concepts:
+  concept-efe8cc59c9bf30b4: 1
+chance: 0
+tags:
+  - world-map

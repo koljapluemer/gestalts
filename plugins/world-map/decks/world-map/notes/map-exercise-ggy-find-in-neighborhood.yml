@@ -1,0 +1,11 @@
+id: map-exercise-ggy-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GGY
+zoom: 105
+priority: 3
+concepts:
+  concept-c279c312b8358d03: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-mlt-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: MLT
+zoom: 110
+priority: 2
+concepts:
+  concept-89491ad1a0a723a5: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,15 @@
+id: map-exercise-bih-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: BIH
+zoom: 128
+distractors:
+  - HRV
+  - MNE
+  - SRB
+priority: 1
+concepts:
+  concept-12c8467963d21ccd: 1
+chance: 0.5
+tags:
+  - world-map

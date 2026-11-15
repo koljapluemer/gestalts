@@ -1,0 +1,10 @@
+id: map-exercise-stp-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: STP
+priority: 3
+concepts:
+  concept-200197b87f5d8c27: 1
+chance: 0.5
+tags:
+  - world-map

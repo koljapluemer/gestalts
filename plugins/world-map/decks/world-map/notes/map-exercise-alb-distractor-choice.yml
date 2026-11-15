@@ -1,0 +1,17 @@
+id: map-exercise-alb-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: ALB
+zoom: 130
+distractors:
+  - GRC
+  - KOS
+  - MNE
+  - MKD
+  - SRB
+priority: 1
+concepts:
+  concept-b70ebc0b4054ccb9: 1
+chance: 0.5
+tags:
+  - world-map

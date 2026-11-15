@@ -1,0 +1,11 @@
+id: map-exercise-vir-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: VIR
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-921c65953fa2ecdd: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-mdv-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: MDV
+priority: 3
+concepts:
+  concept-5890f80c37481181: 1
+chance: 0.5
+tags:
+  - world-map

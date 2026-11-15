@@ -1,0 +1,11 @@
+id: map-exercise-pri-group-caribbean-west
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: PRI
+group: country-group-caribbean-west
+priority: 2
+concepts:
+  concept-ebb43f4b072c7112: 1
+chance: 0.5
+tags:
+  - world-map

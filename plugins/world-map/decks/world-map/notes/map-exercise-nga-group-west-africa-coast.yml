@@ -1,0 +1,11 @@
+id: map-exercise-nga-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: NGA
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-5a5c4987467490b8: 1
+chance: 0.5
+tags:
+  - world-map

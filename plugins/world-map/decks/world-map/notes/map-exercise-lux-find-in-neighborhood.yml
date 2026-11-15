@@ -1,0 +1,11 @@
+id: map-exercise-lux-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: LUX
+zoom: 117
+priority: 2
+concepts:
+  concept-cf062b83e15c80c5: 1
+chance: 0
+tags:
+  - world-map

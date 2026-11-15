@@ -1,0 +1,11 @@
+id: map-exercise-afg-group-central-asia-stans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: AFG
+group: country-group-central-asia-stans
+priority: 1
+concepts:
+  concept-f891ff9f32b5e55b: 1
+chance: 0.5
+tags:
+  - world-map

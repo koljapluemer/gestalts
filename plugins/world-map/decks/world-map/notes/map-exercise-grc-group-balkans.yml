@@ -1,0 +1,11 @@
+id: map-exercise-grc-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: GRC
+group: country-group-balkans
+priority: 1
+concepts:
+  concept-28a2a906cc7f92a5: 1
+chance: 0.5
+tags:
+  - world-map

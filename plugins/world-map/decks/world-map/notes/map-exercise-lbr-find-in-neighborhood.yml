@@ -1,0 +1,11 @@
+id: map-exercise-lbr-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: LBR
+zoom: 132
+priority: 1
+concepts:
+  concept-8cd4393f149b7314: 1
+chance: 0
+tags:
+  - world-map

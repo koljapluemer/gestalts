@@ -1,0 +1,10 @@
+id: map-exercise-vut-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: VUT
+priority: 3
+concepts:
+  concept-eaed04c0ef9fd879: 1
+chance: 0.5
+tags:
+  - world-map

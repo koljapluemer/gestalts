@@ -1,0 +1,14 @@
+id: map-exercise-idn-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: IDN
+zoom: 114
+distractors:
+  - MYS
+  - PNG
+priority: 1
+concepts:
+  concept-29076c11b98b3448: 1
+chance: 0.5
+tags:
+  - world-map

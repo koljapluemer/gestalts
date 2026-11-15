@@ -1,0 +1,11 @@
+id: map-exercise-gha-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: GHA
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-1e6ec1a39595c261: 1
+chance: 0.5
+tags:
+  - world-map

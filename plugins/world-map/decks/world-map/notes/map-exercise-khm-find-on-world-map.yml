@@ -1,0 +1,10 @@
+id: map-exercise-khm-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: KHM
+priority: 1
+concepts:
+  concept-652a8c2f45331f3b: 1
+chance: 0
+tags:
+  - world-map

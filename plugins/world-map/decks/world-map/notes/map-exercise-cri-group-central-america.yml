@@ -1,0 +1,11 @@
+id: map-exercise-cri-group-central-america
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: CRI
+group: country-group-central-america
+priority: 1
+concepts:
+  concept-c2884e0e72ecdc3c: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,35 @@
+id: map-exercise-aia-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: AIA
+zoom: 103
+distractors:
+  - ATG
+  - ABW
+  - BHS
+  - BRB
+  - VGB
+  - CYM
+  - CUB
+  - CUW
+  - DMA
+  - DOM
+  - GRD
+  - HTI
+  - JAM
+  - MSR
+  - PRI
+  - LCA
+  - SXM
+  - MAF
+  - KNA
+  - VCT
+  - TTO
+  - TCA
+  - VIR
+priority: 3
+concepts:
+  concept-38627b55bc7fbcf3: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-ken-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: KEN
+zoom: 120
+priority: 1
+concepts:
+  concept-576fa1705375d837: 1
+chance: 0
+tags:
+  - world-map

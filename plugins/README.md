@@ -23,3 +23,9 @@ becomes an `item-model@1` with a `multiple-choice@1` per exercise (TeX in `$…$
 what each distractor means; this tool only translates. After Stembridge regenerates (a new topic, changed exercises):
 `mise run math-drills:decks`, which rebuilds every `stembridge-*` deck, drops those whose topic is gone and publishes
 them. CC BY 4.0, credited on every item.
+
+`world-map/tools/build-deck.ts` (`mise run world-map:deck`) generates the world-map deck from `tools/data`, exported
+once from sam-learns-things' world-map (which countries have which exercise, zoom levels, distractors, groups) with
+Natural Earth's shapes. It projects the shapes with d3-geo, so the view gets SVG paths and only scales and moves them.
+Each country is a `geography: <name>` concept, each kind of exercise an `item-model@1`, each exercise a
+`map-exercise@1` (a gestalt of the plugin's, with `country-group@1` and `map@1`).

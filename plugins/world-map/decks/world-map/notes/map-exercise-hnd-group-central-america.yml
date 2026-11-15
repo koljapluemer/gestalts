@@ -1,0 +1,11 @@
+id: map-exercise-hnd-group-central-america
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: HND
+group: country-group-central-america
+priority: 1
+concepts:
+  concept-37665fe1dd72fc73: 1
+chance: 0.5
+tags:
+  - world-map

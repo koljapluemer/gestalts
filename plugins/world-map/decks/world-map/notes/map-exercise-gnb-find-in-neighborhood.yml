@@ -1,0 +1,11 @@
+id: map-exercise-gnb-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GNB
+zoom: 125
+priority: 1
+concepts:
+  concept-0fdac7704ad70f5e: 1
+chance: 0
+tags:
+  - world-map

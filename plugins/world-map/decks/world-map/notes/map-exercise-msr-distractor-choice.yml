@@ -1,0 +1,35 @@
+id: map-exercise-msr-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: MSR
+zoom: 104
+distractors:
+  - AIA
+  - ATG
+  - ABW
+  - BHS
+  - BRB
+  - VGB
+  - CYM
+  - CUB
+  - CUW
+  - DMA
+  - DOM
+  - GRD
+  - HTI
+  - JAM
+  - PRI
+  - LCA
+  - SXM
+  - MAF
+  - KNA
+  - VCT
+  - TTO
+  - TCA
+  - VIR
+priority: 3
+concepts:
+  concept-8c205af6430a975a: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-cod-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: COD
+zoom: 150
+priority: 1
+concepts:
+  concept-5c122579d7cafac8: 1
+chance: 0
+tags:
+  - world-map

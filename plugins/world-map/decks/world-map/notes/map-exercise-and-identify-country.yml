@@ -1,0 +1,10 @@
+id: map-exercise-and-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: AND
+priority: 1
+concepts:
+  concept-8bd31e6a54e69b7c: 1
+chance: 0.5
+tags:
+  - world-map

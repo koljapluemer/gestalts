@@ -1,0 +1,11 @@
+id: map-exercise-hti-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: HTI
+zoom: 115
+priority: 2
+concepts:
+  concept-669cbf545f59c082: 1
+chance: 0
+tags:
+  - world-map

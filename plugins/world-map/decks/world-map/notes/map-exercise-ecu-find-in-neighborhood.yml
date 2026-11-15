@@ -1,0 +1,11 @@
+id: map-exercise-ecu-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ECU
+zoom: 147
+priority: 1
+concepts:
+  concept-33729c50e53c55f6: 1
+chance: 0
+tags:
+  - world-map

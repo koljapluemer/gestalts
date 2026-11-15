@@ -1,0 +1,11 @@
+id: map-exercise-yem-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: YEM
+zoom: 163
+priority: 1
+concepts:
+  concept-f77319d356ab0ba5: 1
+chance: 0
+tags:
+  - world-map

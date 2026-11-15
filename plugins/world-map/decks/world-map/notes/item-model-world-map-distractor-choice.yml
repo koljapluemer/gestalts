@@ -1,0 +1,8 @@
+id: item-model-world-map-distractor-choice
+gestalt: item-model@1
+name: distractor-choice
+title: Which country is highlighted?
+engine: world-map/distractor-choice
+chance: 0.5
+tags:
+  - world-map

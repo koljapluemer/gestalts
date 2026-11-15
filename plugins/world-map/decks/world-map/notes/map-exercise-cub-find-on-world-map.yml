@@ -1,0 +1,10 @@
+id: map-exercise-cub-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: CUB
+priority: 2
+concepts:
+  concept-5248eee2cd958af3: 1
+chance: 0
+tags:
+  - world-map

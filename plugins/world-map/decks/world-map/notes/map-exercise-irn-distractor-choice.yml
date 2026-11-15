@@ -1,0 +1,19 @@
+id: map-exercise-irn-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: IRN
+zoom: 114
+distractors:
+  - AFG
+  - ARM
+  - AZE
+  - IRQ
+  - PAK
+  - TUR
+  - TKM
+priority: 1
+concepts:
+  concept-ec5847ee5630f168: 1
+chance: 0.5
+tags:
+  - world-map

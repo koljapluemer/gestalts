@@ -1,0 +1,11 @@
+id: map-exercise-srb-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: SRB
+group: country-group-balkans
+priority: 1
+concepts:
+  concept-bcabc8de371e76c6: 1
+chance: 0.5
+tags:
+  - world-map

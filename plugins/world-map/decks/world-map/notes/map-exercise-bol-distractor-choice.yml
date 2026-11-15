@@ -1,0 +1,17 @@
+id: map-exercise-bol-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: BOL
+zoom: 116
+distractors:
+  - ARG
+  - BRA
+  - CHL
+  - PRY
+  - PER
+priority: 1
+concepts:
+  concept-2ef497b3ff3f982e: 1
+chance: 0.5
+tags:
+  - world-map

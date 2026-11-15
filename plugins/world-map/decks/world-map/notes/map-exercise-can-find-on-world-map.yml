@@ -1,0 +1,10 @@
+id: map-exercise-can-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: CAN
+priority: 1
+concepts:
+  concept-bfd1b76d0ff7f492: 1
+chance: 0
+tags:
+  - world-map

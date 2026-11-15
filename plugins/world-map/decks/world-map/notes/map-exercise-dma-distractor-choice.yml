@@ -1,0 +1,35 @@
+id: map-exercise-dma-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: DMA
+zoom: 107
+distractors:
+  - AIA
+  - ATG
+  - ABW
+  - BHS
+  - BRB
+  - VGB
+  - CYM
+  - CUB
+  - CUW
+  - DOM
+  - GRD
+  - HTI
+  - JAM
+  - MSR
+  - PRI
+  - LCA
+  - SXM
+  - MAF
+  - KNA
+  - VCT
+  - TTO
+  - TCA
+  - VIR
+priority: 2
+concepts:
+  concept-7f73a60055560d98: 1
+chance: 0.5
+tags:
+  - world-map

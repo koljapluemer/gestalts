@@ -1,0 +1,10 @@
+id: map-exercise-ukr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: UKR
+priority: 1
+concepts:
+  concept-7e67612dd9b4259d: 1
+chance: 0
+tags:
+  - world-map

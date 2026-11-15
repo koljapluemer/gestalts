@@ -1,0 +1,11 @@
+id: map-exercise-swz-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SWZ
+zoom: 114
+priority: 3
+concepts:
+  concept-08355cfe27dcb038: 1
+chance: 0
+tags:
+  - world-map

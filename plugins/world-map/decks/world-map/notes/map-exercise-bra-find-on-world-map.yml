@@ -1,0 +1,10 @@
+id: map-exercise-bra-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: BRA
+priority: 2
+concepts:
+  concept-e3118a39c78f883e: 1
+chance: 0
+tags:
+  - world-map

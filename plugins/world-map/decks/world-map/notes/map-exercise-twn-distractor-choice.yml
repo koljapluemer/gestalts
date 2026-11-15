@@ -1,0 +1,17 @@
+id: map-exercise-twn-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: TWN
+zoom: 115
+distractors:
+  - KOR
+  - JPN
+  - IDN
+  - MYS
+  - HKG
+priority: 1
+concepts:
+  concept-2f03f01fa48b10d9: 1
+chance: 0.5
+tags:
+  - world-map

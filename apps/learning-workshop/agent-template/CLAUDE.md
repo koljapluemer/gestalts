@@ -40,7 +40,7 @@ write is refused with the reason. Keep ymls small and link them.
 |---|---|
 | `react`, `lucide-react` | hooks; icons |
 | `@gestalts/view` | the data, below |
-| `@gestalts/kit` | `Markdown`, `MarkdownEditor`, `Modal`, `NoteCard`, `NoteEditor`, `storeFile` |
+| `@gestalts/kit` | `Markdown`, `MarkdownEditor`, `Modal`, `NoteCard`, `NoteEditor`, `storeFile`; `usePanZoom` (drag, wheel and pinch, d3-zoom) |
 | `@gestalts/learning` | FSRS: `fsrsStates`, `useLocalReviews`, `getScheduler`, `rate`, `saveReview`, `nextItem`, `facetOf`, `Rating`, `usePracticeSession`; logging answers: `logPractice`, `ratingOf`; picking with what's known: `lessonPlan`, `rankNew`, `variantGroups` |
 | `@gestalts/sources` | sources: `FIELDS`, `ENTRY_TYPES`, `normalise`, `bibOf`, `parseBibtex`, `renderBibtex`, `match`, `mergeSource` |
 | any npm package | loaded at run time from esm.sh (`d3`, `three`, ...). Needs the network. No types here, so type what you use |

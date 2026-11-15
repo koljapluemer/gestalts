@@ -1,0 +1,11 @@
+id: map-exercise-lso-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: LSO
+zoom: 112
+priority: 1
+concepts:
+  concept-3d49dd9fed944788: 1
+chance: 0
+tags:
+  - world-map

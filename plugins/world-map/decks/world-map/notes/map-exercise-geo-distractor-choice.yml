@@ -1,0 +1,16 @@
+id: map-exercise-geo-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: GEO
+zoom: 127
+distractors:
+  - ARM
+  - AZE
+  - RUS
+  - TUR
+priority: 1
+concepts:
+  concept-c063efbc4bcd12b0: 1
+chance: 0.5
+tags:
+  - world-map

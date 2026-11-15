@@ -1,0 +1,11 @@
+id: map-exercise-khm-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: KHM
+zoom: 120
+priority: 1
+concepts:
+  concept-652a8c2f45331f3b: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-mys-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: MYS
+zoom: 154
+priority: 1
+concepts:
+  concept-8ab7035810a197f4: 1
+chance: 0
+tags:
+  - world-map

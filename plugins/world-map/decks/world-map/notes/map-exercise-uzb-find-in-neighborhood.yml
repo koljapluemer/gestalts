@@ -1,0 +1,11 @@
+id: map-exercise-uzb-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: UZB
+zoom: 161
+priority: 1
+concepts:
+  concept-91db229a0706aab2: 1
+chance: 0
+tags:
+  - world-map

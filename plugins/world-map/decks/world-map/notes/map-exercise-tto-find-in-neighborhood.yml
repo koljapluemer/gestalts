@@ -1,0 +1,11 @@
+id: map-exercise-tto-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TTO
+zoom: 126
+priority: 3
+concepts:
+  concept-f6efba192b59994c: 1
+chance: 0
+tags:
+  - world-map

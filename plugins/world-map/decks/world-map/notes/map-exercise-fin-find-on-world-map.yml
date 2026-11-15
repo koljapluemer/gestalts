@@ -1,0 +1,10 @@
+id: map-exercise-fin-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: FIN
+priority: 1
+concepts:
+  concept-ff33cac7dc58aec5: 1
+chance: 0
+tags:
+  - world-map

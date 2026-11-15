@@ -1,0 +1,10 @@
+id: map-exercise-tgo-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: TGO
+priority: 1
+concepts:
+  concept-fe4909c948d0530c: 1
+chance: 0
+tags:
+  - world-map

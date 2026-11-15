@@ -1,0 +1,11 @@
+id: map-exercise-sle-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: SLE
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-940aaf5acdb3e0da: 1
+chance: 0.5
+tags:
+  - world-map

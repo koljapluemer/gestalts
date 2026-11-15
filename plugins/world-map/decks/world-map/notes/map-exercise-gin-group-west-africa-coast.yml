@@ -1,0 +1,11 @@
+id: map-exercise-gin-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: GIN
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-1f33bc0c34be9f2e: 1
+chance: 0.5
+tags:
+  - world-map

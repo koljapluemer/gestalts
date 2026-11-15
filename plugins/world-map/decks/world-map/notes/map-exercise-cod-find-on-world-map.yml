@@ -1,0 +1,10 @@
+id: map-exercise-cod-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: COD
+priority: 1
+concepts:
+  concept-5c122579d7cafac8: 1
+chance: 0
+tags:
+  - world-map

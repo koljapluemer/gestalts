@@ -1,0 +1,15 @@
+id: map-exercise-lbr-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: LBR
+zoom: 125
+distractors:
+  - CIV
+  - GIN
+  - SLE
+priority: 1
+concepts:
+  concept-8cd4393f149b7314: 1
+chance: 0.5
+tags:
+  - world-map

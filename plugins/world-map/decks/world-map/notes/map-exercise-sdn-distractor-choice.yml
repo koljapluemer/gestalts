@@ -1,0 +1,19 @@
+id: map-exercise-sdn-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: SDN
+zoom: 114
+distractors:
+  - CAF
+  - TCD
+  - EGY
+  - ERI
+  - ETH
+  - LBY
+  - SDS
+priority: 1
+concepts:
+  concept-5dd76137fff313ab: 1
+chance: 0.5
+tags:
+  - world-map

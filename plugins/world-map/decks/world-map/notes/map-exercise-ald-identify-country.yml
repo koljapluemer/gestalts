@@ -1,0 +1,10 @@
+id: map-exercise-ald-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: ALD
+priority: 3
+concepts:
+  concept-948a2f261b2a544b: 1
+chance: 0.5
+tags:
+  - world-map

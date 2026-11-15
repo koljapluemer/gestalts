@@ -1,0 +1,21 @@
+id: map-exercise-cod-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: COD
+zoom: 113
+distractors:
+  - AGO
+  - BDI
+  - CAF
+  - COG
+  - RWA
+  - SDS
+  - TZA
+  - UGA
+  - ZMB
+priority: 1
+concepts:
+  concept-5c122579d7cafac8: 1
+chance: 0.5
+tags:
+  - world-map

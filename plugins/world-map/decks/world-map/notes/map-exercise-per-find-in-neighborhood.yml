@@ -1,0 +1,11 @@
+id: map-exercise-per-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: PER
+zoom: 120
+priority: 1
+concepts:
+  concept-40354d7c161e67e3: 1
+chance: 0
+tags:
+  - world-map

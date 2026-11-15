@@ -1,0 +1,10 @@
+id: map-exercise-irn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: IRN
+priority: 1
+concepts:
+  concept-ec5847ee5630f168: 1
+chance: 0
+tags:
+  - world-map

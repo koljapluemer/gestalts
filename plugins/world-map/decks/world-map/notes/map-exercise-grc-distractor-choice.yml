@@ -1,0 +1,16 @@
+id: map-exercise-grc-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: GRC
+zoom: 124
+distractors:
+  - ALB
+  - BGR
+  - MKD
+  - TUR
+priority: 1
+concepts:
+  concept-28a2a906cc7f92a5: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-esp-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: ESP
+priority: 2
+concepts:
+  concept-6cf0a2f327638d4b: 1
+chance: 0
+tags:
+  - world-map

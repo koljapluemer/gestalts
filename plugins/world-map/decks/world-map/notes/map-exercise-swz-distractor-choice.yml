@@ -1,0 +1,13 @@
+id: map-exercise-swz-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: SWZ
+zoom: 107
+distractors:
+  - MOZ
+priority: 3
+concepts:
+  concept-08355cfe27dcb038: 1
+chance: 0.5
+tags:
+  - world-map

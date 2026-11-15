@@ -1,0 +1,11 @@
+id: map-exercise-mkd-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: MKD
+group: country-group-balkans
+priority: 1
+concepts:
+  concept-510e824afd0865b6: 1
+chance: 0.5
+tags:
+  - world-map

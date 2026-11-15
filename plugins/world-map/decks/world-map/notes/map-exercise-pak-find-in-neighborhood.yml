@@ -1,0 +1,11 @@
+id: map-exercise-pak-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: PAK
+zoom: 140
+priority: 1
+concepts:
+  concept-0e42c36fe29bb665: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-grl-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: GRL
+priority: 2
+concepts:
+  concept-0b24a025a59bdbb3: 1
+chance: 0
+tags:
+  - world-map

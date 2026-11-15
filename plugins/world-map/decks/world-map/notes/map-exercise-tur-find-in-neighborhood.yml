@@ -1,0 +1,11 @@
+id: map-exercise-tur-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TUR
+zoom: 155
+priority: 1
+concepts:
+  concept-bc62b6d046f26c4c: 1
+chance: 0
+tags:
+  - world-map

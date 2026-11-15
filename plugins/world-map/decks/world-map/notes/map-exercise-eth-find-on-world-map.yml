@@ -1,0 +1,10 @@
+id: map-exercise-eth-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: ETH
+priority: 1
+concepts:
+  concept-5b9306bc3d05e33c: 1
+chance: 0
+tags:
+  - world-map

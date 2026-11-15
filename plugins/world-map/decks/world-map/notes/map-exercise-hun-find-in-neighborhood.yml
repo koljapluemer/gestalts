@@ -1,0 +1,11 @@
+id: map-exercise-hun-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: HUN
+zoom: 151
+priority: 1
+concepts:
+  concept-71673ce5076d4f14: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-atg-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ATG
+zoom: 120
+priority: 3
+concepts:
+  concept-d437a6e66c192026: 1
+chance: 0
+tags:
+  - world-map

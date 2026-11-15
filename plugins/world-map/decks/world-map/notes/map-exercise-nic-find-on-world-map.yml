@@ -1,0 +1,10 @@
+id: map-exercise-nic-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: NIC
+priority: 1
+concepts:
+  concept-1e0d77955d6d6b8a: 1
+chance: 0
+tags:
+  - world-map

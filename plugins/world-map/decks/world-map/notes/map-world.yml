@@ -1,0 +1,8 @@
+id: map-world
+gestalt: map@1
+name: world
+title: World
+geometry: c7caf6c407097578.json
+sources:
+  - to: source-natural-earth
+    label: from

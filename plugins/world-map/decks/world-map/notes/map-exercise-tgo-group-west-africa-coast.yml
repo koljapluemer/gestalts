@@ -1,0 +1,11 @@
+id: map-exercise-tgo-group-west-africa-coast
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: TGO
+group: country-group-west-africa-coast
+priority: 1
+concepts:
+  concept-fe4909c948d0530c: 1
+chance: 0.5
+tags:
+  - world-map

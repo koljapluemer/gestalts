@@ -1,0 +1,10 @@
+id: map-exercise-chn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: CHN
+priority: 2
+concepts:
+  concept-7fb3abb9e5aa1668: 1
+chance: 0
+tags:
+  - world-map

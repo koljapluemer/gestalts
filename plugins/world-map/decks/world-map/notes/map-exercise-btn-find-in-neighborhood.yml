@@ -1,0 +1,11 @@
+id: map-exercise-btn-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: BTN
+zoom: 127
+priority: 1
+concepts:
+  concept-7ce97a84d4ef2818: 1
+chance: 0
+tags:
+  - world-map

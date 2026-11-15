@@ -1,0 +1,10 @@
+id: map-exercise-moz-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: MOZ
+priority: 1
+concepts:
+  concept-310af885777ef6a8: 1
+chance: 0
+tags:
+  - world-map

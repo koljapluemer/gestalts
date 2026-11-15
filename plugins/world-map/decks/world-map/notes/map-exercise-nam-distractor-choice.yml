@@ -1,0 +1,17 @@
+id: map-exercise-nam-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: NAM
+zoom: 117
+distractors:
+  - AGO
+  - BWA
+  - ZAF
+  - ZMB
+  - ZWE
+priority: 1
+concepts:
+  concept-71891c3c199a4941: 1
+chance: 0.5
+tags:
+  - world-map

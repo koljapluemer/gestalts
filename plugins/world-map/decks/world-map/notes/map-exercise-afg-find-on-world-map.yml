@@ -1,0 +1,10 @@
+id: map-exercise-afg-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: AFG
+priority: 1
+concepts:
+  concept-f891ff9f32b5e55b: 1
+chance: 0
+tags:
+  - world-map

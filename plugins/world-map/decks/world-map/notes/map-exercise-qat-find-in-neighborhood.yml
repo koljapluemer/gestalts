@@ -1,0 +1,11 @@
+id: map-exercise-qat-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: QAT
+zoom: 110
+priority: 2
+concepts:
+  concept-6d5d3c1d0c3cbc78: 1
+chance: 0
+tags:
+  - world-map

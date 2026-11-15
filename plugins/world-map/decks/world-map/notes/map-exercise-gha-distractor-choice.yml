@@ -1,0 +1,15 @@
+id: map-exercise-gha-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: GHA
+zoom: 122
+distractors:
+  - BFA
+  - CIV
+  - TGO
+priority: 1
+concepts:
+  concept-1e6ec1a39595c261: 1
+chance: 0.5
+tags:
+  - world-map

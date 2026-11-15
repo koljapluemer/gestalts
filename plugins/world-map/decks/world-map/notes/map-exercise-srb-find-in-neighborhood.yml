@@ -1,0 +1,11 @@
+id: map-exercise-srb-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: SRB
+zoom: 140
+priority: 1
+concepts:
+  concept-bcabc8de371e76c6: 1
+chance: 0
+tags:
+  - world-map

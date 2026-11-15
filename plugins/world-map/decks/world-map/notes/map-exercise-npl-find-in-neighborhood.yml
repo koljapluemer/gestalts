@@ -1,0 +1,11 @@
+id: map-exercise-npl-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: NPL
+zoom: 120
+priority: 1
+concepts:
+  concept-f614dd6913187acb: 1
+chance: 0
+tags:
+  - world-map

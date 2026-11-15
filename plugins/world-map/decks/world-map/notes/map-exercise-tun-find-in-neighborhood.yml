@@ -1,0 +1,11 @@
+id: map-exercise-tun-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TUN
+zoom: 130
+priority: 1
+concepts:
+  concept-7a5e9038c87abfd9: 1
+chance: 0
+tags:
+  - world-map

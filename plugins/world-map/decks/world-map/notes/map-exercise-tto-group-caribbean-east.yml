@@ -1,0 +1,11 @@
+id: map-exercise-tto-group-caribbean-east
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: TTO
+group: country-group-caribbean-east
+priority: 3
+concepts:
+  concept-f6efba192b59994c: 1
+chance: 0.5
+tags:
+  - world-map

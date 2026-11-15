@@ -1,0 +1,15 @@
+id: country-group-balkans
+gestalt: country-group@1
+name: balkans
+title: Balkans
+countries:
+  - SVN
+  - HRV
+  - BIH
+  - SRB
+  - MNE
+  - KOS
+  - MKD
+  - ALB
+  - GRC
+  - BGR

@@ -1,0 +1,16 @@
+id: map-exercise-bel-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: BEL
+zoom: 130
+distractors:
+  - FRA
+  - DEU
+  - LUX
+  - NLD
+priority: 1
+concepts:
+  concept-05907485e3957c40: 1
+chance: 0.5
+tags:
+  - world-map

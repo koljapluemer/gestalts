@@ -1,0 +1,10 @@
+id: map-exercise-are-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: ARE
+priority: 1
+concepts:
+  concept-d9fde69d4f0b9939: 1
+chance: 0
+tags:
+  - world-map

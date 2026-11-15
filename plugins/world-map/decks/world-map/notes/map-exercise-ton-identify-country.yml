@@ -1,0 +1,10 @@
+id: map-exercise-ton-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: TON
+priority: 3
+concepts:
+  concept-9ca9dd4f7927a470: 1
+chance: 0.5
+tags:
+  - world-map

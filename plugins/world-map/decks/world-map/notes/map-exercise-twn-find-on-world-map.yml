@@ -1,0 +1,10 @@
+id: map-exercise-twn-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: TWN
+priority: 1
+concepts:
+  concept-2f03f01fa48b10d9: 1
+chance: 0
+tags:
+  - world-map

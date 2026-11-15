@@ -1,0 +1,11 @@
+id: map-exercise-tza-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: TZA
+zoom: 161
+priority: 1
+concepts:
+  concept-4d85cc7475260fce: 1
+chance: 0
+tags:
+  - world-map

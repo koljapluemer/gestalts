@@ -1,0 +1,11 @@
+id: map-exercise-geo-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GEO
+zoom: 125
+priority: 1
+concepts:
+  concept-c063efbc4bcd12b0: 1
+chance: 0
+tags:
+  - world-map

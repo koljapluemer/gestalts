@@ -1,0 +1,17 @@
+id: map-exercise-sen-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: SEN
+zoom: 123
+distractors:
+  - GMB
+  - GIN
+  - GNB
+  - MLI
+  - MRT
+priority: 1
+concepts:
+  concept-b824eb6b563d8938: 1
+chance: 0.5
+tags:
+  - world-map

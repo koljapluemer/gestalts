@@ -1,0 +1,19 @@
+id: map-exercise-afg-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: AFG
+zoom: 118
+distractors:
+  - IRN
+  - PAK
+  - TJK
+  - TKM
+  - UZB
+  - ALB
+  - DZA
+priority: 1
+concepts:
+  concept-f891ff9f32b5e55b: 1
+chance: 0.5
+tags:
+  - world-map

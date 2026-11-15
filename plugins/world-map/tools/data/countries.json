@@ -1,0 +1,5704 @@
+{
+  "ABW": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 150
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 118
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "AFG": {
+    "distractorChoice": {
+      "distractors": [
+        "IRN",
+        "PAK",
+        "TJK",
+        "TKM",
+        "UZB",
+        "ALB",
+        "DZA"
+      ],
+      "enabled": true,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 169
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "AGO": {
+    "distractorChoice": {
+      "distractors": [
+        "COG",
+        "COD",
+        "NAM",
+        "ZMB"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "AIA": {
+    "distractorChoice": {
+      "distractors": [
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 103
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ALB": {
+    "distractorChoice": {
+      "distractors": [
+        "GRC",
+        "KOS",
+        "MNE",
+        "MKD",
+        "SRB"
+      ],
+      "enabled": true,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 149
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ALD": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 142
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 107
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "AND": {
+    "distractorChoice": {
+      "distractors": [
+        "FRA",
+        "ESP"
+      ],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ARE": {
+    "distractorChoice": {
+      "distractors": [
+        "OMN",
+        "SAU"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ARG": {
+    "distractorChoice": {
+      "distractors": [
+        "BOL",
+        "BRA",
+        "CHL",
+        "PRY",
+        "URY"
+      ],
+      "enabled": false,
+      "zoom": 112
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ARM": {
+    "distractorChoice": {
+      "distractors": [
+        "AZE",
+        "GEO",
+        "IRN",
+        "TUR"
+      ],
+      "enabled": false,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 137
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ASM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 101
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 102
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ATC": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 101
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ATG": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "AUS": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 108
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "AUT": {
+    "distractorChoice": {
+      "distractors": [
+        "CZE",
+        "DEU",
+        "HUN",
+        "ITA",
+        "LIE",
+        "SVK",
+        "SVN",
+        "CHE"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 163
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "AZE": {
+    "distractorChoice": {
+      "distractors": [
+        "ARM",
+        "GEO",
+        "IRN",
+        "RUS",
+        "TUR"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 149
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BDI": {
+    "distractorChoice": {
+      "distractors": [
+        "COD",
+        "RWA",
+        "TZA"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 122
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BEL": {
+    "distractorChoice": {
+      "distractors": [
+        "FRA",
+        "DEU",
+        "LUX",
+        "NLD"
+      ],
+      "enabled": true,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BEN": {
+    "distractorChoice": {
+      "distractors": [
+        "BFA",
+        "NER",
+        "NGA",
+        "TGO"
+      ],
+      "enabled": true,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BFA": {
+    "distractorChoice": {
+      "distractors": [
+        "BEN",
+        "CIV",
+        "GHA",
+        "MLI",
+        "NER",
+        "TGO"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BGD": {
+    "distractorChoice": {
+      "distractors": [
+        "IND",
+        "MMR"
+      ],
+      "enabled": false,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 135
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BGR": {
+    "distractorChoice": {
+      "distractors": [
+        "GRC",
+        "MKD",
+        "ROU",
+        "SRB",
+        "TUR"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BHR": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 145
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BHS": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 133
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 156
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BIH": {
+    "distractorChoice": {
+      "distractors": [
+        "HRV",
+        "MNE",
+        "SRB"
+      ],
+      "enabled": true,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BLM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 159
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BLR": {
+    "distractorChoice": {
+      "distractors": [
+        "LVA",
+        "LTU",
+        "POL",
+        "RUS",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 148
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BLZ": {
+    "distractorChoice": {
+      "distractors": [
+        "GTM",
+        "MEX"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BMU": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 156
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BOL": {
+    "distractorChoice": {
+      "distractors": [
+        "ARG",
+        "BRA",
+        "CHL",
+        "PRY",
+        "PER"
+      ],
+      "enabled": true,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BRA": {
+    "distractorChoice": {
+      "distractors": [
+        "ARG",
+        "BOL",
+        "COL",
+        "GUY",
+        "PRY",
+        "PER",
+        "SUR",
+        "URY",
+        "VEN"
+      ],
+      "enabled": false,
+      "zoom": 108
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "BRB": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BRN": {
+    "distractorChoice": {
+      "distractors": [
+        "MYS"
+      ],
+      "enabled": false,
+      "zoom": 137
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 112
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BTN": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "IND"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 127
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "BWA": {
+    "distractorChoice": {
+      "distractors": [
+        "NAM",
+        "ZAF",
+        "ZWE"
+      ],
+      "enabled": true,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CAF": {
+    "distractorChoice": {
+      "distractors": [
+        "CMR",
+        "TCD",
+        "COG",
+        "COD",
+        "SDS",
+        "SDN"
+      ],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 162
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CAN": {
+    "distractorChoice": {
+      "distractors": [
+        "USA"
+      ],
+      "enabled": false,
+      "zoom": 107
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CHE": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "FRA",
+        "DEU",
+        "ITA",
+        "LIE"
+      ],
+      "enabled": false,
+      "zoom": 129
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 141
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CHL": {
+    "distractorChoice": {
+      "distractors": [
+        "ARG",
+        "BOL",
+        "PER"
+      ],
+      "enabled": true,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CHN": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "BTN",
+        "IND",
+        "KAZ",
+        "KGZ",
+        "LAO",
+        "MNG",
+        "MMR",
+        "NPL",
+        "PRK",
+        "PAK",
+        "RUS",
+        "TJK",
+        "VNM"
+      ],
+      "enabled": false,
+      "zoom": 107
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CIV": {
+    "distractorChoice": {
+      "distractors": [
+        "BFA",
+        "GHA",
+        "GIN",
+        "LBR",
+        "MLI"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CMR": {
+    "distractorChoice": {
+      "distractors": [
+        "CAF",
+        "TCD",
+        "COG",
+        "GNQ",
+        "GAB",
+        "NGA"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "COD": {
+    "distractorChoice": {
+      "distractors": [
+        "AGO",
+        "BDI",
+        "CAF",
+        "COG",
+        "RWA",
+        "SDS",
+        "TZA",
+        "UGA",
+        "ZMB"
+      ],
+      "enabled": true,
+      "zoom": 113
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "COG": {
+    "distractorChoice": {
+      "distractors": [
+        "AGO",
+        "CMR",
+        "CAF",
+        "COD",
+        "GAB"
+      ],
+      "enabled": true,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "COK": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 150
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "COL": {
+    "distractorChoice": {
+      "distractors": [
+        "BRA",
+        "ECU",
+        "PAN",
+        "PER",
+        "VEN"
+      ],
+      "enabled": false,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "COM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 141
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 107
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "CPV": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 138
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "CRI": {
+    "distractorChoice": {
+      "distractors": [
+        "NIC",
+        "PAN"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CUB": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR",
+        "USA"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CUW": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "CYM": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 129
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "CYN": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 116
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CYP": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 135
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 117
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "CZE": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "POL",
+        "SVK"
+      ],
+      "enabled": true,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "DEU": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "BEL",
+        "CZE",
+        "DNK",
+        "FRA",
+        "LUX",
+        "NLD",
+        "POL",
+        "CHE"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 161
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "DJI": {
+    "distractorChoice": {
+      "distractors": [
+        "ERI",
+        "ETH",
+        "SOM"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 121
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "DMA": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 107
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 106
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "DNK": {
+    "distractorChoice": {
+      "distractors": [
+        "DEU"
+      ],
+      "enabled": false,
+      "zoom": 129
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 142
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "DOM": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "DZA": {
+    "distractorChoice": {
+      "distractors": [
+        "LBY",
+        "MLI",
+        "MRT",
+        "MAR",
+        "NER",
+        "TUN",
+        "SAH"
+      ],
+      "enabled": false,
+      "zoom": 113
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ECU": {
+    "distractorChoice": {
+      "distractors": [
+        "COL",
+        "PER"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 147
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "EGY": {
+    "distractorChoice": {
+      "distractors": [
+        "ISR",
+        "LBY",
+        "PSX",
+        "SDN"
+      ],
+      "enabled": true,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ERI": {
+    "distractorChoice": {
+      "distractors": [
+        "DJI",
+        "ETH",
+        "SDN"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ESP": {
+    "distractorChoice": {
+      "distractors": [
+        "AND",
+        "FRA",
+        "MAR",
+        "PRT"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 188
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "EST": {
+    "distractorChoice": {
+      "distractors": [
+        "LVA",
+        "RUS"
+      ],
+      "enabled": false,
+      "zoom": 129
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ETH": {
+    "distractorChoice": {
+      "distractors": [
+        "DJI",
+        "ERI",
+        "KEN",
+        "SDS",
+        "SOM",
+        "SDN"
+      ],
+      "enabled": false,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 171
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "FIN": {
+    "distractorChoice": {
+      "distractors": [
+        "NOR",
+        "RUS",
+        "SWE"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 167
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "FJI": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "FLK": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 134
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "FRA": {
+    "distractorChoice": {
+      "distractors": [
+        "AND",
+        "BEL",
+        "DEU",
+        "ITA",
+        "LUX",
+        "MCO",
+        "ESP",
+        "CHE"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "FRO": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 142
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 106
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "FSM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 145
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "GAB": {
+    "distractorChoice": {
+      "distractors": [
+        "CMR",
+        "COG",
+        "GNQ"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GBR": {
+    "distractorChoice": {
+      "distractors": [
+        "IRL"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 155
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GEO": {
+    "distractorChoice": {
+      "distractors": [
+        "ARM",
+        "AZE",
+        "RUS",
+        "TUR"
+      ],
+      "enabled": true,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GGY": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 154
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "GHA": {
+    "distractorChoice": {
+      "distractors": [
+        "BFA",
+        "CIV",
+        "TGO"
+      ],
+      "enabled": true,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 142
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GIN": {
+    "distractorChoice": {
+      "distractors": [
+        "CIV",
+        "GNB",
+        "LBR",
+        "MLI",
+        "SEN",
+        "SLE"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GMB": {
+    "distractorChoice": {
+      "distractors": [
+        "SEN"
+      ],
+      "enabled": false,
+      "zoom": 134
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GNB": {
+    "distractorChoice": {
+      "distractors": [
+        "GIN",
+        "SEN"
+      ],
+      "enabled": false,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "GNQ": {
+    "distractorChoice": {
+      "distractors": [
+        "CMR",
+        "GAB"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 123
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GRC": {
+    "distractorChoice": {
+      "distractors": [
+        "ALB",
+        "BGR",
+        "MKD",
+        "TUR"
+      ],
+      "enabled": true,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 170
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GRD": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 103
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "GRL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 113
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GTM": {
+    "distractorChoice": {
+      "distractors": [
+        "BLZ",
+        "SLV",
+        "HND",
+        "MEX"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "GUM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 146
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 102
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "GUY": {
+    "distractorChoice": {
+      "distractors": [
+        "BRA",
+        "SUR",
+        "VEN"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 142
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "HKG": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 143
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "HMD": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "HND": {
+    "distractorChoice": {
+      "distractors": [
+        "SLV",
+        "GTM",
+        "NIC"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 129
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "HRV": {
+    "distractorChoice": {
+      "distractors": [
+        "BIH",
+        "HUN",
+        "MNE",
+        "SRB",
+        "SVN"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "HTI": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "HUN": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "HRV",
+        "ROU",
+        "SRB",
+        "SVK",
+        "SVN",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 151
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "IDN": {
+    "distractorChoice": {
+      "distractors": [
+        "MYS",
+        "PNG"
+      ],
+      "enabled": true,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 200
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "IMN": {
+    "distractorChoice": {
+      "distractors": [
+        "JEY",
+        "GGY",
+        "ALD",
+        "FRO"
+      ],
+      "enabled": true,
+      "zoom": 104
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 108
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "IND": {
+    "distractorChoice": {
+      "distractors": [
+        "BGD",
+        "BTN",
+        "CHN",
+        "MMR",
+        "NPL",
+        "PAK"
+      ],
+      "enabled": false,
+      "zoom": 112
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 200
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "IOA": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "IOT": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 101
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "IRL": {
+    "distractorChoice": {
+      "distractors": [
+        "GBR"
+      ],
+      "enabled": false,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 134
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "IRN": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "ARM",
+        "AZE",
+        "IRQ",
+        "PAK",
+        "TUR",
+        "TKM"
+      ],
+      "enabled": true,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "IRQ": {
+    "distractorChoice": {
+      "distractors": [
+        "IRN",
+        "JOR",
+        "KWT",
+        "SAU",
+        "SYR",
+        "TUR"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ISL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ISR": {
+    "distractorChoice": {
+      "distractors": [
+        "EGY",
+        "JOR",
+        "LBN",
+        "PSX",
+        "SYR"
+      ],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "ITA": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "FRA",
+        "SMR",
+        "SVN",
+        "CHE",
+        "VAT"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 200
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "JAM": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 134
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 111
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "JEY": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": true,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "JOR": {
+    "distractorChoice": {
+      "distractors": [
+        "IRQ",
+        "ISR",
+        "PSX",
+        "SAU",
+        "SYR"
+      ],
+      "enabled": true,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "JPN": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 164
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "KAS": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 106
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "KAZ": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "KGZ",
+        "RUS",
+        "TKM",
+        "UZB"
+      ],
+      "enabled": false,
+      "zoom": 112
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 170
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "KEN": {
+    "distractorChoice": {
+      "distractors": [
+        "ETH",
+        "SDS",
+        "SOM",
+        "TZA",
+        "UGA"
+      ],
+      "enabled": true,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "KGZ": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "KAZ",
+        "TJK",
+        "UZB"
+      ],
+      "enabled": false,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "KHM": {
+    "distractorChoice": {
+      "distractors": [
+        "LAO",
+        "THA",
+        "VNM"
+      ],
+      "enabled": false,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "KIR": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 145
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "KNA": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "KOR": {
+    "distractorChoice": {
+      "distractors": [
+        "PRK"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 131
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "KOS": {
+    "distractorChoice": {
+      "distractors": [
+        "ALB",
+        "MNE",
+        "MKD",
+        "SRB"
+      ],
+      "enabled": false,
+      "zoom": 134
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "KWT": {
+    "distractorChoice": {
+      "distractors": [
+        "IRQ",
+        "SAU"
+      ],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LAO": {
+    "distractorChoice": {
+      "distractors": [
+        "KHM",
+        "CHN",
+        "MMR",
+        "THA",
+        "VNM"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 162
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LBN": {
+    "distractorChoice": {
+      "distractors": [
+        "ISR",
+        "SYR"
+      ],
+      "enabled": false,
+      "zoom": 135
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LBR": {
+    "distractorChoice": {
+      "distractors": [
+        "CIV",
+        "GIN",
+        "SLE"
+      ],
+      "enabled": true,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 132
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "LBY": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "TCD",
+        "EGY",
+        "NER",
+        "SDN",
+        "TUN"
+      ],
+      "enabled": false,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "LCA": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 146
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 108
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LIE": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "CHE"
+      ],
+      "enabled": false,
+      "zoom": 151
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LKA": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "LSO": {
+    "distractorChoice": {
+      "distractors": [
+        "ZAF"
+      ],
+      "enabled": false,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 112
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LTU": {
+    "distractorChoice": {
+      "distractors": [
+        "BLR",
+        "LVA",
+        "POL",
+        "EST"
+      ],
+      "enabled": true,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 135
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LUX": {
+    "distractorChoice": {
+      "distractors": [
+        "BEL",
+        "FRA",
+        "DEU"
+      ],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 117
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "LVA": {
+    "distractorChoice": {
+      "distractors": [
+        "BLR",
+        "EST",
+        "LTU",
+        "RUS"
+      ],
+      "enabled": false,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MAC": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MAF": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 156
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 113
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MAR": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "ESP",
+        "SAH"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 163
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MCO": {
+    "distractorChoice": {
+      "distractors": [
+        "FRA"
+      ],
+      "enabled": false,
+      "zoom": 110
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MDA": {
+    "distractorChoice": {
+      "distractors": [
+        "ROU",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 128
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MDG": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 146
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MDV": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 103
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MEX": {
+    "distractorChoice": {
+      "distractors": [
+        "BLZ",
+        "GTM",
+        "USA"
+      ],
+      "enabled": false,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 194
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MHL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 151
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MKD": {
+    "distractorChoice": {
+      "distractors": [
+        "ALB",
+        "BGR",
+        "GRC",
+        "KOS",
+        "SRB"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MLI": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "BFA",
+        "CIV",
+        "GIN",
+        "MRT",
+        "NER",
+        "SEN"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MLT": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 148
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MMR": {
+    "distractorChoice": {
+      "distractors": [
+        "BGD",
+        "CHN",
+        "IND",
+        "LAO",
+        "THA"
+      ],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 177
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MNE": {
+    "distractorChoice": {
+      "distractors": [
+        "ALB",
+        "BIH",
+        "HRV",
+        "KOS",
+        "SRB"
+      ],
+      "enabled": true,
+      "zoom": 133
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 137
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MNG": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "RUS"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 141
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MNP": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 112
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MOZ": {
+    "distractorChoice": {
+      "distractors": [
+        "MWI",
+        "ZAF",
+        "TZA",
+        "ZMB",
+        "ZWE",
+        "SWZ"
+      ],
+      "enabled": false,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MRT": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "MLI",
+        "SEN",
+        "SAH"
+      ],
+      "enabled": false,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MSR": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": true,
+      "zoom": 104
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 106
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MUS": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 141
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 102
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "MWI": {
+    "distractorChoice": {
+      "distractors": [
+        "MOZ",
+        "TZA",
+        "ZMB"
+      ],
+      "enabled": true,
+      "zoom": 112
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 149
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "MYS": {
+    "distractorChoice": {
+      "distractors": [
+        "BRN",
+        "IDN",
+        "THA"
+      ],
+      "enabled": true,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 154
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NAM": {
+    "distractorChoice": {
+      "distractors": [
+        "AGO",
+        "BWA",
+        "ZAF",
+        "ZMB",
+        "ZWE"
+      ],
+      "enabled": true,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NCL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 117
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "NER": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "BEN",
+        "BFA",
+        "TCD",
+        "LBY",
+        "MLI",
+        "NGA"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "NFK": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 157
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "NGA": {
+    "distractorChoice": {
+      "distractors": [
+        "BEN",
+        "CMR",
+        "TCD",
+        "NER",
+        "NIC"
+      ],
+      "enabled": true,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 142
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NIC": {
+    "distractorChoice": {
+      "distractors": [
+        "CRI",
+        "HND"
+      ],
+      "enabled": false,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NIU": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "NLD": {
+    "distractorChoice": {
+      "distractors": [
+        "BEL",
+        "DEU"
+      ],
+      "enabled": false,
+      "zoom": 129
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NOR": {
+    "distractorChoice": {
+      "distractors": [
+        "FIN",
+        "SWE"
+      ],
+      "enabled": true,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 200
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NPL": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "IND"
+      ],
+      "enabled": false,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "NRU": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 159
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "NZL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "OMN": {
+    "distractorChoice": {
+      "distractors": [
+        "SAU",
+        "ARE",
+        "YEM"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 162
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PAK": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "CHN",
+        "IND",
+        "IRN"
+      ],
+      "enabled": false,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PAN": {
+    "distractorChoice": {
+      "distractors": [
+        "COL",
+        "CRI"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 126
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PCN": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 156
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PER": {
+    "distractorChoice": {
+      "distractors": [
+        "BOL",
+        "BRA",
+        "CHL",
+        "COL",
+        "ECU"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PHL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 159
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PLW": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PNG": {
+    "distractorChoice": {
+      "distractors": [
+        "IDN"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 151
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "POL": {
+    "distractorChoice": {
+      "distractors": [
+        "BLR",
+        "CZE",
+        "DEU",
+        "LTU",
+        "RUS",
+        "SVK",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PRI": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 135
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PRK": {
+    "distractorChoice": {
+      "distractors": [
+        "CHN",
+        "RUS",
+        "KOR"
+      ],
+      "enabled": false,
+      "zoom": 125
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 148
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "PRT": {
+    "distractorChoice": {
+      "distractors": [
+        "ESP"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 200
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PRY": {
+    "distractorChoice": {
+      "distractors": [
+        "ARG",
+        "BOL",
+        "BRA"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PSX": {
+    "distractorChoice": {
+      "distractors": [
+        "EGY",
+        "ISR",
+        "JOR"
+      ],
+      "enabled": false,
+      "zoom": 137
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 123
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "PYF": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 138
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "QAT": {
+    "distractorChoice": {
+      "distractors": [
+        "BHR",
+        "KWT",
+        "OMN"
+      ],
+      "enabled": true,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ROU": {
+    "distractorChoice": {
+      "distractors": [
+        "BGR",
+        "HUN",
+        "MDA",
+        "SRB",
+        "UKR"
+      ],
+      "enabled": true,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "RUS": {
+    "distractorChoice": {
+      "distractors": [
+        "AZE",
+        "BLR",
+        "CHN",
+        "EST",
+        "FIN",
+        "GEO",
+        "KAZ",
+        "LVA",
+        "LTU",
+        "MNG",
+        "PRK",
+        "NOR",
+        "POL",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "RWA": {
+    "distractorChoice": {
+      "distractors": [
+        "BDI",
+        "COD",
+        "TZA",
+        "UGA"
+      ],
+      "enabled": false,
+      "zoom": 131
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SAH": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "MRT",
+        "MAR"
+      ],
+      "enabled": false,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SAU": {
+    "distractorChoice": {
+      "distractors": [
+        "IRQ",
+        "JOR",
+        "KWT",
+        "OMN",
+        "QAT",
+        "ARE",
+        "YEM"
+      ],
+      "enabled": false,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SDN": {
+    "distractorChoice": {
+      "distractors": [
+        "CAF",
+        "TCD",
+        "EGY",
+        "ERI",
+        "ETH",
+        "LBY",
+        "SDS"
+      ],
+      "enabled": true,
+      "zoom": 114
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SDS": {
+    "distractorChoice": {
+      "distractors": [
+        "CAF",
+        "COD",
+        "ETH",
+        "KEN",
+        "SDN",
+        "UGA"
+      ],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SEN": {
+    "distractorChoice": {
+      "distractors": [
+        "GMB",
+        "GIN",
+        "GNB",
+        "MLI",
+        "MRT"
+      ],
+      "enabled": true,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 132
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SGP": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 145
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 104
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SGS": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 138
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SHN": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 136
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SLB": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 136
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SLE": {
+    "distractorChoice": {
+      "distractors": [
+        "GIN",
+        "LBR",
+        "BFA"
+      ],
+      "enabled": true,
+      "zoom": 127
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 114
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SLV": {
+    "distractorChoice": {
+      "distractors": [
+        "GTM",
+        "HND"
+      ],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 114
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SMR": {
+    "distractorChoice": {
+      "distractors": [
+        "ITA"
+      ],
+      "enabled": false,
+      "zoom": 155
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 102
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SOL": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 136
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SOM": {
+    "distractorChoice": {
+      "distractors": [
+        "DJI",
+        "ETH",
+        "KEN"
+      ],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 155
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SPM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 106
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SRB": {
+    "distractorChoice": {
+      "distractors": [
+        "ALB",
+        "BIH",
+        "BGR",
+        "HRV",
+        "HUN",
+        "KOS",
+        "MNE",
+        "MKD",
+        "ROU"
+      ],
+      "enabled": false,
+      "zoom": 126
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "STP": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 144
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 113
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SUR": {
+    "distractorChoice": {
+      "distractors": [
+        "BRA",
+        "GUY"
+      ],
+      "enabled": false,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SVK": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "CZE",
+        "HUN",
+        "POL",
+        "UKR"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 131
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SVN": {
+    "distractorChoice": {
+      "distractors": [
+        "AUT",
+        "HRV",
+        "HUN",
+        "ITA"
+      ],
+      "enabled": false,
+      "zoom": 132
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SWE": {
+    "distractorChoice": {
+      "distractors": [
+        "FIN",
+        "NOR"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 179
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "SWZ": {
+    "distractorChoice": {
+      "distractors": [
+        "MOZ"
+      ],
+      "enabled": true,
+      "zoom": 107
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 114
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SXM": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 159
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SYC": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "SYR": {
+    "distractorChoice": {
+      "distractors": [
+        "IRQ",
+        "ISR",
+        "JOR",
+        "LBN",
+        "TUR"
+      ],
+      "enabled": true,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 179
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TCA": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 147
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TCD": {
+    "distractorChoice": {
+      "distractors": [
+        "CMR",
+        "CAF",
+        "LBY",
+        "NER",
+        "NGA",
+        "SDN"
+      ],
+      "enabled": false,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TGO": {
+    "distractorChoice": {
+      "distractors": [
+        "BEN",
+        "BFA",
+        "GHA"
+      ],
+      "enabled": false,
+      "zoom": 128
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "THA": {
+    "distractorChoice": {
+      "distractors": [
+        "KHM",
+        "LAO",
+        "MYS",
+        "MMR"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TJK": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "CHN",
+        "KGZ",
+        "UZB"
+      ],
+      "enabled": true,
+      "zoom": 130
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 127
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TKM": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "IRN",
+        "KAZ",
+        "UZB"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 140
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TLS": {
+    "distractorChoice": {
+      "distractors": [
+        "IDN"
+      ],
+      "enabled": false,
+      "zoom": 133
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 119
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TON": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 105
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TTO": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 137
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 126
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TUN": {
+    "distractorChoice": {
+      "distractors": [
+        "DZA",
+        "LBY"
+      ],
+      "enabled": false,
+      "zoom": 124
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TUR": {
+    "distractorChoice": {
+      "distractors": [
+        "ARM",
+        "AZE",
+        "BGR",
+        "GEO",
+        "GRC",
+        "IRN",
+        "IRQ",
+        "SYR"
+      ],
+      "enabled": false,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 155
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TUV": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 158
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 102
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "TWN": {
+    "distractorChoice": {
+      "distractors": [
+        "KOR",
+        "JPN",
+        "IDN",
+        "MYS",
+        "HKG"
+      ],
+      "enabled": true,
+      "zoom": 115
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "TZA": {
+    "distractorChoice": {
+      "distractors": [
+        "BDI",
+        "COD",
+        "KEN",
+        "MWI",
+        "MOZ",
+        "RWA",
+        "UGA",
+        "ZMB"
+      ],
+      "enabled": true,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 161
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "UGA": {
+    "distractorChoice": {
+      "distractors": [
+        "COD",
+        "KEN",
+        "RWA",
+        "SDS",
+        "TZA"
+      ],
+      "enabled": true,
+      "zoom": 122
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "UKR": {
+    "distractorChoice": {
+      "distractors": [
+        "BLR",
+        "HUN",
+        "MDA",
+        "POL",
+        "ROU",
+        "RUS",
+        "SVK"
+      ],
+      "enabled": false,
+      "zoom": 118
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 159
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "URY": {
+    "distractorChoice": {
+      "distractors": [
+        "ARG",
+        "BRA"
+      ],
+      "enabled": false,
+      "zoom": 123
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "USA": {
+    "distractorChoice": {
+      "distractors": [
+        "CAN",
+        "CUB",
+        "MEX"
+      ],
+      "enabled": false,
+      "zoom": 107
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "UZB": {
+    "distractorChoice": {
+      "distractors": [
+        "AFG",
+        "KAZ",
+        "KGZ",
+        "TJK",
+        "TKM"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 161
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "VAT": {
+    "distractorChoice": {
+      "distractors": [
+        "ITA"
+      ],
+      "enabled": false,
+      "zoom": 171
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 2,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "VCT": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 148
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 110
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "VEN": {
+    "distractorChoice": {
+      "distractors": [
+        "COL",
+        "GUY",
+        "GNB",
+        "SUR"
+      ],
+      "enabled": true,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "VGB": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA",
+        "VIR"
+      ],
+      "enabled": false,
+      "zoom": 151
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 107
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "VIR": {
+    "distractorChoice": {
+      "distractors": [
+        "AIA",
+        "ATG",
+        "ABW",
+        "BHS",
+        "BRB",
+        "VGB",
+        "CYM",
+        "CUB",
+        "CUW",
+        "DMA",
+        "DOM",
+        "GRD",
+        "HTI",
+        "JAM",
+        "MSR",
+        "PRI",
+        "LCA",
+        "SXM",
+        "MAF",
+        "KNA",
+        "VCT",
+        "TTO",
+        "TCA"
+      ],
+      "enabled": false,
+      "zoom": 148
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 115
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "VNM": {
+    "distractorChoice": {
+      "distractors": [
+        "KHM",
+        "CHN",
+        "LAO"
+      ],
+      "enabled": false,
+      "zoom": 121
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  },
+  "VUT": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 134
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 125
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "WLF": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 149
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 150
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "WSM": {
+    "distractorChoice": {
+      "distractors": [],
+      "enabled": false,
+      "zoom": 140
+    },
+    "identifyCountry": {
+      "enabled": true
+    },
+    "learningPriority": 3,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 105
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "YEM": {
+    "distractorChoice": {
+      "distractors": [
+        "OMN",
+        "SAU"
+      ],
+      "enabled": false,
+      "zoom": 119
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 163
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ZAF": {
+    "distractorChoice": {
+      "distractors": [
+        "BWA",
+        "LSO",
+        "MOZ",
+        "NAM",
+        "ZWE",
+        "SWZ"
+      ],
+      "enabled": false,
+      "zoom": 116
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": false,
+      "zoom": 153
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ZMB": {
+    "distractorChoice": {
+      "distractors": [
+        "AGO",
+        "COD",
+        "MWI",
+        "MOZ",
+        "NAM",
+        "TZA",
+        "ZWE"
+      ],
+      "enabled": false,
+      "zoom": 117
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 120
+    },
+    "worldMap": {
+      "enabled": false
+    }
+  },
+  "ZWE": {
+    "distractorChoice": {
+      "distractors": [
+        "BWA",
+        "MOZ",
+        "ZAF",
+        "ZMB"
+      ],
+      "enabled": false,
+      "zoom": 120
+    },
+    "identifyCountry": {
+      "enabled": false
+    },
+    "learningPriority": 1,
+    "neighborhood": {
+      "enabled": true,
+      "zoom": 130
+    },
+    "worldMap": {
+      "enabled": true
+    }
+  }
+}

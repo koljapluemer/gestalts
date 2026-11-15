@@ -5,6 +5,7 @@ plugins:
   - ../../plugins/alphabet-pronunciation-trainer
   - ../../plugins/phrasebook
   - ../../plugins/math-drills
+  - ../../plugins/world-map
 # what views may do beyond the strict sandbox, out of what each asks for (`permissions` in its plugin.yml): only for our
 # own code, which loads nothing from elsewhere at run time
 grants:

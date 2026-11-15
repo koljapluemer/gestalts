@@ -1,0 +1,8 @@
+name: country-group
+version: 1
+description: >-
+  Regions of a map practised together, in order: `countries` holds their codes in the map's geometry.
+fields:
+  name: { type: string, required: true }
+  title: { type: string }
+  countries: { type: string_list, required: true }

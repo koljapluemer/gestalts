@@ -1,0 +1,10 @@
+id: map-exercise-brn-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: BRN
+priority: 3
+concepts:
+  concept-667ff34fba17c21f: 1
+chance: 0.5
+tags:
+  - world-map

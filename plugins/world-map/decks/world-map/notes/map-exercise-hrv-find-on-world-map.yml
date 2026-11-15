@@ -1,0 +1,10 @@
+id: map-exercise-hrv-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: HRV
+priority: 1
+concepts:
+  concept-44cf9c108064d78c: 1
+chance: 0
+tags:
+  - world-map

@@ -1,0 +1,10 @@
+id: map-exercise-fro-identify-country
+gestalt: map-exercise@1
+model: item-model-world-map-identify-country
+country: FRO
+priority: 3
+concepts:
+  concept-27e5a86b2daee99a: 1
+chance: 0.5
+tags:
+  - world-map

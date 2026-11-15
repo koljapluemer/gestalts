@@ -1,0 +1,11 @@
+id: map-exercise-alb-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: ALB
+zoom: 149
+priority: 1
+concepts:
+  concept-b70ebc0b4054ccb9: 1
+chance: 0
+tags:
+  - world-map

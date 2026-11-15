@@ -1,0 +1,11 @@
+id: map-exercise-gtm-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GTM
+zoom: 110
+priority: 1
+concepts:
+  concept-c4ae3d5452de38d3: 1
+chance: 0
+tags:
+  - world-map

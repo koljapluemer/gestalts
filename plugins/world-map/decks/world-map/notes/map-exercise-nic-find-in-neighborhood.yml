@@ -1,0 +1,11 @@
+id: map-exercise-nic-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: NIC
+zoom: 130
+priority: 1
+concepts:
+  concept-1e0d77955d6d6b8a: 1
+chance: 0
+tags:
+  - world-map

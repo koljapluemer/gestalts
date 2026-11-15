@@ -1,0 +1,10 @@
+id: map-exercise-cmr-find-on-world-map
+gestalt: map-exercise@1
+model: item-model-world-map-find-on-world-map
+country: CMR
+priority: 1
+concepts:
+  concept-5873dc5803ff6d71: 1
+chance: 0
+tags:
+  - world-map

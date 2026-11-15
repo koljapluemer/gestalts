@@ -1,0 +1,11 @@
+id: map-exercise-kos-group-balkans
+gestalt: map-exercise@1
+model: item-model-world-map-group-sequence
+country: KOS
+group: country-group-balkans
+priority: 1
+concepts:
+  concept-93bb3a1e7a695c83: 1
+chance: 0.5
+tags:
+  - world-map

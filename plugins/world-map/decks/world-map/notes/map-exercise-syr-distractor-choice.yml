@@ -1,0 +1,17 @@
+id: map-exercise-syr-distractor-choice
+gestalt: map-exercise@1
+model: item-model-world-map-distractor-choice
+country: SYR
+zoom: 123
+distractors:
+  - IRQ
+  - ISR
+  - JOR
+  - LBN
+  - TUR
+priority: 1
+concepts:
+  concept-289298253158d6b2: 1
+chance: 0.5
+tags:
+  - world-map

@@ -1,0 +1,11 @@
+id: map-exercise-grd-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: GRD
+zoom: 104
+priority: 3
+concepts:
+  concept-d3e2436c0710eb17: 1
+chance: 0
+tags:
+  - world-map

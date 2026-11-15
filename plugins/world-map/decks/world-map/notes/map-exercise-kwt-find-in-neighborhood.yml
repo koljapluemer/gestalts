@@ -1,0 +1,11 @@
+id: map-exercise-kwt-find-in-neighborhood
+gestalt: map-exercise@1
+model: item-model-world-map-find-in-neighborhood
+country: KWT
+zoom: 110
+priority: 2
+concepts:
+  concept-9124548cfb04e7bc: 1
+chance: 0
+tags:
+  - world-map
