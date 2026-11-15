@@ -1,0 +1,22 @@
+id: flag-py
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PY
+name: Paraguay
+image: 3de9c1f74c7d9cdc.svg
+lookalikes:
+  - HR
+  - LU
+  - NL
+distractors:
+  - AR
+  - BO
+  - BR
+concepts:
+  concept-33f55eb69a47fbff: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

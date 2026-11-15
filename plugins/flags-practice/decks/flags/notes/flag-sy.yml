@@ -1,0 +1,23 @@
+id: flag-sy
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SY
+name: Syria
+image: e40f50bad2c4b21f.svg
+lookalikes:
+  - EG
+  - IQ
+  - YE
+distractors:
+  - IL
+  - JO
+  - LB
+  - TR
+concepts:
+  concept-439f754074fdc6ad: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

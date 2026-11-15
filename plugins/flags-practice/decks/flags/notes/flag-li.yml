@@ -1,0 +1,19 @@
+id: flag-li
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LI
+name: Liechtenstein
+image: 4db15f471672477c.svg
+lookalikes:
+  - HT
+distractors:
+  - AT
+  - CH
+concepts:
+  concept-f4d78e5646611833: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

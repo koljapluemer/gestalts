@@ -1,0 +1,36 @@
+id: flag-dm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: DM
+name: Dominica
+image: 3866ef49455b3b69.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-f932f8b963a81544: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

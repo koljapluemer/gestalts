@@ -1,0 +1,17 @@
+id: flag-np
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NP
+name: Nepal
+image: 6a091dd40212b3e8.svg
+distractors:
+  - CN
+  - IN
+concepts:
+  concept-aff4c3382ba07796: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

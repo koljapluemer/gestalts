@@ -1,0 +1,24 @@
+id: flag-eh
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: EH
+name: Western Sahara
+image: 2fdea831c55abd20.svg
+lookalikes:
+  - AE
+  - JO
+  - KW
+  - PS
+  - SD
+distractors:
+  - DZ
+  - MR
+  - MA
+concepts:
+  concept-8f5efc62d8e61a4b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

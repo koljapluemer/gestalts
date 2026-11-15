@@ -1,0 +1,23 @@
+id: flag-ro
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: RO
+name: Romania
+image: f1aa94d8493d0bd9.svg
+lookalikes:
+  - AD
+  - MD
+  - TD
+distractors:
+  - BG
+  - HU
+  - RS
+  - UA
+concepts:
+  concept-966dc09e22598529: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

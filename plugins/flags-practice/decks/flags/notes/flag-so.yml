@@ -1,0 +1,18 @@
+id: flag-so
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SO
+name: Somalia
+image: 57d98df33e0a9a1b.svg
+distractors:
+  - DJ
+  - ET
+  - KE
+concepts:
+  concept-83f04d5285b099c3: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

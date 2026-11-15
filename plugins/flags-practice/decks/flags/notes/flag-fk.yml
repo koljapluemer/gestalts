@@ -1,0 +1,23 @@
+id: flag-fk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: FK
+name: Falkland Islands
+image: 5da6a3e33d02f2fb.svg
+lookalikes:
+  - AI
+  - IO
+  - KY
+  - MS
+  - PN
+  - SH
+  - TC
+  - VG
+concepts:
+  concept-9118dc611b1c4fdc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

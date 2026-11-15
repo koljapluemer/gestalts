@@ -1,0 +1,22 @@
+id: flag-af
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AF
+name: Afghanistan
+image: 25448f686532171f.svg
+distractors:
+  - IR
+  - PK
+  - TJ
+  - TM
+  - UZ
+  - AL
+  - DZ
+concepts:
+  concept-5e55568f7e5708db: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

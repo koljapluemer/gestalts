@@ -1,0 +1,30 @@
+id: flag-cn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CN
+name: China
+image: 4dc630f6ca0e0ec8.svg
+lookalikes:
+  - VN
+distractors:
+  - AF
+  - BT
+  - IN
+  - KZ
+  - KG
+  - LA
+  - MN
+  - MM
+  - NP
+  - KP
+  - PK
+  - RU
+  - TJ
+concepts:
+  concept-0865e37dab592c26: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

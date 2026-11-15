@@ -1,0 +1,21 @@
+id: flag-ly
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LY
+name: Libya
+image: 797f4adc61649f65.svg
+distractors:
+  - DZ
+  - TD
+  - EG
+  - NE
+  - SD
+  - TN
+concepts:
+  concept-587463510e7974e6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

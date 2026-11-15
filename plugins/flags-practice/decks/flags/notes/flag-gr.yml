@@ -1,0 +1,19 @@
+id: flag-gr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GR
+name: Greece
+image: 0ba349753fd3c7ab.svg
+distractors:
+  - AL
+  - BG
+  - MK
+  - TR
+concepts:
+  concept-049df9e8798b0552: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,23 @@
+id: flag-tj
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TJ
+name: Tajikistan
+image: fcd2dd462d70f862.svg
+lookalikes:
+  - BG
+  - HU
+  - IR
+distractors:
+  - AF
+  - CN
+  - KG
+  - UZ
+concepts:
+  concept-64a0cb584ed6a8ad: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

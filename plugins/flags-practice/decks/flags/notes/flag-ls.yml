@@ -1,0 +1,16 @@
+id: flag-ls
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LS
+name: Lesotho
+image: e2e4aa7e666cedc0.svg
+distractors:
+  - ZA
+concepts:
+  concept-2a39dac1b7b31cf1: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

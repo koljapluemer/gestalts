@@ -1,0 +1,20 @@
+id: flag-pe
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PE
+name: Peru
+image: b933f0b3a20295b7.svg
+distractors:
+  - BO
+  - BR
+  - CL
+  - CO
+  - EC
+concepts:
+  concept-b7e232c0fe7b82b4: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

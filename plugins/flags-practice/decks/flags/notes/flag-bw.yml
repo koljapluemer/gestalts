@@ -1,0 +1,18 @@
+id: flag-bw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BW
+name: Botswana
+image: 5911744ac890ed11.svg
+distractors:
+  - NA
+  - ZA
+  - ZW
+concepts:
+  concept-b34222ba98073493: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

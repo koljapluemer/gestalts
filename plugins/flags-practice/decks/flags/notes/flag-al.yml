@@ -1,0 +1,19 @@
+id: flag-al
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AL
+name: Albania
+image: cc60534181d7f246.svg
+distractors:
+  - GR
+  - ME
+  - MK
+  - RS
+concepts:
+  concept-bd1e177bcff9c2f9: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

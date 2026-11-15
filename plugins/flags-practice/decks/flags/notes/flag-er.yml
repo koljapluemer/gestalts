@@ -1,0 +1,18 @@
+id: flag-er
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ER
+name: Eritrea
+image: 6aa0d21f5fb8a56b.svg
+distractors:
+  - DJ
+  - ET
+  - SD
+concepts:
+  concept-50c5349bebb66f51: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

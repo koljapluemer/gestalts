@@ -1,0 +1,18 @@
+id: flag-ck
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CK
+name: Cook Islands
+image: 6c186838b78f3251.svg
+lookalikes:
+  - AU
+  - NZ
+  - TV
+concepts:
+  concept-aa4b9756606df5a4: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

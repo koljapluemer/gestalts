@@ -1,0 +1,18 @@
+id: flag-ma
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MA
+name: Morocco
+image: 58f0d1c7a865fea0.svg
+distractors:
+  - DZ
+  - ES
+  - EH
+concepts:
+  concept-c14293ab2dab4ad7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,14 @@
+id: flag-to
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TO
+name: Tonga
+image: 91cba447d6c6ad53.svg
+concepts:
+  concept-a61dd64616ed4353: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

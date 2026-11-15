@@ -1,0 +1,26 @@
+id: flag-hu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: HU
+name: Hungary
+image: 37643d5afd6f40d5.svg
+lookalikes:
+  - BG
+  - IR
+  - TJ
+distractors:
+  - AT
+  - HR
+  - RO
+  - RS
+  - SK
+  - SI
+  - UA
+concepts:
+  concept-09c2b3a1223eb6f5: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

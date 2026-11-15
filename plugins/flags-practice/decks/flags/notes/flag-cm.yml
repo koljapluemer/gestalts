@@ -1,0 +1,25 @@
+id: flag-cm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CM
+name: Cameroon
+image: d88f2fa53193b2ef.svg
+lookalikes:
+  - GN
+  - ML
+  - SN
+distractors:
+  - CF
+  - TD
+  - CG
+  - GQ
+  - GA
+  - NG
+concepts:
+  concept-d683a68e86270258: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

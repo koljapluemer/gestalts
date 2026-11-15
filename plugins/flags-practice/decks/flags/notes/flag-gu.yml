@@ -1,0 +1,14 @@
+id: flag-gu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GU
+name: Guam
+image: e5c9cc629a0e2c80.svg
+concepts:
+  concept-621acde56a31dfed: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,19 @@
+id: flag-im
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IM
+name: Isle of Man
+image: e0d187333ca2d3fe.svg
+distractors:
+  - JE
+  - GG
+  - AX
+  - FO
+concepts:
+  concept-4985815234fa28e2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

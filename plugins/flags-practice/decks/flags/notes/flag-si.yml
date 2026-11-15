@@ -1,0 +1,23 @@
+id: flag-si
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SI
+name: Slovenia
+image: 26f5a2710696ac64.svg
+lookalikes:
+  - RS
+  - RU
+  - SK
+distractors:
+  - AT
+  - HR
+  - HU
+  - IT
+concepts:
+  concept-f22eb6a97f924bae: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

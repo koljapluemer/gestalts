@@ -1,0 +1,18 @@
+id: flag-tv
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TV
+name: Tuvalu
+image: b8b8b987d2ef2938.svg
+lookalikes:
+  - AU
+  - CK
+  - NZ
+concepts:
+  concept-be7c3c6a4593a696: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

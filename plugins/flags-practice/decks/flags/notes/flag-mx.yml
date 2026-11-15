@@ -1,0 +1,22 @@
+id: flag-mx
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MX
+name: Mexico
+image: c6a78658b2eea330.svg
+lookalikes:
+  - CI
+  - IE
+  - IT
+distractors:
+  - BZ
+  - GT
+  - US
+concepts:
+  concept-c4bad4cb355ea86b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

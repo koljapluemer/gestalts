@@ -1,0 +1,21 @@
+id: flag-my
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MY
+name: Malaysia
+image: ef90d311c677832c.svg
+lookalikes:
+  - LR
+  - US
+distractors:
+  - BN
+  - ID
+  - TH
+concepts:
+  concept-f255ef7454cfbd03: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

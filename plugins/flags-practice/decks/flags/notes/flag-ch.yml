@@ -1,0 +1,20 @@
+id: flag-ch
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CH
+name: Switzerland
+image: f318863d22d3f555.svg
+distractors:
+  - AT
+  - FR
+  - DE
+  - IT
+  - LI
+concepts:
+  concept-7d382525b853b148: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

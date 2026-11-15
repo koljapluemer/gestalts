@@ -1,0 +1,17 @@
+id: flag-bz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BZ
+name: Belize
+image: aa151432b13781a8.svg
+distractors:
+  - GT
+  - MX
+concepts:
+  concept-cf85106ca62ddb02: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

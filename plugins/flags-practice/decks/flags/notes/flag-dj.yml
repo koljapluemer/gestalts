@@ -1,0 +1,18 @@
+id: flag-dj
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: DJ
+name: Djibouti
+image: 2fcc21b1e9a369a2.svg
+distractors:
+  - ER
+  - ET
+  - SO
+concepts:
+  concept-946170e9d41806b9: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

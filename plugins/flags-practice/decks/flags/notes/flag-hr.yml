@@ -1,0 +1,24 @@
+id: flag-hr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: HR
+name: Croatia
+image: 2642c47d2716b985.svg
+lookalikes:
+  - LU
+  - NL
+  - PY
+distractors:
+  - BA
+  - HU
+  - ME
+  - RS
+  - SI
+concepts:
+  concept-e4bd751e4fb15ede: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

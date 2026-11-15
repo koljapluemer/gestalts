@@ -1,0 +1,36 @@
+id: flag-jm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: JM
+name: Jamaica
+image: cfa78577e6ee322a.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-dab18f9e80626b19: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

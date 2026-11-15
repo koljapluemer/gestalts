@@ -1,0 +1,38 @@
+id: flag-ht
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: HT
+name: Haiti
+image: e08d1be9606ff2ed.svg
+lookalikes:
+  - LI
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-f380751ca41b9e41: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

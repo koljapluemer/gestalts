@@ -216,6 +216,10 @@ for d in plugins/math-drills/decks/*/; do mise run publish-data "$d"; done
 description = "Rebuild plugins/world-map's deck from its tools/data, and publish it"
 run = ["node plugins/world-map/tools/build-deck.ts", "mise run publish-data plugins/world-map/decks/world-map"]
 
+[tasks."flags-practice:deck"]
+description = "Rebuild plugins/flags-practice's deck from its tools/data and world-map's, and publish it"
+run = ["node plugins/flags-practice/tools/build-deck.ts", "mise run publish-data plugins/flags-practice/decks/flags"]
+
 # --- vizint-workshop ---
 
 [tasks."vizint-workshop:dev"]

@@ -1,0 +1,19 @@
+id: flag-ec
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: EC
+name: Ecuador
+image: 510f39c7a17dfefd.svg
+lookalikes:
+  - CO
+  - VE
+distractors:
+  - PE
+concepts:
+  concept-2a5f2a278e9db19c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

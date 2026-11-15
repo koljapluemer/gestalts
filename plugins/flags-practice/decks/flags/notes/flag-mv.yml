@@ -1,0 +1,17 @@
+id: flag-mv
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MV
+name: Maldives
+image: 53d0f1d1f83ad180.svg
+lookalikes:
+  - DZ
+  - PK
+concepts:
+  concept-60426550bab7b801: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

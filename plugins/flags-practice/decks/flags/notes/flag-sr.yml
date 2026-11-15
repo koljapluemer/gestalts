@@ -1,0 +1,17 @@
+id: flag-sr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SR
+name: Suriname
+image: 80e165107e594094.svg
+distractors:
+  - BR
+  - GY
+concepts:
+  concept-2563358cc5cb7c05: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

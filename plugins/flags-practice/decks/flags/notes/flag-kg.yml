@@ -1,0 +1,19 @@
+id: flag-kg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KG
+name: Kyrgyzstan
+image: 77f32114736b40dc.svg
+distractors:
+  - CN
+  - KZ
+  - TJ
+  - UZ
+concepts:
+  concept-119f4a400a593578: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

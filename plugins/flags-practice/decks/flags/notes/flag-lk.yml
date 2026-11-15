@@ -1,0 +1,14 @@
+id: flag-lk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LK
+name: Sri Lanka
+image: 04760725dbe87173.svg
+concepts:
+  concept-e5a9f3d2b65bd29d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

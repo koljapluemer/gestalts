@@ -1,0 +1,20 @@
+id: flag-na
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NA
+name: Namibia
+image: 8f4902621c86f0df.svg
+distractors:
+  - AO
+  - BW
+  - ZA
+  - ZM
+  - ZW
+concepts:
+  concept-3770a398686ce2db: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

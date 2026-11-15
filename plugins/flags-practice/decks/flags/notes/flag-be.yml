@@ -1,0 +1,20 @@
+id: flag-be
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BE
+name: Belgium
+image: a0e763d30a8b3e01.svg
+lookalikes:
+  - DE
+distractors:
+  - FR
+  - LU
+  - NL
+concepts:
+  concept-9058c5744d39afa2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

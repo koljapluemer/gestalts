@@ -1,0 +1,21 @@
+id: flag-ad
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AD
+name: Andorra
+image: 4315c8951a759fff.svg
+lookalikes:
+  - MD
+  - RO
+  - TD
+distractors:
+  - FR
+  - ES
+concepts:
+  concept-418bec40709d3bea: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

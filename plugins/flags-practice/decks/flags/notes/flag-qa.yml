@@ -1,0 +1,19 @@
+id: flag-qa
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: QA
+name: Qatar
+image: 6502d0b83303665e.svg
+lookalikes:
+  - BH
+distractors:
+  - KW
+  - OM
+concepts:
+  concept-09fae3bc439b7408: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

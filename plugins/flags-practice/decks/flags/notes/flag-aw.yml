@@ -1,0 +1,36 @@
+id: flag-aw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AW
+name: Aruba
+image: 52c10543cb530d6a.svg
+distractors:
+  - AI
+  - AG
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-a7b4f6918967a877: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

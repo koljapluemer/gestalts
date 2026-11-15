@@ -1,0 +1,18 @@
+id: flag-cz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CZ
+name: Czechia
+image: a8df76dcdd017e8c.svg
+distractors:
+  - AT
+  - PL
+  - SK
+concepts:
+  concept-519bf10e1cc0905a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,41 @@
+id: flag-vg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VG
+name: British Virgin Islands
+image: ed564152ce0d2029.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - KY
+  - MS
+  - PN
+  - SH
+  - TC
+distractors:
+  - AG
+  - AW
+  - BS
+  - BB
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+concepts:
+  concept-f53093d45766e366: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

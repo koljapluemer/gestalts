@@ -1,0 +1,19 @@
+id: flag-mr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MR
+name: Mauritania
+image: 7b590449a24f0cd2.svg
+distractors:
+  - DZ
+  - ML
+  - SN
+  - EH
+concepts:
+  concept-e46678f963108f45: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

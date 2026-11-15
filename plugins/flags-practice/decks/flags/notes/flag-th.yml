@@ -1,0 +1,19 @@
+id: flag-th
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TH
+name: Thailand
+image: 72bdc24cc851cf42.svg
+distractors:
+  - KH
+  - LA
+  - MY
+  - MM
+concepts:
+  concept-7a2223235a06fefe: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

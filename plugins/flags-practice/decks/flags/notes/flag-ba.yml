@@ -1,0 +1,18 @@
+id: flag-ba
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BA
+name: Bosnia and Herzegovina
+image: 36fcbd3a27b037cc.svg
+distractors:
+  - HR
+  - ME
+  - RS
+concepts:
+  concept-f53577e147587e5d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

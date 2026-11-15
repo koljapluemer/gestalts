@@ -1,0 +1,20 @@
+id: flag-lb
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LB
+name: Lebanon
+image: 66cb3f7529c63be0.svg
+lookalikes:
+  - AT
+  - LV
+distractors:
+  - IL
+  - SY
+concepts:
+  concept-63dcad8383e6eaf3: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,36 @@
+id: flag-kn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KN
+name: Saint Kitts and Nevis
+image: bce271fb8340d8a2.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-1cc8aad535540b16: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

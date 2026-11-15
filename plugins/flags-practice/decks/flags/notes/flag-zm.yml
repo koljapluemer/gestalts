@@ -1,0 +1,22 @@
+id: flag-zm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ZM
+name: Zambia
+image: 703445ba57965687.svg
+distractors:
+  - AO
+  - CD
+  - MW
+  - MZ
+  - NA
+  - TZ
+  - ZW
+concepts:
+  concept-c76364a445ed1593: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

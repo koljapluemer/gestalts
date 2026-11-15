@@ -1,0 +1,19 @@
+id: flag-es
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ES
+name: Spain
+image: 861c2d37c8d6d25e.svg
+distractors:
+  - AD
+  - FR
+  - MA
+  - PT
+concepts:
+  concept-53f117abcd90b953: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

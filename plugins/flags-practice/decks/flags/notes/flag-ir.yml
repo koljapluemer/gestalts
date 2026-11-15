@@ -1,0 +1,26 @@
+id: flag-ir
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IR
+name: Iran
+image: 63cfcb3273a9709b.svg
+lookalikes:
+  - BG
+  - HU
+  - TJ
+distractors:
+  - AF
+  - AM
+  - AZ
+  - IQ
+  - PK
+  - TR
+  - TM
+concepts:
+  concept-d3302b4955863b46: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

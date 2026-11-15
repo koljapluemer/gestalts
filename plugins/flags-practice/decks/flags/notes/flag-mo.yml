@@ -1,0 +1,14 @@
+id: flag-mo
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MO
+name: Macao
+image: 3932628a047dccbe.svg
+concepts:
+  concept-3d8fd415e3bdf4a2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

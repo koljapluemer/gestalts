@@ -1,0 +1,21 @@
+id: flag-fo
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: FO
+name: Faroe Islands
+image: 4e2a49d6f779f887.svg
+lookalikes:
+  - AX
+  - DK
+  - FI
+  - IS
+  - NO
+  - SE
+concepts:
+  concept-2293ac28857db42e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

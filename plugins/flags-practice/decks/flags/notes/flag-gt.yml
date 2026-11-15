@@ -1,0 +1,21 @@
+id: flag-gt
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GT
+name: Guatemala
+image: 280d1b5150f5f8e5.svg
+lookalikes:
+  - HN
+  - NI
+  - SV
+distractors:
+  - BZ
+  - MX
+concepts:
+  concept-43c2f37cb85290e2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

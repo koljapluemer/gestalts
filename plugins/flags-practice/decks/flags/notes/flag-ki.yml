@@ -1,0 +1,14 @@
+id: flag-ki
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KI
+name: Kiribati
+image: 1995402a7fdd1889.svg
+concepts:
+  concept-b117943abf69535c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

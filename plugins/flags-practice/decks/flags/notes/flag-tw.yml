@@ -1,0 +1,20 @@
+id: flag-tw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TW
+name: Taiwan
+image: ccd624c87bb39316.svg
+distractors:
+  - KR
+  - JP
+  - ID
+  - MY
+  - HK
+concepts:
+  concept-f0610d4d454bdb6d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

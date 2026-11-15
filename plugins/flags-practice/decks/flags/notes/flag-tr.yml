@@ -1,0 +1,25 @@
+id: flag-tr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TR
+name: Türkiye
+image: 01ae70198afaa98a.svg
+lookalikes:
+  - TN
+distractors:
+  - AM
+  - AZ
+  - BG
+  - GE
+  - GR
+  - IR
+  - IQ
+  - SY
+concepts:
+  concept-ccb1999c90c9d5e7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

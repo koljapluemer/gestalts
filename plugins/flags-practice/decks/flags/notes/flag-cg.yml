@@ -1,0 +1,20 @@
+id: flag-cg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CG
+name: Republic of the Congo
+image: ace47fa5c9f74f32.svg
+distractors:
+  - AO
+  - CM
+  - CF
+  - CD
+  - GA
+concepts:
+  concept-0ae80ac9ff20d141: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

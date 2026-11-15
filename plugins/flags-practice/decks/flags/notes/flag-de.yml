@@ -1,0 +1,25 @@
+id: flag-de
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: DE
+name: Germany
+image: 6587358c77f801cc.svg
+lookalikes:
+  - BE
+distractors:
+  - AT
+  - CZ
+  - DK
+  - FR
+  - LU
+  - NL
+  - PL
+  - CH
+concepts:
+  concept-952ff67dae904791: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

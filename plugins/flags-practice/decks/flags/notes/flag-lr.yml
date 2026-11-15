@@ -1,0 +1,21 @@
+id: flag-lr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LR
+name: Liberia
+image: 246ed18fdace0001.svg
+lookalikes:
+  - MY
+  - US
+distractors:
+  - CI
+  - GN
+  - SL
+concepts:
+  concept-3f2b9c7d57d78544: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

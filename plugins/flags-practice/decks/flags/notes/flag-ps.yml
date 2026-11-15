@@ -1,0 +1,23 @@
+id: flag-ps
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PS
+name: Palestine
+image: b037976f4f676f23.svg
+lookalikes:
+  - AE
+  - EH
+  - JO
+  - KW
+  - SD
+distractors:
+  - EG
+  - IL
+concepts:
+  concept-bf4ece623a08dc75: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,23 @@
+id: flag-sh
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SH
+name: Saint Helena
+image: 27715885de67678b.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - KY
+  - MS
+  - PN
+  - TC
+  - VG
+concepts:
+  concept-8437284f2bec8ab2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

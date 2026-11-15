@@ -1,0 +1,14 @@
+id: flag-mg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MG
+name: Madagascar
+image: f41f8c0b166cb980.svg
+concepts:
+  concept-346366eed7aa3502: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,25 @@
+id: flag-dz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: DZ
+name: Algeria
+image: b625a097095e5fa1.svg
+lookalikes:
+  - MV
+  - PK
+distractors:
+  - LY
+  - ML
+  - MR
+  - MA
+  - NE
+  - TN
+  - EH
+concepts:
+  concept-29d2e3c68b479200: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

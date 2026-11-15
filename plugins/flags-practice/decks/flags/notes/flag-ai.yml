@@ -1,0 +1,41 @@
+id: flag-ai
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AI
+name: Anguilla
+image: fc241f611b1e27b0.svg
+lookalikes:
+  - FK
+  - IO
+  - KY
+  - MS
+  - PN
+  - SH
+  - TC
+  - VG
+distractors:
+  - AG
+  - AW
+  - BS
+  - BB
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+concepts:
+  concept-3caf366a63f4a807: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,20 @@
+id: flag-ni
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NI
+name: Nicaragua
+image: 7c726aa4e6a886fc.svg
+lookalikes:
+  - GT
+  - HN
+  - SV
+distractors:
+  - CR
+concepts:
+  concept-d8a4942741dfd80a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

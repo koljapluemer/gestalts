@@ -1,0 +1,18 @@
+id: flag-nz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NZ
+name: New Zealand
+image: b0e08f33c02a9aa6.svg
+lookalikes:
+  - AU
+  - CK
+  - TV
+concepts:
+  concept-cca241477c677420: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

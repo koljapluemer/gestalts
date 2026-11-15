@@ -1,0 +1,18 @@
+id: flag-ga
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GA
+name: Gabon
+image: 020bdd9e50385595.svg
+distractors:
+  - CM
+  - CG
+  - GQ
+concepts:
+  concept-18a35aaef6dd460b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

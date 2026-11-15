@@ -1,0 +1,14 @@
+id: flag-gg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GG
+name: Guernsey
+image: 2c4cf2db6703801f.svg
+concepts:
+  concept-62d7bf3b58559336: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

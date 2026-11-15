@@ -1,0 +1,36 @@
+id: flag-bb
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BB
+name: Barbados
+image: a10b729ea11e7435.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-138c49f5d39ff136: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

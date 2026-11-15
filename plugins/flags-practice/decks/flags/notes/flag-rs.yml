@@ -1,0 +1,27 @@
+id: flag-rs
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: RS
+name: Serbia
+image: b8ad57487e79764a.svg
+lookalikes:
+  - RU
+  - SI
+  - SK
+distractors:
+  - AL
+  - BA
+  - BG
+  - HR
+  - HU
+  - ME
+  - MK
+  - RO
+concepts:
+  concept-b65a576a91727a8d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

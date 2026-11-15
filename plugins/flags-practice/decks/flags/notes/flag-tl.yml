@@ -1,0 +1,16 @@
+id: flag-tl
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TL
+name: Timor-Leste
+image: 21fe09c4e2fd7bff.svg
+distractors:
+  - ID
+concepts:
+  concept-20f1ad8916d5f47c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

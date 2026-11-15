@@ -1,0 +1,25 @@
+id: flag-et
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ET
+name: Ethiopia
+image: d2fcda87528f1357.svg
+lookalikes:
+  - BO
+  - GH
+  - LT
+distractors:
+  - DJ
+  - ER
+  - KE
+  - SS
+  - SO
+  - SD
+concepts:
+  concept-07cc2e88184b9b51: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

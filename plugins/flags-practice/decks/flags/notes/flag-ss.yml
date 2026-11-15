@@ -1,0 +1,21 @@
+id: flag-ss
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SS
+name: South Sudan
+image: f0887a3fe77d10a4.svg
+distractors:
+  - CF
+  - CD
+  - ET
+  - KE
+  - SD
+  - UG
+concepts:
+  concept-93d6e0e3e61b8a4c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

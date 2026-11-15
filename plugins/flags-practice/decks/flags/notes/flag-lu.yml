@@ -1,0 +1,22 @@
+id: flag-lu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LU
+name: Luxembourg
+image: 7a3f9e419e73afb1.svg
+lookalikes:
+  - HR
+  - NL
+  - PY
+distractors:
+  - BE
+  - FR
+  - DE
+concepts:
+  concept-78f2731e521d441a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

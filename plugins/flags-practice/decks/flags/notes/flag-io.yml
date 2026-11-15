@@ -1,0 +1,23 @@
+id: flag-io
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IO
+name: British Indian Ocean Territory
+image: 25356e260606b872.svg
+lookalikes:
+  - AI
+  - FK
+  - KY
+  - MS
+  - PN
+  - SH
+  - TC
+  - VG
+concepts:
+  concept-4037048853db91e6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

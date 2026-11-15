@@ -1,0 +1,17 @@
+id: flag-gq
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GQ
+name: Equatorial Guinea
+image: 42e55a6442347b60.svg
+distractors:
+  - CM
+  - GA
+concepts:
+  concept-71d99596237b1a27: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

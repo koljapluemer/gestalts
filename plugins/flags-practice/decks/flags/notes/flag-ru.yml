@@ -1,0 +1,33 @@
+id: flag-ru
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: RU
+name: Russia
+image: 825daec8841ec0bb.svg
+lookalikes:
+  - RS
+  - SI
+  - SK
+distractors:
+  - AZ
+  - BY
+  - CN
+  - EE
+  - FI
+  - GE
+  - KZ
+  - LV
+  - LT
+  - MN
+  - KP
+  - NO
+  - PL
+  - UA
+concepts:
+  concept-83581fe7d3d13e99: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

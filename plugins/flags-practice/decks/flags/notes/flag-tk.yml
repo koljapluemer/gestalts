@@ -1,0 +1,14 @@
+id: flag-tk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TK
+name: Tokelau
+image: 01b9897fabffe1b6.svg
+concepts:
+  concept-df103e10491d7d8d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

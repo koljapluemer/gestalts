@@ -1,0 +1,21 @@
+id: flag-cf
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CF
+name: Central African Republic
+image: e10156a8aa21bcaa.svg
+distractors:
+  - CM
+  - TD
+  - CG
+  - CD
+  - SS
+  - SD
+concepts:
+  concept-c62ead82e4354b49: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

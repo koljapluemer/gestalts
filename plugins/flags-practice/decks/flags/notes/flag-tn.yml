@@ -1,0 +1,19 @@
+id: flag-tn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TN
+name: Tunisia
+image: 24fa5badfa112228.svg
+lookalikes:
+  - TR
+distractors:
+  - DZ
+  - LY
+concepts:
+  concept-9bec9821f0534775: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

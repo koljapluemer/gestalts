@@ -1,0 +1,14 @@
+id: flag-hk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: HK
+name: Hong Kong
+image: c6eb0ac35e9c5207.svg
+concepts:
+  concept-6d1b85d3c12fa035: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

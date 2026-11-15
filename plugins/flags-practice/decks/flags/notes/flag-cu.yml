@@ -1,0 +1,38 @@
+id: flag-cu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CU
+name: Cuba
+image: 998f4b68d1274fcf.svg
+lookalikes:
+  - PR
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+  - US
+concepts:
+  concept-034256cda54bb7a4: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

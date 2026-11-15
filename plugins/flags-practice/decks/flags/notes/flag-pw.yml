@@ -1,0 +1,14 @@
+id: flag-pw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PW
+name: Palau
+image: 0971384777a3b2e4.svg
+concepts:
+  concept-7f46bdb95a79f65a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

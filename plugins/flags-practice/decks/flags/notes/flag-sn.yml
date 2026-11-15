@@ -1,0 +1,22 @@
+id: flag-sn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SN
+name: Senegal
+image: fbd3e32f74504af6.svg
+lookalikes:
+  - CM
+  - GN
+  - ML
+distractors:
+  - GM
+  - GW
+  - MR
+concepts:
+  concept-de8e192b50998c66: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

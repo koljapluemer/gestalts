@@ -1,0 +1,14 @@
+id: flag-as
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AS
+name: American Samoa
+image: 4c4446f3aacf7a0f.svg
+concepts:
+  concept-e5c40d96f1846f79: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

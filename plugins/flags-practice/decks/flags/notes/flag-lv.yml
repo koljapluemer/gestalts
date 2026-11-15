@@ -1,0 +1,22 @@
+id: flag-lv
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LV
+name: Latvia
+image: 94454d23bd92bf7f.svg
+lookalikes:
+  - AT
+  - LB
+distractors:
+  - BY
+  - EE
+  - LT
+  - RU
+concepts:
+  concept-9e76947726213d62: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

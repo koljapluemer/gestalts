@@ -1,0 +1,36 @@
+id: flag-vc
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VC
+name: Saint Vincent and Grenadines
+image: 9bcdb0525ef8e94f.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - TT
+  - TC
+concepts:
+  concept-c97689f497ab9b60: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

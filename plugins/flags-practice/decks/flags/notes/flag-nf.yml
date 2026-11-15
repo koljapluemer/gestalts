@@ -1,0 +1,14 @@
+id: flag-nf
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NF
+name: Norfolk Island
+image: 0665ab29645bc836.svg
+concepts:
+  concept-4f3e84e8dfd74352: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

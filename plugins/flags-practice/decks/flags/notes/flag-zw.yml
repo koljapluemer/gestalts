@@ -1,0 +1,19 @@
+id: flag-zw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ZW
+name: Zimbabwe
+image: 1790b126a247706e.svg
+distractors:
+  - BW
+  - MZ
+  - ZA
+  - ZM
+concepts:
+  concept-215b6a5217e17918: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

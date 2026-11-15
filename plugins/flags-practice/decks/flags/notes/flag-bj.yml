@@ -1,0 +1,19 @@
+id: flag-bj
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BJ
+name: Benin
+image: 1cbbbaec2939b775.svg
+distractors:
+  - BF
+  - NE
+  - NG
+  - TG
+concepts:
+  concept-9d227cb47f463641: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

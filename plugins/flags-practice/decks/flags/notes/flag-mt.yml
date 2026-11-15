@@ -1,0 +1,14 @@
+id: flag-mt
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MT
+name: Malta
+image: 2090685303a095e3.svg
+concepts:
+  concept-05bb1232847ae29c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,14 @@
+id: flag-sc
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SC
+name: Seychelles
+image: 9e216883c8364052.svg
+concepts:
+  concept-c5298b3cf8aadc72: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

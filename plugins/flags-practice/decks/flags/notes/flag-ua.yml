@@ -1,0 +1,22 @@
+id: flag-ua
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: UA
+name: Ukraine
+image: 621dd0f9dbc62fab.svg
+distractors:
+  - BY
+  - HU
+  - MD
+  - PL
+  - RO
+  - RU
+  - SK
+concepts:
+  concept-45e9c0b2baf5594e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

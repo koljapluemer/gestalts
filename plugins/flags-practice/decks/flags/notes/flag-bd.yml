@@ -1,0 +1,17 @@
+id: flag-bd
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BD
+name: Bangladesh
+image: c1eaf388f2a58b00.svg
+distractors:
+  - IN
+  - MM
+concepts:
+  concept-4d937c308bdd0779: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,36 @@
+id: flag-ag
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AG
+name: Antigua and Barbuda
+image: d16ab7d59ae397db.svg
+distractors:
+  - AI
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-256ffe97cee1d1c2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

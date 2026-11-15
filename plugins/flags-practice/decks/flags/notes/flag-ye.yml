@@ -1,0 +1,21 @@
+id: flag-ye
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: YE
+name: Yemen
+image: 7690b36265501e4f.svg
+lookalikes:
+  - EG
+  - IQ
+  - SY
+distractors:
+  - OM
+  - SA
+concepts:
+  concept-01babad2826f30b5: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

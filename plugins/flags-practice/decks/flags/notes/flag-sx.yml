@@ -1,0 +1,36 @@
+id: flag-sx
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SX
+name: Sint Maarten
+image: 5455bacfc88fd039.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-d2abea740114c87d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

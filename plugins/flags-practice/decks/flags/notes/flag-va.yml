@@ -1,0 +1,16 @@
+id: flag-va
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VA
+name: Vatican City
+image: 4b5d3f870b7573d7.svg
+distractors:
+  - IT
+concepts:
+  concept-1aa0c01b58cf0085: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

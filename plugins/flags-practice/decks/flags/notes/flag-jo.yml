@@ -1,0 +1,25 @@
+id: flag-jo
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: JO
+name: Jordan
+image: e8c54df11e74dd1c.svg
+lookalikes:
+  - AE
+  - EH
+  - KW
+  - PS
+  - SD
+distractors:
+  - IQ
+  - IL
+  - SA
+  - SY
+concepts:
+  concept-475a554a62dea3cc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

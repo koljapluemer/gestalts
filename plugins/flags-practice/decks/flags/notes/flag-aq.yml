@@ -1,0 +1,14 @@
+id: flag-aq
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AQ
+name: Antarctica
+image: e43eedb8704f699c.svg
+concepts:
+  concept-193a8a126df54064: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

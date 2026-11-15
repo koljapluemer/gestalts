@@ -1,0 +1,14 @@
+id: flag-mh
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MH
+name: Marshall Islands
+image: c84eeee72e6dbffd.svg
+concepts:
+  concept-f864f72f9cee8706: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

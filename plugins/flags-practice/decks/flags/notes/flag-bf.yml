@@ -1,0 +1,21 @@
+id: flag-bf
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BF
+name: Burkina Faso
+image: 57318e3fbc162a08.svg
+distractors:
+  - BJ
+  - CI
+  - GH
+  - ML
+  - NE
+  - TG
+concepts:
+  concept-21988406fb455d06: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

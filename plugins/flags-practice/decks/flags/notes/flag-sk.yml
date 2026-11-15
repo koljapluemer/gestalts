@@ -1,0 +1,24 @@
+id: flag-sk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SK
+name: Slovakia
+image: 96e5207d5534feac.svg
+lookalikes:
+  - RS
+  - RU
+  - SI
+distractors:
+  - AT
+  - CZ
+  - HU
+  - PL
+  - UA
+concepts:
+  concept-7b39375f94b811f5: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

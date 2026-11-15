@@ -1,0 +1,18 @@
+id: flag-cl
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CL
+name: Chile
+image: 763d3c2e391bd5c5.svg
+distractors:
+  - AR
+  - BO
+  - PE
+concepts:
+  concept-ec4df606a1041afd: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

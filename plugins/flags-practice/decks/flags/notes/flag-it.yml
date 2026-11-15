@@ -1,0 +1,25 @@
+id: flag-it
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IT
+name: Italy
+image: 8033713afdbce814.svg
+lookalikes:
+  - CI
+  - IE
+  - MX
+distractors:
+  - AT
+  - FR
+  - SM
+  - SI
+  - CH
+  - VA
+concepts:
+  concept-0586414113f7e461: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

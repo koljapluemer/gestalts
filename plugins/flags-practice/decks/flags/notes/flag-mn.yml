@@ -1,0 +1,17 @@
+id: flag-mn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MN
+name: Mongolia
+image: c1e18a20075f3e58.svg
+distractors:
+  - CN
+  - RU
+concepts:
+  concept-5e01abdcce7f8efe: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

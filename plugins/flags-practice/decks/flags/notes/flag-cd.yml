@@ -1,0 +1,24 @@
+id: flag-cd
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CD
+name: DR Congo
+image: f9e681de0bd103b0.svg
+distractors:
+  - AO
+  - BI
+  - CF
+  - CG
+  - RW
+  - SS
+  - TZ
+  - UG
+  - ZM
+concepts:
+  concept-b4a2f92a946bd7b6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

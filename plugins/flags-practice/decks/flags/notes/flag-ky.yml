@@ -1,0 +1,41 @@
+id: flag-ky
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KY
+name: Cayman Islands
+image: 4fbc002337b57783.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - MS
+  - PN
+  - SH
+  - TC
+  - VG
+distractors:
+  - AG
+  - AW
+  - BS
+  - BB
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+concepts:
+  concept-07d86e8c2058b087: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

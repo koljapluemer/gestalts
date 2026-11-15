@@ -1,0 +1,14 @@
+id: flag-je
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: JE
+name: Jersey
+image: 7e8ccfa1ebec7dac.svg
+concepts:
+  concept-2668014bec064997: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

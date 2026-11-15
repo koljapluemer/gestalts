@@ -1,0 +1,14 @@
+id: flag-mp
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MP
+name: Northern Mariana Islands
+image: 410b65b9c0fbb1cd.svg
+concepts:
+  concept-4f47de168343c0aa: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

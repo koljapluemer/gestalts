@@ -1,0 +1,23 @@
+id: flag-fr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: FR
+name: France
+image: 1aa05e1d6a936d6e.svg
+distractors:
+  - AD
+  - BE
+  - DE
+  - IT
+  - LU
+  - MC
+  - ES
+  - CH
+concepts:
+  concept-1468d4f883c9c743: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

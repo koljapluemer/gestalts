@@ -1,0 +1,14 @@
+id: flag-vu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VU
+name: Vanuatu
+image: e1dfb198c849ac87.svg
+concepts:
+  concept-891ac5a8869deb00: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

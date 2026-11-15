@@ -1,0 +1,14 @@
+id: flag-mu
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MU
+name: Mauritius
+image: d5e7924124236f8d.svg
+concepts:
+  concept-0ba5a624542e58cf: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

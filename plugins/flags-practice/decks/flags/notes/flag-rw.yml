@@ -1,0 +1,19 @@
+id: flag-rw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: RW
+name: Rwanda
+image: ad31843b96926a2b.svg
+distractors:
+  - BI
+  - CD
+  - TZ
+  - UG
+concepts:
+  concept-9565e9c37499375a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

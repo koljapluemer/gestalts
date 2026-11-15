@@ -1,0 +1,14 @@
+id: flag-st
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ST
+name: São Tomé and Príncipe
+image: f1dec4ddb0fa16de.svg
+concepts:
+  concept-c902503efe4b8e65: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

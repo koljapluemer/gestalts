@@ -1,0 +1,23 @@
+id: flag-gn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GN
+name: Guinea
+image: d6225f5e900f1aa7.svg
+lookalikes:
+  - CM
+  - ML
+  - SN
+distractors:
+  - CI
+  - GW
+  - LR
+  - SL
+concepts:
+  concept-ad8bcdcc526d1a68: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

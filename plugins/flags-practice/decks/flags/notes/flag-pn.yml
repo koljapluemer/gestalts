@@ -1,0 +1,23 @@
+id: flag-pn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PN
+name: Pitcairn Islands
+image: 559cf13661095653.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - KY
+  - MS
+  - SH
+  - TC
+  - VG
+concepts:
+  concept-69ae1347ab9d49e2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

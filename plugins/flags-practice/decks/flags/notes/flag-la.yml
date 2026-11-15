@@ -1,0 +1,20 @@
+id: flag-la
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LA
+name: Laos
+image: a7aeabdff7257641.svg
+distractors:
+  - KH
+  - CN
+  - MM
+  - TH
+  - VN
+concepts:
+  concept-0ef730148a4dab44: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

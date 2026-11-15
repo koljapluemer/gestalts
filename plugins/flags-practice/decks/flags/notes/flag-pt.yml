@@ -1,0 +1,16 @@
+id: flag-pt
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PT
+name: Portugal
+image: b5404c11e09d27b6.svg
+distractors:
+  - ES
+concepts:
+  concept-5fa1b4a16482dae1: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

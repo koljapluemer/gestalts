@@ -1,0 +1,14 @@
+id: flag-nr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NR
+name: Nauru
+image: b8eccac3abe08178.svg
+concepts:
+  concept-5c2390b9c82e7cfc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

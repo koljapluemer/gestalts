@@ -1,0 +1,24 @@
+id: flag-ml
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ML
+name: Mali
+image: 035b42692194c47e.svg
+lookalikes:
+  - CM
+  - GN
+  - SN
+distractors:
+  - DZ
+  - BF
+  - CI
+  - MR
+  - NE
+concepts:
+  concept-822005830b3437cc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,26 @@
+id: flag-pl
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PL
+name: Poland
+image: 7aca9d287f672a5f.svg
+lookalikes:
+  - ID
+  - MC
+  - SG
+distractors:
+  - BY
+  - CZ
+  - DE
+  - LT
+  - RU
+  - SK
+  - UA
+concepts:
+  concept-5f52a564dfcfc799: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

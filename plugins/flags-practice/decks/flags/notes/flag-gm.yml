@@ -1,0 +1,16 @@
+id: flag-gm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GM
+name: Gambia
+image: bbd41a215f7e0d50.svg
+distractors:
+  - SN
+concepts:
+  concept-e34c4120a38ed82e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

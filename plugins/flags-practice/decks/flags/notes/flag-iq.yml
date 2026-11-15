@@ -1,0 +1,24 @@
+id: flag-iq
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IQ
+name: Iraq
+image: 9d6f8a9fe783752b.svg
+lookalikes:
+  - EG
+  - SY
+  - YE
+distractors:
+  - IR
+  - JO
+  - KW
+  - SA
+  - TR
+concepts:
+  concept-ee59a1edf39b9b15: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,23 @@
+id: flag-fi
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: FI
+name: Finland
+image: 6d464d590e33c3a6.svg
+lookalikes:
+  - AX
+  - DK
+  - FO
+  - IS
+  - NO
+  - SE
+distractors:
+  - RU
+concepts:
+  concept-6dda164fa990e4ce: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,20 @@
+id: flag-il
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IL
+name: Israel
+image: 79cb9b327c84b3a6.svg
+distractors:
+  - EG
+  - JO
+  - LB
+  - PS
+  - SY
+concepts:
+  concept-ff59ee3013def1e2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

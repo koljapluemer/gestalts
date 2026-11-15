@@ -1,0 +1,18 @@
+id: flag-sl
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SL
+name: Sierra Leone
+image: dd8175908ba9b7d3.svg
+distractors:
+  - GN
+  - LR
+  - BF
+concepts:
+  concept-d3f0e30df5c49b24: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

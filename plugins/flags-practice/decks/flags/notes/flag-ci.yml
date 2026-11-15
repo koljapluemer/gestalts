@@ -1,0 +1,24 @@
+id: flag-ci
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CI
+name: Côte d’Ivoire
+image: 7867540b39ad71aa.svg
+lookalikes:
+  - IE
+  - IT
+  - MX
+distractors:
+  - BF
+  - GH
+  - GN
+  - LR
+  - ML
+concepts:
+  concept-4bf5eed4d21a7f83: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

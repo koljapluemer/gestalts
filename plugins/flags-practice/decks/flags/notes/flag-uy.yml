@@ -1,0 +1,18 @@
+id: flag-uy
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: UY
+name: Uruguay
+image: 72cc55b473bf0e95.svg
+lookalikes:
+  - AR
+distractors:
+  - BR
+concepts:
+  concept-3692bc1979c31a2d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

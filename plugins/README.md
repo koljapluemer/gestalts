@@ -30,3 +30,11 @@ Natural Earth's shapes. It projects the shapes with d3-geo, so the view gets SVG
 Each country is a `geography: <name>` concept, its id keyed by its code (`tools/concepts.ts`, shared with
 flags-practice), each kind of exercise an `item-model@1`, each exercise a `map-exercise@1` (a gestalt of the plugin's,
 with `country-group@1` and `map@1`).
+
+`flags-practice/tools/build-deck.ts` (`mise run flags-practice:deck`) generates the flags deck from `tools/data`: the
+flags of sam-learns-things' learn-flags (iso-country-flags-svg-collection, minified with svgo), `countries.json` (each
+ISO alpha-2 code's name, its code in world-map's geometry, and `skip` with why a flag isn't asked: one that is
+another's, like France's territories) and `lookalikes.json` (groups of flags that are confused). Each flag is a
+`flag@1` practising a `flag: <name>` concept, linked both ways (weight 0.1) to world-map's `geography: <name>`
+concept of the country, whose yml it writes the same as world-map does. A flag's wrong options are its look-alikes,
+else its region's countries from world-map's `tools/data/countries.json`.

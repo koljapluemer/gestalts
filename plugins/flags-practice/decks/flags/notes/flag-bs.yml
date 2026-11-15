@@ -1,0 +1,36 @@
+id: flag-bs
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BS
+name: Bahamas
+image: 880f0fcf1c026767.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BB
+  - VG
+  - KY
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-a4d36fd4c52a2107: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

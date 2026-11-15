@@ -1,0 +1,21 @@
+id: flag-mz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MZ
+name: Mozambique
+image: e3473305d5038699.svg
+distractors:
+  - MW
+  - ZA
+  - TZ
+  - ZM
+  - ZW
+  - SZ
+concepts:
+  concept-3def2b9b8a2f7ed9: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

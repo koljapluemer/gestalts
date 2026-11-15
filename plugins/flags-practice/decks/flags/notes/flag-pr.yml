@@ -1,0 +1,37 @@
+id: flag-pr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PR
+name: Puerto Rico
+image: a2a43eefd68f7cdd.svg
+lookalikes:
+  - CU
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-569aa2c555583637: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

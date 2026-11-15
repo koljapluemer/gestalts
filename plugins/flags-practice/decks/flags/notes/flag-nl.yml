@@ -1,0 +1,21 @@
+id: flag-nl
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NL
+name: Netherlands
+image: 3a2b7141352cca29.svg
+lookalikes:
+  - HR
+  - LU
+  - PY
+distractors:
+  - BE
+  - DE
+concepts:
+  concept-a0a17ce104e9bebc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

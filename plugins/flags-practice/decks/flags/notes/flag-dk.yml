@@ -1,0 +1,23 @@
+id: flag-dk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: DK
+name: Denmark
+image: a6ce800e09389a92.svg
+lookalikes:
+  - AX
+  - FI
+  - FO
+  - IS
+  - NO
+  - SE
+distractors:
+  - DE
+concepts:
+  concept-1642315fcd73ce75: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

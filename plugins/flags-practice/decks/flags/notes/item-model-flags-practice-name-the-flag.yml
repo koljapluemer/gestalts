@@ -1,0 +1,8 @@
+id: item-model-flags-practice-name-the-flag
+gestalt: item-model@1
+name: name-the-flag
+title: Whose flag is this?
+engine: flags-practice/name-the-flag
+chance: 0.5
+tags:
+  - flags-practice

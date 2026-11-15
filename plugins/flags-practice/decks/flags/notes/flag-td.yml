@@ -1,0 +1,25 @@
+id: flag-td
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TD
+name: Chad
+image: ca11e8c86f0e8cf7.svg
+lookalikes:
+  - AD
+  - MD
+  - RO
+distractors:
+  - CM
+  - CF
+  - LY
+  - NE
+  - NG
+  - SD
+concepts:
+  concept-e9bb7394fe56e03a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

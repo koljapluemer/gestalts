@@ -1,0 +1,14 @@
+id: flag-fj
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: FJ
+name: Fiji
+image: c86887b83f8a9001.svg
+concepts:
+  concept-c1419d190c748aa7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

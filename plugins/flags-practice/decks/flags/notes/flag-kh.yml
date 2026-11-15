@@ -1,0 +1,18 @@
+id: flag-kh
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KH
+name: Cambodia
+image: 12d895eb96f8eefe.svg
+distractors:
+  - LA
+  - TH
+  - VN
+concepts:
+  concept-cea4ee8ad1a46aa7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

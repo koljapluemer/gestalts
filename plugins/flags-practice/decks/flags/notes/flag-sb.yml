@@ -1,0 +1,14 @@
+id: flag-sb
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SB
+name: Solomon Islands
+image: 1afc33788d4f58a2.svg
+concepts:
+  concept-c0b29d746b225b67: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

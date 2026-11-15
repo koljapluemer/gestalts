@@ -1,0 +1,21 @@
+id: flag-ar
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AR
+name: Argentina
+image: 9c5fc816e7de5155.svg
+lookalikes:
+  - UY
+distractors:
+  - BO
+  - BR
+  - CL
+  - PY
+concepts:
+  concept-552efc6b754e6c89: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

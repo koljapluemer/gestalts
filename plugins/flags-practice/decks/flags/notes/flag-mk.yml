@@ -1,0 +1,19 @@
+id: flag-mk
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MK
+name: North Macedonia
+image: f1791b3c6f47791a.svg
+distractors:
+  - AL
+  - BG
+  - GR
+  - RS
+concepts:
+  concept-08709c14f0ef9973: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

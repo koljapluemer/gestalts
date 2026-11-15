@@ -1,0 +1,23 @@
+id: flag-lt
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: LT
+name: Lithuania
+image: c911d62e9f51fb2a.svg
+lookalikes:
+  - BO
+  - ET
+  - GH
+distractors:
+  - BY
+  - LV
+  - PL
+  - EE
+concepts:
+  concept-3d2efcb04dacb9e2: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

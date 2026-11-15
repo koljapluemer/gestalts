@@ -1,0 +1,19 @@
+id: flag-me
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ME
+name: Montenegro
+image: e05254b6f20a2f5e.svg
+distractors:
+  - AL
+  - BA
+  - HR
+  - RS
+concepts:
+  concept-ef698f69f3f23437: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

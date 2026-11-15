@@ -1,0 +1,20 @@
+id: flag-kz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KZ
+name: Kazakhstan
+image: 9d67f5525132d9a6.svg
+distractors:
+  - CN
+  - KG
+  - RU
+  - TM
+  - UZ
+concepts:
+  concept-ad8811baf211296f: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

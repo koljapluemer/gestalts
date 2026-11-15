@@ -1,0 +1,14 @@
+id: flag-pf
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PF
+name: French Polynesia
+image: 1c67cfa07be82048.svg
+concepts:
+  concept-7394e15815e0f45e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

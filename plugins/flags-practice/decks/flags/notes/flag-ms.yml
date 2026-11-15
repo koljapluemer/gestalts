@@ -1,0 +1,41 @@
+id: flag-ms
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MS
+name: Montserrat
+image: 48572b1f9f90ecf3.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - KY
+  - PN
+  - SH
+  - TC
+  - VG
+distractors:
+  - AG
+  - AW
+  - BS
+  - BB
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+concepts:
+  concept-b8eab2d38acfb9fd: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

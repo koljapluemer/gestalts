@@ -80,6 +80,10 @@ but nothing uses them: concepts form no tree, and events don't copy conclusions.
 deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
 the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
 
+Decks share a concept by writing the same yml under the same id, so their builders share the rule for it. A concept
+of something with a code (a country) takes its id from the code, not its name, so a rename keeps it
+(`plugins/world-map/tools/concepts.ts`, used by world-map's and flags-practice's builders).
+
 Concepts form no hierarchy. How they relate is said by `concept-link`s: directed (knowing how to say a word is good
 evidence of recognising it, not the other way round), weighted, cycles allowed, any number of them, and each a claim
 by its `source` (a deck, the user, a model), so several can stand about one pair; they count as their mean.

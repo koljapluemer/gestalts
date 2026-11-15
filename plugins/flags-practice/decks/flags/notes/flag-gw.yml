@@ -1,0 +1,17 @@
+id: flag-gw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GW
+name: Guinea-Bissau
+image: cef97aa531eba513.svg
+distractors:
+  - GN
+  - SN
+concepts:
+  concept-65674175497ff7d6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

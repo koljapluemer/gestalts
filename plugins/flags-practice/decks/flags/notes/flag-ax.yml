@@ -1,0 +1,21 @@
+id: flag-ax
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AX
+name: Åland Islands
+image: 15c0f87f2d384d33.svg
+lookalikes:
+  - DK
+  - FI
+  - FO
+  - IS
+  - NO
+  - SE
+concepts:
+  concept-00837e49855eb0c7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

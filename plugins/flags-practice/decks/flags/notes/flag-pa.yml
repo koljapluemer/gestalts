@@ -1,0 +1,17 @@
+id: flag-pa
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PA
+name: Panama
+image: e2af4646d628afeb.svg
+distractors:
+  - CO
+  - CR
+concepts:
+  concept-88fdc1c579dc02b6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

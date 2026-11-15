@@ -1,0 +1,23 @@
+id: flag-tz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TZ
+name: Tanzania
+image: dc2ed14ad3f73062.svg
+distractors:
+  - BI
+  - CD
+  - KE
+  - MW
+  - MZ
+  - RW
+  - UG
+  - ZM
+concepts:
+  concept-b3709f8bc7cde922: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,18 @@
+id: flag-sg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SG
+name: Singapore
+image: c3f823ae0898f4c9.svg
+lookalikes:
+  - ID
+  - MC
+  - PL
+concepts:
+  concept-e647e41559879946: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

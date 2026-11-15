@@ -1,0 +1,24 @@
+id: flag-ne
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NE
+name: Niger
+image: d8305e4997a125de.svg
+lookalikes:
+  - IN
+distractors:
+  - DZ
+  - BJ
+  - BF
+  - TD
+  - LY
+  - ML
+  - NG
+concepts:
+  concept-6e2fbc5e8b4718dd: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

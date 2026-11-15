@@ -1,0 +1,17 @@
+id: flag-ee
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: EE
+name: Estonia
+image: 6f05a8042e3fd319.svg
+distractors:
+  - LV
+  - RU
+concepts:
+  concept-a33966137959c822: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

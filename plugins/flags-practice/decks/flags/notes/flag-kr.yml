@@ -1,0 +1,16 @@
+id: flag-kr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KR
+name: South Korea
+image: 199e01e0c31f8610.svg
+distractors:
+  - KP
+concepts:
+  concept-a0cd2e199ec40d25: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

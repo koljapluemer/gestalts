@@ -1,0 +1,23 @@
+id: flag-in
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: IN
+name: India
+image: 7e2e0bef8d5d64bb.svg
+lookalikes:
+  - NE
+distractors:
+  - BD
+  - BT
+  - CN
+  - MM
+  - NP
+  - PK
+concepts:
+  concept-a140defe39b504a1: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

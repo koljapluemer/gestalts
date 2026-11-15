@@ -1,0 +1,20 @@
+id: flag-uz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: UZ
+name: Uzbekistan
+image: f3d4441609726569.svg
+distractors:
+  - AF
+  - KZ
+  - KG
+  - TJ
+  - TM
+concepts:
+  concept-bd75496c46982938: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

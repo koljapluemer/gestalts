@@ -1,0 +1,22 @@
+id: flag-gh
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GH
+name: Ghana
+image: f74a53a039af3b12.svg
+lookalikes:
+  - BO
+  - ET
+  - LT
+distractors:
+  - BF
+  - CI
+  - TG
+concepts:
+  concept-cf856af3d2b9a033: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

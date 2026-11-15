@@ -1,0 +1,16 @@
+id: flag-gb
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GB
+name: United Kingdom
+image: 722d633c759a3033.svg
+distractors:
+  - IE
+concepts:
+  concept-24a4881b249214a7: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,21 @@
+id: flag-co
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CO
+name: Colombia
+image: f33c4e9f79414e77.svg
+lookalikes:
+  - EC
+  - VE
+distractors:
+  - BR
+  - PA
+  - PE
+concepts:
+  concept-e26beea9f7422b6b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

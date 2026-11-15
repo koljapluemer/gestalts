@@ -1,0 +1,20 @@
+id: flag-ng
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: NG
+name: Nigeria
+image: 3605f1cf080e5dda.svg
+distractors:
+  - BJ
+  - CM
+  - TD
+  - NE
+  - NI
+concepts:
+  concept-d4ea80a966b3bd3d: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

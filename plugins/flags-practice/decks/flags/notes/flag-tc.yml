@@ -1,0 +1,41 @@
+id: flag-tc
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TC
+name: Turks and Caicos Islands
+image: b677e4cd3040d2f6.svg
+lookalikes:
+  - AI
+  - FK
+  - IO
+  - KY
+  - MS
+  - PN
+  - SH
+  - VG
+distractors:
+  - AG
+  - AW
+  - BS
+  - BB
+  - CU
+  - CW
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+concepts:
+  concept-1b46bb824ca1b7a9: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

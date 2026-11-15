@@ -1,0 +1,16 @@
+id: flag-ca
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CA
+name: Canada
+image: b75a149429812054.svg
+distractors:
+  - US
+concepts:
+  concept-dbbe343351e6a789: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

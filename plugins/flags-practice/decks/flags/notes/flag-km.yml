@@ -1,0 +1,14 @@
+id: flag-km
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KM
+name: Comoros
+image: ef5c47ef6e8ea6a1.svg
+concepts:
+  concept-30832911f818ed15: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

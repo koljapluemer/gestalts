@@ -1,0 +1,19 @@
+id: flag-tm
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TM
+name: Turkmenistan
+image: e8acfd19fb30fab9.svg
+distractors:
+  - AF
+  - IR
+  - KZ
+  - UZ
+concepts:
+  concept-76d0f70b4efe2986: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,23 @@
+id: flag-eg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: EG
+name: Egypt
+image: 94068d07247c62ba.svg
+lookalikes:
+  - IQ
+  - SY
+  - YE
+distractors:
+  - IL
+  - LY
+  - PS
+  - SD
+concepts:
+  concept-e1ed21788bcc940e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,20 @@
+id: flag-mc
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MC
+name: Monaco
+image: ffb2aeb79ba48c29.svg
+lookalikes:
+  - ID
+  - PL
+  - SG
+distractors:
+  - FR
+concepts:
+  concept-597f902ae0c6dbbc: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

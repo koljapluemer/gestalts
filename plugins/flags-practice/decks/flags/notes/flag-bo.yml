@@ -1,0 +1,24 @@
+id: flag-bo
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BO
+name: Bolivia
+image: 31d234e61c8261c8.svg
+lookalikes:
+  - ET
+  - GH
+  - LT
+distractors:
+  - AR
+  - BR
+  - CL
+  - PY
+  - PE
+concepts:
+  concept-5e521cf9f73d5d56: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

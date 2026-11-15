@@ -1,0 +1,18 @@
+id: flag-gy
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GY
+name: Guyana
+image: 6d0913a814234865.svg
+distractors:
+  - BR
+  - SR
+  - VE
+concepts:
+  concept-60692973d3a9048e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,19 @@
+id: flag-vn
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VN
+name: Vietnam
+image: b24c3850a71bc2e8.svg
+lookalikes:
+  - CN
+distractors:
+  - KH
+  - LA
+concepts:
+  concept-d7de2a2ae6d7eb44: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

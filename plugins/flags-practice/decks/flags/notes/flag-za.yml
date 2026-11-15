@@ -1,0 +1,21 @@
+id: flag-za
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: ZA
+name: South Africa
+image: f2d22bb06f6943d0.svg
+distractors:
+  - BW
+  - LS
+  - MZ
+  - NA
+  - ZW
+  - SZ
+concepts:
+  concept-7f31c948fcbccdfd: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

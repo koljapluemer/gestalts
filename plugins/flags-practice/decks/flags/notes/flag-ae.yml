@@ -1,0 +1,23 @@
+id: flag-ae
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AE
+name: United Arab Emirates
+image: 2fe3c3dfd4f8f668.svg
+lookalikes:
+  - EH
+  - JO
+  - KW
+  - PS
+  - SD
+distractors:
+  - OM
+  - SA
+concepts:
+  concept-ef03f4655d1cabd6: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

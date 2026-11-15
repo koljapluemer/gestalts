@@ -1,0 +1,16 @@
+id: flag-sz
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SZ
+name: Eswatini
+image: 39f1929b53f32f5c.svg
+distractors:
+  - MZ
+concepts:
+  concept-02a9e3a8433d29d3: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

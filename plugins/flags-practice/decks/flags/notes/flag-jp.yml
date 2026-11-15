@@ -1,0 +1,14 @@
+id: flag-jp
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: JP
+name: Japan
+image: d536392b233d4cf5.svg
+concepts:
+  concept-94e1e8e2bfd3385f: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

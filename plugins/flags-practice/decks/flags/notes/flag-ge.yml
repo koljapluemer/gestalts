@@ -1,0 +1,19 @@
+id: flag-ge
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: GE
+name: Georgia
+image: 3b1c38dc66817774.svg
+distractors:
+  - AM
+  - AZ
+  - RU
+  - TR
+concepts:
+  concept-8449b5a270d5ba8f: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

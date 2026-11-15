@@ -1,0 +1,20 @@
+id: flag-md
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: MD
+name: Moldova
+image: 0b3387acf2beff9e.svg
+lookalikes:
+  - AD
+  - RO
+  - TD
+distractors:
+  - UA
+concepts:
+  concept-033cf5af72e5e21b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

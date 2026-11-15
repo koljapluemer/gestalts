@@ -1,0 +1,14 @@
+id: flag-cy
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CY
+name: Cyprus
+image: 2e4b6dbe7349ee8b.svg
+concepts:
+  concept-7fdc608806cf2b34: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

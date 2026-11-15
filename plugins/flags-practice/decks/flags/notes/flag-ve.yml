@@ -1,0 +1,21 @@
+id: flag-ve
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: VE
+name: Venezuela
+image: a57ca9d8baf15e80.svg
+lookalikes:
+  - CO
+  - EC
+distractors:
+  - GY
+  - GW
+  - SR
+concepts:
+  concept-f841653251111ea5: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

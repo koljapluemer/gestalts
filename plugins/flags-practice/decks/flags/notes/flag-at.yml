@@ -1,0 +1,26 @@
+id: flag-at
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AT
+name: Austria
+image: fe5ea5edc2c844ec.svg
+lookalikes:
+  - LB
+  - LV
+distractors:
+  - CZ
+  - DE
+  - HU
+  - IT
+  - LI
+  - SK
+  - SI
+  - CH
+concepts:
+  concept-9b577f632bb7d255: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

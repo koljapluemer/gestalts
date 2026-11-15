@@ -1,0 +1,17 @@
+id: flag-cr
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CR
+name: Costa Rica
+image: f412d720b629e07c.svg
+distractors:
+  - NI
+  - PA
+concepts:
+  concept-4698b399bf9827f8: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

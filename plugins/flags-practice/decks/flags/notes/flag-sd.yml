@@ -1,0 +1,28 @@
+id: flag-sd
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SD
+name: Sudan
+image: 85a23a2c81bf78e5.svg
+lookalikes:
+  - AE
+  - EH
+  - JO
+  - KW
+  - PS
+distractors:
+  - CF
+  - TD
+  - EG
+  - ER
+  - ET
+  - LY
+  - SS
+concepts:
+  concept-396a88594cc6f075: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

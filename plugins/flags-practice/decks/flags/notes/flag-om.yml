@@ -1,0 +1,18 @@
+id: flag-om
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: OM
+name: Oman
+image: 695ba07061ae4c15.svg
+distractors:
+  - SA
+  - AE
+  - YE
+concepts:
+  concept-1662b4c89b78fe8b: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

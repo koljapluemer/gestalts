@@ -1,0 +1,19 @@
+id: flag-am
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AM
+name: Armenia
+image: 54b5093a04ea5bc0.svg
+distractors:
+  - AZ
+  - GE
+  - IR
+  - TR
+concepts:
+  concept-5f4db071028c023c: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

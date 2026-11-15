@@ -1,0 +1,36 @@
+id: flag-cw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CW
+name: Curaçao
+image: 93bfebb84e898b16.svg
+distractors:
+  - AI
+  - AG
+  - AW
+  - BS
+  - BB
+  - VG
+  - KY
+  - CU
+  - DM
+  - DO
+  - GD
+  - HT
+  - JM
+  - MS
+  - PR
+  - LC
+  - SX
+  - KN
+  - VC
+  - TT
+  - TC
+concepts:
+  concept-c97d7f75bb6a7b88: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

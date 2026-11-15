@@ -1,0 +1,14 @@
+id: flag-cx
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: CX
+name: Christmas Island
+image: 0d0c2050cf58073f.svg
+concepts:
+  concept-3d519c12b373b613: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

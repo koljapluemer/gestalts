@@ -1,0 +1,20 @@
+id: flag-ke
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KE
+name: Kenya
+image: df7206dbda7d5997.svg
+distractors:
+  - ET
+  - SS
+  - SO
+  - TZ
+  - UG
+concepts:
+  concept-76143f6f08785dcb: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,20 @@
+id: flag-by
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BY
+name: Belarus
+image: 0039a6fd70063672.svg
+distractors:
+  - LV
+  - LT
+  - PL
+  - RU
+  - UA
+concepts:
+  concept-d5e727f9e432da39: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

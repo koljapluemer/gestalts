@@ -1,0 +1,18 @@
+id: flag-tg
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: TG
+name: Togo
+image: 05b1f5230e798bde.svg
+distractors:
+  - BJ
+  - BF
+  - GH
+concepts:
+  concept-0e984f5340311b21: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

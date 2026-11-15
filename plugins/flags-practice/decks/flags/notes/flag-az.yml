@@ -1,0 +1,20 @@
+id: flag-az
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AZ
+name: Azerbaijan
+image: 5ad1427fec623aa4.svg
+distractors:
+  - AM
+  - GE
+  - IR
+  - RU
+  - TR
+concepts:
+  concept-fd36699ae8970c36: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

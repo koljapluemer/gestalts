@@ -1,0 +1,23 @@
+id: flag-kw
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: KW
+name: Kuwait
+image: cb95125b81624ec5.svg
+lookalikes:
+  - AE
+  - EH
+  - JO
+  - PS
+  - SD
+distractors:
+  - IQ
+  - SA
+concepts:
+  concept-0d8fbf0bdec16fe8: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

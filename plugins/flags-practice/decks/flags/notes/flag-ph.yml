@@ -1,0 +1,14 @@
+id: flag-ph
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: PH
+name: Philippines
+image: 830917288f7d2944.svg
+concepts:
+  concept-d5f5ae854cad715a: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

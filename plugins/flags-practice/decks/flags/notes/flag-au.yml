@@ -1,0 +1,18 @@
+id: flag-au
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AU
+name: Australia
+image: 83dc957062db5982.svg
+lookalikes:
+  - CK
+  - NZ
+  - TV
+concepts:
+  concept-4116d5b8e4656a7e: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

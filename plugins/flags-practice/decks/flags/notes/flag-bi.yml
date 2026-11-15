@@ -1,0 +1,18 @@
+id: flag-bi
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BI
+name: Burundi
+image: 1fe97719bcf0da29.svg
+distractors:
+  - CD
+  - RW
+  - TZ
+concepts:
+  concept-617bff5435628651: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

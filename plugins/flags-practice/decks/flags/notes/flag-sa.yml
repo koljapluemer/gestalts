@@ -1,0 +1,22 @@
+id: flag-sa
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: SA
+name: Saudi Arabia
+image: e68743a979d2eb38.svg
+distractors:
+  - IQ
+  - JO
+  - KW
+  - OM
+  - QA
+  - AE
+  - YE
+concepts:
+  concept-f1665f3db7b6ceca: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

@@ -1,0 +1,19 @@
+id: flag-ao
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: AO
+name: Angola
+image: 8afb7b9c39c77914.svg
+distractors:
+  - CG
+  - CD
+  - NA
+  - ZM
+concepts:
+  concept-c0d8ce97a9dc7160: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from

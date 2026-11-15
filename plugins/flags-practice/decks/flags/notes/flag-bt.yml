@@ -1,0 +1,17 @@
+id: flag-bt
+gestalt: flag@1
+model: item-model-flags-practice-name-the-flag
+country: BT
+name: Bhutan
+image: 7e174da0ec2f35e8.svg
+distractors:
+  - CN
+  - IN
+concepts:
+  concept-30467047f9f06798: 1
+chance: 0.5
+tags:
+  - flags-practice
+sources:
+  - to: source-iso-country-flags-svg-collection
+    label: from
