@@ -178,7 +178,7 @@ type Recorder = ReturnType<typeof useRecorder>;
 function Levels({ levels }: { levels: number[] }) {
   return (
     <div className="flex h-8 min-w-0 flex-1 items-center gap-0.5" aria-hidden>
-      {levels.map((l, i) => <div key={i} className="flex-1 rounded-full bg-white" style={{ height: `${Math.max(8, Math.min(100, l * 160))}%` }} />)}
+      {levels.map((l, i) => <div key={i} className="flex-1 rounded-full bg-primary" style={{ height: `${Math.max(8, Math.min(100, l * 160))}%` }} />)}
     </div>
   );
 }
@@ -195,32 +195,24 @@ function PlayButton({ url, label }: { url: string; label: string }) {
     setPlaying(true);
   };
   return (
-    <button type="button" className={OUTLINE} onClick={toggle}>
-      {playing ? <Square size={16} /> : <Play size={16} />} {label}
+    <button type="button" className="btn" onClick={toggle}>
+      {playing ? <Square className="size-4" /> : <Play className="size-4" />} {label}
     </button>
   );
 }
 
-// ---------- the look (practice-style.md) ----------
-
-const OUTLINE = 'flex items-center justify-center gap-2 rounded-lg border border-white px-4 py-3 text-white transition-colors duration-150 hover:bg-white/10 disabled:opacity-50';
-const PRIMARY = `${OUTLINE} bg-white/30`;
-const PLAIN = 'py-2 text-sm text-white/80 hover:text-white';
-
 function Shell({ mode, progress, instruction, onBack, children }: { mode: string; progress?: number; instruction?: string; onBack?: () => void; children: ReactNode }) {
   return (
-    <div className="h-full overflow-y-auto bg-linear-to-br from-primary via-secondary to-accent text-white">
-      <div className="mx-auto flex min-h-full w-full max-w-xl flex-col gap-4 px-4 py-6">
-        <div className="flex items-center justify-between gap-3">
-          {onBack ? <button type="button" className="rounded-lg border border-white p-2 hover:bg-white/10" aria-label="Back" onClick={onBack}><ArrowLeft size={18} /></button> : <span />}
-          <span className="text-sm font-medium">{mode}</span>
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto flex min-h-full w-full max-w-xl flex-col gap-4 p-4">
+        <div className="flex items-center gap-2">
+          {onBack && <button type="button" className="btn btn-ghost btn-sm btn-square" title="Back" aria-label="Back" onClick={onBack}><ArrowLeft className="size-4" /></button>}
+          <h1 className="text-lg font-semibold">{mode}</h1>
         </div>
         {progress !== undefined && (
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/30">
-            <div className="h-full rounded-full bg-white transition-[width] duration-300 ease-out" style={{ width: `${Math.round(progress * 100)}%` }} />
-          </div>
+          <progress className="progress progress-primary w-full" value={progress} max={1} />
         )}
-        {instruction && <p className="font-mono text-sm">{instruction}</p>}
+        {instruction && <p className="text-sm text-base-content/70">{instruction}</p>}
         <div className="flex flex-1 flex-col gap-4">{children}</div>
       </div>
     </div>
@@ -235,14 +227,14 @@ function Phrase({ id, reveal }: { id: string; reveal: boolean }) {
   const extra = str(card.value.extra);
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-      <Markdown text={str(card.value.front)} className="text-2xl font-bold" />
-      {context && <p className="text-sm text-white/80">{context}</p>}
+      <Markdown text={str(card.value.front)} className="text-2xl font-semibold" />
+      {context && <p className="text-sm text-base-content/70">{context}</p>}
       {reveal && (
         <>
-          <div className="my-2 w-full border-t border-dashed border-white/60" />
-          <Markdown text={str(card.value.back)} className="text-2xl font-bold" />
-          {extra && <Markdown text={extra} className="text-sm text-white/80" />}
-          <Credits sources={card.value.sources} className="mt-2 text-white" />
+          <div className="divider my-0 w-full" />
+          <Markdown text={str(card.value.back)} className="text-2xl font-semibold" />
+          {extra && <Markdown text={extra} className="text-sm text-base-content/70" />}
+          <Credits sources={card.value.sources} />
         </>
       )}
     </div>
@@ -286,19 +278,19 @@ function Recall({ id, language, canRecord, recorder, onRated, progress, mode, on
       <Shell mode={mode} progress={progress} instruction={`Do you remember how to say this in ${language}?`} onBack={onBack}>
         <Phrase id={id} reveal={false} />
         <div className="flex flex-col gap-3">
-          {recorder.error && <p className="text-center text-sm">{recorder.error}</p>}
+          {recorder.error && <p className="text-center text-sm text-error">{recorder.error}</p>}
           {canRecord && recorder.recording && (
-            <div className="flex items-center gap-3"><Levels levels={recorder.levels} /><button type="button" className={OUTLINE} aria-label="Stop recording" onClick={recorder.stop}><Check size={16} /></button></div>
+            <div className="flex items-center gap-3"><Levels levels={recorder.levels} /><button type="button" className="btn btn-square" title="Stop recording" aria-label="Stop recording" onClick={recorder.stop}><Check className="size-4" /></button></div>
           )}
-          {canRecord && !recorder.recording && !recorder.url && <button type="button" className={PRIMARY} onClick={() => void recorder.start()}><Mic size={16} /> Say it</button>}
+          {canRecord && !recorder.recording && !recorder.url && <button type="button" className="btn btn-primary" onClick={() => void recorder.start()}><Mic className="size-4" /> Say it</button>}
           {canRecord && recorder.url && (
             <div className="flex gap-3">
               <PlayButton url={recorder.url} label="Your take" />
-              <button type="button" className={OUTLINE} aria-label="Record again" onClick={() => { recorder.reset(); void recorder.start(); }}><RotateCcw size={16} /></button>
+              <button type="button" className="btn btn-square" title="Record again" aria-label="Record again" onClick={() => { recorder.reset(); void recorder.start(); }}><RotateCcw className="size-4" /></button>
             </div>
           )}
-          <button type="button" className={canRecord && !recorder.url ? OUTLINE : PRIMARY} onClick={check}><ArrowRight size={16} /> {canRecord && recorder.url ? 'Check' : 'Reveal'}</button>
-          <button type="button" className={PLAIN} onClick={() => { setGaveUp(true); check(); }}>I have no idea</button>
+          <button type="button" className={canRecord && !recorder.url ? 'btn' : 'btn btn-primary'} onClick={check}><ArrowRight className="size-4" /> {canRecord && recorder.url ? 'Check' : 'Reveal'}</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setGaveUp(true); check(); }}>I have no idea</button>
         </div>
       </Shell>
     );
@@ -309,11 +301,11 @@ function Recall({ id, language, canRecord, recorder, onRated, progress, mode, on
       <div className="flex flex-col gap-3">
         {recorder.url && !gaveUp && <PlayButton url={recorder.url} label="Your take" />}
         {gaveUp ? (
-          <button type="button" className={PRIMARY} onClick={() => onRated(false)}><ArrowRight size={16} /> Next</button>
+          <button type="button" className="btn btn-primary" onClick={() => onRated(false)}><ArrowRight className="size-4" /> Next</button>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <button type="button" className={OUTLINE} onClick={() => onRated(false)}><ThumbsDown size={16} /> Wrong</button>
-            <button type="button" className={PRIMARY} onClick={() => onRated(true)}><ThumbsUp size={16} /> Right</button>
+            <button type="button" className="btn btn-soft btn-error" onClick={() => onRated(false)}><ThumbsDown className="size-4" /> Wrong</button>
+            <button type="button" className="btn btn-soft btn-success" onClick={() => onRated(true)}><ThumbsUp className="size-4" /> Right</button>
           </div>
         )}
       </div>
@@ -359,7 +351,7 @@ export default function Phrasebook() {
         {alert}
         {langs.map((l) => {
           const d = graph.decks.find((x) => graph.cards.some((c) => c.lang === l && x.members.includes(c.id)));
-          return <button key={l} type="button" className={OUTLINE} onClick={() => go({ lang: l })}>{d?.title ?? graph.languageName(l)}</button>;
+          return <button key={l} type="button" className="btn" onClick={() => go({ lang: l })}>{d?.title ?? graph.languageName(l)}</button>;
         })}
       </Shell>
     );
@@ -379,12 +371,12 @@ export default function Phrasebook() {
     <Shell mode={deck?.title ?? language} instruction={`${due} due · ${learned} learned · ${cards.length - learned} new`} onBack={() => go({})}>
       {alert}
       <div className="flex flex-1 flex-col justify-center gap-3">
-        <button type="button" className={PRIMARY} disabled={!due} onClick={() => go({ lang, screen: 'lesson' })}>Practice</button>
-        <button type="button" className={OUTLINE} disabled={learned === cards.length} onClick={() => go({ lang, screen: 'learn' })}>Learn new</button>
-        <button type="button" className={OUTLINE} onClick={() => go({ lang, screen: 'progress' })}>What you can do</button>
+        <button type="button" className="btn btn-primary" disabled={!due} onClick={() => go({ lang, screen: 'lesson' })}>Practice</button>
+        <button type="button" className="btn" disabled={learned === cards.length} onClick={() => go({ lang, screen: 'learn' })}>Learn new</button>
+        <button type="button" className="btn" onClick={() => go({ lang, screen: 'progress' })}>What you can do</button>
       </div>
-      {!canRecord && <p className="text-center text-xs text-white/70">Recording isn't available here: you'll reveal instead of saying it aloud.</p>}
-      <Credits sources={sources} className="text-center text-white" />
+      {!canRecord && <p className="text-center text-xs text-base-content/60">Recording isn't available here: you'll reveal instead of saying it aloud.</p>}
+      <Credits sources={sources} className="text-center" />
     </Shell>
   );
 }
@@ -406,7 +398,7 @@ function Lesson({ cards, states, beliefs, language, canRecord, recorder, onRate,
     return (
       <Shell mode="Practice" progress={1} instruction={total ? `${right} of ${done} right the first time.` : 'Nothing due right now.'} onBack={onBack}>
         {alert}
-        <div className="flex flex-1 items-center justify-center"><button type="button" className={PRIMARY} onClick={onBack}>Done</button></div>
+        <div className="flex flex-1 items-center justify-center"><button type="button" className="btn btn-primary" onClick={onBack}>Done</button></div>
       </Shell>
     );
   }
@@ -440,7 +432,7 @@ function Learn({ cards, states, beliefs, graph, language, canRecord, recorder, o
     return (
       <Shell mode="Learn" instruction="You've seen every phrase here." onBack={onBack}>
         {alert}
-        <div className="flex flex-1 items-center justify-center"><button type="button" className={PRIMARY} onClick={onBack}>Done</button></div>
+        <div className="flex flex-1 items-center justify-center"><button type="button" className="btn btn-primary" onClick={onBack}>Done</button></div>
       </Shell>
     );
   }
@@ -456,18 +448,18 @@ function Learn({ cards, states, beliefs, graph, language, canRecord, recorder, o
         {alert}
         <Phrase id={current} reveal />
         {(known || why.length > 0) && (
-          <p className="text-center text-xs text-white/80">
+          <p className="text-center text-xs text-base-content/70">
             {known ? 'Another way to say something you know.' : 'You already know part of this:'} {why.length > 0 && why.join(', ')}
           </p>
         )}
         <div className="flex flex-col gap-3">
           {takes.map((u, i) => <PlayButton key={u} url={u} label={`Take ${i + 1}`} />)}
-          {recorder.error && <p className="text-center text-sm">{recorder.error}</p>}
+          {recorder.error && <p className="text-center text-sm text-error">{recorder.error}</p>}
           {canRecord && recorder.recording && (
-            <div className="flex items-center gap-3"><Levels levels={recorder.levels} /><button type="button" className={OUTLINE} aria-label="Stop recording" onClick={recorder.stop}><Check size={16} /></button></div>
+            <div className="flex items-center gap-3"><Levels levels={recorder.levels} /><button type="button" className="btn btn-square" title="Stop recording" aria-label="Stop recording" onClick={recorder.stop}><Check className="size-4" /></button></div>
           )}
-          {canRecord && !recorder.recording && !ready && <button type="button" className={PRIMARY} onClick={() => void recorder.start(addTake)}><Mic size={16} /> Say it ({takes.length + 1} of {TAKES})</button>}
-          {ready && <button type="button" className={PRIMARY} onClick={() => { onSeen(current); setStep('wait'); }}><Check size={16} /> Done</button>}
+          {canRecord && !recorder.recording && !ready && <button type="button" className="btn btn-primary" onClick={() => void recorder.start(addTake)}><Mic className="size-4" /> Say it ({takes.length + 1} of {TAKES})</button>}
+          {ready && <button type="button" className="btn btn-primary" onClick={() => { onSeen(current); setStep('wait'); }}><Check className="size-4" /> Done</button>}
         </div>
       </Shell>
     );
@@ -504,9 +496,9 @@ function Bar({ belief }: { belief?: Belief }) {
   const lo = belief ? sigmoid(belief.mean - belief.sd) : 0;
   const hi = belief ? sigmoid(belief.mean + belief.sd) : 1;
   return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/20" title={belief ? `${Math.round(p * 100)}% · from ${belief.evidence} answers` : 'nothing yet'}>
-      <div className="absolute inset-y-0 bg-white/30" style={{ left: `${lo * 100}%`, width: `${(hi - lo) * 100}%` }} />
-      <div className="absolute inset-y-0 left-0 rounded-full bg-white" style={{ width: `${p * 100}%` }} />
+    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-base-300" title={belief ? `${Math.round(p * 100)}% · from ${belief.evidence} answers` : 'nothing yet'}>
+      <div className="absolute inset-y-0 bg-primary/30" style={{ left: `${lo * 100}%`, width: `${(hi - lo) * 100}%` }} />
+      <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${p * 100}%` }} />
     </div>
   );
 }
@@ -515,12 +507,12 @@ function Section({ title, rows }: { title: string; rows: Row[] }) {
   if (!rows.length) return null;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="font-mono text-sm">{title}</h2>
+      <h2 className="text-xs font-semibold text-base-content/70">{title}</h2>
       {rows.map((r) => (
         <div key={r.id} className="flex flex-col gap-1">
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span>{r.label}</span>
-            <span className="text-xs text-white/70">{r.belief?.evidence ? `${r.belief.evidence}×` : 'not yet'}{r.also.length > 0 && ` · also ${r.also.join(', ')}`}</span>
+            <span className="text-xs text-base-content/60">{r.belief?.evidence ? `${r.belief.evidence}×` : 'not yet'}{r.also.length > 0 && ` · also ${r.also.join(', ')}`}</span>
           </div>
           <Bar belief={r.belief} />
         </div>

@@ -47,22 +47,22 @@ function mainConcept(concepts: unknown): string | null {
   return best ? best[0] : null;
 }
 
-// ---------- the look (phrasebook's) ----------
+// ---------- the look ----------
 
-const OUTLINE = 'flex items-center justify-center gap-2 rounded-lg border border-white px-4 py-3 text-white transition-colors duration-150 hover:bg-white/10 disabled:opacity-50';
-const PRIMARY = `${OUTLINE} bg-white/30`;
-const RIGHT = 'flex items-center justify-center rounded-lg border border-white bg-white px-4 py-3 text-primary';
-const WRONG = 'flex items-center justify-center rounded-lg border border-white/40 px-4 py-3 text-white/50 line-through';
+// picked options keep their colour: no `disabled`, which daisy greys out, but no clicks either
+const OPTION = 'btn btn-lg h-auto min-h-12 py-2 text-xl font-normal';
+const RIGHT = `${OPTION} btn-success pointer-events-none`;
+const WRONG = `${OPTION} btn-soft btn-error pointer-events-none line-through`;
 
 function Shell({ mode, instruction, onBack, children }: { mode: string; instruction?: string; onBack?: () => void; children: ReactNode }) {
   return (
-    <div className="h-full overflow-y-auto bg-linear-to-br from-primary via-secondary to-accent text-white">
-      <div className="mx-auto flex min-h-full w-full max-w-xl flex-col gap-4 px-4 py-6">
-        <div className="flex items-center justify-between gap-3">
-          {onBack ? <button type="button" className="rounded-lg border border-white p-2 hover:bg-white/10" aria-label="Back" onClick={onBack}><ArrowLeft size={18} /></button> : <span />}
-          <span className="text-sm font-medium">{mode}</span>
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto flex min-h-full w-full max-w-xl flex-col gap-4 p-4">
+        <div className="flex items-center gap-2">
+          {onBack && <button type="button" className="btn btn-ghost btn-sm btn-square" title="Back" aria-label="Back" onClick={onBack}><ArrowLeft className="size-4" /></button>}
+          <h1 className="text-lg font-semibold">{mode}</h1>
         </div>
-        {instruction && <p className="font-mono text-sm">{instruction}</p>}
+        {instruction && <p className="text-sm text-base-content/70">{instruction}</p>}
         <div className="flex flex-1 flex-col gap-4">{children}</div>
       </div>
     </div>
@@ -75,9 +75,9 @@ function Bar({ belief }: { belief?: Belief }) {
   const lo = belief ? sigmoid(belief.mean - belief.sd) : 0;
   const hi = belief ? sigmoid(belief.mean + belief.sd) : 1;
   return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/20" title={belief?.evidence ? `${Math.round(p * 100)}% · from ${belief.evidence} answers` : 'nothing yet'}>
-      <div className="absolute inset-y-0 bg-white/30" style={{ left: `${lo * 100}%`, width: `${(hi - lo) * 100}%` }} />
-      <div className="absolute inset-y-0 left-0 rounded-full bg-white" style={{ width: `${p * 100}%` }} />
+    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-base-300" title={belief?.evidence ? `${Math.round(p * 100)}% · from ${belief.evidence} answers` : 'nothing yet'}>
+      <div className="absolute inset-y-0 bg-primary/30" style={{ left: `${lo * 100}%`, width: `${(hi - lo) * 100}%` }} />
+      <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${p * 100}%` }} />
     </div>
   );
 }
@@ -119,25 +119,25 @@ function Question({ id, onShown, onAnswered, onNext }: { id: string; onShown: ()
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-        {str(doc.value.instruction) && <p className="text-sm text-white/80">{str(doc.value.instruction)}</p>}
+        {str(doc.value.instruction) && <p className="text-sm text-base-content/70">{str(doc.value.instruction)}</p>}
         <Markdown text={str(doc.value.prompt)} className="text-3xl" />
       </div>
       {!revealed ? (
-        <button type="button" className={PRIMARY} onClick={() => setRevealed(true)}><Eye size={16} /> Reveal answers</button>
+        <button type="button" className="btn btn-primary" onClick={() => setRevealed(true)}><Eye className="size-4" /> Reveal answers</button>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {options.map((o, i) => {
             const chosen = picked.includes(i);
-            const cls = chosen ? (o.correct ? RIGHT : WRONG) : OUTLINE;
+            const cls = chosen ? (o.correct ? RIGHT : WRONG) : done ? `${OPTION} pointer-events-none` : OPTION;
             return (
-              <button key={i} type="button" className={`${cls} text-xl`} disabled={chosen || done} onClick={(e) => pick(i, e.timeStamp)}>
+              <button key={i} type="button" className={cls} aria-disabled={chosen || done} onClick={(e) => { if (!chosen && !done) pick(i, e.timeStamp); }}>
                 <Markdown text={o.text} inline />
               </button>
             );
           })}
         </div>
       )}
-      <Credits sources={doc.value.sources} className="text-center text-white" />
+      <Credits sources={doc.value.sources} className="text-center" />
     </>
   );
 }
@@ -157,7 +157,7 @@ function Drill({ model, log, onBack }: { model: Model; log: PracticeLog; onBack:
     <Shell mode={model.title} onBack={onBack}>
       {items.loading || items.hasMore ? <div className="flex flex-1 items-center justify-center"><span className="loading loading-spinner" /></div>
         : ids.length ? <Questions ids={ids} log={log} />
-          : <p className="text-center">No questions in this topic.</p>}
+          : <p className="text-center text-base-content/60">No questions in this topic.</p>}
     </Shell>
   );
 }
@@ -205,7 +205,7 @@ export default function MathDrills() {
   return (
     <Shell mode="Math Drills" instruction={models.length ? 'Which topic?' : 'No math decks here yet.'}>
       {models.map((m) => (
-        <button key={m.id} type="button" className={`${OUTLINE} flex-col items-stretch`} onClick={() => setParams({ model: m.id })}>
+        <button key={m.id} type="button" className="btn h-auto flex-col items-stretch gap-2 py-3 font-normal" onClick={() => setParams({ model: m.id })}>
           <span>{m.title}</span>
           <Bar belief={m.main ? beliefs.get(m.main) : undefined} />
         </button>
