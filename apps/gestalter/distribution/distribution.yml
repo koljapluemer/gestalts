@@ -14,6 +14,9 @@ plugins:
   - ../../../plugins/alphabet-pronunciation-trainer
   - ../../../plugins/transparent-input
   - ../../../plugins/phrasebook
+# the gestalts beyond the core's that its views read
+models:
+  - ../../../gestalts/media
 default_views: [quick-note, note-crud, note-queue]
 install_ui: true
 # what views may do beyond the strict sandbox, out of what each asks for (`permissions` in its plugin.yml): same-origin

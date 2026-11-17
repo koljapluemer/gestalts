@@ -20,8 +20,8 @@ pub const OLD_NAMES: &[&str] = &["gestalter", "gestalts-connector"];
 /// The apps (websites) allowed to use the node, besides localhost.
 pub const ORIGINS: &[&str] = &["https://gestalter.koljasam.com", "https://loop.koljasam.com"];
 
-/// The repo's plugins (their gestalts and workers), copied by `build.rs`.
-static BUILTIN: Dir<'static> = include_dir!("$OUT_DIR/plugins");
+/// The repo's plugins (manifests and workers) and model packages, copied by `build.rs`.
+static BUILTIN: Dir<'static> = include_dir!("$OUT_DIR/builtin");
 /// The node's settings page, served at `/`.
 static APP: Dir<'static> = include_dir!("$OUT_DIR/app");
 

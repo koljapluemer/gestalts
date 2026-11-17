@@ -21,7 +21,9 @@ Writing through the app refuses anything but a valid yml.
 
 ## Defining a gestalt
 
-`gestalts/<name>/v<N>.yml`, in this repo or in a plugin:
+In this repo's `gestalts/`: the core's are `gestalts/<name>/v<N>.yml`, compiled into the core; every other is in a
+model package, `gestalts/<package>/<name>/v<N>.yml`, loaded at runtime
+([[../architecture/plugins-and-views#Models|Models]]):
 
 ```yaml
 name: concept
@@ -51,6 +53,15 @@ Reference types feed the reverse index. `targets` limits what a reference may po
 since targets can be deleted. `labels` limits how many items each label may have.
 
 Text merges by line, lists of references as sets, and everything else per key, conflicting at the leaves.
+
+### Published definitions don't change
+
+Ymls in learners' folders name `name@N`, so once a definition has gone out, what makes a yml valid and how it merges
+stays: its structure (fields, `type`, `required`, `min`, `max`, `one_of`, `targets`, `labels`, nested rules, `merge`).
+A structural change is a new version. What's presentational (`description`) changes nothing about validity, so it may.
+`gestalts/published.yml` holds each definition's structural hash; `cargo test` (and so `mise run check`) refuses a
+definition that isn't listed or whose structure differs, and `mise run gestalts:publish` lists new ones. A listed line
+may be deleted by hand only for a definition that has never gone out (not deployed, in no deck).
 
 ## The core gestalts
 

@@ -97,8 +97,8 @@ pauses collection, since what's in use can't be known for sure.
 
 `gestalts-node` (`apps/node/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
 backends. It ships no app: the apps are websites that use it from their own origin (allowed: localhost, the origins
-in `ORIGINS` and the config's `extra_origins`). It brings the gestalts and backends of the repo's `plugins/`, and its
-own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
+in `ORIGINS` and the config's `extra_origins`). It brings the backends of the repo's `plugins/`, every model package
+of `gestalts/`, and its own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
 
 | Route | |
 |---|---|

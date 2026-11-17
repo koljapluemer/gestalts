@@ -30,6 +30,10 @@ pub struct Opts {
     /// plugin folders to use instead of the built-in plugins (for developing plugins)
     #[arg(long, global = true)]
     pub plugins_dir: Vec<PathBuf>,
+    /// folders of model packages (`<package>/<name>/v<N>.yml`, like the repo's `gestalts/`) to use instead of the
+    /// built-in ones
+    #[arg(long, global = true)]
+    pub models_dir: Vec<PathBuf>,
     /// keeps settings separate from the installed app, e.g. `--profile dev`
     #[arg(long, global = true)]
     pub profile: Option<String>,
@@ -55,7 +59,7 @@ pub struct Embedded {
     pub name: &'static str,
     /// the node's own page (a static build) served at `/`
     pub app: Option<&'static include_dir::Dir<'static>>,
-    /// the plugins, one folder each
+    /// `plugins/` (one folder each) and `models/` (the model packages)
     pub builtin: Option<&'static include_dir::Dir<'static>>,
     pub origins: &'static [&'static str],
 }
@@ -124,11 +128,11 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
     let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
     let control_token = uuid::Uuid::new_v4().to_string();
     paths::write_secret(&paths.control_token_file(), &control_token).map_err(|e| format!("cannot write the control token: {e}"))?;
-    let plugin_dirs = plugin_dirs(opts, embedded, &paths)?;
+    let sources = sources(opts, embedded, &paths)?;
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], opts.port));
     let listener = rt.block_on(tokio::net::TcpListener::bind(addr)).map_err(|e| format!("cannot listen on {addr}: {e}"))?;
     let address = format!("http://{addr}");
-    let plugins = PluginHost::discover(&plugin_dirs, address.clone(), paths.clone())?;
+    let plugins = PluginHost::discover(&sources, address.clone(), paths.clone())?;
     let mut origins: Vec<String> = embedded.origins.iter().map(|o| o.to_string()).collect();
     origins.extend(Config::load(&paths).extra_origins);
     origins.extend(opts.allow_origin.iter().cloned());
@@ -149,23 +153,27 @@ pub fn start_server(opts: &Opts, embedded: Embedded, paths: Paths, folder: Optio
     Ok(Server { rt, plugins, shutdown, task, lan, paths, control_token, address })
 }
 
-/// Where plugins come from: `--plugins-dir`, else the app's built-in ones (unpacked) and the user's.
-fn plugin_dirs(opts: &Opts, embedded: Embedded, paths: &Paths) -> Result<Vec<PathBuf>, String> {
-    if !opts.plugins_dir.is_empty() {
-        return Ok(opts.plugins_dir.clone());
+/// Where plugins and model packages come from: `--plugins-dir` and `--models-dir`, else the app's built-in ones
+/// (unpacked) and the user's plugins.
+fn sources(opts: &Opts, embedded: Embedded, paths: &Paths) -> Result<plugins::Sources, String> {
+    if !opts.plugins_dir.is_empty() || !opts.models_dir.is_empty() {
+        return Ok(plugins::Sources { plugins: opts.plugins_dir.clone(), models: opts.models_dir.clone() });
     }
-    let mut dirs = Vec::new();
+    let mut sources = plugins::Sources::default();
     if let Some(builtin) = embedded.builtin {
-        dirs.push(plugins::unpack_builtin(paths, builtin).map_err(|e| format!("cannot unpack the built-in plugins: {e}"))?);
+        let root = plugins::unpack_builtin(paths, builtin).map_err(|e| format!("cannot unpack the built-in plugins: {e}"))?;
+        sources.plugins.push(root.join("plugins"));
+        sources.models.push(root.join("models"));
     }
-    dirs.push(paths.user_plugins());
-    Ok(dirs)
+    sources.plugins.push(paths.user_plugins());
+    Ok(sources)
 }
 
-/// The core's gestalts and those of every plugin `opts` finds, for `health` and `publish`.
+/// The core's gestalts and the model packages `opts` finds, checked against its plugins' `reads`, for `health` and
+/// `publish`.
 fn all_gestalts(opts: &Opts, embedded: Embedded) -> Result<gestalts_core::Gestalts, String> {
     let paths = Paths::new(opts.profile.as_deref())?;
-    plugins::load_gestalts(&plugin_dirs(opts, embedded, &paths)?)
+    plugins::load_gestalts(&sources(opts, embedded, &paths)?)
 }
 
 /// Resolves on Ctrl+C, or on SIGTERM (`kill`, logout, service managers) on Unix.

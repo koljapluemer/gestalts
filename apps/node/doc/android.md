@@ -48,7 +48,7 @@ The contract between `@gestalts/client/tauri` and `apps/node/android/src/lib.rs`
 | `blobs_list`, `blob_delete` | `name` | names |
 | `blob_read` | `name` | raw bytes: a byte 1 then the blob, or a single 0 if missing |
 | `blob_write` | raw bytes, header `x-blob-name` (URI-encoded) | |
-| `gestalts_set` | `yaml` (the plugins' gestalts, kept for merging) | |
+| `gestalts_set` | `yaml` (the model packages' gestalts, kept for merging) | |
 | `sync_status`, `sync_now`, `set_active` | `active` | the status (`gestalts_device::Status`) |
 | `pair`, `forget` | `uri, deviceName?` | `{nodeId, name}` |
 

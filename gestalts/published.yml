@@ -1,0 +1,28 @@
+# The structural hash of every published definition in gestalts/: what makes a yml valid and how it merges.
+# A listed definition never changes structurally (a change is a new version); descriptions may. Add new ones with
+# `mise run gestalts:publish`. A line may be deleted by hand only for a definition that has never gone out.
+concept-link@1: 5f8a1f9575228263
+concept-practice-event@1: 85aaa4d22e411051
+concept@1: bc2bb16e5981427c
+concept@2: f8e209fd4e478d70
+conflict@1: 86a003895da88d8f
+country-group@1: a02f582336633431
+deck@1: f8ac9d504bda21cc
+flag@1: 10c3b54326483ff7
+flashcard@1: 4b1641c0bab1c9f9
+fsrs-data@1: 33f894db4d9b866c
+glossed-track@1: 10d1a09b2da548e5
+item-model@1: ea548543db7acc6b
+map-exercise@1: 0264f3736b499256
+map@1: 1fb56cae115ccd0d
+media-source@1: 97b0468b457501ad
+multiple-choice@1: 18a62b0f9f4fca2e
+note@1: 99021a40379e6354
+plugin-install@1: fcff6201e95cfe4d
+practice-event@1: 4f5ff45443fb7fd2
+practice-event@2: 786c6df8400c5fe7
+practice-session@1: 10f6986f42875bf6
+source@1: e199896ae60eb79d
+typing-word@1: ba35a20084a2096b
+view@1: 06cbb33fbe6326ff
+viz@1: 9a4b53cefd6e7107

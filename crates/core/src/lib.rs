@@ -15,7 +15,7 @@ pub mod yml;
 
 pub use blobs::{BlobRefs, GcManifest, blobs_of, collect_blobs, referenced_blobs};
 pub use decks::{DeckRef, Decks, Merged};
-pub use gestalt::{Edge, GestaltDef, Gestalts, Problem, YmlState};
+pub use gestalt::{Edge, GestaltDef, Gestalts, Problem, YmlState, valid_gestalt_id};
 pub use gestalts_merge::{Conflict, Policy, Segment};
 pub use index::{Item, LinkFilter, LinkMatch, Order, Page, Query, RefFilter, Shape, TagFilter};
 pub use mastery::{Belief, Mastery, MasteryParams};

@@ -1,28 +1,30 @@
 # Where gestalts live, and gestalts as data: discussion
 
-Not built. Where the thinking stands, from a discussion on 2026-11-15 that started at authoring decks
-([[deck-authoring|Deck authoring]]).
+Option 3 is built (2026-11-17): model packages, namespaced names for new gestalts, and the structural/presentational
+split with published definitions checked ([[../architecture/plugins-and-views#Models|Models]],
+[[../reference/data-format#Published definitions don't change|Data format]]). Option 4 is not. The discussion, from
+2026-11-15, started at authoring decks ([[deck-authoring|Deck authoring]]).
 
-## Now
+## Before
 
 - The core's gestalts are compiled in: `crates/core/src/gestalt.rs` embeds `gestalts/*/v*.yml` with `include_str!`,
   into the core, the wasm and the phone app.
-- A plugin's come at runtime: `crates/node/src/manifest.rs` and `packages/vite` hand them to `builtin_with(extra)` as
+- A plugin's came at runtime: `crates/node/src/manifest.rs` and `packages/vite` handed them to `builtin_with(extra)` as
   YAML. Redefining a gestalt is refused.
 - A yml whose gestalt this device doesn't know is unknown: it syncs, but can't be queried.
 
-So a definition already reaches the core as data at runtime; only where it comes from is tied to a view's plugin.
-That tie is the problem: `plugins/world-map` holds a view, the `map`, `map-exercise` and `country-group` gestalts, and
-a deck, so any second view on those gestalts depends on another view.
+So a definition already reached the core as data at runtime; only where it came from was tied to a view's plugin.
+That tie was the problem: `plugins/world-map` held a view, the `map`, `map-exercise` and `country-group` gestalts, and
+a deck, so any second view on those gestalts depended on another view.
 
 ## Options
 
 1. **All in the core.** Domain gestalts go to `gestalts/`, compiled in. One registry, nothing unknown between our own
    apps. But every new gestalt means a new core, wasm and phone app, only the repo can add gestalts, and the core
    holds every domain's model.
-2. **Owned by plugins** (now). Self-contained plugins; a model tied to one view, and view-on-view dependencies as soon
+2. **Owned by plugins** (before). Self-contained plugins; a model tied to one view, and view-on-view dependencies as soon
    as a second view uses it.
-3. **Model packages beside plugins**, e.g. `gestalts/geography/{map,map-exercise,country-group}`, loaded at runtime as
+3. **Model packages beside plugins** (built), e.g. `gestalts/geography/{map,map-exercise,country-group}`, loaded at runtime as
    plugins' gestalts are now; only the core's compiled in. Views and decks depend on models, models on nothing. A
    distribution names its models, or they follow from its views' `reads` and its decks. Mostly moving folders and the
    loaders and checks. Still only the repo adds gestalts.
@@ -30,7 +32,9 @@ a deck, so any second view on those gestalts depends on another view.
    the user's folder like any yml.
 
 3 now and 4 when gestalts have to come from outside the repo, with 3 done so that 4 later only changes where
-definitions come from: namespaced names for anything new, and published definitions checked to never change.
+definitions come from: namespaced names for anything new, and published definitions checked to never change. As built,
+a distribution names its packages (`models:` in `distribution.yml`), and the build checks them against its views'
+`reads` and its decks.
 
 ## Option 4
 
@@ -80,10 +84,11 @@ outline read (`note`, `concept`, `concept-link`, `practice-event`).
 - **Copying definitions into the user's folder** on write. They're small and never collected.
 - **Refusing** a data definition of a compiled-in gestalt: one check in `builtin_with`.
 - **Limits** on a definition's depth, fields and size.
-- **Migrating** plugins' gestalts into ymls. Backwards compatible: an older app sees `gestalt@1` ymls as unknown, and
+- **Migrating** the model packages' gestalts into ymls. Backwards compatible: an older app sees `gestalt@1` ymls as unknown, and
   those sync byte for byte.
-- **Namespacing, shallowly.** Today's names are in learners' folders and can't be migrated, so they stay as they are;
-  only definitions from outside the repo need a namespace. A change to `valid_gestalt_id` and a convention.
+- **Namespacing, shallowly.** Built with option 3: `package/name@N` is a valid gestalt id, and a new gestalt in a
+  package must be named so; the names already in learners' folders stay flat. Definitions from outside the repo would
+  need a namespace per source on top (below).
 
 ### Contained design
 
@@ -110,9 +115,10 @@ So a definition splits in two:
 - **presentational**: `description`, field descriptions, which field titles a yml, widget and `format` hints, labels of
   an `enum`. Changes nothing about validity, so it may change after publishing and merges like any yml.
 
-Nearly every edit after publishing is presentational, and the rest needed a new version anyway. The split is worth
-having under option 3 as well: it decides whether the display hints of [[deck-authoring|Deck authoring]]'s editor can change once a
-definition has shipped.
+Nearly every edit after publishing is presentational, and the rest needed a new version anyway. The split is built
+with option 3 (`GestaltDef::structure_hash`, `PRESENTATIONAL`, `gestalts/published.yml`): it decides whether the
+display hints of [[deck-authoring|Deck authoring]]'s editor can change once a definition has shipped. Copies agreeing
+by hash is what option 4 adds.
 
 **Collisions between authors, only once there are outside ones.** A namespace needs an owner. A deck shipping its own
 `geography/map-exercise@1` with another structure would, under the hard-error rule, make everyone's exercises of the

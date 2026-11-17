@@ -11,6 +11,7 @@ use async_trait::async_trait;
 use gestalts_core::content_hash;
 use gestalts_core::storage::{Hashes, Result, Storage, StorageError, check_key, yml_id_from_file};
 
+pub mod models;
 mod publish;
 pub use publish::{PublishReport, blob_name, publish};
 

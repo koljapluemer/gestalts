@@ -27,8 +27,6 @@ export type DeckEntry = { id: string; title: string; source: string; path: strin
 /** A plugin the app is built with. */
 export type PluginEntry = {
   manifest: PluginManifest;
-  /** the definitions of the gestalts it owns, as YAML */
-  gestalts: string[];
   decks: DeckEntry[];
   /** its view, compiled */
   js: string;
@@ -48,7 +46,8 @@ export type Distribution = { id: string; default_views: string[]; install_ui: bo
 /** What every view's frame loads: React, the kit and the rest, as one script, and their styles. */
 export type FrameRuntime = { js: string; css: string };
 
-export type Registry = { distribution: Distribution; plugins: PluginEntry[]; runtime: FrameRuntime };
+/** `gestalts`: the definitions of the distribution's model packages, as YAML (the core's are compiled in). */
+export type Registry = { distribution: Distribution; plugins: PluginEntry[]; gestalts: string[]; runtime: FrameRuntime };
 
 export const findPlugin = (registry: Registry, id: string) => registry.plugins.find((p) => p.manifest.id === id);
 

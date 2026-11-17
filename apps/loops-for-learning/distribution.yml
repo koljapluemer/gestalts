@@ -8,6 +8,10 @@ plugins:
   - ../../plugins/world-map
   - ../../plugins/flags-practice
   - ../../plugins/vietnamese-typing-practice
+# the gestalts beyond the core's that its views read and its decks hold
+models:
+  - ../../gestalts/geography
+  - ../../gestalts/typing
 # what views may do beyond the strict sandbox, out of what each asks for (`permissions` in its plugin.yml): only for our
 # own code, which loads nothing from elsewhere at run time
 grants:

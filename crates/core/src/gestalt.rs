@@ -17,6 +17,7 @@ use crate::yml::{Yml, valid_key};
 pub struct GestaltDef {
     pub name: String,
     pub version: u32,
+    /// presentational: not part of [`GestaltDef::structure_hash`]
     #[serde(default)]
     pub description: Option<String>,
     #[serde(default)]
@@ -140,10 +141,15 @@ fn whole(message: impl Into<String>) -> Vec<Problem> {
     vec![Problem { path: String::new(), message: message.into() }]
 }
 
-/// `name@N`, `N` from 1, with no leading zero.
-fn valid_gestalt_id(s: &str) -> bool {
+/// `name@N`, `N` from 1, with no leading zero. A name is `[a-z0-9-]+`, or `package/name` for a model package's
+/// gestalts named since packages exist.
+pub fn valid_gestalt_id(s: &str) -> bool {
     let Some((name, version)) = s.split_once('@') else { return false };
-    let name_ok = !name.is_empty() && name.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+    let segment = |p: &str| !p.is_empty() && p.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+    let name_ok = match name.split_once('/') {
+        Some((package, rest)) => segment(package) && segment(rest),
+        None => segment(name),
+    };
     let version_ok = !version.is_empty() && !version.starts_with('0') && version.bytes().all(|b| b.is_ascii_digit());
     name_ok && version_ok
 }
@@ -179,6 +185,56 @@ fn labelled<'a>(v: &'a Value, key: &str) -> impl Iterator<Item = &'a str> {
 impl GestaltDef {
     pub fn id(&self) -> String {
         format!("{}@{}", self.name, self.version)
+    }
+
+    /// A hash of what makes a yml valid and how it merges: everything but the presentational keys
+    /// ([`PRESENTATIONAL`]). Published definitions never change it under one `name@version`
+    /// (`gestalts/published.yml`); a change that does is a new version.
+    pub fn structure_hash(&self) -> String {
+        use sha2::{Digest, Sha256};
+        use serde_json::Value as J;
+        // a definition and each of its rules: drop their presentational keys, recurse into rules (not into maps
+        // whose keys are field names, labels or merge rules)
+        fn strip(v: &mut J) {
+            let J::Object(m) = v else { return };
+            PRESENTATIONAL.iter().for_each(|k| { m.remove(*k); });
+            if let Some(J::Object(fields)) = m.get_mut("fields") { fields.values_mut().for_each(strip); }
+            for k in ["items", "values"] {
+                if let Some(r) = m.get_mut(k) { strip(r); }
+            }
+        }
+        // sorted keys whatever serde_json's features, so equal structures give equal text
+        fn canonical(v: &J, out: &mut String) {
+            match v {
+                J::Object(m) => {
+                    let mut keys: Vec<_> = m.keys().collect();
+                    keys.sort();
+                    out.push('{');
+                    for (i, k) in keys.into_iter().enumerate() {
+                        if i > 0 { out.push(','); }
+                        out.push_str(&J::String(k.clone()).to_string());
+                        out.push(':');
+                        canonical(&m[k], out);
+                    }
+                    out.push('}');
+                }
+                J::Array(items) => {
+                    out.push('[');
+                    for (i, item) in items.iter().enumerate() {
+                        if i > 0 { out.push(','); }
+                        canonical(item, out);
+                    }
+                    out.push(']');
+                }
+                other => out.push_str(&other.to_string()),
+            }
+        }
+        let mut v = serde_json::to_value(self).expect("a definition serializes");
+        strip(&mut v);
+        let mut text = String::new();
+        canonical(&v, &mut text);
+        let hash = Sha256::digest(text.as_bytes());
+        hash.iter().take(8).map(|b| format!("{b:02x}")).collect()
     }
 
     /// How this gestalt's ymls merge: lists of references and text by what their type implies, with its `merge:` rules
@@ -355,6 +411,10 @@ fn check_field(path: &str, v: Option<&Value>, rule: &FieldRule, report: &mut imp
         }
     }
 }
+
+/// Keys of a definition and of its field rules that change nothing about validity or merging: they may change after a
+/// definition is published.
+pub const PRESENTATIONAL: &[&str] = &["description"];
 
 /// Keys of a rule that only make sense for some types; anything else is a mistake in the definition.
 fn check_rule(path: &str, rule: &FieldRule) -> Result<(), String> {
@@ -565,9 +625,48 @@ mod tests {
     #[test]
     fn every_shipped_definition_is_loaded() {
         let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/../../gestalts");
-        let files = std::fs::read_dir(dir).unwrap().flat_map(|d| std::fs::read_dir(d.unwrap().path()).unwrap()).count();
+        // the core's are `gestalts/<name>/v<N>.yml`; model packages (`gestalts/<package>/<name>/`) load at runtime
+        let files = std::fs::read_dir(dir).unwrap().map(|d| d.unwrap().path()).filter(|d| d.is_dir())
+            .flat_map(|d| std::fs::read_dir(d).unwrap().map(|f| f.unwrap().path()))
+            .filter(|f| f.is_file() && f.extension().is_some_and(|e| e == "yml"))
+            .count();
         assert_eq!(files, BUILTIN.len(), "a file in gestalts/ isn't listed in BUILTIN");
         assert_eq!(Gestalts::builtin().defs().len(), BUILTIN.len());
+    }
+
+    #[test]
+    fn package_names_are_namespaced_once() {
+        assert!(valid_gestalt_id("map-exercise@1"));
+        assert!(valid_gestalt_id("geography/map-exercise@1"));
+        assert!(!valid_gestalt_id("a/b/c@1"));
+        assert!(!valid_gestalt_id("/b@1"));
+        assert!(!valid_gestalt_id("a/@1"));
+        assert!(!valid_gestalt_id("Geo/b@1"));
+        let g = Gestalts::builtin_with(&["name: geo/place\nversion: 1\nfields:\n  near: { type: ref, targets: [geo/place] }\n"]).unwrap();
+        let state = |raw: &str| g.classify(&Yml::parse("a", raw));
+        assert_eq!(state("id: a\ngestalt: geo/place@1\nnear: b\n"), YmlState::Valid("geo/place@1".into()));
+        assert_eq!(state("id: a\ngestalt: geo/other@1\n"), YmlState::Unknown("geo/other@1".into()));
+    }
+
+    #[test]
+    fn only_structure_is_hashed() {
+        let hash = |s: &str| Gestalts::from_yaml(&[s]).unwrap().defs()[0].structure_hash();
+        let base = hash("name: a\nversion: 1\ndescription: one\nfields:\n  x: { type: string, required: true }\n  description: { type: text }\n");
+        assert_eq!(base.len(), 16);
+        // presentational
+        assert_eq!(base, hash("name: a\nversion: 1\ndescription: another\nfields:\n  description: { type: text }\n  x: { required: true, type: string }\n"));
+        assert_eq!(base, hash("name: a\nversion: 1\nfields:\n  x: { type: string, required: true, min: null }\n  description: { type: text, required: false }\n"));
+        // structural, including a field that happens to be called `description`
+        for changed in [
+            "name: a\nversion: 1\nfields:\n  x: { type: text, required: true }\n  description: { type: text }\n",
+            "name: a\nversion: 1\nfields:\n  x: { type: string }\n  description: { type: text }\n",
+            "name: a\nversion: 1\nfields:\n  x: { type: string, required: true, max: 3 }\n  description: { type: text }\n",
+            "name: a\nversion: 1\nfields:\n  x: { type: string, required: true }\n",
+            "name: a\nversion: 2\nfields:\n  x: { type: string, required: true }\n  description: { type: text }\n",
+            "name: a\nversion: 1\nfields:\n  x: { type: string, required: true }\n  description: { type: text }\nmerge: { keys: { x: max } }\n",
+        ] {
+            assert_ne!(base, hash(changed), "{changed}");
+        }
     }
 
     #[test]

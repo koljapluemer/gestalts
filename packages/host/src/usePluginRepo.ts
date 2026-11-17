@@ -15,10 +15,10 @@ function mountedDecks(dir: string, registry: Registry): string[] {
 }
 
 /**
- * The app's repo: ymls in OPFS under `dir` or in the folder of the node at `node` (`where`), with the gestalts of every
- * bundled plugin and the decks of the installed ones. Installs the distribution's plugins in a new folder. Which decks
- * to mount is only known once the folder is open, so it's remembered per browser; if the installs changed since, the
- * repo opens once more with the right decks.
+ * The app's repo: ymls in OPFS under `dir` or in the folder of the node at `node` (`where`), with the gestalts of the
+ * distribution's model packages and the decks of the installed plugins. Installs the distribution's plugins in a new
+ * folder. Which decks to mount is only known once the folder is open, so it's remembered per browser; if the installs
+ * changed since, the repo opens once more with the right decks.
  */
 export function usePluginRepo(where: YmlsIn, registry: Registry): { repo?: Repo; installed: PluginEntry[]; decks: string[]; error?: string } {
   const dir = where.dir ?? (where.node !== undefined ? `node:${where.node}` : `native:${where.native}`);
@@ -27,7 +27,7 @@ export function usePluginRepo(where: YmlsIn, registry: Registry): { repo?: Repo;
   const source = useMemo(() => ({
     ...(JSON.parse(whereKey) as YmlsIn),
     decks: deckSources(registry.plugins.flatMap((p) => p.decks).filter((d) => mounted.includes(d.source))),
-    gestalts: registry.plugins.flatMap((p) => p.gestalts),
+    gestalts: registry.gestalts,
   }), [whereKey, registry, mounted]);
   const { repo, error } = useOpenRepo(source);
   const [seeded, setSeeded] = useState<{ repo: Repo; installs: Installs } | null>(null);

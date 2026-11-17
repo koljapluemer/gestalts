@@ -7,7 +7,7 @@ apps built on it. Start with [`doc/`](doc/README.md) or the
 ```
 crates/       the core (Rust, also in the page as wasm), merge, fs, peer sync, the node, the phone's device
 packages/     what apps and views build with: client, host, view (the view contract), kit, learning, sources, vite, viz
-gestalts/     the core's gestalt definitions
+gestalts/     gestalt definitions: the core's, and model packages (gestalts/<package>/<name>/)
 plugins/      the views (and their decks, workers), one folder each, usable by any app
 sdk/python/   what plugin workers import
 apps/
@@ -21,7 +21,7 @@ scripts/      shared by the tasks
 ```
 
 Who may import whom (packages, plugins, apps) is checked by `oxlint.config.ts`; that apps take their plugins only
-from `plugins/`, by `scripts/check-distributions.ts`. Both run in `mise run check`.
+from `plugins/` and their models from `gestalts/`, by `scripts/check-distributions.ts`. Both run in `mise run check`.
 
 ## Developing
 

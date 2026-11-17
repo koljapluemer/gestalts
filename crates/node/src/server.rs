@@ -835,7 +835,7 @@ mod tests {
     fn state_with(folder: Option<Folder>, app: Option<AppFiles>) -> AppState {
         let root = temp_dir("paths");
         let paths = Paths { config: root.join("config"), data: root.join("data"), cache: root.join("cache") };
-        let plugins = PluginHost::discover(&[], "http://127.0.0.1:0".into(), paths.clone()).unwrap();
+        let plugins = PluginHost::discover(&Default::default(), "http://127.0.0.1:0".into(), paths.clone()).unwrap();
         AppState::new(folder, plugins, "secret".into(), Some(paths), Arc::new(Headless), Identity { name: "test", app },
                       "http://127.0.0.1:0".into(), vec![APP_ORIGIN.into()])
     }

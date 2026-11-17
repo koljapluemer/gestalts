@@ -15,13 +15,14 @@ gestalts-node --background       # same, without opening them ("Start on login" 
 gestalts-node serve [--data DIR] # headless; the folder from --data, else the remembered one
 gestalts-node health DIR         # every yml that can't be used, and why
 gestalts-node publish DIR        # prepare a folder as a read-only deck
-# all of them: [--port 7717] [--profile NAME] [--plugins-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
+# all of them: [--port 7717] [--profile NAME] [--plugins-dir DIR]... [--models-dir DIR]... [--allow-origin URL]... [--app-dir DIR]
 ```
 
-In development, `mise run node:dev` starts it with `--profile dev --plugins-dir plugins` next to the settings page's
-Vite server (from :5176), which proxies the node's API so the page is the node's own as when served by it; `mise run
-gestalter:dev` starts it the same way, with the settings page built in, next to gestalter's Vite server. The dev
-profile keeps its settings apart from an installed app, and the dev node stays clear of the installed one's 7717.
+In development, `mise run node:dev` starts it with `--profile dev --plugins-dir plugins --models-dir gestalts` next to
+the settings page's Vite server (from :5176), which proxies the node's API so the page is the node's own as when served
+by it; `mise run gestalter:dev` starts it the same way, with the settings page built in, next to gestalter's Vite
+server. The dev profile keeps its settings apart from an installed app, and the dev node stays clear of the installed
+one's 7717.
 `mise run dev` (`scripts/dev.sh`) starts the dev node with the settings page's Vite server, the workshop's Make node and
 every app's Vite server, each on the first free port from its usual one, and prints where they are.
 

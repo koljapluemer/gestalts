@@ -6,7 +6,6 @@ A plugin is a folder:
 my-plugin/
   plugin.yml      # id, version, title; optional description, reads, writes, tags, requires
   view.tsx        # one React file; its default export is the view
-  gestalts/<name>/v1.yml   # optional: gestalts it owns
   decks/<id>/              # optional: ymls it ships, one `deck@1` among them
   backend.py               # optional; see Backends
 ```
@@ -21,6 +20,28 @@ writes: [note@1]
 
 `reads` and `writes` are enforced outside the view. An app lists its plugins by path in `distribution.yml`, as `core`
 (always there) or `plugins` (installable).
+
+## Models
+
+A plugin doesn't define gestalts: a view would then depend on another view to read its data. The gestalts beyond the
+core's are in model packages, `gestalts/<package>/<name>/v<N>.yml`: `geography` (map, map-exercise, country-group,
+flag), `typing` (typing-word), `media` (media-source, glossed-track), `viz` (viz). Views and decks depend on models,
+models on nothing.
+
+An app names the packages it needs in `distribution.yml`:
+
+```yaml
+models:
+  - ../../gestalts/geography
+```
+
+The build refuses a view whose `reads`, or a deck holding a gestalt, that's neither the core's nor in a named package,
+and says which package defines it. The desktop node embeds every package (it judges whatever an app syncs to it);
+`--models-dir` replaces them in development.
+
+A new gestalt in a package is named `<package>/<name>` (`geography/capital@1`); the ones above keep the flat names
+already in learners' folders. Definitions that have gone out don't change structurally
+([[../reference/data-format#Published definitions don't change|Data format]]).
 
 A view may also ask for:
 

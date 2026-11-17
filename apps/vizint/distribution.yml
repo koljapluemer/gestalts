@@ -2,3 +2,5 @@
 id: vizint
 plugins:
   - ../../plugins/vizint
+models:
+  - ../../gestalts/viz

@@ -14,4 +14,4 @@ uv run --quiet --with playwright==1.65.0 playwright install chromium
 # from the repo root, so rustup picks up its rust-toolchain.toml
 cd "$root"
 exec cargo run -q -p gestalts-node-desktop -- --profile vizint-workshop --port "$port" --lan-port "$((port + 1))" \
-  --plugins-dir "$root/plugins" --plugins-dir "$here/plugins" serve --data "$data"
+  --plugins-dir "$root/plugins" --plugins-dir "$here/plugins" --models-dir "$root/gestalts" serve --data "$data"

@@ -67,6 +67,10 @@ description = "Prepare a data folder for publishing as a read-only deck: content
 usage = 'arg "<dir>" help="the data folder, e.g. plugins/phrasebook/decks/<deck>"'
 run = "cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
 
+[tasks."gestalts:publish"]
+description = "List new gestalt definitions in gestalts/published.yml, after which their structure can't change (a change is a new version)"
+run = "GESTALTS_PUBLISH=1 cargo test -q -p gestalts-fs --test published"
+
 [tasks.deploy]
 description = "Build gestalter, loops-for-learning and vizint and deploy them to gestalter.koljasam.com, loop.koljasam.com and vizint.koljasam.com (Netlify; needs `netlify login` and a committed tree)"
 depends = ["setup"]

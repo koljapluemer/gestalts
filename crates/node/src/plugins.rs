@@ -55,10 +55,10 @@ const BACKEND_SDK: &str = include_str!("../../../sdk/python/gestalts_backend.py"
 struct Health { protocol: u32 }
 
 impl PluginHost {
-    pub fn discover(dirs: &[PathBuf], connector_url: String, paths: Paths) -> Result<Self, String> {
+    pub fn discover(sources: &Sources, connector_url: String, paths: Paths) -> Result<Self, String> {
         let mut found = BTreeMap::new();
         let mut bundles: Vec<PluginBundle> = Vec::new();
-        for dir in dirs {
+        for dir in &sources.plugins {
             if !dir.exists() { continue; }
             let entries = std::fs::read_dir(dir).map_err(|e| format!("cannot read plugin directory {}: {e}", dir.display()))?;
             for entry in entries.flatten().filter(|e| e.file_type().is_ok_and(|t| t.is_dir())) {
@@ -73,7 +73,7 @@ impl PluginHost {
                 found.insert(id, Arc::new(Mutex::new(HostedPlugin { bundle, view, token: uuid::Uuid::new_v4().to_string(), worker_url: None, child: None })));
             }
         }
-        let gestalts = crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())?;
+        let gestalts = crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>(), &sources.model_texts()?)?;
         let network = bundles.iter().flat_map(|b| b.manifest.network.iter().cloned()).collect();
         Ok(Self { inner: Arc::new(RwLock::new(found)), connector_url, paths, uv: Arc::new(std::sync::RwLock::new(UvState::Locating)), client: reqwest::Client::new(), gestalts: Arc::new(gestalts), network: Arc::new(network) })
     }
@@ -84,7 +84,7 @@ impl PluginHost {
     /// Where this node keeps its settings.
     pub fn config_dir(&self) -> &std::path::Path { &self.paths.config }
 
-    /// The core's gestalts and those of every plugin found, for access checks and merging.
+    /// The core's gestalts and the model packages', for access checks and merging.
     pub fn gestalts(&self) -> &Gestalts { &self.gestalts }
 
     pub fn uv_state(&self) -> UvState { self.uv.read().expect("uv state lock").clone() }
@@ -230,22 +230,37 @@ impl PluginHost {
     }
 }
 
-/// The core's gestalts plus those of the plugins in `dirs` (without hosting them).
-pub fn load_gestalts(dirs: &[PathBuf]) -> Result<Gestalts, String> {
+/// Where a node finds plugins (folders of plugin folders) and model packages (folders of packages).
+#[derive(Debug, Clone, Default)]
+pub struct Sources {
+    pub plugins: Vec<PathBuf>,
+    pub models: Vec<PathBuf>,
+}
+
+impl Sources {
+    /// The definitions of every model package found.
+    pub fn model_texts(&self) -> Result<Vec<String>, String> {
+        Ok(gestalts_fs::models::read_models(&self.models)?.into_iter().map(|m| m.text).collect())
+    }
+}
+
+/// The core's gestalts plus the model packages', checked against the `reads` of the plugins found (without hosting
+/// them).
+pub fn load_gestalts(sources: &Sources) -> Result<Gestalts, String> {
     let mut bundles = Vec::new();
-    for dir in dirs.iter().filter(|d| d.exists()) {
+    for dir in sources.plugins.iter().filter(|d| d.exists()) {
         let entries = std::fs::read_dir(dir).map_err(|e| format!("cannot read plugin directory {}: {e}", dir.display()))?;
         for entry in entries.flatten().filter(|e| e.path().join("plugin.yml").is_file()) {
             bundles.push(PluginBundle::load(entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?);
         }
     }
-    crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>())
+    crate::manifest::gestalts_with(&bundles.iter().collect::<Vec<_>>(), &sources.model_texts()?)
 }
 
 pub fn unpack_builtin(paths: &Paths, builtin: &include_dir::Dir<'_>) -> std::io::Result<PathBuf> {
     use sha2::{Digest, Sha256};
     let mut files = Vec::new();
-    collect(builtin, Path::new("plugins"), &mut files);
+    collect(builtin, Path::new(""), &mut files);
     let mut hash = Sha256::new();
     for (path, f) in &files { hash.update(path.to_string_lossy().as_bytes()); hash.update([0]); hash.update(f.contents()); }
     let id: String = hash.finalize().iter().take(8).map(|b| format!("{b:02x}")).collect();
@@ -265,7 +280,7 @@ pub fn unpack_builtin(paths: &Paths, builtin: &include_dir::Dir<'_>) -> std::io:
     for entry in std::fs::read_dir(&root)?.flatten() {
         if entry.file_name() != id.as_str() { let _ = std::fs::remove_dir_all(entry.path()); }
     }
-    Ok(dest.join("plugins"))
+    Ok(dest)
 }
 
 /// Files under `dir`, with their paths below `prefix`; skips Python caches and environments.

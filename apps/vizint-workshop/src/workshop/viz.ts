@@ -1,7 +1,7 @@
 import { stableId, type Repo } from '@gestalts/client';
 import type { Item, JsonMap } from '@gestalts/view';
 
-/** One viz is one yml (plugins/vizint/gestalts/viz/v1.yml). */
+/** One viz is one yml (gestalts/viz/viz/v1.yml). */
 export const VIZ = 'viz@1';
 
 export type BlobRef = { file: string; label: string };

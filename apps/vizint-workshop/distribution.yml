@@ -3,3 +3,5 @@
 id: vizint-workshop
 plugins:
   - ../../plugins/vizint
+models:
+  - ../../gestalts/viz

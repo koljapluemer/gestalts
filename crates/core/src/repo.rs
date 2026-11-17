@@ -504,6 +504,23 @@ mod tests {
     }
 
     #[test]
+    fn a_package_gestalt_is_written_queried_and_referenced_by_its_namespaced_name() {
+        pollster::block_on(async {
+            let def = "name: geo/place\nversion: 1\nfields:\n  name: { type: string }\n  near: { type: ref_list, targets: [geo/place] }\n";
+            let r = Repo::new(Memory::default(), Gestalts::builtin_with(&[def]).unwrap());
+            let place = |id: &str, rest: &str| parse_yaml(&format!("id: {id}\ngestalt: geo/place@1\n{rest}")).unwrap();
+            r.put(place("a", "name: A\n")).await.unwrap();
+            r.put(place("b", "near: [a]\n")).await.unwrap();
+            r.put(note("n", "")).await.unwrap();
+            assert!(r.put(place("c", "near: [n]\n")).await.is_err(), "a note isn't a geo/place");
+            let places = Query { gestalt: Some("geo/place@1".into()), ..Default::default() };
+            assert_eq!(ids(&r.query(&places)), ["a", "b"]);
+            let near_a = Query { refs: Some(RefFilter { to: "a".into(), field: Some("near".into()), label: None }), ..places };
+            assert_eq!(ids(&r.query(&near_a)), ["b"]);
+        });
+    }
+
+    #[test]
     fn only_valid_ymls_are_queryable_and_the_rest_are_reported() {
         pollster::block_on(async {
             let r = repo();

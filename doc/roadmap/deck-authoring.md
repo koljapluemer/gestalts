@@ -1,7 +1,7 @@
 # Authoring decks (a CMS): discussion
 
 Not built. Where the thinking stands, from a discussion on 2026-11-15. Gestalt placement, which this depends on, is in
-[[gestalt-definitions-as-data|Gestalt definitions as data]].
+[[gestalt-definitions-as-data|Gestalt definitions as data]]: model packages are built.
 
 ## Who it's for
 
@@ -48,8 +48,9 @@ What doesn't:
 - bulk work: a table over many ymls (a column per scalar field), not only a form per yml
 
 Previews come from the plugin's own view, opened at an `item` param (a convention every learning view would take).
-Whether the hints can be edited after a definition ships depends on [[gestalt-definitions-as-data|Gestalt definitions as data]]'s
-structural/presentational split.
+The hints can be edited after a definition ships if they're presentational: add them to `PRESENTATIONAL`
+(`crates/core/src/gestalt.rs`), so `gestalts/published.yml` doesn't count them as structure
+([[gestalt-definitions-as-data|Gestalt definitions as data]]).
 
 ## Where it sits
 
@@ -134,15 +135,16 @@ you write it.
 ## Editing views and where gestalts live
 
 A domain editor (a map to curate exercises on) shouldn't be a second `.tsx` in a plugin, or a plugin that edits
-another plugin's data. Both hide the real problem: `plugins/world-map` holds a view, a data model (its gestalts) and
-content (its deck and tools), so a second view on `map-exercise@1` depends on another view's plugin. Elsewhere views and
+another plugin's data. Both hide the real problem: `plugins/world-map` held a view, a data model (its gestalts) and
+content (its deck and tools), so a second view on `map-exercise@1` depended on another view's plugin. The model is out
+now (`gestalts/geography`); the content isn't. Elsewhere views and
 gestalts are many to many: `flashcards`, `flashcard-manager`, `phrasebook` and others all use the core's
 `flashcard@1`.
 
 With the model and content out of the view's plugin, an editing view is a peer like `flashcard-manager`, named for what
 it does, and authoring is the same views pointed at a deck folder instead of the user's. Which decks a distribution
-mounts would then be listed in its `distribution.yml`, not implied by an installed plugin. Where gestalts go is
-[[gestalt-definitions-as-data|Gestalt definitions as data]]; where decks and their pipelines go (top-level `decks/`, or with their
+mounts would then be listed in its `distribution.yml`, not implied by an installed plugin. Gestalts are in model
+packages ([[gestalt-definitions-as-data|Gestalt definitions as data]]); where decks and their pipelines go (top-level `decks/`, or with their
 gestalts per domain) is open.
 
 ## Order

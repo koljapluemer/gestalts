@@ -1,11 +1,12 @@
 //! `plugin.yml`, and the bundle around it: pure, no IO beyond reading the bundle. Running backends is `plugins.rs`.
 //!
-//! A plugin is a folder: `plugin.yml`, `view.tsx`, and optionally `gestalts/<name>/v<N>.yml`, `decks/<id>/` and
-//! `backend.py`. What it holds is what's in the folder; the manifest only says what can't be seen there.
+//! A plugin is a folder: `plugin.yml`, `view.tsx`, and optionally `decks/<id>/` and `backend.py`. What it holds is
+//! what's in the folder; the manifest only says what can't be seen there. Gestalts aren't a plugin's: they're the
+//! core's or a model package's (`gestalts_fs::models`), so views and decks depend on models and not on each other.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use gestalts_core::{Gestalts, Yml, YmlState};
+use gestalts_core::{Gestalts, Yml, YmlState, valid_gestalt_id};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, thiserror::Error)]
@@ -73,7 +74,6 @@ pub enum Permission {
 pub struct PluginBundle {
     pub root: PathBuf,
     pub manifest: PluginManifest,
-    gestalt_texts: Vec<String>,
 }
 
 impl PluginBundle {
@@ -87,35 +87,16 @@ impl PluginBundle {
         if manifest.requires.contains(&Requirement::Backend) && !root.join("backend.py").is_file() {
             return invalid(format!("{}: `requires: [backend]` but there's no backend.py", manifest.id));
         }
-        let gestalt_texts = read_gestalts(&root)?;
-        Gestalts::from_yaml(&gestalt_texts.iter().map(String::as_str).collect::<Vec<_>>()).map_err(ManifestError::Invalid)?;
-        Ok(Self { root, manifest, gestalt_texts })
-    }
-
-    /// The definitions of the gestalts this plugin owns, as YAML.
-    pub fn gestalt_texts(&self) -> &[String] {
-        &self.gestalt_texts
+        if root.join("gestalts").exists() {
+            return invalid(format!("{}: a plugin doesn't define gestalts; they go in a model package, gestalts/<package>/<name>/v<N>.yml", manifest.id));
+        }
+        Ok(Self { root, manifest })
     }
 
     /// Its `backend.py`, required or optional.
     pub fn backend(&self) -> Option<PathBuf> {
         Some(self.root.join("backend.py")).filter(|p| p.is_file())
     }
-}
-
-/// Every `gestalts/<name>/v<N>.yml` in the bundle, in a stable order.
-fn read_gestalts(root: &Path) -> Result<Vec<String>, ManifestError> {
-    let dir = root.join("gestalts");
-    if !dir.is_dir() {
-        return Ok(vec![]);
-    }
-    let read = |p: &Path| std::fs::read_dir(p).map_err(|e| ManifestError::Read(p.to_owned(), e));
-    let mut files = Vec::new();
-    for name in read(&dir)?.flatten().filter(|e| e.path().is_dir()) {
-        files.extend(read(&name.path())?.flatten().map(|e| e.path()).filter(|p| p.extension().is_some_and(|x| x == "yml")));
-    }
-    files.sort();
-    files.iter().map(|p| std::fs::read_to_string(p).map_err(|e| ManifestError::Read(p.clone(), e))).collect()
 }
 
 fn valid_id(id: &str) -> bool {
@@ -125,10 +106,6 @@ fn valid_id(id: &str) -> bool {
 fn valid_version(v: &str) -> bool {
     let mut parts = v.split('.');
     parts.by_ref().take(3).count() == 3 && parts.next().is_none() && v.split('.').all(|p| !p.is_empty() && p.bytes().all(|c| c.is_ascii_digit()))
-}
-
-fn valid_gestalt(id: &str) -> bool {
-    id.split_once('@').is_some_and(|(name, version)| valid_id(name) && version.parse::<u32>().is_ok_and(|n| n >= 1))
 }
 
 fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
@@ -141,7 +118,7 @@ fn validate(m: &PluginManifest) -> Result<(), ManifestError> {
     if m.title.trim().is_empty() {
         return invalid(format!("{} has no title", m.id));
     }
-    if let Some(g) = m.reads.iter().chain(&m.writes).find(|g| !valid_gestalt(g)) {
+    if let Some(g) = m.reads.iter().chain(&m.writes).find(|g| !valid_gestalt_id(g)) {
         return invalid(format!("gestalt {g} is not name@N"));
     }
     if let Some(g) = m.writes.iter().find(|g| !m.reads.contains(g)) {
@@ -162,9 +139,10 @@ pub fn valid_host(h: &str) -> bool {
         && l.bytes().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-'))
 }
 
-/// The core's gestalts plus every plugin's: each defined once, and every gestalt a plugin reads existing.
-pub fn gestalts_with(bundles: &[&PluginBundle]) -> Result<Gestalts, String> {
-    let texts: Vec<&str> = bundles.iter().flat_map(|b| b.gestalt_texts()).map(String::as_str).collect();
+/// The core's gestalts plus the model packages' (`models`, as YAML): each defined once, and every gestalt a plugin
+/// reads existing.
+pub fn gestalts_with(bundles: &[&PluginBundle], models: &[String]) -> Result<Gestalts, String> {
+    let texts: Vec<&str> = models.iter().map(String::as_str).collect();
     let g = Gestalts::builtin_with(&texts)?;
     for b in bundles {
         if let Some(missing) = b.manifest.reads.iter().find(|id| g.get(id).is_none()) {
@@ -291,14 +269,15 @@ mod tests {
     }
 
     #[test]
-    fn gestalts_are_found_in_the_folder_and_defined_once() {
-        let def = "name: thing\nversion: 1\n";
-        let (_a, a) = bundle("g1", &format!("{BASE}reads: [thing@1]\n"), &[("gestalts/thing/v1.yml", def)]);
+    fn gestalts_come_from_models_defined_once_and_never_from_plugins() {
+        let def = "name: geo/thing\nversion: 1\n".to_owned();
+        let (_a, a) = bundle("g1", &format!("{BASE}reads: [geo/thing@1]\n"), &[]);
         let a = a.unwrap();
-        assert!(gestalts_with(&[&a]).unwrap().get("thing@1").is_some());
-        assert!(gestalts_with(&[&a, &a]).is_err());
-        let (_b, b) = bundle("g2", &format!("{BASE}reads: [missing@1]\n"), &[]);
-        assert!(gestalts_with(&[&b.unwrap()]).unwrap_err().contains("nothing defines"));
+        assert!(gestalts_with(&[&a], std::slice::from_ref(&def)).unwrap().get("geo/thing@1").is_some());
+        assert!(gestalts_with(&[&a], &[def.clone(), def]).is_err());
+        assert!(gestalts_with(&[&a], &[]).unwrap_err().contains("nothing defines"));
+        let (_b, b) = bundle("g2", BASE, &[("gestalts/thing/v1.yml", "name: thing\nversion: 1\n")]);
+        assert!(b.unwrap_err().to_string().contains("model package"));
     }
 
     #[test]
