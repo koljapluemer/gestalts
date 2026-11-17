@@ -46,7 +46,7 @@ async function sha256(bytes: Uint8Array): Promise<string> {
 
 /**
  * One running view's way in. Everything it asks is checked here, outside the frame it runs in, against what its
- * manifest declared. A query must name one gestalt the view reads, so nothing can be asked for wholesale.
+ * manifest declared. A query must name gestalts the view reads, so nothing can be asked for wholesale.
  */
 export class Bridge {
   private lives = new Map<number, Pick<Live, 'stop'>>();
@@ -57,8 +57,9 @@ export class Bridge {
   constructor(private repo: BridgeRepo, private scope: Scope, private env: ViewEnv, private push: (m: Pushed) => void) {}
 
   private checkQuery(q: Query) {
-    if (!q.gestalt) throw new AccessError('a query must name the gestalt it asks for');
-    if (!this.scope.reads.includes(q.gestalt)) throw new AccessError(`this view doesn't declare that it reads ${q.gestalt}`);
+    const asked = Array.isArray(q.gestalt) ? q.gestalt : q.gestalt ? [q.gestalt] : [];
+    if (!asked.length || !asked.every((g) => typeof g === 'string')) throw new AccessError('a query must name the gestalts it asks for');
+    for (const g of asked) if (!this.scope.reads.includes(g)) throw new AccessError(`this view doesn't declare that it reads ${g}`);
   }
 
   private checkWrite(gestalt: string) {

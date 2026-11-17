@@ -36,11 +36,39 @@ pub struct RefFilter {
     pub label: Option<String>,
 }
 
+/// One gestalt (`name@version`) or several, any of which will do: a view reading every version of `concept` it knows
+/// asks for `[concept@2, concept@3]`.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[serde(untagged)]
+pub enum GestaltFilter {
+    One(String),
+    Many(Vec<String>),
+}
+
+impl GestaltFilter {
+    pub fn all(&self) -> &[String] {
+        match self {
+            GestaltFilter::One(g) => std::slice::from_ref(g),
+            GestaltFilter::Many(gs) => gs,
+        }
+    }
+
+    pub fn has(&self, gestalt: &str) -> bool {
+        self.all().iter().any(|g| g == gestalt)
+    }
+}
+
+impl From<&str> for GestaltFilter {
+    fn from(g: &str) -> Self {
+        GestaltFilter::One(g.to_owned())
+    }
+}
+
 /// What a yml a link points at must be. A target that isn't there (or isn't valid) is no shape.
 #[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
 #[serde(default, deny_unknown_fields)]
 pub struct Shape {
-    pub gestalt: Option<String>,
+    pub gestalt: Option<GestaltFilter>,
     pub ids: Option<Vec<String>>,
     #[serde(rename = "where")]
     pub where_: BTreeMap<String, Value>,
@@ -78,7 +106,7 @@ impl LinkFilter {
 impl Shape {
     fn holds(&self, e: &Entry) -> bool {
         let Some(gestalt) = e.gestalt() else { return false };
-        self.gestalt.as_deref().is_none_or(|g| g == gestalt)
+        self.gestalt.as_ref().is_none_or(|g| g.has(gestalt))
             && self.ids.as_ref().is_none_or(|ids| ids.contains(&e.yml.id))
             && self.where_.iter().all(|(k, v)| e.yml.get(k) == Some(v))
             && self.tags.holds(e)
@@ -116,8 +144,8 @@ pub enum Order {
 #[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq)]
 #[serde(default, deny_unknown_fields)]
 pub struct Query {
-    /// `name@version`
-    pub gestalt: Option<String>,
+    /// `name@version`, or several
+    pub gestalt: Option<GestaltFilter>,
     pub ids: Option<Vec<String>>,
     /// exact matches on top-level props
     #[serde(rename = "where")]
@@ -213,7 +241,7 @@ impl Query {
     /// Whether `e` is one the query asks for, regardless of paging. `index` says what `e`'s targets are, for `links`.
     pub fn matches(&self, e: &Entry, index: &Index) -> bool {
         let Some(gestalt) = e.gestalt() else { return false };
-        self.gestalt.as_deref().is_none_or(|g| g == gestalt)
+        self.gestalt.as_ref().is_none_or(|g| g.has(gestalt))
             && self.ids.as_ref().is_none_or(|ids| ids.contains(&e.yml.id))
             && self.where_.iter().all(|(k, v)| e.yml.get(k) == Some(v))
             && self.tags.holds(e)
@@ -340,8 +368,17 @@ impl Index {
     fn narrowed(&self, q: &Query) -> Option<Candidates<'_>> {
         static EMPTY: BTreeSet<String> = BTreeSet::new();
         let mut best: Option<Candidates<'_>> = q.ids.as_ref().map(|ids| Candidates::Owned(ids.iter().cloned().collect()));
+        if let Some(GestaltFilter::Many(gs)) = &q.gestalt {
+            let n: usize = gs.iter().map(|g| self.by_gestalt.get(g).map_or(0, BTreeSet::len)).sum();
+            if best.as_ref().is_none_or(|b| n < b.len()) {
+                best = Some(Candidates::Owned(gs.iter().filter_map(|g| self.by_gestalt.get(g)).flatten().cloned().collect()));
+            }
+        }
         let lent = [
-            q.gestalt.as_ref().map(|g| self.by_gestalt.get(g).unwrap_or(&EMPTY)),
+            match &q.gestalt {
+                Some(GestaltFilter::One(g)) => Some(self.by_gestalt.get(g).unwrap_or(&EMPTY)),
+                _ => None,
+            },
             q.tags.all.first().map(|t| self.by_tag.get(t).unwrap_or(&EMPTY)),
             q.refs.as_ref().map(|r| self.backrefs.get(&r.to).unwrap_or(&EMPTY)),
         ];

@@ -9,7 +9,8 @@ Each phrase is an intent, one concept (`vie: ask how someone is`) that every var
 they practise beyond it (a pronoun, a register) at their own weights. The concepts no language owns (`function: greet`,
 `situation: restaurant`, `social: politeness`) are named the same in every deck, so they are one concept across decks,
 and each deck's links to them are its own claims (`source` is the deck). Nothing here is a hierarchy: an intent links to
-every function it serves and situation it's used in, and languages link their own concepts as they see fit.
+every function it serves and situation it's used in, and languages link their own concepts as they see fit. Every
+concept the language owns (`vie: …`) is `in` the language (`lang: vie`), a `concept@3`: a member counted, not evidence.
 
 Usage: uv run tools/build_phrase_decks.py   then   mise run publish-data plugins/phrasebook/decks/<deck>
 """
@@ -23,7 +24,6 @@ TOOLS = Path(__file__).resolve().parent
 PLUGIN = TOOLS.parent
 INTENT_TO_FUNCTION = 0.5
 INTENT_TO_SITUATION = 0.3
-TO_LANGUAGE = 0.2
 # a situation every phrase may come up in says nothing
 NO_SITUATION = "anywhere"
 TAGS = ["phrasebook", "native:eng", "no-generic-practice"]
@@ -119,13 +119,10 @@ def build(path: Path) -> None:
             members.append(write(notes, card))
     for source, target, weight, kind in d.get("links", []):
         link(source, target, weight, kind)
-    # everything this language owns is part of it
-    for name in list(names):
-        if name.startswith(f"{lang}: "):
-            link(name, language, TO_LANGUAGE, "part-of")
-
     for name, aliases in sorted(names.items()):
-        members.append(write(notes, {"id": concept_id(name), "gestalt": "concept@2", "name": name, **({"aliases": aliases} if aliases else {})}))
+        # everything this language owns is one of its members
+        owned = {"in": concept_id(language)} if name.startswith(f"{lang}: ") else {}
+        members.append(write(notes, {"id": concept_id(name), "gestalt": "concept@3" if owned else "concept@2", "name": name, **({"aliases": aliases} if aliases else {}), **owned}))
     for value in links.values():
         members.append(write(notes, value))
     deck_id = f"deck-{d['deck']}"

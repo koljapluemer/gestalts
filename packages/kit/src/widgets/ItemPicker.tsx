@@ -5,7 +5,9 @@ import { useDebounced } from '../primitives';
 import { NoteTitle } from './NoteTitle';
 
 const NOTE = 'note@1';
+/** a new concept is in no set: `@2`; finding one looks at members of sets (`@3`) too */
 const CONCEPT = 'concept@2';
+const CONCEPTS = ['concept@2', 'concept@3'];
 const SHOWN = 8;
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -126,7 +128,7 @@ export function NotePicker({ onPick, unrelatedTo, exclude, placeholder = 'Find a
 
 /** The concept named (or going by) `name` exactly, if there is one; asked afresh, as what's shown may lag the typing. */
 export async function conceptNamed(read: ReturnType<typeof useRead>, name: string): Promise<Item | undefined> {
-  const { items } = await read.page({ gestalt: CONCEPT, text: name, fields: ['name', 'aliases'], limit: 50 });
+  const { items } = await read.page({ gestalt: CONCEPTS, text: name, fields: ['name', 'aliases'], limit: 50 });
   return items.find((c) => fold(str(c.value.name)) === fold(name))
     ?? items.find((c) => strings(c.value.aliases).some((a) => fold(a) === fold(name)));
 }
@@ -144,7 +146,7 @@ export function ConceptPicker({ onPick, exclude, placeholder = 'Find or create a
   return (
     <ItemPicker
       placeholder={placeholder} autoFocus={autoFocus} exclude={exclude} size={size} onPick={(c) => onPick(c.id)}
-      query={(text) => ({ gestalt: CONCEPT, text, fields: ['name', 'aliases'], limit: SHOWN })}
+      query={(text) => ({ gestalt: CONCEPTS, text, fields: ['name', 'aliases'], limit: SHOWN })}
       render={(c) => (
         <span className="flex min-w-0 items-baseline gap-2">
           <span>{str(c.value.name)}</span>

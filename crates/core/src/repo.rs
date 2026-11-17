@@ -423,7 +423,7 @@ pub fn state_id(gestalt: &str, target: &str, facet: Option<&str>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::index::{LinkFilter, LinkMatch, Order, RefFilter, Shape, TagFilter};
+    use crate::index::{GestaltFilter, LinkFilter, LinkMatch, Order, RefFilter, Shape, TagFilter};
     use crate::storage::Memory;
     use crate::yml::parse_yaml;
 
@@ -517,6 +517,27 @@ mod tests {
             assert_eq!(ids(&r.query(&places)), ["a", "b"]);
             let near_a = Query { refs: Some(RefFilter { to: "a".into(), field: Some("near".into()), label: None }), ..places };
             assert_eq!(ids(&r.query(&near_a)), ["b"]);
+        });
+    }
+
+    #[test]
+    fn a_query_may_ask_for_several_gestalts() {
+        pollster::block_on(async {
+            let r = repo();
+            r.put(parse_yaml("id: set\ngestalt: concept@2\nname: 'lang: x'\n").unwrap()).await.unwrap();
+            r.put(parse_yaml("id: w\ngestalt: concept@3\nname: x:word\nin: set\n").unwrap()).await.unwrap();
+            r.put(note("n", "")).await.unwrap();
+            let both = || Some(GestaltFilter::Many(vec!["concept@2".into(), "concept@3".into()]));
+            assert_eq!(ids(&r.query(&Query { gestalt: both(), ..Default::default() })), ["set", "w"]);
+            // narrowed by the union of both, still filtered by the rest
+            assert_eq!(ids(&r.query(&Query { gestalt: both(), text: Some("word".into()), ..Default::default() })), ["w"]);
+            let ordered = Query { gestalt: both(), order: Some(Order::Field { field: "name".into(), desc: true }), ..Default::default() };
+            assert_eq!(ids(&r.query(&ordered)), ["w", "set"]);
+            let shape = Shape { gestalt: both(), ..Default::default() };
+            let pointing = Query { links: LinkFilter { all: vec![LinkMatch { field: Some("in".into()), label: None, to: Some(shape) }], none: vec![] }, ..Default::default() };
+            assert_eq!(ids(&r.query(&pointing)), ["w"]);
+            let parsed: Query = serde_json::from_str(r#"{"gestalt": ["concept@3"]}"#).unwrap();
+            assert_eq!(ids(&r.query(&parsed)), ["w"]);
         });
     }
 

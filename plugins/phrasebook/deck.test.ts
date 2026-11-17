@@ -6,7 +6,7 @@ import { parse } from 'yaml';
 type Yml = {
   id: string; gestalt: string; name?: string; front?: string; context?: string; back?: string; tags?: string[];
   concepts?: Record<string, number>; sources?: { to: string; label: string }[]; from?: string; to?: string; weight?: number;
-  members?: string[]; license?: string; url?: string;
+  members?: string[]; license?: string; url?: string; in?: string;
 };
 
 const decksDir = join(import.meta.dirname, 'decks');
@@ -16,7 +16,7 @@ for (const deck of readdirSync(decksDir)) {
   const ymls = readdirSync(dir).map((f) => parse(readFileSync(join(dir, f), 'utf8')) as Yml);
   const of = (g: string) => ymls.filter((y) => y.gestalt === g);
   const cards = of('flashcard@1');
-  const concepts = new Map(of('concept@2').map((c) => [c.id, c]));
+  const concepts = new Map([...of('concept@2'), ...of('concept@3')].map((c) => [c.id, c]));
   const links = of('concept-link@1');
   const lang = cards[0]?.tags?.find((t) => t.startsWith('lang:'))?.slice(5);
   const main = (c: Yml) => Object.entries(c.concepts ?? {}).filter(([, w]) => w === 1).map(([id]) => id);
@@ -59,10 +59,16 @@ for (const deck of readdirSync(decksDir)) {
       }
     });
 
-    it('links each phrase to what it does, and the language to its own concepts', () => {
+    it('links each phrase to what it does, and has what the language owns in the language', () => {
       const out = (id: string) => links.filter((l) => l.from === id).map((l) => concepts.get(l.to!)!.name);
       for (const id of new Set(cards.flatMap(main))) expect(out(id).some((n) => n.startsWith('function: '))).toBe(true);
-      for (const c of concepts.values()) if (c.name!.startsWith(`${lang}: `)) expect(out(c.id)).toContain(`lang: ${lang}`);
+      const language = [...concepts.values()].find((c) => c.name === `lang: ${lang}`)!;
+      for (const c of concepts.values()) {
+        const owned = c.name!.startsWith(`${lang}: `);
+        expect(c.gestalt, c.name).toBe(owned ? 'concept@3' : 'concept@2');
+        expect(c.in, c.name).toBe(owned ? language.id : undefined);
+        if (owned) expect(out(c.id)).not.toContain(`lang: ${lang}`);
+      }
     });
 
     it('credits its source on every card taken from it', () => {

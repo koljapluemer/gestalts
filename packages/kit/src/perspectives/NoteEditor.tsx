@@ -8,7 +8,9 @@ import { blobsOf, type BlobRef } from './NoteCard';
 
 const NOTE = 'note@1';
 const SOURCE = 'source@1';
-const CONCEPT = 'concept@2';
+/** every version of `concept` read; plain ones are written `@2`, members of a set `@3` */
+const CONCEPTS = ['concept@2', 'concept@3'];
+const isConcept = (gestalt: string) => CONCEPTS.includes(gestalt);
 /** a relationship's label when nothing more specific is said */
 export const RELATED = 'related';
 
@@ -42,7 +44,7 @@ const hasContent = (v: JsonMap) => Object.keys(v).some((k) => k !== 'id' && k !=
 /** The views that edit what a note relates to, by its gestalt, and the param that says which one. */
 const EDITOR: Record<string, { view: string; param: string; kind: string; Icon: typeof StickyNote }> = {
   [NOTE]: { view: 'note-crud', param: 'note', kind: 'note', Icon: StickyNote },
-  [CONCEPT]: { view: 'concept-explorer', param: 'concept', kind: 'concept', Icon: Lightbulb },
+  ...Object.fromEntries(CONCEPTS.map((g) => [g, { view: 'concept-explorer', param: 'concept', kind: 'concept', Icon: Lightbulb }])),
   [SOURCE]: { view: 'source-manager', param: 'source', kind: 'source', Icon: BookOpen },
 };
 
@@ -81,10 +83,10 @@ function useNoteWriter(id: string, note: Item | undefined, onCreated?: (id: stri
 /** What `ids` point at, by id; undefined while still asked; missing ones point at nothing (deleted). */
 function useTargets(ids: string[]): Map<string, Item> | undefined {
   const unique = [...new Set(ids)];
-  const q = (gestalt: string, fields: string[]) => (unique.length ? { gestalt, ids: unique, fields, limit: unique.length } : null);
+  const q = (gestalt: string | string[], fields: string[]) => (unique.length ? { gestalt, ids: unique, fields, limit: unique.length } : null);
   const notes = useQuery(q(NOTE, ['title', 'main']));
   const sources = useQuery(q(SOURCE, ['title', 'key', 'author', 'editor', 'date']));
-  const concepts = useQuery(q(CONCEPT, ['name']));
+  const concepts = useQuery(q(CONCEPTS, ['name']));
   if (unique.length && (notes.loading || sources.loading || concepts.loading)) return undefined;
   return new Map([...notes.items, ...sources.items, ...concepts.items].map((i) => [i.id, i]));
 }
@@ -100,7 +102,7 @@ function TargetName({ item }: { item: Item }) {
       </span>
     );
   }
-  if (item.gestalt === CONCEPT) return <span className="min-w-0 break-words">{str(item.value.name)}</span>;
+  if (isConcept(item.gestalt)) return <span className="min-w-0 break-words">{str(item.value.name)}</span>;
   return <NoteTitle value={item.value} className="min-w-0 break-words" />;
 }
 
@@ -174,7 +176,7 @@ function LinkSearch({ exclude, onPick }: { exclude: Set<string>; onPick: (id: st
     <ItemPicker
       placeholder="Link a note or concept…" exclude={exclude} onPick={(i) => onPick(i.id)}
       // concepts first: there are few, and a name typed in full is most likely meant
-      query={(text) => ({ gestalt: CONCEPT, text, fields: ['name'], limit: 4 })}
+      query={(text) => ({ gestalt: CONCEPTS, text, fields: ['name'], limit: 4 })}
       more={(text) => ({ gestalt: NOTE, text, fields: ['title', 'main'], limit: 6 })}
       render={(i) => {
         const E = EDITOR[i.gestalt];
@@ -215,7 +217,7 @@ function Files({ blobs, onChange, onError }: { blobs: BlobRef[]; onChange: (b: B
 /**
  * Edits every prop of the note `id`, always: each text is saved when it's left, everything else as it changes; what
  * isn't saved yet is saved when the editor goes. A note that isn't there yet is written once it has something in it,
- * then `onCreated` is told. It reads `note@1`, `source@1` and `concept@2` (what a note relates to) and writes `note@1`
+ * then `onCreated` is told. It reads `note@1`, `source@1`, `concept@2` and `concept@3` (what a note relates to) and writes `note@1`
  * and `source@1` (sources pasted in as BibTeX).
  */
 export function NoteEditor({ id, onCreated, autoFocus }: { id: string; onCreated?: (id: string) => void; autoFocus?: boolean }) {

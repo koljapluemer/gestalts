@@ -6,8 +6,9 @@
 //
 // Each word is a `typing-word@1` made by one `item-model@1`, practising its word concept `vie:<word>` a little (it is
 // copied, not recalled) and the script concepts of its marks (`vie-script: sắc`, `vie-script: ơ`, …, tools/script.ts)
-// by each mark's share. Words and script concepts are part of `lang: vie`; a paired intent links to its word. The
-// phrasebook's concepts (`lang: vie`, the intents) are copied byte for byte from its built deck, read as data.
+// by each mark's share. Words are `in` `lang: vie` and script concepts `in` `vie: script` (`concept@3`: members
+// counted, not evidence); a paired intent links to its word. The phrasebook's concepts (`lang: vie`, the intents) are
+// copied byte for byte from its built deck, read as data.
 //
 //   node plugins/vietnamese-typing-practice/tools/build-deck.ts && mise run publish-data plugins/vietnamese-typing-practice/decks/vietnamese-typing
 import { createHash } from 'node:crypto';
@@ -25,8 +26,6 @@ const TAGS = ['vietnamese-typing-practice'];
 const SOURCE = 'vietnamese-typing-practice/vietnamese-typing';
 /** how much copying a word you're shown practises knowing it */
 const WORD_WEIGHT = 0.2;
-/** what a word or a mark says about the language, as the phrasebook links its own */
-const TO_LANGUAGE = 0.2;
 /** being able to say a phrase says you know the word that mostly says it; the other way round, little */
 const INTENT_TO_WORD = 0.5;
 const WORD_TO_INTENT = 0.1;
@@ -36,6 +35,8 @@ const sha = (text: string) => createHash('sha256').update(text).digest('hex').sl
 const conceptId = (name: string) => `concept-${sha(name)}`;
 const scriptName = (key: string) => `vie-script: ${key}`;
 const LANGUAGE = 'lang: vie';
+/** the set of the script's marks */
+const SCRIPT = 'vie: script';
 
 const json = async <T>(f: string) => JSON.parse(await readFile(f, 'utf8')) as T;
 const words = await json<Record<string, string>>(join(data, 'vie.json'));
@@ -73,10 +74,10 @@ const link = (from: string, to: string, weight: number, kind: string) => put({
 
 const language = await copyFromPhrasebook(LANGUAGE);
 
+const script = conceptId(SCRIPT);
+await put({ id: script, gestalt: 'concept@2', name: SCRIPT });
 for (const key of MARK_KEYS) {
-  const id = conceptId(scriptName(key));
-  await put({ id, gestalt: 'concept@2', name: scriptName(key) });
-  await link(id, language, TO_LANGUAGE, 'part-of');
+  await put({ id: conceptId(scriptName(key)), gestalt: 'concept@3', name: scriptName(key), in: script });
 }
 
 const MODEL = 'item-model-vietnamese-typing-practice-type-the-word';
@@ -91,8 +92,7 @@ const wordConcept = new Map<string, string>();
 for (const [text, gloss] of Object.entries(words)) {
   const concept = conceptId(`vie:${text}`);
   wordConcept.set(text, concept);
-  await put({ id: concept, gestalt: 'concept@2', name: `vie:${text}` });
-  await link(concept, language, TO_LANGUAGE, 'part-of');
+  await put({ id: concept, gestalt: 'concept@3', name: `vie:${text}`, in: language });
   const shares = [...markShares(text)].map(([k, s]) => [conceptId(scriptName(k)), s] as const);
   await put({
     id: `typing-word-${sha(text)}`, gestalt: 'typing-word@1', model: MODEL, text, gloss,

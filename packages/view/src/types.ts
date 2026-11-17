@@ -11,8 +11,8 @@ export type Order = { field: string; desc?: boolean } | { seed: number };
 
 /** Which ymls a view wants. All given conditions must hold. */
 export type Query = {
-  /** `name@version`; a view must say which gestalt it asks for */
-  gestalt?: string;
+  /** `name@version`, or several (`['concept@2', 'concept@3']`); a view must say which gestalts it asks for */
+  gestalt?: string | string[];
   ids?: string[];
   /** exact matches on top-level props */
   where?: Record<string, Json>;
@@ -33,7 +33,7 @@ export type Query = {
 };
 
 /** What a yml a link points at must be; a target that isn't there is no shape. */
-export type Shape = { gestalt?: string; ids?: string[]; where?: Record<string, Json>; tags?: { all?: string[]; none?: string[] } };
+export type Shape = { gestalt?: string | string[]; ids?: string[]; where?: Record<string, Json>; tags?: { all?: string[]; none?: string[] } };
 
 /** One kind of reference: through `field`, labelled `label`, to a yml of shape `to`, each if given. */
 export type LinkMatch = { field?: string; label?: string; to?: Shape };
@@ -86,7 +86,11 @@ export type Delta = { sub: number; upsert: Item[]; remove: string[]; order: stri
  * logit scale (0 is a coin flip), `sd` how unsure that is, `p` the chance of getting something on it right, `evidence`
  * how many events were on it directly, `lastAt` the last one that reached it.
  */
-export type Belief = { concept: string; mean: number; sd: number; p: number; evidence: number; lastAt?: string };
+/**
+ * What is believed about one concept. `members` is there for a set (a concept others are `in`): how many of its
+ * members are known (their `p` at least 0.8). Sets are open, so how many members there are isn't said.
+ */
+export type Belief = { concept: string; mean: number; sd: number; p: number; evidence: number; lastAt?: string; members?: { known: number } };
 
 /** What changed about one belief subscription's concepts. */
 export type BeliefDelta = { sub: number; beliefs: Belief[] };

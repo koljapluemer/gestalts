@@ -8,9 +8,9 @@
 // - world-map's tools/data/countries.json: its countries' curated distractors (their region), each flag's
 //   `distractors` those that have a flag here.
 //
-// Every flag is a `flag: <name>` concept, linked both ways to world-map's `geography: <name>` concept of the same
-// country (whose yml is written here too, the same as world-map's, by tools/concepts.ts there), and a `flag@1` made
-// by one `item-model@1`.
+// Every flag is a `flag: <name>` concept `in` `flag: country flags`, linked both ways to world-map's
+// `geography: <name>` concept of the same country (whose yml, and its set's, is written here too, the same as
+// world-map's, by tools/concepts.ts there), and a `flag@1` made by one `item-model@1`.
 //
 //   node plugins/flags-practice/tools/build-deck.ts && mise run publish-data plugins/flags-practice/decks/flags
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
@@ -18,7 +18,7 @@ import { join, resolve } from 'node:path';
 import type { FeatureCollection } from 'geojson';
 import { optimize } from 'svgo';
 import { stringify } from 'yaml';
-import { geographyConcept, geographyName, sha } from '../../world-map/tools/concepts.ts';
+import { COUNTRIES, geographyConcept, geographyYml, sha } from '../../world-map/tools/concepts.ts';
 
 const plugin = resolve(import.meta.dirname, '..');
 const data = join(plugin, 'tools/data');
@@ -83,6 +83,10 @@ const MODEL = 'item-model-flags-practice-name-the-flag';
 await put({ id: MODEL, gestalt: 'item-model@1', name: 'name-the-flag', title: 'Whose flag is this?', engine: 'flags-practice/name-the-flag', chance: CHANCE, tags: TAGS });
 
 const flagConcept = (code: string) => `concept-${sha(`flag:${code}`)}`;
+/** the set every flag is `in` */
+const FLAGS = { id: `concept-${sha('flag: country flags')}`, gestalt: 'concept@2', name: 'flag: country flags' };
+await put(FLAGS);
+await put(COUNTRIES);
 const link = (from: string, to: string) => put({
   id: `link-${sha(`${from}>${to}`)}`, gestalt: 'concept-link@1', from, to, weight: LINK_WEIGHT, kind: 'same-country', source: LINK_SOURCE,
 });
@@ -99,10 +103,10 @@ for (const code of asked) {
   await writeFile(join(deck, 'blobs', blob), svg);
 
   const concept = flagConcept(code);
-  await put({ id: concept, gestalt: 'concept@2', name: `flag: ${name}` });
+  await put({ id: concept, gestalt: 'concept@3', name: `flag: ${name}`, in: FLAGS.id });
   if (map) {
     const geography = geographyConcept(map);
-    await put({ id: geography, gestalt: 'concept@2', name: geographyName(mapNames.get(map)!) });
+    await put(geographyYml(map, mapNames.get(map)!));
     await link(concept, geography);
     await link(geography, concept);
   }

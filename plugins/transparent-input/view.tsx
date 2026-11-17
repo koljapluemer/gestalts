@@ -6,8 +6,9 @@ import { useCapabilities, useDoc, useLlm, useNet, useQuery, useViewState, useWri
 /**
  * Watch a YouTube video with cards for the words worth knowing as they come up (after transparent-input). Subtitles
  * come through the app's `net`, glosses from the user's LLM providers, a few segments ahead of playback, kept in a
- * `glossed-track@1` so a video is glossed once. Each word shown is a `concept@2` per flemma (its base form with all
- * inflections, whatever the part of speech), which the video links with a small strength, and showing it logs a rating-0
+ * `glossed-track@1` so a video is glossed once. Each word shown is a `concept@3` per flemma (its base form with all
+ * inflections, whatever the part of speech), `in` its language (`lang: vie`, made when missing), which the video
+ * links with a small strength, and showing it logs a rating-0
  * `practice-event@1` with that concept as its subject and the video as its origin. Words whose flashcard is well
  * learned get no cards; due ones stand out.
  */
@@ -217,6 +218,12 @@ class Glosser {
 
 /** A concept per flemma of a language, named like the decks name theirs, by its ISO 639-3 code (`grc:κιννάμωμον`). */
 export const conceptName = (language: string, flemma: string) => `${iso639_3(language)}:${flemma.normalize('NFC').trim()}`;
+
+/** The set a language's flemmas are `in`, named like the decks name it (`lang: vie`). */
+export const languageConceptName = (language: string) => `lang: ${iso639_3(language)}`;
+
+/** Every version of `concept` this view reads. */
+const CONCEPTS = ['concept@2', 'concept@3'];
 
 /** How strongly seeing a word's card while watching practises it. */
 export const EXPOSURE_STRENGTH = 0.05;
@@ -564,8 +571,10 @@ function Watch({ source, native, setNative, onBack }: { source: Item; native: st
     void Promise.all(names.map(async (n) => [n, await conceptId(write.contentHash, n)] as const))
       .then((pairs) => setConceptIds((m) => new Map([...m, ...pairs])));
   }, [segments, language, write, conceptIds]);
-  const ids = useMemo(() => [...new Set(conceptIds.values())].slice(0, 500), [conceptIds]);
-  const existing = useQuery(ids.length ? { gestalt: 'concept@2', ids, fields: [], limit: 500 } : null);
+  const [languageId, setLanguageId] = useState<string | null>(null);
+  useEffect(() => { void conceptId(write.contentHash, languageConceptName(language)).then(setLanguageId); }, [write, language]);
+  const ids = useMemo(() => [...new Set([...(languageId ? [languageId] : []), ...conceptIds.values()])].slice(0, 500), [conceptIds, languageId]);
+  const existing = useQuery(ids.length ? { gestalt: CONCEPTS, ids, fields: [], limit: 500 } : null);
   const exists = useMemo(() => new Set(existing.items.map((c) => c.id)), [existing.items]);
 
   const conceptOf = useCallback((g: Gloss) => conceptIds.get(conceptName(language, g.flemma)), [conceptIds, language]);
@@ -587,7 +596,13 @@ function Watch({ source, native, setNative, onBack }: { source: Item; native: st
     const concept = latest.current.conceptOf(g) ?? await conceptId(write.contentHash, name);
     if (!latest.current.exists.has(concept) && !created.current.has(concept)) {
       created.current.add(concept);
-      await write.put({ id: concept, gestalt: 'concept@2', name });
+      const set = languageConceptName(language);
+      const setId = await conceptId(write.contentHash, set);
+      if (!latest.current.exists.has(setId) && !created.current.has(setId)) {
+        created.current.add(setId);
+        await write.put({ id: setId, gestalt: 'concept@2', name: set });
+      }
+      await write.put({ id: concept, gestalt: 'concept@3', name, in: setId });
     }
     await write.put(practiceEvent(concept, 'transparent-input', 0, new Date(), { origin: source.id }));
     pendingLinks.current.add(concept);

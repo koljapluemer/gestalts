@@ -2,12 +2,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { geographyConcept } from './tools/concepts.ts';
+import { COUNTRIES, geographyConcept } from './tools/concepts.ts';
 
 type Yml = {
   id: string; gestalt: string; name?: string; members?: string[]; model?: string; country?: string; group?: string;
   zoom?: number; distractors?: string[]; priority?: number; concepts?: Record<string, number>; chance?: number;
-  countries?: string[]; geometry?: string; sources?: { to: string; label: string }[]; tags?: string[];
+  countries?: string[]; geometry?: string; sources?: { to: string; label: string }[]; tags?: string[]; in?: string;
 };
 type Geometry = { scale: number; bounds: number[]; regions: Record<string, { name: string; d: string; centroid: number[]; bounds: number[]; size: number }> };
 
@@ -46,10 +46,11 @@ describe('the world-map deck', () => {
     expect(byId.get(map.sources![0].to)?.gestalt).toBe('source@1');
   });
 
-  it('has one concept per country', () => {
-    expect(of('concept@2')).toHaveLength(codes.size);
+  it('has one concept per country, each in the countries', () => {
+    expect(of('concept@3')).toHaveLength(codes.size);
+    expect(of('concept@2')).toEqual([COUNTRIES]);
     for (const [code, r] of Object.entries(geometry.regions)) {
-      expect(byId.get(geographyConcept(code))?.name, code).toBe(`geography: ${r.name}`);
+      expect(byId.get(geographyConcept(code)), code).toMatchObject({ name: `geography: ${r.name}`, in: COUNTRIES.id });
     }
   });
 

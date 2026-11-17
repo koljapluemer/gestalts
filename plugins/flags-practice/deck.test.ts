@@ -6,7 +6,7 @@ import { parse } from 'yaml';
 type Yml = {
   id: string; gestalt: string; name?: string; members?: string[]; model?: string; country?: string; image?: string;
   lookalikes?: string[]; distractors?: string[]; concepts?: Record<string, number>; chance?: number; tags?: string[];
-  from?: string; to?: string; weight?: number; sources?: { to: string; label: string }[];
+  from?: string; to?: string; weight?: number; sources?: { to: string; label: string }[]; in?: string;
 };
 
 const read = (dir: string) => readdirSync(join(dir, 'notes')).map((f) => [f, readFileSync(join(dir, 'notes', f), 'utf8')] as const);
@@ -71,9 +71,19 @@ describe('the flags deck', () => {
   });
 
   it('holds world-map\'s geography concepts exactly as world-map does', () => {
-    const geography = of('concept@2').filter((c) => c.name!.startsWith('geography: '));
+    const geography = of('concept@3').filter((c) => c.name!.startsWith('geography: '));
     expect(geography.length).toBeGreaterThan(200);
     for (const c of geography) expect(files.find(([f]) => f === `${c.id}.yml`)![1], c.id).toBe(worldMap.get(c.id));
     expect(geography).toHaveLength(Object.values(countries).filter((c) => c.map && !c.skip).length);
+    const set = geography[0].in!;
+    expect(files.find(([f]) => f === `${set}.yml`)![1]).toBe(worldMap.get(set));
+  });
+
+  it('has every flag in the flags, and the flags in nothing', () => {
+    const flagConcepts = of('concept@3').filter((c) => c.name!.startsWith('flag: '));
+    expect(flagConcepts).toHaveLength(flags.length);
+    const set = byId.get(flagConcepts[0].in!)!;
+    expect(set).toMatchObject({ gestalt: 'concept@2', name: 'flag: country flags' });
+    for (const c of flagConcepts) expect(c.in).toBe(set.id);
   });
 });

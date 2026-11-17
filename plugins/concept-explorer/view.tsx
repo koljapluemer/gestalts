@@ -3,7 +3,7 @@ import { ArrowLeftRight, BookPlus, Pencil, Trash2, Unlink } from 'lucide-react';
 import { AddSource, ConceptPicker, ConfirmDialog, ListInput, Modal, NotePicker, SOURCE_LABEL, byline, newId, sourceTitle } from '@gestalts/kit';
 import { useBeliefs, useParams, useQuery, useRead, useWrite, type Item, type JsonMap } from '@gestalts/view';
 
-const CONCEPT = 'concept@2';
+const CONCEPTS = ['concept@2', 'concept@3'];
 const NOTE = 'note@1';
 const SOURCE = 'source@1';
 const LINK = 'concept-link@1';
@@ -266,14 +266,14 @@ function LinkList({ title, rows, names, onOpen }: { title: string; rows: LinkRow
 }
 
 /** What the app believes about the concept, and the concepts it says something about or is said something about by. */
-function Relations({ concept, onOpen }: { concept: string; onOpen: (id: string) => void }) {
+function Relations({ concept, set, onOpen }: { concept: string; set?: string; onOpen: (id: string) => void }) {
   const out = useQuery({ gestalt: LINK, refs: { to: concept, field: 'from' }, limit: 100 });
   const into = useQuery({ gestalt: LINK, refs: { to: concept, field: 'to' }, limit: 100 });
   const row = (l: Item, side: 'from' | 'to'): LinkRow => ({ id: l.id, other: str(l.value[side]), weight: Number(l.value.weight), kind: str(l.value.kind), source: str(l.value.source) });
   const outRows = out.items.map((l) => row(l, 'to'));
   const inRows = into.items.map((l) => row(l, 'from'));
-  const others = [...new Set([...outRows, ...inRows].map((r) => r.other))].sort();
-  const { items } = useQuery(others.length ? { gestalt: CONCEPT, ids: others, fields: ['name'], limit: others.length } : null);
+  const others = [...new Set([...outRows, ...inRows].map((r) => r.other).concat(set ? [set] : []))].sort();
+  const { items } = useQuery(others.length ? { gestalt: CONCEPTS, ids: others, fields: ['name'], limit: others.length } : null);
   const names = new Map(items.map((c) => [c.id, str(c.value.name)]));
   const { beliefs } = useBeliefs([concept]);
   const b = beliefs.get(concept);
@@ -284,6 +284,12 @@ function Relations({ concept, onOpen }: { concept: string; onOpen: (id: string) 
           {b.evidence || b.lastAt
             ? <>Known about <strong>{Math.round(b.p * 100)}%</strong>, from {b.evidence} answer{b.evidence === 1 ? '' : 's'} on it{b.lastAt ? `, last ${b.lastAt.slice(0, 10)}` : ''}.</>
             : <span className="text-base-content/60">Not practised yet.</span>}
+          {b.members && <> {b.members.known} of its members known.</>}
+        </p>
+      )}
+      {set && (
+        <p className="text-sm">
+          One of <button type="button" className="badge badge-outline hover:badge-primary" onClick={() => onOpen(set)}>{names.get(set) ?? set}</button>
         </p>
       )}
       <LinkList title="Says something about" rows={outRows} names={names} onOpen={onOpen} />
@@ -344,7 +350,7 @@ function Concept({ concept, onOpen, onClosed }: { concept: Item; onOpen: (id: st
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
           {error && <div role="alert" className="alert alert-error text-sm whitespace-pre-wrap">{error}</div>}
-          <Relations concept={concept.id} onOpen={onOpen} />
+          <Relations concept={concept.id} set={str(concept.value.in) || undefined} onOpen={onOpen} />
           <Notes concept={concept.id} onError={fail} />
         </div>
       </div>
@@ -367,7 +373,7 @@ export default function ConceptExplorer() {
   const [params, setParams] = useParams();
   const concept = params.concept ?? null;
   const setConcept = (id: string | null) => setParams(id ? { concept: id } : {});
-  const { items, loading } = useQuery(concept ? { gestalt: CONCEPT, ids: [concept], limit: 1 } : null);
+  const { items, loading } = useQuery(concept ? { gestalt: CONCEPTS, ids: [concept], limit: 1 } : null);
   const item = items[0];
   if (concept && loading) return <div className="flex h-full items-center justify-center bg-base-100"><span className="loading loading-spinner" /></div>;
   if (!item) {

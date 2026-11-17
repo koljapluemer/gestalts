@@ -8,5 +8,5 @@ description: >-
 tags: [learning]
 # it records your attempts to play them back; recording needs the app's origin, as a sandboxed frame can't
 permissions: [same-origin, microphone]
-reads: [flashcard@1, fsrs-data@1, practice-session@1, practice-event@1, concept@2, concept-link@1, deck@1, source@1]
+reads: [flashcard@1, fsrs-data@1, practice-session@1, practice-event@1, concept@2, concept@3, concept-link@1, deck@1, source@1]
 writes: [fsrs-data@1, practice-session@1, practice-event@1]

@@ -9,3 +9,8 @@ export const sha = (text: string) => createHash('sha256').update(text).digest('h
 export const geographyConcept = (code: string) => `concept-${sha(`geography:${code}`)}`;
 /** that concept's name, from the geometry's name for the country */
 export const geographyName = (name: string) => `geography: ${name}`;
+
+/** the set every country's place is `in`: a concept counting the countries known, never evidence about them */
+export const COUNTRIES = { id: `concept-${sha('geography: countries')}`, gestalt: 'concept@2', name: 'geography: countries' };
+/** the concept "where this country is", as every deck holding it writes it: a `concept@3` `in` {@link COUNTRIES} */
+export const geographyYml = (code: string, name: string) => ({ id: geographyConcept(code), gestalt: 'concept@3', name: geographyName(name), in: COUNTRIES.id });

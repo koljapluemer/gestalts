@@ -39,8 +39,9 @@ app's core stays on the page, as its folder is reached through the page. Every r
 published deck is read in one download, its `ymls.json` (made by `packages/vite` from the deck). A view never holds
 the index:
 
-- `useQuery` is a **live query**, one bounded page at a time. It must name one gestalt. `useRead` reads once, for a
-  check or an action (is this key taken? export everything), never for what the view shows.
+- `useQuery` is a **live query**, one bounded page at a time. It must name its gestalt, or several (every version of
+  one it reads). `useRead` reads once, for a check or an action (is this key taken? export everything), never for what
+  the view shows.
 - When ymls change, only subscriptions whose predicate matches an old or new version of one of them are recomputed, and
   each gets a delta of its page. `crates/core/src/repo.rs` has a test of this with 12k ymls.
 - Search, ordering, a random draw and references both ways run in the host's index. A query can ask what a yml

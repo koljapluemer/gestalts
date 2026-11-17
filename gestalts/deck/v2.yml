@@ -1,0 +1,11 @@
+name: deck
+version: 2
+description: >-
+  A named list of ymls, of any gestalt, that ship together with a plugin, as in `deck@1`. `concepts` (concept id to
+  0..1) says what the deck practises beyond its members' own `concepts`, for content not made of items. Write `deck@1`
+  for a deck without it.
+fields:
+  name: { type: string, required: true }
+  title: { type: string }
+  members: { type: ref_list, required: true }
+  concepts: { type: ref_map, min: 0, max: 1, targets: [concept] }

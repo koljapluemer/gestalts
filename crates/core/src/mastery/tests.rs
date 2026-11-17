@@ -36,6 +36,11 @@ impl World {
         self
     }
 
+    fn member(&mut self, id: &str, set: &str) -> &mut Self {
+        self.put(id, &format!("gestalt: concept@3\nname: {id}\nin: {set}\n"));
+        self
+    }
+
     fn card(&mut self, id: &str, concepts: &[(&str, f64)]) -> &mut Self {
         let map: String = concepts.iter().map(|(c, w)| format!("{c}: {w}, ")).collect();
         self.put(id, &format!("gestalt: flashcard@1\nfront: q\nconcepts: {{{map}}}\n"));
@@ -328,4 +333,41 @@ fn replay_cost() {
     let t = std::time::Instant::now();
     w.fresh("c1");
     eprintln!("full replay of 50k events over 2k cards and links: {:?}", t.elapsed());
+}
+
+#[test]
+fn a_set_counts_its_members_known_and_takes_no_evidence_from_them() {
+    let mut w = World::new();
+    w.concept("abc").member("a", "abc").member("b", "abc").concept("lone");
+    assert_eq!(w.get("abc").members, Some(Members { known: 0 }));
+    assert_eq!(w.get("lone").members, None, "a concept nothing is in is no set");
+    assert_eq!(w.get("a").members, None);
+    for m in 0..6 {
+        w.event("a", 2, m);
+    }
+    assert!(w.get("a").p >= MasteryParams::default().known_p);
+    let set = w.get("abc");
+    assert_eq!(set.members, Some(Members { known: 1 }));
+    assert_eq!((set.mean, set.evidence), (0.0, 0), "membership isn't evidence");
+    // the set's own practice is its own
+    w.event("abc", 2, 10);
+    assert!(w.get("abc").mean > 0.0);
+    assert_eq!(w.get("abc").members, Some(Members { known: 1 }));
+    // leaving the set is counted at once
+    w.concept("a");
+    assert_eq!(w.get("abc").members, Some(Members { known: 0 }));
+    w.remove("b");
+    assert_eq!(w.get("abc").members, None);
+}
+
+#[test]
+fn joining_a_set_changes_its_belief() {
+    let mut w = World::new();
+    w.concept("abc").concept("a");
+    let before = w.get("abc");
+    let old = w.index.get("a").cloned();
+    w.member("a", "abc");
+    let new = w.index.get("a").cloned();
+    assert!(Inputs::of(old.as_ref()) != Inputs::of(new.as_ref()));
+    assert!(w.get("abc").differs(&before));
 }

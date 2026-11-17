@@ -11,7 +11,7 @@ import { useCapabilities, useDoc, useHost, useParams, useQuery, useRead, useServ
 
 const SOURCE = 'source@1';
 const NOTE = 'note@1';
-const CONCEPT = 'concept@2';
+const CONCEPTS = ['concept@2', 'concept@3'];
 /** how strongly a concept comes up in a source when it's first attached */
 const STRENGTH = 0.5;
 const PAGE = 40;
@@ -239,7 +239,7 @@ function Concepts({ source }: { source: Item }) {
   const [error, setError] = useState<string>();
   const map = conceptsOf(source.value);
   const ids = Object.keys(map);
-  const { items } = useQuery(ids.length ? { gestalt: CONCEPT, ids, fields: ['name'], limit: ids.length } : null);
+  const { items } = useQuery(ids.length ? { gestalt: CONCEPTS, ids, fields: ['name'], limit: ids.length } : null);
   const names = new Map(items.map((c) => [c.id, str(c.value.name)]));
   /** the source as it is now, with its concepts changed by `f` */
   const change = async (f: (m: Record<string, number>) => Record<string, number>) => {

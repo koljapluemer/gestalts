@@ -10,5 +10,5 @@ permissions: [same-origin]
 # a video's subtitles: YouTube doesn't let pages read them, so the desktop app fetches them
 network: [www.youtube.com]
 llm: true
-reads: [media-source@1, glossed-track@1, flashcard@1, fsrs-data@1, concept@2, practice-event@1]
-writes: [media-source@1, glossed-track@1, concept@2, practice-event@1]
+reads: [media-source@1, glossed-track@1, flashcard@1, fsrs-data@1, concept@2, concept@3, practice-event@1]
+writes: [media-source@1, glossed-track@1, concept@2, concept@3, practice-event@1]

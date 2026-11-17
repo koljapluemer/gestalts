@@ -69,6 +69,7 @@ may be deleted by hand only for a definition that has never gone out (not deploy
 |---|---|
 | `note@1` | `title`, `main`, `extra`, `aliases`, `tags`, `relationships` (to notes, sources and concepts), `blobs`; all optional |
 | `concept@2` | `name`, `aliases`: something that can be learned, in any domain, at any level of abstraction |
+| `concept@3` | the same, one of a set: `in` (the concept it is a member of) |
 | `concept-link@1` | `from`, `to` (concepts), `weight` 0..1: evidence about `from` says this much about `to`; optional `kind`, `source` |
 | `practice-event@2` | `subject` (what was practised: an item, an item model, or a concept itself) came up in `view` at `at`, with a `rating` from -2 to 2; optional `origin`, `response` (what kind of answer: a key of the subject's or its model's `responses`), `instance` (which item exactly, in its model's terms) and `ms` (how long it took). `practice-event@1` is the same without the last three; both are read alike, and `logPractice` writes `@1` unless it needs `@2` |
 | `flashcard@1` | Markdown `front`; optional `context` (small print with the front), `back`, `extra`, `tags`, `aliases`, `blobs` (`front`, `back`, `audio`), `concepts` (`{concept id: 0..1}`), `sources` (credits, to sources) |
@@ -76,6 +77,7 @@ may be deleted by hand only for a definition that has never gone out (not deploy
 | `item-model@1` | `name`: a procedure that makes items (a generator of exercises); optional `title`, `engine` (the code that runs it), `version`, `params`, `concepts` (what its items practise), `responses` (`{key: {label, concepts}}`: what each kind of answer is evidence about), `chance`, `tags`, `aliases`, `sources` |
 | `source@1` | a citable source: `key` (its BibTeX key, apart from the id), `entrytype`, `title` and biblatex fields (`author`, `date`, `doi`, …); optional `license` (SPDX), `aliases`, `tags`, `extra`, `blobs`, `concepts` (`{concept id: 0..1}`, how strongly each comes up in it) |
 | `deck@1` | `name`, `title`, `members`: ymls that ship together |
+| `deck@2` | the same, plus `concepts` (`{concept id: 0..1}`): what it practises beyond its members' own, for content not made of items |
 | `fsrs-data@1` | spaced-repetition state for a `target` |
 | `practice-session@1` | one session's timing and trials |
 | `plugin-install@1` | whether a plugin is on here |
@@ -87,7 +89,7 @@ but nothing uses them: concepts form no tree, and events don't copy conclusions.
 
 ## Concepts, practice and what a learner knows
 
-`concept@2` knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
+A concept knows nothing about any domain. What a "letter" is, and how strongly something practices it, belongs to the
 deck or view that writes it. A yml that practices concepts lists them in its own `concepts` prop; `refs` finds them from
 the concept's side. Tag a flashcard `no-generic-practice` to keep it out of the generic Flashcards view.
 
@@ -100,6 +102,20 @@ word (or expression), `vie: say hello` (with a space) something to say (the phra
 part of its writing (a tone mark, a marked letter), and `lang: vie` the language. Concepts no language owns are
 `<kind>: <name>` (`function: greet`, `geography: France`). `iso639_3` in `@gestalts/learning` gives the code of a
 language tag (`vi`, `pt-BR`).
+
+A set is a concept other concepts are `in` (`concept@3`): a letter is `in` its alphabet (`grc:alphabet`), a word `in`
+its language (`lang: vie`), a country `in` `geography: countries`. `in` is single-valued and says membership only:
+practising a member is never evidence about the set. What the app believes about a set is its own evidence and,
+counted apart, how many of its members are known (their `p` at least 0.8). Sets are open, since the core can't tell
+whether a deck ships every member, so a view shows *k known*, never *k of n* or a percentage. Nothing rolls sets up
+further ("Greek: 43%"): show sets side by side, or write an explicit concept with evidence links.
+
+A version is written only when it's needed (like `practice-event`): a concept in a set is `concept@3`, any other
+`concept@2`. Both are read alike, so a view reading concepts reads both: its manifest lists both, and its queries ask
+for both (`gestalt: ['concept@2', 'concept@3']`). The same goes for `deck@2`, written only with `concepts`.
+
+A deck's members may be listed items (facts) or `item-model`s (generators of items). Whether practice of a generated
+item is traced per item (scheduling it) or only feeds its concepts is the view's call, not the deck's.
 
 Concepts form no hierarchy. How they relate is said by `concept-link`s: directed (knowing how to say a word is good
 evidence of recognising it, not the other way round), weighted, cycles allowed, any number of them, and each a claim

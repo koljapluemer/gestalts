@@ -21,6 +21,9 @@
 //!   `hops` steps and never to a concept this event already reached, so cycles end. Linked concepts grow surer too, by
 //!   the square of that scale. Several claims about one pair (from different sources) count as their mean.
 //! - Unpractised, a belief grows less sure with time (forgetting), up to the prior.
+//! - A concept other concepts are `in` (`concept@3`) is a set: its belief also counts its members known (their own
+//!   `p` at least [`MasteryParams::known_p`]). Members are counted, never evidence: practising a letter moves the
+//!   letter, and the alphabet only through the count.
 //!
 //! This stands in for a latent-skill model with correlated skills (a Gaussian graphical model over concepts, fitted to
 //! all events at once). What's meant to last is the interface: events, item weights and links in, beliefs out.
@@ -53,6 +56,8 @@ const RESPONSES: &str = "responses";
 const CHANCE: &str = "chance";
 /// The prop through which an item names the item model it was made by.
 const MODEL: &str = "model";
+/// The prop through which a concept names the set it is one of.
+const IN: &str = "in";
 
 const DAY_MS: f64 = 86_400_000.0;
 const LIMIT: f64 = 6.0;
@@ -68,11 +73,13 @@ pub struct MasteryParams {
     pub hops: usize,
     /// a change smaller than this spreads no further
     pub min_change: f64,
+    /// a set's member counts as known from this chance of getting it right on
+    pub known_p: f64,
 }
 
 impl Default for MasteryParams {
     fn default() -> Self {
-        MasteryParams { prior_mean: 0.0, prior_sd: 1.5, drift_per_day: 0.01, damping: 0.8, hops: 2, min_change: 0.005 }
+        MasteryParams { prior_mean: 0.0, prior_sd: 1.5, drift_per_day: 0.01, damping: 0.8, hops: 2, min_change: 0.005, known_p: 0.8 }
     }
 }
 
@@ -91,12 +98,23 @@ pub struct Belief {
     /// the last event that reached it, directly or by a link
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_at: Option<String>,
+    /// for a set (a concept others are `in`), its members
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub members: Option<Members>,
+}
+
+/// A set's members as far as the learner knows them. Sets are open: how many members there are is only how many this
+/// repo holds, so it isn't said.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+pub struct Members {
+    /// members whose own belief is at least [`MasteryParams::known_p`]
+    pub known: u32,
 }
 
 impl Belief {
     /// Whether `other` says something different, beyond forgetting with time.
     pub fn differs(&self, other: &Belief) -> bool {
-        self.mean != other.mean || self.evidence != other.evidence || self.last_at != other.last_at
+        self.mean != other.mean || self.evidence != other.evidence || self.last_at != other.last_at || self.members != other.members
     }
 }
 
@@ -163,6 +181,11 @@ fn is_concept(e: &Entry) -> bool {
     e.gestalt().and_then(|g| g.split('@').next()) == Some(CONCEPT)
 }
 
+/// The set a concept is one of, if it says.
+fn set_of(e: &Entry) -> Option<String> {
+    is_concept(e).then(|| e.yml.get(IN)?.as_str().map(str::to_owned)).flatten()
+}
+
 /// A `{concept id: weight}` map, leaving out weights of 0.
 fn weights_in(v: &Value) -> Option<BTreeMap<String, f64>> {
     let m: &Mapping = v.as_mapping()?;
@@ -204,6 +227,7 @@ struct Inputs {
     chance: Option<f64>,
     model: Option<String>,
     concept: bool,
+    set: Option<String>,
 }
 
 impl Inputs {
@@ -216,6 +240,7 @@ impl Inputs {
             chance: chance_of(e),
             model: model_of(e),
             concept: is_concept(e),
+            set: set_of(e),
         })
     }
 
@@ -394,17 +419,36 @@ impl Mastery {
         let prior_var = cfg.prior_sd * cfg.prior_sd;
         concepts
             .iter()
-            .map(|c| match self.states.get(c) {
-                None => Belief { concept: c.clone(), mean: cfg.prior_mean, sd: cfg.prior_sd, p: sigmoid(cfg.prior_mean), evidence: 0, last_at: None },
-                Some(s) => {
-                    let variance = match now_ms.cmp(&s.at) {
-                        Ordering::Greater => (s.variance + cfg.drift_per_day * ((now_ms - s.at) as f64 / DAY_MS)).min(prior_var),
-                        _ => s.variance,
-                    };
-                    Belief { concept: c.clone(), mean: s.mean, sd: variance.sqrt(), p: sigmoid(s.mean), evidence: s.evidence, last_at: s.last_at.clone() }
+            .map(|c| {
+                let members = self.members(index, c);
+                match self.states.get(c) {
+                    None => Belief { concept: c.clone(), mean: cfg.prior_mean, sd: cfg.prior_sd, p: sigmoid(cfg.prior_mean), evidence: 0, last_at: None, members },
+                    Some(s) => {
+                        let variance = match now_ms.cmp(&s.at) {
+                            Ordering::Greater => (s.variance + cfg.drift_per_day * ((now_ms - s.at) as f64 / DAY_MS)).min(prior_var),
+                            _ => s.variance,
+                        };
+                        Belief { concept: c.clone(), mean: s.mean, sd: variance.sqrt(), p: sigmoid(s.mean), evidence: s.evidence, last_at: s.last_at.clone(), members }
+                    }
                 }
             })
             .collect()
+    }
+
+    /// The members of `set` known, if anything is `in` it. A member's `p` doesn't change with time, only its spread,
+    /// so this holds until the next event. Walks the ymls referencing `set` once.
+    fn members(&self, index: &Index, set: &str) -> Option<Members> {
+        let mut any = false;
+        let mut known = 0;
+        for id in index.referencing(set) {
+            if index.get(id).and_then(set_of).as_deref() == Some(set) {
+                any = true;
+                if sigmoid(self.states.get(id).map_or(self.params.prior_mean, |s| s.mean)) >= self.params.known_p {
+                    known += 1;
+                }
+            }
+        }
+        any.then_some(Members { known })
     }
 }
 

@@ -9,7 +9,7 @@ type Yml = {
   id: string; gestalt: string; name?: string; members?: string[]; model?: string; text?: string; gloss?: string;
   keystrokes?: { telex: string; vni: string }; marks?: { at: number; mark: string; key: string }[];
   concepts?: Record<string, number>; responses?: Record<string, { label: string; concepts: Record<string, number> }>;
-  from?: string; to?: string; weight?: number; kind?: string; source?: string; tags?: string[];
+  from?: string; to?: string; weight?: number; kind?: string; source?: string; tags?: string[]; in?: string;
 };
 
 const read = (dir: string) => readdirSync(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')] as const);
@@ -24,6 +24,8 @@ const pairs = JSON.parse(readFileSync(join(import.meta.dirname, 'tools/data/phra
 
 const conceptId = (name: string) => `concept-${createHash('sha256').update(name).digest('hex').slice(0, 16)}`;
 const LANGUAGE = conceptId('lang: vie');
+const SCRIPT = conceptId('vie: script');
+const concepts = [...of('concept@2'), ...of('concept@3')];
 const links = of('concept-link@1');
 const linked = (from: string, to: string) => links.find((l) => l.from === from && l.to === to);
 
@@ -35,7 +37,7 @@ describe('the vietnamese-typing deck', () => {
   });
 
   it('names every concept by the shared rule', () => {
-    for (const c of of('concept@2')) expect(c.id).toBe(conceptId(c.name!));
+    for (const c of concepts) expect(c.id).toBe(conceptId(c.name!));
   });
 
   it('has a word for every entry, practising its word concept and its marks', () => {
@@ -49,7 +51,7 @@ describe('the vietnamese-typing deck', () => {
       expect(w.marks).toEqual(marksOf(text));
       const expected = { [conceptId(`vie:${text}`)]: 0.2, ...Object.fromEntries([...markShares(text)].map(([k, s]) => [conceptId(`vie-script: ${k}`), s])) };
       expect(w.concepts).toEqual(expected);
-      for (const c of Object.keys(w.concepts!)) expect(byId.get(c)?.gestalt, text).toBe('concept@2');
+      for (const c of Object.keys(w.concepts!)) expect(byId.get(c)?.gestalt, text).toBe('concept@3');
       expect(w.tags).toContain('vietnamese-typing-practice');
     }
   });
@@ -60,11 +62,14 @@ describe('the vietnamese-typing deck', () => {
     for (const k of MARK_KEYS) expect(model.responses![k].concepts).toEqual({ [conceptId(`vie-script: ${k}`)]: 1 });
   });
 
-  it('makes every word and every mark part of the language', () => {
-    for (const c of of('concept@2')) {
+  it('has every word in the language and every mark in the script, linked to neither', () => {
+    expect(byId.get(SCRIPT)?.gestalt).toBe('concept@2');
+    for (const c of concepts) {
       // words are `vie:<word>`; `vie: <intent>` is the phrasebook's
-      if (/^vie:(?! )/.test(c.name!) || c.name!.startsWith('vie-script: ')) expect(linked(c.id, LANGUAGE)?.kind, c.name).toBe('part-of');
+      if (/^vie:(?! )/.test(c.name!)) expect(c.in, c.name).toBe(LANGUAGE);
+      if (c.name!.startsWith('vie-script: ')) expect(c.in, c.name).toBe(SCRIPT);
     }
+    for (const l of links) expect(l.kind).not.toBe('part-of');
   });
 
   it('holds the phrasebook concepts it links to as the phrasebook does, linked both ways to their word', () => {

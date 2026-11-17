@@ -5,5 +5,5 @@ description: >-
   Learn the flags of the world: name the country a flag belongs to, out of two, the other often a flag it is confused
   with. What you get right first time feeds what you know about each country's flag.
 tags: [learning]
-reads: [flag@1, item-model@1, concept@2, concept-link@1, fsrs-data@1, practice-event@2, practice-session@1, source@1, deck@1]
+reads: [flag@1, item-model@1, concept@2, concept@3, concept-link@1, fsrs-data@1, practice-event@2, practice-session@1, source@1, deck@1]
 writes: [fsrs-data@1, practice-event@2, practice-session@1]

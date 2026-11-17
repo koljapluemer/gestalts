@@ -24,6 +24,7 @@ write is refused with the reason. Keep ymls small and link them.
 | `note@1` | `title?`, `main?`, `extra?`, `aliases[]?`, `tags[]?`, `relationships?: [{to, label}]` (to notes or sources), `blobs?: [{file, label}]` |
 | `source@1` | a citable source: `key`, `entrytype`, `title?`, biblatex fields (`author[]`, `date`, `doi`, …, see `@gestalts/sources`), `aliases[]?`, `tags[]?`, `extra?`, `blobs?`. Notes relating to it are claims about it |
 | `concept@2` | `name`, `aliases[]?`: something learnable, any domain, any level. No tree: concepts relate through links |
+| `concept@3` | the same, one of a set: `in` (the set's concept id; a letter `in` its alphabet, a word `in` its language). A set counts its members known, it gets no evidence from them. Read both versions; write `@3` only with `in` |
 | `concept-link@1` | `from`, `to` (concept ids), `weight` 0..1 (how much evidence on `from` says about `to`), `kind?`, `source?`. Directed, cycles fine |
 | `flashcard@1` | `front`, `context?` (small print with the front), `back?`, `extra?`, `tags[]?`, `aliases[]?`, `blobs?` (labels `front`, `back`, `audio`), `concepts?: {<concept id>: 0..1}`, `sources?: [{to: <source id>, label}]` (credits) |
 | `multiple-choice@1` | `prompt` and `options: [{text, correct?, response?}]` (Markdown, `$…$` maths), `instruction?`, `concepts?`, `responses?: {<key>: {label, concepts}}`, `chance?`, `model?` (its `item-model@1`), `instance?`, `tags[]?`, `sources?` |
@@ -31,6 +32,7 @@ write is refused with the reason. Keep ymls small and link them.
 | `practice-event@1` | one answer, as it happened: written by `logPractice` |
 | `practice-event@2` | the same, saying more: written by `logPractice` when given `{ response, instance, ms }` (what kind of answer, a key of the item's `responses`; which item; how long) |
 | `deck@1` | `name`, `title?`, `members[]` |
+| `deck@2` | the same, plus `concepts?: {<concept id>: 0..1}`: what it practises beyond its members' own |
 | `fsrs-data@1` | written by `saveReview` |
 | `practice-session@1` | written by `usePracticeSession` |
 
@@ -54,7 +56,7 @@ Style with Tailwind classes and daisyUI components. Keep it responsive: the fram
 ```tsx
 import { useQuery, useDoc, useRead, useWrite, useBlobUrl, useViewState, useBeliefs } from '@gestalts/view';
 
-// a query must name one gestalt, and loads a page at a time; `more()` adds the next
+// a query must name its gestalt (or several: ['concept@2', 'concept@3']), and loads a page at a time; `more()` adds the next
 const { items, loading, error, hasMore, more } = useQuery({ gestalt: 'note@1', tags: { none: ['archive'] }, limit: 50 });
 // also: ids, where: {prop: value}, refs: {to: id, field?}, text: 'search', order: {field, desc?} or {seed}, fields: ['title']
 // an item is {id, gestalt, value}; `value` has every prop
@@ -68,7 +70,8 @@ await write.remove(id);
 const [tab, setTab] = useViewState('tab', 'first');   // survives being closed; keep it small
 
 // what the learner knows about concepts, worked out by the app from all practice, kept current (needs `concept@2` in reads)
-const { beliefs } = useBeliefs(conceptIds);           // Map id -> {mean, sd, p (chance of getting it right), evidence, lastAt?}
+const { beliefs } = useBeliefs(conceptIds);           // Map id -> {mean, sd, p (chance of getting it right), evidence, lastAt?, members?}
+// a set's belief has `members: {known}`: how many concepts `in` it are known. Sets are open: never show "k of n" or a %
 ```
 
 A learning view logs each answer with `logPractice(write, cardId, '<view id>', ratingOf(grade), new Date())` and shows

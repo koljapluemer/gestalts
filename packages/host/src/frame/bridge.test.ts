@@ -42,6 +42,10 @@ describe('the bridge', () => {
     await expect(bridge.handle({ op: 'query', query: {} })).rejects.toBeInstanceOf(AccessError);
     await expect(bridge.handle({ op: 'query', query: { gestalt: 'deck@1' } })).rejects.toBeInstanceOf(AccessError);
     await expect(bridge.handle({ op: 'subscribe', query: { gestalt: 'deck@1' } })).rejects.toBeInstanceOf(AccessError);
+    // several, each one the view reads
+    await expect(bridge.handle({ op: 'query', query: { gestalt: ['note@1', 'concept@1'] } })).resolves.toBeTruthy();
+    await expect(bridge.handle({ op: 'query', query: { gestalt: ['note@1', 'deck@1'] } })).rejects.toBeInstanceOf(AccessError);
+    await expect(bridge.handle({ op: 'query', query: { gestalt: [] } })).rejects.toBeInstanceOf(AccessError);
   });
 
   it('writes only gestalts the view writes', async () => {

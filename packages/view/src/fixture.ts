@@ -12,10 +12,12 @@ function edges(i: Item): { field: string; to: string; label?: string }[] {
   )));
 }
 
+const ofGestalt = (g: string | string[] | undefined, i: Item) => g === undefined || (Array.isArray(g) ? g.includes(i.gestalt) : g === i.gestalt);
+
 function holds(i: Item | undefined, s: Shape): boolean {
   if (!i) return false;
   const tags = Array.isArray(i.value.tags) ? i.value.tags : [];
-  return (s.gestalt === undefined || s.gestalt === i.gestalt)
+  return ofGestalt(s.gestalt, i)
     && (s.ids === undefined || s.ids.includes(i.id))
     && Object.entries(s.where ?? {}).every(([k, v]) => JSON.stringify(i.value[k]) === JSON.stringify(v))
     && (s.tags?.all ?? []).every((t) => tags.includes(t))
@@ -29,7 +31,7 @@ function linked(i: Item, m: LinkMatch, all: Map<string, Item>): boolean {
 function matches(i: Item, q: Query, all: Map<string, Item>): boolean {
   const tags = Array.isArray(i.value.tags) ? i.value.tags : [];
   const text = words(JSON.stringify(i.value));
-  return (q.gestalt === undefined || q.gestalt === i.gestalt)
+  return ofGestalt(q.gestalt, i)
     && (q.ids === undefined || q.ids.includes(i.id))
     && Object.entries(q.where ?? {}).every(([k, v]) => JSON.stringify(i.value[k]) === JSON.stringify(v))
     && (q.tags?.all ?? []).every((t) => tags.includes(t))

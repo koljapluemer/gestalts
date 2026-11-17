@@ -221,7 +221,8 @@ class LiveBeliefs {
 /**
  * What is believed about how well the learner knows `concepts` (ids), worked out by the app from all practice and
  * kept current: only changes about these concepts reach the view, never the practice behind them. Every concept asked
- * for gets a belief, at the prior when nothing reached it. `null` asks for nothing yet. The view must read `concept`.
+ * for gets a belief, at the prior when nothing reached it; a set's (a concept others are `in`) also counts its members
+ * known. `null` asks for nothing yet. The view must read `concept`.
  */
 export function useBeliefs(concepts: string[] | null): BeliefsResult {
   const { host } = useContext_();

@@ -165,8 +165,8 @@ From the roadmap:
 - [[gestalt-definitions-as-data|Gestalt definitions as data]]: option 3, then option 4's core (`gestalt@1`, load order,
   reindexing, refusing redefinitions, limits, the structural/presentational split, definitions don't merge).
   Collisions between authors are settled by server-assigned namespaces and by promotion, not by a general rule.
-- From [[concept-model|Concept model]], only the structural changes (`in` on `concept`, `concepts` on `deck`) and the
-  shape `useBeliefs` returns, before published lessons and students' data depend on `concept@2`.
+- From [[concept-model|Concept model]], the structural changes (`in` on `concept`, `concepts` on `deck`) and the
+  shape `useBeliefs` returns are built (2026-11-17). `closed` would be `concept@4`.
 - [[deck-authoring|Deck authoring]] isn't needed. Its schema editor and catalog matter later, for editing a view's data
   in forms and for submissions.
 

@@ -1,0 +1,12 @@
+name: concept
+version: 3
+description: >-
+  Something that can be learned, in any domain, at any level of abstraction, as in `concept@2`, and possibly a member
+  of a set: `in` names the concept it is one of (a letter `in` the alphabet, a word `in` its language). A set is a
+  concept that has members. Membership is counted, not evidence: what the app believes about a set comes from practice
+  of the set itself, and how many of its members are known from theirs. How concepts relate otherwise is said by
+  `concept-link` ymls. Write `concept@2` for a concept in no set.
+fields:
+  name: { type: string, required: true }
+  aliases: { type: string_list }
+  in: { type: ref, targets: [concept] }

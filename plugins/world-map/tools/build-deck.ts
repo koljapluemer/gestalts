@@ -5,8 +5,8 @@
 //   bounds. d3-geo runs here, not in the view, so the view only scales and moves; the projection has no rotation, so
 //   every view of it is the same paths under another affine transform. Paths are made at a world about REF px wide,
 //   so d3's resampling and clipping at the antimeridian are what the old app drew.
-// - every country is a `concept@2` (`geography: <name>`, its id from its code by tools/concepts.ts, which
-//   flags-practice's builder shares), each exercise kind an `item-model@1`, and each enabled exercise of a country
+// - every country is a `concept@3` (`geography: <name>`, its id from its code by tools/concepts.ts, which
+//   flags-practice's builder shares) `in` `geography: countries`, each exercise kind an `item-model@1`, and each enabled exercise of a country
 //   (countries.json) a `map-exercise@1`; each country group (groups.json) a `country-group@1` with a group-sequence
 //   `map-exercise@1` per country in it.
 //
@@ -16,7 +16,7 @@ import { join, resolve } from 'node:path';
 import { geoCentroid, geoMercator, geoPath } from 'd3-geo';
 import type { Feature, FeatureCollection } from 'geojson';
 import { stringify } from 'yaml';
-import { geographyConcept, geographyName } from './concepts.ts';
+import { COUNTRIES, geographyConcept, geographyYml } from './concepts.ts';
 
 const plugin = resolve(import.meta.dirname, '..');
 const data = join(plugin, 'tools/data');
@@ -122,9 +122,10 @@ await writeFile(join(deck, 'blobs', 'world.json'), geometry);
 await put({ id: 'map-world', gestalt: 'map@1', name: 'world', title: 'World', geometry: 'world.json', sources: credit });
 
 const concept = new Map<string, string>();
+await put(COUNTRIES);
 for (const [code, name] of names) {
   concept.set(code, geographyConcept(code));
-  await put({ id: geographyConcept(code), gestalt: 'concept@2', name: geographyName(name) });
+  await put(geographyYml(code, name));
 }
 
 const KINDS = {

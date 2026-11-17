@@ -5,5 +5,5 @@ description: >-
   Learn where the countries of the world are: find them on the map, near their neighbours or on the whole world, and
   name the one that is highlighted. What you get right and wrong first time feeds what you know about each country.
 tags: [learning]
-reads: [map@1, map-exercise@1, country-group@1, item-model@1, concept@2, fsrs-data@1, practice-event@2, practice-session@1, source@1, deck@1]
+reads: [map@1, map-exercise@1, country-group@1, item-model@1, concept@2, concept@3, fsrs-data@1, practice-event@2, practice-session@1, source@1, deck@1]
 writes: [fsrs-data@1, practice-event@2, practice-session@1]

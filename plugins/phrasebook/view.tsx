@@ -80,7 +80,7 @@ function useGraph(): { graph: Graph; loading: boolean; error?: string } {
   }, [deckQuery.items, cards]);
   // only what the phrase decks hold, by id
   const members = useMemo(() => (decks.length ? [...new Set(decks.flatMap((d) => d.members))].sort() : null), [decks]);
-  const conceptQuery = useAll(useQuery(members && { gestalt: 'concept@2', ids: members, fields: ['name', 'aliases'], limit: 500 }));
+  const conceptQuery = useAll(useQuery(members && { gestalt: ['concept@2', 'concept@3'], ids: members, fields: ['name', 'aliases'], limit: 500 }));
   const linkQuery = useAll(useQuery(members && { gestalt: 'concept-link@1', ids: members, fields: ['from', 'to', 'weight'], limit: 500 }));
   const graph = useMemo<Graph>(() => {
     const concepts = new Map(conceptQuery.items.map((c) => [c.id, { id: c.id, name: str(c.value.name), aliases: strings(c.value.aliases) }]));

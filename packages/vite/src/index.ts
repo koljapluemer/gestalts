@@ -104,8 +104,8 @@ function readDecks(pluginId: string, root: string) {
     const deck = join(dir, id);
     if (!existsSync(join(deck, 'index.json'))) throw new Error(`${pluginId}: its deck ${id} has no index.json; run \`mise run publish-data ${relative(process.cwd(), deck)}\``);
     const ymls = readdirSync(join(deck, 'notes')).map((f) => parse(readFileSync(join(deck, 'notes', f), 'utf8')) as { gestalt?: string; title?: string; name?: string });
-    const meta = ymls.find((y) => y.gestalt === 'deck@1');
-    if (!meta) throw new Error(`${pluginId}: its deck ${id} has no deck@1 yml`);
+    const meta = ymls.find((y) => y.gestalt === 'deck@1' || y.gestalt === 'deck@2');
+    if (!meta) throw new Error(`${pluginId}: its deck ${id} has no deck yml`);
     const gestalts = [...new Set(ymls.flatMap((y) => (typeof y.gestalt === 'string' ? [y.gestalt] : [])))];
     return { id, title: meta.title ?? meta.name ?? id, dir: deck, gestalts };
   });

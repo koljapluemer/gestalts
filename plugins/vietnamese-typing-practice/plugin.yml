@@ -5,5 +5,5 @@ description: >-
   Type Vietnamese words as they are shown, tones and all, with your system's Vietnamese keyboard (TELEX or VNI), and
   get faster at it. The tones and letters you get wrong most come up most.
 tags: [learning]
-reads: [typing-word@1, item-model@1, concept@2, concept-link@1, practice-event@2, practice-session@1, deck@1]
+reads: [typing-word@1, item-model@1, concept@2, concept@3, concept-link@1, practice-event@2, practice-session@1, deck@1]
 writes: [practice-event@2, practice-session@1]
