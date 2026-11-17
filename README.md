@@ -1,8 +1,6 @@
-# gestalts
+# thia
 
-Personal plain-text data (ymls and blobs in one folder, each yml naming exactly one gestalt) with views on top, and the
-apps built on it. Start with [`doc/`](doc/README.md) or the
-[`system overview`](doc/architecture/system-overview.md).
+Views on top-of semantic yml to represent a wide range of interactive learning experiences.
 
 ```
 crates/       the core (Rust, also in the page as wasm), merge, fs, peer sync, the node, the phone's device
@@ -20,7 +18,6 @@ apps/
 scripts/      shared by the tasks
 ```
 
-Who may import whom (packages, plugins, apps) is checked by `oxlint.config.ts`; that apps take their plugins only
 from `plugins/` and their models from `gestalts/`, by `scripts/check-distributions.ts`. Both run in `mise run check`.
 
 ## Developing
@@ -47,9 +44,3 @@ mise run serve ~/some-folder                      # the node headless with the r
 mise run deploy                                   # gestalter, loops-for-learning, vizint to their *.koljasam.com sites
 mise tasks            # everything else
 ```
-
-## History
-
-Until 2026-11-12 the apps and plugins were repos of their own, now archived: gestalter (`f64751c`), gestalt-plugins
-(`f642f41`), loops-for-learning (`0ba0ff7`, which had folded in gestalt-workshop). Each has a `pre-one-gestalt` tag
-from before the one-yml-one-gestalt re-architecture.
