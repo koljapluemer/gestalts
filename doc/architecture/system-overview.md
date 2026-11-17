@@ -27,7 +27,7 @@ sdk/python        gestalts_backend.py, what a backend.py imports
 
 ## Data
 
-See [data-format.md](data-format.md). Every yml names exactly one gestalt and is judged by that definition alone.
+See [[../reference/data-format|Data format]]. Every yml names exactly one gestalt and is judged by that definition alone.
 Nothing is inferred from content, so a yml that doesn't say what it is, is invalid. Invalid ymls still sync byte for byte,
 so nothing is ever destroyed, but they can't be queried; `gestalts-node health <dir>` lists them and says why.
 
@@ -47,7 +47,7 @@ the index:
   references (`links`): through which prop, with which label, and to a yml of what shape. A shape is about the
   target, so a change to a yml also rechecks the subscriptions with a shape for the ymls referencing it.
 - So does what a learner knows: the core keeps beliefs about concepts up to date from practice events as they change
-  ([data-format.md](data-format.md)), and `useBeliefs` is live like `useQuery`, for just the concepts a view shows.
+  ([[../reference/data-format|Data format]]), and `useBeliefs` is live like `useQuery`, for just the concepts a view shows.
 - So is an outline over labelled references, Luhmann's Zettelkasten being one (`crates/core/src/outline.rs`): the
   core works out where each yml sits, what floats and what doesn't add up, and `useOutline` is live for just the rows,
   places or problems a view shows. Only a change to what places a yml rebuilds it.
@@ -63,7 +63,7 @@ or storage. Source views and vibecoded views run identically. Frames nested in i
 embeds (a YouTube player) stay blank there, and it can't record. For those, a view asks for `permissions` and the
 distribution grants them per view (`grants`): `same-origin` gives a frame with `allow-same-origin`, so it runs as part of
 the app, and `microphone` (only with `same-origin`) adds `allow="microphone"`. That is the exception, for first-party
-views that load nothing at run time; see [plugins.md](plugins.md).
+views that load nothing at run time; see [[plugins-and-views]].
 
 The frame loads nothing from the app's origin, because an opaque origin can't. The host sends everything over a
 `MessagePort`: one script holding React, the kit and learning (built by `@gestalts/vite`), the styles, and the view's
@@ -81,7 +81,7 @@ to show another somewhere (`openView`), and the app moves that view there (a `pa
 
 ## Plugins
 
-See [plugins.md](plugins.md).
+See [[plugins-and-views]].
 
 ## Sync
 

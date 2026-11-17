@@ -1,7 +1,7 @@
 # Where gestalts live, and gestalts as data: discussion
 
 Not built. Where the thinking stands, from a discussion on 2026-11-15 that started at authoring decks
-([cms.md](cms.md)).
+([[deck-authoring|Deck authoring]]).
 
 ## Now
 
@@ -111,7 +111,7 @@ So a definition splits in two:
   an `enum`. Changes nothing about validity, so it may change after publishing and merges like any yml.
 
 Nearly every edit after publishing is presentational, and the rest needed a new version anyway. The split is worth
-having under option 3 as well: it decides whether the display hints of [cms.md](cms.md)'s editor can change once a
+having under option 3 as well: it decides whether the display hints of [[deck-authoring|Deck authoring]]'s editor can change once a
 definition has shipped.
 
 **Collisions between authors, only once there are outside ones.** A namespace needs an owner. A deck shipping its own

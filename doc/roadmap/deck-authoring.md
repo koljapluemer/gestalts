@@ -1,7 +1,7 @@
 # Authoring decks (a CMS): discussion
 
 Not built. Where the thinking stands, from a discussion on 2026-11-15. Gestalt placement, which this depends on, is in
-[gestalts-as-data.md](gestalts-as-data.md).
+[[gestalt-definitions-as-data|Gestalt definitions as data]].
 
 ## Who it's for
 
@@ -48,7 +48,7 @@ What doesn't:
 - bulk work: a table over many ymls (a column per scalar field), not only a form per yml
 
 Previews come from the plugin's own view, opened at an `item` param (a convention every learning view would take).
-Whether the hints can be edited after a definition ships depends on [gestalts-as-data.md](gestalts-as-data.md)'s
+Whether the hints can be edited after a definition ships depends on [[gestalt-definitions-as-data|Gestalt definitions as data]]'s
 structural/presentational split.
 
 ## Where it sits
@@ -142,7 +142,7 @@ gestalts are many to many: `flashcards`, `flashcard-manager`, `phrasebook` and o
 With the model and content out of the view's plugin, an editing view is a peer like `flashcard-manager`, named for what
 it does, and authoring is the same views pointed at a deck folder instead of the user's. Which decks a distribution
 mounts would then be listed in its `distribution.yml`, not implied by an installed plugin. Where gestalts go is
-[gestalts-as-data.md](gestalts-as-data.md); where decks and their pipelines go (top-level `decks/`, or with their
+[[gestalt-definitions-as-data|Gestalt definitions as data]]; where decks and their pipelines go (top-level `decks/`, or with their
 gestalts per domain) is open.
 
 ## Order

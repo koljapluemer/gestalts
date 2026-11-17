@@ -1,6 +1,6 @@
 # plugins
 
-One folder per plugin ([`doc/plugins.md`](../doc/plugins.md)), usable by any app: an app's `distribution.yml` says
+One folder per plugin ([plugin and view architecture](../doc/architecture/plugins-and-views.md)), usable by any app: an app's `distribution.yml` says
 which it ships. A view imports only `@gestalts/view`, `@gestalts/kit`, `@gestalts/learning`, `@gestalts/sources` and npm
 packages, never another plugin (`oxlint.config.ts`).
 

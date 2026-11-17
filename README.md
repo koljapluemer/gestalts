@@ -1,7 +1,8 @@
 # gestalts
 
 Personal plain-text data (ymls and blobs in one folder, each yml naming exactly one gestalt) with views on top, and the
-apps built on it. Start with [`doc/architecture.md`](doc/architecture.md).
+apps built on it. Start with [`doc/`](doc/README.md) or the
+[`system overview`](doc/architecture/system-overview.md).
 
 ```
 crates/       the core (Rust, also in the page as wasm), merge, fs, peer sync, the node, the phone's device

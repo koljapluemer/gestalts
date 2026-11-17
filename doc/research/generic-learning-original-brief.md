@@ -1,4 +1,11 @@
-let's add a view (both to core gestalter and to loops-for-learning) for generic SR flashcard practice, and one neat single-screen view (for now optional gestalter only) to CRUD manage these flashcards.
+# Original generic-learning brief
+
+> [!NOTE]
+> Historical input, preserved as theoretical and product context. It is not current architecture or an active plan.
+> See [[../reference/data-format#Concepts, practice and what a learner knows|the current learning data model]] and
+> [[../roadmap/concept-model|the concept-model roadmap]].
+
+Add a view (both to core gestalter and to loops-for-learning) for generic SR flashcard practice, and one neat single-screen view (for now optional gestalter only) to CRUD manage these flashcards.
 Flashcards are their own gestalt, with the primary props of md-rendered `front` and `back`.
 They have 0 or 1 attached fsrs-data ymls attached.
 

@@ -7,7 +7,7 @@ package (`mise run node:package` / `mise run node:install`) and launch it from t
 its settings page, which asks for your folder; it remembers it and lives in the tray from then on.
 
 The server, folders, change events, sync, plugins, workers and access are the node's (`crates/node`, see
-[`doc/architecture.md`](../../../doc/architecture.md#the-node)).
+[system overview](../../../doc/architecture/system-overview.md#the-node)).
 
 ```sh
 gestalts-node                    # the desktop app: tray, opens its settings; one instance per user
