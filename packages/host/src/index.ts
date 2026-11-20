@@ -2,6 +2,7 @@
 export { ConnectorSettings, useConnectorState } from './ConnectorSettings';
 export { ErrorBoundary } from './debug';
 export { FrameView, type RunnableView } from './frame/FrameView';
+export { bootHtml, closedCsp } from './frame/boot';
 export { AccessError, Bridge, type Scope, type ViewEnv } from './frame/bridge';
 export { installId, installState, installedPlugins, useInstalled } from './installs';
 export { PluginSettings } from './PluginSettings';

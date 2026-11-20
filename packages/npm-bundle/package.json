@@ -1,0 +1,19 @@
+{
+  "name": "@gestalts/npm-bundle",
+  "private": true,
+  "type": "module",
+  "description": "npm packages for views, bundled on our own server and pinned: what esm.sh does, without a third party",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@gestalts/view": "workspace:*",
+    "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6"
+  }
+}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Repo } from '@gestalts/client';
 import { PROTOCOL, logger, type FromView, type JsonMap, type ToView, type ViewError } from '@gestalts/view';
 import type { FrameRuntime, Permission } from '../registry';
-import { BOOT_HTML } from './boot';
+import { bootHtml } from './boot';
 import { Bridge, type Scope, type ViewEnv } from './bridge';
 
 const log = logger('view');
@@ -18,6 +18,8 @@ export type RunnableView = {
   scope: Scope;
   /** what the distribution granted it beyond the strict sandbox */
   granted?: Permission[];
+  /** where each of `npm` is loaded from, by name; esm.sh (unpinned) for any not here */
+  npmUrls?: Record<string, string>;
 };
 
 const STRICT = 'allow-scripts allow-downloads';
@@ -46,15 +48,18 @@ type Props = {
   env: ViewEnv;
   onError?: (e: ViewError) => void;
   hidden?: boolean;
+  /** a Content-Security-Policy for the frame, as `closedCsp` makes one; none: what the sandbox allows */
+  csp?: string;
 };
 
 /** One view, in a sandboxed frame of its own. A new `view.js` gives a new frame. */
-export function FrameView({ repo, view, runtime, css, tailwind, params, state, env, onError, hidden }: Props) {
+export function FrameView({ repo, view, runtime, css, tailwind, params, state, env, onError, hidden, csp }: Props) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [failure, setFailure] = useState<string>();
   const latest = useRef({ env, onError });
   useEffect(() => { latest.current = { env, onError }; }, [env, onError]);
   const scopeKey = JSON.stringify(view.scope);
+  const npmUrlsKey = JSON.stringify(view.npmUrls ?? {});
   // where the view is: a new frame starts there; a running one is told when it's moved, not remade
   const paramsKey = JSON.stringify(params);
   const latestParams = useRef(params);
@@ -122,12 +127,12 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
         );
       };
       frame.contentWindow?.postMessage({
-        runtime: runtime.js, css: `${runtime.css}\n${css}`, tailwind, js: view.js, npm: view.npm,
+        runtime: runtime.js, css: `${runtime.css}\n${css}`, tailwind, js: view.js, npm: view.npm, npmUrls: JSON.parse(npmUrlsKey) as Record<string, string>,
         init: { protocol: PROTOCOL, id: view.id, title: view.title, params: startAt, state: initial },
       }, '*', [channel.port2]);
     };
     addEventListener('message', onReady);
-    frame.srcdoc = BOOT_HTML;
+    frame.srcdoc = bootHtml(csp);
     return () => {
       clearTimeout(stalled);
       setFailure(undefined);
@@ -136,7 +141,7 @@ export function FrameView({ repo, view, runtime, css, tailwind, params, state, e
       bridge?.close();
       port?.close();
     };
-  }, [repo, view.id, view.title, view.js, view.npm, flags.key, scopeKey, runtime, css, tailwind, initial]);
+  }, [repo, view.id, view.title, view.js, view.npm, npmUrlsKey, flags.key, scopeKey, runtime, css, tailwind, initial, csp]);
 
   // moved from outside while running; its own moves come back equal and aren't echoed
   useEffect(() => {

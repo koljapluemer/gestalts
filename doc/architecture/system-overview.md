@@ -19,6 +19,7 @@ packages/client   the wasm-backed repo, its core in a worker; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime (versioned by its hash)
 packages/workshop making a view with an agent: drafts, their preview, the chat, the agent protocol
+packages/npm-bundle npm packages for views, installed without scripts, bundled and pinned on a server (Node)
 packages/viz      @gestalts/viz: interactive visualizations (params, clock, model, scene) and their runtime; imports nothing of ours
 plugins/          the views that live in source: notes, flashcards, sources, concepts
 sdk/python        gestalts_backend.py, what a backend.py imports
@@ -70,7 +71,13 @@ views that load nothing at run time; see [[plugins-and-views]].
 The frame loads nothing from the app's origin, because an opaque origin can't. The host sends everything over a
 `MessagePort`: one script holding React, the kit and learning (built by `@gestalts/vite`), the styles, and the view's
 compiled module. `packages/host/src/frame/boot.ts` turns those into `blob:` modules and an import map. Other npm packages
-resolve through esm.sh.
+resolve to the URLs the host gives (`RunnableView.npmUrls`: bundled and pinned on our own server by
+`@gestalts/npm-bundle`), else through esm.sh, unpinned.
+
+A frame may also get a Content-Security-Policy (`csp`). Views nobody vetted (a teacher's lesson, a draft) run under
+`closedCsp`: no `fetch`, WebSocket or form to anywhere, scripts only from the frame's own blobs and the npm origin,
+images and media only from blobs, data URLs and the lesson's own files. Without one, an opaque-origin frame could still
+send what it reads to any CORS-enabled server.
 
 Every call crosses `packages/host/src/frame/bridge.ts`, which checks it against the view's `reads` and `writes`, outside
 the frame. A sandboxed frame isn't a secure context, so anything needing `crypto.subtle` is a call to the host.
