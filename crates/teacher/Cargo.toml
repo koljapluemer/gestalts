@@ -1,0 +1,27 @@
+[package]
+name = "gestalts-teacher"
+description = "The teacher app's server: accounts, drafts synced and validated, the agent, publishing lessons"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+gestalts-core.workspace = true
+gestalts-fs.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml_ng.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+argon2 = { version = "0.5", features = ["std"] }
+axum = "0.8"
+base64 = "0.22"
+clap = { version = "4", features = ["derive", "env"] }
+getrandom = "0.3"
+include_dir = "0.7"
+rusqlite = { version = "0.37", features = ["bundled"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "process", "time", "sync", "io-util"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3"
+tower = { version = "0.5", features = ["util"] }
