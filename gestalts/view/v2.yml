@@ -1,0 +1,16 @@
+name: view
+version: 2
+description: >-
+  A vibecoded view and what ships with it: its React `source`, the gestalts it may read and write, the npm packages
+  it imports at the versions they resolved to (`npm`), the runtime it was made against (`runtime`), the package its
+  own gestalts are named in (`package`), and its `members`: the `gestalt@1` definitions and the ymls it ships with,
+  as a deck's. What it writes while being tried out isn't a member.
+fields:
+  title: { type: string, required: true }
+  source: { type: text, required: true }
+  reads: { type: string_list, required: true }
+  writes: { type: string_list, required: true }
+  npm: { type: map, values: { type: string } }
+  runtime: { type: string }
+  package: { type: string, required: true }
+  members: { type: ref_list }

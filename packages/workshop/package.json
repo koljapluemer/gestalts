@@ -1,0 +1,24 @@
+{
+  "name": "@gestalts/workshop",
+  "private": true,
+  "type": "module",
+  "description": "Making a view with an agent: the draft format, its preview, the chat, and the agent protocol",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@gestalts/client": "workspace:*",
+    "@gestalts/host": "workspace:*",
+    "@gestalts/view": "workspace:*",
+    "yaml": "2.8.1"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "react": "19.3.1"
+  }
+}

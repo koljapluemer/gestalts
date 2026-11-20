@@ -1,0 +1,7 @@
+{
+  "title": "der, die, das",
+  "package": "d-example",
+  "reads": ["d-example/noun@1", "practice-event@1"],
+  "writes": ["practice-event@1"],
+  "npm": {}
+}

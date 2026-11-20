@@ -583,6 +583,7 @@ const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/practice-session/v1.yml"),
     include_str!("../../../gestalts/plugin-install/v1.yml"),
     include_str!("../../../gestalts/view/v1.yml"),
+    include_str!("../../../gestalts/view/v2.yml"),
     include_str!("../../../gestalts/conflict/v1.yml"),
     include_str!("../../../gestalts/gestalt/v1.yml"),
 ];

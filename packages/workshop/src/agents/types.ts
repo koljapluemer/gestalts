@@ -1,9 +1,9 @@
 import type { ViewError } from '@gestalts/view';
 
 /**
- * What the workshop asks of an agent, whatever runs it (the claude CLI behind the node now; an API called from the
- * browser later). The agent sees a view as files and returns the files it changed; the browser checks them and
- * writes the yml, so no agent needs access to any.
+ * What a workshop asks of an agent, whatever runs it (the claude CLI behind a local node, the teacher app's server).
+ * The agent sees a draft as files ([`filesOf`](../draft.ts)) and returns the files it changed; the browser turns them
+ * into ymls and writes them, so no agent needs access to any.
  */
 export type TurnRequest = {
   /** the view's id (lowercase letters, digits and -) */
@@ -11,11 +11,16 @@ export type TurnRequest = {
   /** this backend's conversation to continue, from an earlier `done` */
   session?: string;
   message: string;
-  /** `view.tsx` and `view.json`, by path */
+  /** the draft as files, by path: `view.tsx`, `view.json`, `gestalts/<name>@<N>.yml`, `data/<id>.yml` */
   files: Record<string, string>;
-  /** what the preview reported since the last turn */
-  diagnostics: ViewError[];
+  /** the gestalts the app has (`name@N`), which the view may read and write besides its own */
+  gestalts: string[];
+  /** what the preview reported since the last turn, and what couldn't be saved of the last one */
+  diagnostics: Diagnostic[];
 };
+
+/** An error from the preview, or a file of the last turn the repo refused (`save`). */
+export type Diagnostic = { kind: ViewError['kind'] | 'save'; message: string; stack?: string; at: string };
 
 export type AgentEvent =
   | { type: 'text'; text: string }

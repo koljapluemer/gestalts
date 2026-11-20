@@ -20,7 +20,8 @@
     "@gestalts/kit": "workspace:*",
     "@gestalts/learning": "workspace:*",
     "@gestalts/sources": "workspace:*",
-    "@tailwindcss/browser": "4.3.3"
+    "@tailwindcss/browser": "4.3.3",
+    "@gestalts/workshop": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",

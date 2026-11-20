@@ -1,6 +1,6 @@
 # learning-workshop
 
-Make learning views: create `view@1` drafts, preview them live beside the learning views of loops-for-learning, and
+Make learning views: create drafts (a view with its own gestalts and content, `@gestalts/workshop`), preview them live beside the learning views of loops-for-learning, and
 have a local Claude CLI agent edit them. Deployed apart from loops-for-learning's public site.
 
 Drafts live in the browser (`workshop-views`) and sync with the local Make node, which keeps them in `$WORKSHOP_DATA`

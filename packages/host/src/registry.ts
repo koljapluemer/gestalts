@@ -44,7 +44,8 @@ export type PluginEntry = {
 export type Distribution = { id: string; default_views: string[]; install_ui: boolean };
 
 /** What every view's frame loads: React, the kit and the rest, as one script, and their styles. */
-export type FrameRuntime = { js: string; css: string };
+/** What every frame loads. `version` names it: a hash of `js`, so a lesson or draft can say what it was made against. */
+export type FrameRuntime = { js: string; css: string; version: string };
 
 /** `gestalts`: the definitions of the distribution's model packages, as YAML (the core's are compiled in). */
 export type Registry = { distribution: Distribution; plugins: PluginEntry[]; gestalts: string[]; runtime: FrameRuntime };

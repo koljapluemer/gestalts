@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import tailwind from '@tailwindcss/browser?raw';
 import { Plus, Settings } from 'lucide-react';
 import { registry } from 'virtual:gestalts-plugins';
 import { RepoProvider, useHostQuery, type Repo } from '@gestalts/client';
 import { ConnectorSettings, usePluginRepo } from '@gestalts/host';
 import type { ViewError } from '@gestalts/view';
-import { Chat } from './Chat';
-import { Preview } from './Preview';
-import { VIEW, asView, createView, type VibeView } from './workshop';
+import { Chat, Preview, VIEWS, asDraft, createDraft, type Draft } from '@gestalts/workshop';
+import css from '../app.css?inline';
+import { cliBackend } from './agents/cli';
 
 /**
- * The workshop: views vibecoded into `view@1` ymls, each run in a frame beside the chat that edits it. The ymls live in
- * this browser and sync with the node the workshop runs (`mise run node`, :7727), which runs the claude CLI.
+ * The workshop: views vibecoded into drafts (`view@2` ymls and their members, `@gestalts/workshop`), each run in a
+ * frame beside the chat that edits it. The ymls live in this browser and sync with the node the workshop runs
+ * (`mise run node`, :7727), which runs the claude CLI.
  */
 const NODE = import.meta.env.VITE_WORKSHOP_NODE ?? 'http://127.0.0.1:7727';
 const SELECTED = 'workshop:view';
@@ -36,20 +38,23 @@ export function Make() {
   );
 }
 
-function Workbench({ repo, view }: { repo: Repo; view: VibeView }) {
+function Workbench({ repo, draft }: { repo: Repo; draft: Draft }) {
   const [errors, setErrors] = useState<ViewError[]>([]);
+  const [backend] = useState(() => cliBackend(repo));
   const onError = useCallback((e: ViewError) => setErrors((es) => [...es, e].slice(-20)), []);
   return (
     <div className="grid h-full min-h-0 grid-rows-2 md:grid-cols-[minmax(0,1fr)_24rem] md:grid-rows-1">
-      <div className="min-h-0 min-w-0"><Preview repo={repo} view={view} onError={onError} /></div>
-      <div className="min-h-0 border-t border-base-300 md:border-t-0 md:border-l"><Chat repo={repo} view={view} errors={errors} onTurnDone={() => setErrors([])} /></div>
+      <div className="min-h-0 min-w-0"><Preview repo={repo} draft={draft} runtime={registry.runtime} css={css} tailwind={tailwind} onError={onError} /></div>
+      <div className="min-h-0 border-t border-base-300 md:border-t-0 md:border-l">
+        <Chat repo={repo} draft={draft} backend={backend} runtime={registry.runtime.version} errors={errors} onTurnDone={() => setErrors([])} />
+      </div>
     </div>
   );
 }
 
 function Shell({ repo }: { repo: Repo }) {
-  const items = useHostQuery({ gestalt: VIEW, order: { field: 'title' }, limit: 500 });
-  const list = useMemo(() => items.map(asView), [items]);
+  const items = useHostQuery({ gestalt: VIEWS, order: { field: 'title' }, limit: 500 });
+  const list = useMemo(() => items.map(asDraft), [items]);
   const [selected, setSelected] = useState<string | null>(() => { try { return localStorage.getItem(SELECTED); } catch { return null; } });
   const choose = (id: string) => {
     setSelected(id);
@@ -58,7 +63,7 @@ function Shell({ repo }: { repo: Repo }) {
   const current = list.find((v) => v.id === selected) ?? null;
   const create = async () => {
     const title = window.prompt('What will it be? (a title; you describe it in the chat next)')?.trim();
-    if (title) choose(await createView(repo, title));
+    if (title) choose(await createDraft(repo, title, registry.runtime.version));
   };
   return (
     <>
@@ -79,7 +84,7 @@ function Shell({ repo }: { repo: Repo }) {
         </nav>
         <main className="min-w-0 flex-1">
           {current
-            ? <Workbench key={current.id} repo={repo} view={current} />
+            ? <Workbench key={current.id} repo={repo} draft={current} />
             : <div className="flex h-full items-center justify-center text-base-content/60">Pick a view, or make a new one.</div>}
         </main>
       </div>

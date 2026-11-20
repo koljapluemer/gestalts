@@ -2,15 +2,15 @@
 # requires-python = ">=3.12"
 # dependencies = []
 # ///
-"""One turn of the claude CLI on a view's files.
+"""One turn of the claude CLI on a draft's files.
 
-The browser sends the view's files (`view.tsx`, `view.json`) with each message; this writes them into a workspace per
-view, next to the agent template (the contract and `check.ts`), runs `claude -p --output-format stream-json` there and
+The browser sends the draft as files (`view.tsx`, `view.json`, `gestalts/<name>@<N>.yml`, `data/<id>.yml`) with each
+message; this writes them into a workspace per view, next to the agent template (the contract and `check.ts`), runs `claude -p --output-format stream-json` there and
 hands back what it said and did, then the files it changed. It reads and writes no ymls: the browser does, so another
 agent backend can take this one's place.
 
-- `POST /turn` `{view, session?, message, files: {path: text}, diagnostics: [..]}` -> 202 `{job}`; 409 while that view has
-  a turn running
+- `POST /turn` `{view, session?, message, files: {path: text}, gestalts: [name@N], diagnostics: [..]}` -> 202 `{job}`;
+  409 while that view has a turn running
 - `GET /events?job=&after=n` -> `{events, next, done}`, waiting up to 20 s for events after the `n`-th
 - `POST /cancel` `{job}` -> `{}`
 """
@@ -38,7 +38,7 @@ CLAUDE = os.environ.get("WORKSHOP_CLAUDE", "claude")
 TEMPLATE_FILES = ["CLAUDE.md", "tsconfig.json", "check.ts", "examples"]
 TOOLS = ["Read", "Edit", "Write", "Glob", "Grep", "Bash(node check.ts)", "Bash(node check.ts:*)"]
 SYSTEM = ("You are editing one view in this directory. CLAUDE.md here is the contract: read it first. "
-          "Only view.tsx and view.json are kept; run `node check.ts` before you finish.")
+          "Only view.tsx, view.json, gestalts/ and data/ are kept; run `node check.ts` before you finish.")
 # A turn itself has no deadline. The node currently limits each proxied request to 180 s, so an events request returns
 # well before then; completed jobs remain available briefly in case the client needs one last poll.
 EVENT_POLL_S = 20
@@ -77,7 +77,10 @@ def _json(status: int, body: object) -> tuple[int, str, bytes]:
     return status, "application/json", json.dumps(body).encode()
 
 
-KEPT = ("view.tsx", "view.json")
+# what a draft is, as files; everything else in a workspace is the template's or scratch
+KEPT = re.compile(r"^(view\.tsx|view\.json|gestalts/[a-z0-9-]+@[1-9][0-9]*\.yml|data/[^/\\.][^/\\]{0,199}\.yml)$")
+KEPT_DIRS = ("gestalts", "data")
+GESTALT_ID = re.compile(r"^[a-z0-9-]+(/[a-z0-9-]+)?@[1-9][0-9]*$")
 
 
 def _changed_outside(workspace: Path, files: dict[str, str]) -> list[str]:
@@ -89,7 +92,7 @@ def _changed_outside(workspace: Path, files: dict[str, str]) -> list[str]:
     return sorted(p for p in set(last) | set(files) if last.get(p) != files.get(p))
 
 
-def _prepare(workspace: Path, files: dict[str, str], diagnostics: list) -> None:
+def _prepare(workspace: Path, files: dict[str, str], gestalts: list[str], diagnostics: list) -> None:
     workspace.mkdir(parents=True, exist_ok=True)
     for name in TEMPLATE_FILES:
         src, dst = TEMPLATE / name, workspace / name
@@ -105,11 +108,16 @@ def _prepare(workspace: Path, files: dict[str, str], diagnostics: list) -> None:
     modules = workspace / "node_modules"
     if not modules.exists():
         modules.symlink_to(TEMPLATE / "node_modules", target_is_directory=True)
-    # the yml is the truth: what isn't in this turn's files is gone
-    for name in KEPT:
+    # the ymls are the truth: what isn't in this turn's files is gone
+    for name in ("view.tsx", "view.json"):
         (workspace / name).unlink(missing_ok=True)
+    for name in KEPT_DIRS:
+        shutil.rmtree(workspace / name, ignore_errors=True)
     for path, text in files.items():
+        (workspace / path).parent.mkdir(parents=True, exist_ok=True)
         (workspace / path).write_text(text)
+    # what check.ts allows besides the draft's own
+    (workspace / ".workshop" / "gestalts.json").write_text(json.dumps(sorted(gestalts)))
     errors = workspace / "runtime-errors.md"
     if diagnostics:
         lines = ["# Errors the preview reported since the last turn", ""]
@@ -121,7 +129,12 @@ def _prepare(workspace: Path, files: dict[str, str], diagnostics: list) -> None:
 
 
 def _collect(workspace: Path) -> dict[str, str]:
-    return {name: (workspace / name).read_text() for name in KEPT if (workspace / name).is_file()}
+    paths = [workspace / "view.tsx", workspace / "view.json"]
+    for name in KEPT_DIRS:
+        if (workspace / name).is_dir():
+            paths += sorted((workspace / name).rglob("*"))
+    rel = [(p.relative_to(workspace).as_posix(), p) for p in paths if p.is_file()]
+    return {r: p.read_text() for r, p in rel if KEPT.match(r)}
 
 
 def _summary(name: str, args: dict, workspace: Path) -> str:
@@ -135,7 +148,7 @@ def _summary(name: str, args: dict, workspace: Path) -> str:
     return ""
 
 
-def _run(job: Job, session: str | None, message: str, files: dict[str, str], diagnostics: list) -> None:
+def _run(job: Job, session: str | None, message: str, files: dict[str, str], gestalts: list[str], diagnostics: list) -> None:
     workspace = WORKSPACES / job.view
     runlog = RunLog(WORKSPACES, job.id, job.view, session, message, files, diagnostics)
     new_session = session
@@ -145,7 +158,7 @@ def _run(job: Job, session: str | None, message: str, files: dict[str, str], dia
     outcome = "failed"
     try:
         outside = _changed_outside(workspace, files)
-        _prepare(workspace, files, diagnostics)
+        _prepare(workspace, files, gestalts, diagnostics)
         prompt = message
         if outside and session:
             prompt += f"\n\n(Changed since your last turn, outside this conversation: {', '.join(outside)}. Re-read them before relying on what you remember.)"
@@ -237,8 +250,11 @@ def turn(req: dict) -> tuple[int, str, bytes]:
         return _json(400, {"error": "view: lowercase letters, digits and -"})
     if not isinstance(message, str) or not message.strip():
         return _json(400, {"error": "message is empty"})
-    if not isinstance(files, dict) or not all(p in KEPT and isinstance(t, str) for p, t in files.items()):
-        return _json(400, {"error": f"files: only {', '.join(KEPT)}, as text"})
+    if not isinstance(files, dict) or not all(isinstance(p, str) and KEPT.match(p) and isinstance(t, str) for p, t in files.items()):
+        return _json(400, {"error": "files: only view.tsx, view.json, gestalts/<name>@<N>.yml and data/<id>.yml, as text"})
+    gestalts = req.get("gestalts") or []
+    if not isinstance(gestalts, list) or not all(isinstance(g, str) and GESTALT_ID.match(g) for g in gestalts):
+        return _json(400, {"error": "gestalts: a list of name@N"})
     _prune()
     with _jobs_lock:
         if any(j.view == view and not j.done for j in _jobs.values()):
@@ -246,7 +262,7 @@ def turn(req: dict) -> tuple[int, str, bytes]:
         job = Job(view)
         _jobs[job.id] = job
     session = req.get("session") if isinstance(req.get("session"), str) else None
-    threading.Thread(target=_run, args=(job, session, message, files, req.get("diagnostics") or []), daemon=True).start()
+    threading.Thread(target=_run, args=(job, session, message, files, gestalts, req.get("diagnostics") or []), daemon=True).start()
     return _json(202, {"job": job.id})
 
 

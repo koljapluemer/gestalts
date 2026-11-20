@@ -11,6 +11,9 @@ for ex in "$here"/agent-template/examples/*/; do
   cp "$here"/agent-template/{tsconfig.json,check.ts} "$ws/"
   ln -s "$here/agent-template/node_modules" "$ws/node_modules"
   cp -r "$ex"/. "$ws/"
+  # what the workshop sends as the app's gestalts
+  mkdir -p "$ws/.workshop"
+  echo '["note@1","source@1","concept@2","concept@3","concept-link@1","practice-event@1","practice-event@2","flashcard@1","multiple-choice@1","item-model@1","deck@2","fsrs-data@1","practice-session@1"]' > "$ws/.workshop/gestalts.json"
   echo "example $id:"
   (cd "$ws" && node check.ts)
 done

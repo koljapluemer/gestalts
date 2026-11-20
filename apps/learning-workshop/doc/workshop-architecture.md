@@ -1,18 +1,27 @@
 # Learning workshop architecture
 
 ```
-src/workshop/Make.tsx       the list of views, and the workbench
-src/workshop/Preview.tsx    compiles a view in the browser and runs it in a frame, as any view runs
-src/workshop/Chat.tsx       one conversation about one view
-src/workshop/agents/        what an agent backend is, and the claude CLI as one
-src/workshop/workshop.ts    a view as a `view@1` yml, and as the files the agent sees
-plugins/workshop-agent/   backend.py: one turn of the claude CLI
-agent-template/      what the agent works against: its contract (CLAUDE.md), `check.ts`, an example
+src/workshop/Make.tsx        the list of drafts, and the workbench
+src/workshop/agents/cli.ts   the claude CLI behind the node, as an agent backend
+plugins/workshop-agent/      backend.py: one turn of the claude CLI
+agent-template/              what the agent works against: its contract (CLAUDE.md), `check.ts`, examples
+
+packages/workshop/           shared with the teacher app:
+  draft.ts                   a draft as ymls (`view@2` and its members) and as the files the agent sees
+  Preview.tsx                compiles a draft's view in the browser and runs it in a frame, as any view runs
+  Chat.tsx                   one conversation about one draft
+  agents/                    what an agent backend is; one run as a job over HTTP
 ```
 
-A turn: the browser sends the view as `view.tsx` and `view.json`, with any errors the preview reported. The backend writes
-them into a workspace per view, runs `claude -p` there and streams back what it said and did, then the files it changed.
-The browser writes the yml, so the agent never touches any data, and another backend can take this one's place.
+A draft is a `view@2` yml and its `members`: `gestalt@1` definitions of its own gestalts (named in the draft's
+`package`) and the ymls it ships with. What the view writes while it's tried out isn't a member. A `view@1` reads as
+a draft without members.
+
+A turn: the browser sends the draft as files (`view.tsx`, `view.json`, `gestalts/<name>@<N>.yml`, `data/<id>.yml`), the
+gestalts the app has, and any errors the preview reported or the last save refused. The backend writes them into a
+workspace per view, runs `claude -p` there and streams back what it said and did, then the files it changed. The
+browser turns those into ymls and writes them, definitions first; what the repo refuses goes with the next message.
+The agent never touches any data, and another backend can take this one's place.
 
 The node's proxy currently gives each service request 180 s, but that is not a turn deadline. A turn is a cancellable
 job with no overall deadline; the browser reads it through `/events` requests that long-poll for at most 20 s each.

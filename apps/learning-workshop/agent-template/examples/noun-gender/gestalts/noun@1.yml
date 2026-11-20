@@ -1,0 +1,5 @@
+description: A German noun and its grammatical gender.
+fields:
+  word: { type: string, required: true }
+  gender: { type: string, required: true, one_of: [m, f, n] }
+  plural: { type: string }

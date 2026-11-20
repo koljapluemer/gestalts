@@ -11,8 +11,9 @@ import { defineConfig } from 'oxlint';
  * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit, learning and
  *   sources (learning, sources and the kit only for the runtime frames load).
  * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
+ * - `@gestalts/workshop` (making a view with an agent) builds on client, host and view.
  * - an app (`apps/<app>/src`, `apps/gestalter/<distribution>/src`, the node's settings page) imports only the packages
- *   (client, host, view, the kit's index, learning, sources) and its own files, never another app or a plugin;
+ *   (client, host, view, the kit's index, learning, sources, workshop) and its own files, never another app or a plugin;
  *   nothing imports an app.
  * External packages are always fine.
  */
@@ -36,7 +37,8 @@ const allowed: Record<string, string[]> = {
   plugin: ['view', 'kit-index', 'learning', 'sources'],
   debug: ['client', 'view'],
   host: ['client', 'view', 'kit-index', 'learning', 'sources', 'debug'],
-  app: ['client', 'host', 'view', 'kit-index', 'learning', 'sources'],
+  workshop: ['client', 'host', 'view'],
+  app: ['client', 'host', 'view', 'kit-index', 'learning', 'sources', 'workshop'],
 };
 
 export default defineConfig({
@@ -62,6 +64,7 @@ export default defineConfig({
       { type: 'plugin', pattern: 'plugins/*', capture: ['plugin'] },
       { type: 'debug', pattern: `${host}/debug` },
       { type: 'host', pattern: host },
+      { type: 'workshop', pattern: 'packages/workshop/src' },
       // apps: each its own element, so one may not import another
       { type: 'app', pattern: 'apps/gestalter/*/src', capture: ['app'] },
       { type: 'app', pattern: 'apps/node/*/src', capture: ['app'] },

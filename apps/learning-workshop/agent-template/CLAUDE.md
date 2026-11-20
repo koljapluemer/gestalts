@@ -7,12 +7,19 @@ Work only in this folder.
 
 - **`view.tsx`**: one file, TypeScript + JSX. Its **default export is a React component with no props**. It fills its
   frame (give the root `h-full`). There are no other files: no local imports.
-- **`view.json`**: `{"title": "...", "reads": ["note@1"], "writes": []}`. What it may read and write, by gestalt. A
-  call outside that is refused, so declare what the view needs, and no more.
-- **`runtime-errors.md`**, when present, holds what the preview reported since the last turn. Fix those first.
+- **`view.json`**: `{"title": "...", "package": "d-…", "reads": ["note@1"], "writes": [], "npm": {}}`. What it may
+  read and write, by gestalt. A call outside that is refused, so declare what the view needs, and no more. `package`
+  is fixed: it names the view's own gestalts. `npm` lists each npm package `view.tsx` imports, with its exact version
+  (`{"three": "0.170.0"}`).
+- **`gestalts/<name>@<version>.yml`**, optional: a gestalt of the view's own, when none of the app's fits (below).
+- **`data/<id>.yml`**, optional: ymls that ship with the view, its content: the words of a vocabulary game, the
+  questions of a quiz. What the view writes while it's tried out is not here.
+- **`runtime-errors.md`**, when present, holds what the preview reported, and what couldn't be saved of your last
+  turn, since then. Fix those first.
 
 Nothing else here is kept. Run **`node check.ts`** before you finish: it compiles `view.tsx` the way the workshop does,
-typechecks it, and checks `view.json`. A turn ending with a failing check shows the person an error instead of the view.
+typechecks it, and checks `view.json`, `gestalts/` and `data/`. A turn ending with a failing check shows the person an
+error instead of the view.
 
 ## The data
 
@@ -36,6 +43,31 @@ write is refused with the reason. Keep ymls small and link them.
 | `fsrs-data@1` | written by `saveReview` |
 | `practice-session@1` | written by `usePracticeSession` |
 
+## Its own gestalts
+
+When the data has a shape none of the gestalts above fits (a noun with its gender and plural, a map with regions to
+click), define one: `gestalts/noun@1.yml` defines `<package>/noun@1`, with `package` from `view.json`.
+
+```yaml
+description: A German noun and its grammatical gender.
+fields:
+  word: { type: string, required: true }
+  gender: { type: string, required: true, one_of: [m, f, n] }
+  plural: { type: string }
+```
+
+Types: `string` (one line), `text`, `number`, `integer`, `bool`, `date`, `datetime`, `url`, `string_list`, `list`
+(`items: <rule>`), `map` (`fields: {k: <rule>}`, `values: <rule>`), `blob`, `ref`/`ref_list` (ids, `targets: [name]`
+limits what they point at), `ref_map` (`{id: number}`), `any`. A rule may say `required`, `min`, `max` (numbers, or
+how many items), `one_of: [..]`.
+
+- A yml of it names it in full: `gestalt: d-…/noun@1`, and so do `reads`, `writes` and queries.
+- Practice still goes through the app's own gestalts: log answers with `logPractice` on the item's id, link items to
+  `concept@2`s by a `ref_map` field named `concepts`, and so on. Don't make a gestalt for what the app has.
+- Once the view is published, a change to `fields` needs a new version (`noun@2.yml`); while it's a draft, edit freely.
+- Each yml in `data/` is `data/<id>.yml` with `gestalt:` and its props; the id comes from the file name. Keep ids
+  short and readable (`haus`, `q-03`). See `examples/noun-gender`.
+
 ## What it may import
 
 | module | for |
@@ -45,7 +77,7 @@ write is refused with the reason. Keep ymls small and link them.
 | `@gestalts/kit` | `Markdown`, `MarkdownEditor`, `Modal`, `NoteCard`, `NoteEditor`, `storeFile`; `usePanZoom` (drag, wheel and pinch, d3-zoom) |
 | `@gestalts/learning` | FSRS: `fsrsStates`, `useLocalReviews`, `getScheduler`, `rate`, `saveReview`, `nextItem`, `facetOf`, `Rating`, `usePracticeSession`; logging answers: `logPractice`, `ratingOf`; picking with what's known: `lessonPlan`, `rankNew`, `variantGroups` |
 | `@gestalts/sources` | sources: `FIELDS`, `ENTRY_TYPES`, `normalise`, `bibOf`, `parseBibtex`, `renderBibtex`, `match`, `mergeSource` |
-| any npm package | loaded at run time from esm.sh (`d3`, `three`, ...). Needs the network. No types here, so type what you use |
+| any npm package | loaded at run time (`d3`, `three`, ...); list it in `view.json`'s `npm` with its version. No types here, so type what you use |
 
 The sources are in `node_modules/@gestalts/*/src`. Read them when unsure; don't guess signatures.
 

@@ -7,6 +7,7 @@
  * those checkouts, and replaces `@gestalts-sources;` in the app's CSS with an `@source` per package and plugin
  * (Tailwind doesn't reliably scan through pnpm's symlinks). List it before `tailwindcss()`.
  */
+import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { compile } from '@gestalts/view/compile';
@@ -153,7 +154,7 @@ function load(appRoot: string) {
 }
 
 /** Everything a frame loads, as one script and its styles. */
-async function buildRuntime(appRoot: string): Promise<{ js: string; css: string }> {
+async function buildRuntime(appRoot: string): Promise<{ js: string; css: string; version: string }> {
   const host = gestaltsPackages(appRoot).find((d) => /[\\/]host$/.test(d));
   if (!host) throw new Error('the app has no @gestalts/host');
   const result = await build({
@@ -176,12 +177,12 @@ async function buildRuntime(appRoot: string): Promise<{ js: string; css: string 
   const outputs = (Array.isArray(result) ? result : [result as Rollup.RollupOutput]).flatMap((r) => r.output);
   const js = outputs.flatMap((o) => (o.type === 'chunk' ? [o.code] : [])).join('\n');
   const css = outputs.flatMap((o) => (o.type === 'asset' && o.fileName.endsWith('.css') ? [String(o.source)] : [])).join('\n');
-  return { js, css };
+  return { js, css, version: createHash('sha256').update(js).digest('hex').slice(0, 16) };
 }
 
 export function gestaltsPlugins(): PluginOption[] {
   let appRoot = process.cwd();
-  let runtime: Promise<{ js: string; css: string }> | undefined;
+  let runtime: Promise<{ js: string; css: string; version: string }> | undefined;
   const sources: Plugin = {
     name: 'gestalts-sources',
     enforce: 'pre',
