@@ -2,8 +2,12 @@
 
 Option 3 is built (2026-11-17): model packages, namespaced names for new gestalts, and the structural/presentational
 split with published definitions checked ([[../architecture/plugins-and-views#Models|Models]],
-[[../reference/data-format#Published definitions don't change|Data format]]). Option 4 is not. The discussion, from
-2026-11-15, started at authoring decks ([[deck-authoring|Deck authoring]]).
+[[../reference/data-format#Published definitions don't change|Data format]]). Option 4's core is built (2026-11-20) for
+the [[teacher-app|teacher app]]: `gestalt@1`, load order, reindexing, refusing redefinitions, limits, definitions not
+merging ([[../reference/data-format#Definitions as ymls|Data format]]). Not built: copying definitions into the
+user's folder on first write, migrating the model packages to ymls, a draft-vs-published marker in the data (the
+teacher app checks it at publishing), and namespaces checked against where a definition came from. The discussion,
+from 2026-11-15, started at authoring decks ([[deck-authoring|Deck authoring]]).
 
 ## Before
 

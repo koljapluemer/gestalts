@@ -1,0 +1,14 @@
+name: gestalt
+version: 1
+description: >-
+  A gestalt's definition as a yml, for gestalts made outside the repo (a teacher's lesson, a workshop draft). Its id is
+  `gestalt-<package>.<name>.<version>`, so every copy of one definition has the same id, and its name is always
+  namespaced (`package/name`). The rest is what a definition in `gestalts/` holds. It can't redefine a gestalt the app
+  has built in. Two copies that differ in `fields` or `merge` don't merge: that's a conflict, never a union of fields.
+fields:
+  name: { type: string, required: true }
+  version: { type: integer, required: true, min: 1 }
+  description: { type: text }
+  fields: { type: map }
+  merge: { type: any }
+merge: { keys: { name: conflict, version: conflict, fields: conflict, merge: conflict } }

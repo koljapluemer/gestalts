@@ -8,12 +8,13 @@
 
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 
 use serde::Serialize;
 use serde_yaml_ng::{Mapping, Value};
 
 use crate::blobs::BlobRefs;
-use crate::gestalt::{Edge, Gestalts, Problem, YmlState};
+use crate::gestalt::{DEFINITION_PREFIX, Edge, GESTALT, Gestalts, Problem, YmlState};
 use crate::index::{Entry, Index, Item, Page, Query};
 use crate::mastery::{Belief, Mastery};
 use crate::outline::{Outline, OutlinePage, OutlineQuery, OutlineSpec};
@@ -79,7 +80,8 @@ struct OutlineSubscription {
 
 pub struct Repo<S> {
     storage: S,
-    gestalts: Gestalts,
+    /// the app's definitions plus those of the `gestalt@1` ymls indexed now; replaced whenever those change
+    gestalts: RefCell<Rc<Gestalts>>,
     index: RefCell<Index>,
     subs: RefCell<BTreeMap<SubId, Subscription>>,
     belief_subs: RefCell<BTreeMap<SubId, BeliefSubscription>>,
@@ -96,7 +98,7 @@ impl<S: Storage> Repo<S> {
     pub fn new(storage: S, gestalts: Gestalts) -> Self {
         Repo {
             storage,
-            gestalts,
+            gestalts: RefCell::new(Rc::new(gestalts)),
             index: RefCell::default(),
             subs: RefCell::default(),
             belief_subs: RefCell::default(),
@@ -112,20 +114,30 @@ impl<S: Storage> Repo<S> {
         &self.storage
     }
 
-    pub fn gestalts(&self) -> &Gestalts {
-        &self.gestalts
+    /// The definitions in force now, the folder's own included. A snapshot: a later change of a definition yml
+    /// replaces it.
+    pub fn gestalts(&self) -> Rc<Gestalts> {
+        self.gestalts.borrow().clone()
     }
 
-    /// Reads every yml from storage. Happens once, on opening.
+    /// Reads every yml from storage. Happens once, on opening. Definitions first, so the rest is judged by them.
     pub async fn load(&self) -> Result<()> {
-        let all = self.storage.read_all_ymls().await?;
+        let mut all = self.storage.read_all_ymls().await?;
+        all.sort_by_key(|(id, _)| !id.starts_with(DEFINITION_PREFIX));
         let mut changed: Changed = Vec::with_capacity(all.len());
         {
             let mut index = self.index.borrow_mut();
             let mut gone: BTreeSet<String> = index.entries().map(|e| e.yml.id.clone()).collect();
+            let mut defined = false;
             for (id, raw) in all {
+                if !defined && !id.starts_with(DEFINITION_PREFIX) {
+                    defined = true;
+                    drop(index);
+                    self.take_definitions();
+                    index = self.index.borrow_mut();
+                }
                 gone.remove(&id);
-                let old = index.insert(Entry::new(Yml::parse(id.clone(), raw), &self.gestalts));
+                let old = index.insert(Entry::new(Yml::parse(id.clone(), raw), &self.gestalts()));
                 changed.push((id, old));
             }
             for id in gone {
@@ -143,7 +155,7 @@ impl<S: Storage> Repo<S> {
         let mut changed: Changed = Vec::with_capacity(ids.len());
         for id in ids {
             let old = match self.storage.read_yml(id).await? {
-                Some(raw) => self.index.borrow_mut().insert(Entry::new(Yml::parse(id.clone(), raw), &self.gestalts)),
+                Some(raw) => self.index.borrow_mut().insert(Entry::new(Yml::parse(id.clone(), raw), &self.gestalts())),
                 None => self.index.borrow_mut().remove(id),
             };
             changed.push((id.clone(), old));
@@ -183,7 +195,7 @@ impl<S: Storage> Repo<S> {
     pub fn blob_refs(&self) -> BlobRefs {
         let mut refs = BlobRefs::new();
         for e in self.index.borrow().entries() {
-            refs.add(&e.yml, &e.state, &self.gestalts);
+            refs.add(&e.yml, &e.state, &self.gestalts());
         }
         refs
     }
@@ -202,7 +214,7 @@ impl<S: Storage> Repo<S> {
         }
         ordered.extend(std::mem::take(m).into_iter().filter(|(k, _)| !matches!(k.as_str(), Some("id" | "gestalt"))));
         let raw = to_yaml(&Value::Mapping(ordered));
-        let entry = Entry::new(Yml::parse(id.clone(), raw.clone()), &self.gestalts);
+        let entry = Entry::new(Yml::parse(id.clone(), raw.clone()), &self.gestalts());
         match &entry.state {
             YmlState::Valid(_) => {}
             YmlState::Unknown(g) => return Err(StorageError::Rejected(format!("no definition of {g} here"))),
@@ -236,7 +248,7 @@ impl<S: Storage> Repo<S> {
         }
         let raw = tombstone(id, now);
         self.storage.write_yml(id, &raw).await?;
-        self.replace(Entry::new(Yml::parse(id, raw), &self.gestalts));
+        self.replace(Entry::new(Yml::parse(id, raw), &self.gestalts()));
         Ok(true)
     }
 
@@ -348,11 +360,49 @@ impl<S: Storage> Repo<S> {
         std::mem::take(&mut self.deltas.borrow_mut())
     }
 
+    /// Takes the definitions of the indexed `gestalt@1` ymls, and returns the gestalts whose structure that changed
+    /// (arrived, left or differs).
+    fn take_definitions(&self) -> BTreeSet<String> {
+        let now = self.gestalts();
+        let data: Vec<_> = self.index.borrow().of_gestalt(GESTALT).filter_map(|e| now.definition(&e.yml).ok()).collect();
+        let next = now.with_data(data);
+        let hash = |g: &Gestalts, id: &str| g.get(id).map(crate::GestaltDef::structure_hash);
+        let changed: BTreeSet<String> = now.data().iter().chain(next.data()).map(|d| d.id()).filter(|id| hash(&now, id) != hash(&next, id)).collect();
+        *self.gestalts.borrow_mut() = Rc::new(next);
+        changed
+    }
+
+    /// When definition ymls are among `changed`: takes them, and judges again every yml of a gestalt whose definition
+    /// changed, adding those to `changed`.
+    fn redefine(&self, changed: &mut Changed) {
+        let touches = |e: Option<&Entry>| e.is_some_and(|e| e.yml.gestalt() == Some(GESTALT));
+        let index = self.index.borrow();
+        if !changed.iter().any(|(id, old)| touches(old.as_ref()) || touches(index.get(id))) {
+            return;
+        }
+        drop(index);
+        let redefined = self.take_definitions();
+        let gestalts = self.gestalts();
+        let mut index = self.index.borrow_mut();
+        let seen: BTreeSet<String> = changed.iter().map(|(id, _)| id.clone()).collect();
+        for gestalt in redefined {
+            for id in index.naming(&gestalt) {
+                let Some(old) = index.remove(&id) else { continue };
+                index.insert(Entry::new(old.yml.clone(), &gestalts));
+                // an id changed in this same batch keeps its earlier old version
+                if !seen.contains(&id) {
+                    changed.push((id, Some(old)));
+                }
+            }
+        }
+    }
+
     /// Recomputes the subscriptions these changes concern. `changed` holds the previous version of each id.
-    fn notify(&self, changed: Changed) {
+    fn notify(&self, mut changed: Changed) {
         if changed.is_empty() {
             return;
         }
+        self.redefine(&mut changed);
         let index = self.index.borrow();
         let mut mastery = self.mastery.borrow_mut();
         let mut touched = false;
@@ -517,6 +567,99 @@ mod tests {
             assert_eq!(ids(&r.query(&places)), ["a", "b"]);
             let near_a = Query { refs: Some(RefFilter { to: "a".into(), field: Some("near".into()), label: None }), ..places };
             assert_eq!(ids(&r.query(&near_a)), ["b"]);
+        });
+    }
+
+    const NOUN_DEF: &str = "id: gestalt-t-ab12.noun.1\ngestalt: gestalt@1\nname: t-ab12/noun\nversion: 1\nfields:\n  word: { type: string, required: true }\n";
+
+    fn nouns() -> Query {
+        Query { gestalt: Some("t-ab12/noun@1".into()), ..Default::default() }
+    }
+
+    #[test]
+    fn a_folder_defines_its_own_gestalts_and_they_are_taken_first() {
+        pollster::block_on(async {
+            let r = repo();
+            // stored before the definition sorts: `a` < `gestalt-…`
+            r.storage().write_yml("a", "id: a\ngestalt: t-ab12/noun@1\nword: Haus\n").await.unwrap();
+            r.storage().write_yml("gestalt-t-ab12.noun.1", NOUN_DEF).await.unwrap();
+            r.load().await.unwrap();
+            assert_eq!(ids(&r.query(&nouns())), ["a"]);
+            assert!(r.health().is_empty(), "{:?}", r.health());
+            r.put(parse_yaml("id: b\ngestalt: t-ab12/noun@1\nword: Baum\n").unwrap()).await.unwrap();
+            assert!(r.put(parse_yaml("id: c\ngestalt: t-ab12/noun@1\n").unwrap()).await.is_err(), "word is required");
+            assert_eq!(ids(&r.query(&nouns())), ["a", "b"]);
+        });
+    }
+
+    #[test]
+    fn a_definition_arriving_or_changing_judges_its_ymls_again() {
+        pollster::block_on(async {
+            let r = repo();
+            r.storage().write_yml("a", "id: a\ngestalt: t-ab12/noun@1\nword: Haus\n").await.unwrap();
+            r.storage().write_yml("b", "id: b\ngestalt: t-ab12/noun@1\nword: Baum\ngender: m\n").await.unwrap();
+            r.put(note("n", "")).await.unwrap();
+            r.load().await.unwrap();
+            let (sub, page) = r.subscribe(nouns());
+            assert!(page.items.is_empty(), "unknown until defined");
+
+            // arrives by a put
+            r.put(parse_yaml(NOUN_DEF).unwrap()).await.unwrap();
+            let d = r.take_deltas();
+            assert_eq!((d.len(), d[0].sub, d[0].order.clone()), (1, sub, vec!["a".to_owned()]));
+            assert_eq!(r.health().iter().map(|h| h.id.as_str()).collect::<Vec<_>>(), ["b"], "gender isn't a field yet");
+
+            // changes behind the repo's back, like a sync
+            let with_gender = format!("{NOUN_DEF}  gender: {{ type: string }}\n");
+            r.storage().write_yml("gestalt-t-ab12.noun.1", &with_gender).await.unwrap();
+            r.reindex(&["gestalt-t-ab12.noun.1".into()]).await.unwrap();
+            assert_eq!(r.take_deltas()[0].order, ["a", "b"]);
+            assert!(r.health().is_empty());
+
+            // a description alone judges nothing again
+            r.storage().write_yml("gestalt-t-ab12.noun.1", &format!("{with_gender}description: nouns\n")).await.unwrap();
+            r.reindex(&["gestalt-t-ab12.noun.1".into()]).await.unwrap();
+            assert!(r.take_deltas().is_empty());
+
+            // deleted: its ymls are unknown again, kept but not queryable
+            r.delete("gestalt-t-ab12.noun.1", NOW).await.unwrap();
+            assert_eq!(r.take_deltas()[0].remove, ["a", "b"]);
+            assert!(r.storage().read_yml("a").await.unwrap().is_some());
+            assert!(r.get("n").is_some());
+        });
+    }
+
+    #[test]
+    fn a_definition_may_not_redefine_the_apps_own() {
+        pollster::block_on(async {
+            let r = Repo::new(Memory::default(), Gestalts::builtin_with(&["name: geo/place\nversion: 1\n"]).unwrap());
+            assert!(r.put(parse_yaml("id: gestalt-geo.place.1\ngestalt: gestalt@1\nname: geo/place\nversion: 1\nfields: { x: { type: string } }\n").unwrap()).await.is_err());
+            r.storage().write_yml("gestalt-geo.place.1", "id: gestalt-geo.place.1\ngestalt: gestalt@1\nname: geo/place\nversion: 1\nfields: { x: { type: string } }\n").await.unwrap();
+            r.load().await.unwrap();
+            assert_eq!(r.health().len(), 1);
+            assert!(r.put(parse_yaml("id: p\ngestalt: geo/place@1\nx: 1\n").unwrap()).await.is_err(), "the built-in definition holds");
+        });
+    }
+
+    /// One definition changing among 12k ymls judges only its own ymls again.
+    #[test]
+    fn a_changed_definition_among_12k_ymls_touches_only_its_gestalt() {
+        pollster::block_on(async {
+            let r = repo();
+            for i in 0..12_000 {
+                let raw = if i % 4 == 0 { format!("id: n{i}\ngestalt: t-ab12/noun@1\nword: w{i}\n") } else { format!("id: n{i}\ngestalt: note@1\nmain: word{i}\n") };
+                r.storage().write_yml(&format!("n{i}"), &raw).await.unwrap();
+            }
+            r.storage().write_yml("gestalt-t-ab12.noun.1", NOUN_DEF).await.unwrap();
+            r.load().await.unwrap();
+            assert_eq!(r.query(&Query { limit: Some(500), ..nouns() }).items.len(), 500);
+            let (notes_sub, _) = r.subscribe(Query { limit: Some(20), ..notes() });
+            let (nouns_sub, _) = r.subscribe(Query { limit: Some(20), ..nouns() });
+            let start = std::time::Instant::now();
+            r.put(parse_yaml(&format!("{NOUN_DEF}  gender: {{ type: string }}\n")).unwrap()).await.unwrap();
+            let d = r.take_deltas();
+            assert_eq!(d.iter().map(|x| x.sub).collect::<Vec<_>>(), vec![nouns_sub], "notes sleep: {notes_sub}");
+            assert!(start.elapsed().as_secs() < 2, "{:?}", start.elapsed());
         });
     }
 

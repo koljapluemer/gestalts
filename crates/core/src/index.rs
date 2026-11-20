@@ -283,6 +283,8 @@ fn compare(a: &Value, b: &Value) -> Ordering {
 pub struct Index {
     entries: BTreeMap<String, Entry>,
     by_gestalt: HashMap<String, BTreeSet<String>>,
+    /// by the gestalt a yml names, valid or not: what to judge again when a definition arrives or changes
+    by_named: HashMap<String, BTreeSet<String>>,
     by_tag: HashMap<String, BTreeSet<String>>,
     backrefs: HashMap<String, BTreeSet<String>>,
     by_word: BTreeMap<String, BTreeSet<String>>,
@@ -307,10 +309,18 @@ impl Index {
         self.by_gestalt.get(gestalt).into_iter().flatten().filter_map(|id| self.entries.get(id))
     }
 
+    /// The ids of the ymls naming `gestalt`, whatever their state.
+    pub fn naming(&self, gestalt: &str) -> Vec<String> {
+        self.by_named.get(gestalt).into_iter().flatten().cloned().collect()
+    }
+
     /// Puts `e` in, returning what it replaced.
     pub fn insert(&mut self, e: Entry) -> Option<Entry> {
         let old = self.remove(&e.yml.id);
         let id = e.yml.id.clone();
+        if let Some(g) = e.yml.gestalt() {
+            self.by_named.entry(g.to_owned()).or_default().insert(id.clone());
+        }
         if let Some(g) = e.gestalt() {
             self.by_gestalt.entry(g.to_owned()).or_default().insert(id.clone());
             for t in e.tags() {
@@ -336,6 +346,9 @@ impl Index {
                     map.remove(key);
                 }
             }
+        }
+        if let Some(g) = e.yml.gestalt() {
+            drop_from(&mut self.by_named, g, id);
         }
         if let Some(g) = e.gestalt() {
             drop_from(&mut self.by_gestalt, g, id);

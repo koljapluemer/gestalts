@@ -170,3 +170,17 @@ fn conflict_ymls_are_the_same_on_every_device() {
     let other = Conflict { lost: Some(4.into()), ..c };
     assert_ne!(conflict_yml("n", &other, false, NOW).0, k1);
 }
+
+#[test]
+fn definitions_never_merge_into_a_schema_nobody_wrote() {
+    let def = |fields: &str, description: &str| format!("id: gestalt-t.a.1\ngestalt: gestalt@1\nname: t/a\nversion: 1\ndescription: {description}\nfields: {{ {fields} }}\n");
+    let base = def("x: { type: string }", "one");
+    // each side added a field: a conflict, not both fields
+    let r = m(Some(&base), Some(&def("x: { type: string }, y: { type: number }", "one")), Some(&def("x: { type: string }, z: { type: text }", "one")));
+    assert_eq!(r.conflicts.len(), 1, "{r:?}");
+    let fields = parse_yaml(text(&r).unwrap()).unwrap()["fields"].as_mapping().unwrap().len();
+    assert_eq!(fields, 2, "one side's fields, whole");
+    // a description on one side and a field on the other merge as any yml
+    let r = m(Some(&base), Some(&def("x: { type: string }", "two")), Some(&def("x: { type: string }, y: { type: number }", "one")));
+    assert!(r.conflicts.is_empty(), "{r:?}");
+}

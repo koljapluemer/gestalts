@@ -2,6 +2,10 @@
 //!
 //! Every yml names exactly one gestalt, as `gestalt: name@N`, and is judged by that definition alone. Definitions are
 //! closed: a prop the definition doesn't declare makes the yml invalid. Nothing is ever inferred from a yml's content.
+//!
+//! Definitions come from three places: the core's, compiled in; model packages', loaded at runtime
+//! ([`Gestalts::builtin_with`]); and ymls of the gestalt `gestalt@1` in a folder or deck ([`Gestalts::with_data`]),
+//! which the repo takes before judging anything else.
 
 use std::collections::{BTreeMap, HashMap};
 
@@ -137,6 +141,23 @@ pub struct Edge {
     pub label: Option<String>,
 }
 
+/// The gestalt whose ymls are definitions.
+pub const GESTALT: &str = "gestalt@1";
+/// Every definition yml's id starts with this ([`definition_id`]), so a folder's definitions are found without parsing.
+pub const DEFINITION_PREFIX: &str = "gestalt-";
+/// Limits on a definition yml: its text, its field rules (nested ones included), and how deep rules nest.
+pub const MAX_DEFINITION_BYTES: usize = 32 * 1024;
+pub const MAX_DEFINITION_RULES: usize = 200;
+pub const MAX_DEFINITION_DEPTH: usize = 6;
+
+/// The id of the yml defining `package/name@N`: `gestalt-package.name.N`. Names have no dots, so it reads back
+/// unambiguously. `None` for a gestalt without a package: those are never data.
+pub fn definition_id(gestalt: &str) -> Option<String> {
+    let (name, version) = gestalt.split_once('@')?;
+    let (package, name) = name.split_once('/')?;
+    Some(format!("{DEFINITION_PREFIX}{package}.{name}.{version}"))
+}
+
 fn whole(message: impl Into<String>) -> Vec<Problem> {
     vec![Problem { path: String::new(), message: message.into() }]
 }
@@ -235,6 +256,24 @@ impl GestaltDef {
         canonical(&v, &mut text);
         let hash = Sha256::digest(text.as_bytes());
         hash.iter().take(8).map(|b| format!("{b:02x}")).collect()
+    }
+
+    /// What makes a definition broken, whatever it came from.
+    fn validate(&self) -> Result<(), String> {
+        let id = self.id();
+        if !valid_gestalt_id(&id) {
+            return Err(format!("{id}: not a valid gestalt id"));
+        }
+        for (field, rule) in &self.fields {
+            if matches!(field.as_str(), "id" | "gestalt") {
+                return Err(format!("{id}: `{field}` belongs to every yml and can't be declared"));
+            }
+            check_rule(field, rule).map_err(|e| format!("{id}: {e}"))?;
+        }
+        if let Some(m) = &self.merge {
+            Policy::parse(m).map_err(|e| format!("{id}: merge: {e}"))?;
+        }
+        Ok(())
     }
 
     /// How this gestalt's ymls merge: lists of references and text by what their type implies, with its `merge:` rules
@@ -446,6 +485,12 @@ fn check_rule(path: &str, rule: &FieldRule) -> Result<(), String> {
     Ok(())
 }
 
+fn count_rules(rule: &FieldRule, depth: usize, rules: &mut usize, deepest: &mut usize) {
+    *rules += 1;
+    *deepest = (*deepest).max(depth);
+    rule.fields.values().chain(rule.items.as_deref()).chain(rule.values.as_deref()).for_each(|r| count_rules(r, depth + 1, rules, deepest));
+}
+
 fn type_name(t: FieldType) -> &'static str {
     match t {
         FieldType::Any => "anything",
@@ -514,6 +559,8 @@ fn is_url(s: &str) -> bool {
 pub struct Gestalts {
     defs: Vec<GestaltDef>,
     by_id: HashMap<String, usize>,
+    /// `defs[..base]` are compiled in or from model packages, the rest from ymls
+    base: usize,
 }
 
 /// The definitions shipped in `gestalts/`, embedded at build time.
@@ -537,6 +584,7 @@ const BUILTIN: &[&str] = &[
     include_str!("../../../gestalts/plugin-install/v1.yml"),
     include_str!("../../../gestalts/view/v1.yml"),
     include_str!("../../../gestalts/conflict/v1.yml"),
+    include_str!("../../../gestalts/gestalt/v1.yml"),
 ];
 
 impl Gestalts {
@@ -556,27 +604,72 @@ impl Gestalts {
         let defs = sources.iter().map(|s| serde_yaml_ng::from_str::<GestaltDef>(s).map_err(|e| e.to_string())).collect::<Result<Vec<_>, _>>()?;
         let mut by_id = HashMap::new();
         for (i, d) in defs.iter().enumerate() {
-            if !valid_gestalt_id(&d.id()) {
-                return Err(format!("{}: not a valid gestalt id", d.id()));
-            }
-            for (field, rule) in &d.fields {
-                if matches!(field.as_str(), "id" | "gestalt") {
-                    return Err(format!("{}: `{field}` belongs to every yml and can't be declared", d.id()));
-                }
-                check_rule(field, rule).map_err(|e| format!("{}: {e}", d.id()))?;
-            }
-            if let Some(m) = &d.merge {
-                Policy::parse(m).map_err(|e| format!("{}: merge: {e}", d.id()))?;
-            }
+            d.validate()?;
             if by_id.insert(d.id(), i).is_some() {
                 return Err(format!("{} is defined twice", d.id()));
             }
         }
-        Ok(Gestalts { defs, by_id })
+        let base = defs.len();
+        Ok(Gestalts { defs, by_id, base })
+    }
+
+    /// These definitions, without any taken from ymls before, plus `data`: the definitions of a folder's `gestalt@1`
+    /// ymls ([`Self::definition`]). One that names a gestalt already here is left out; [`Self::definition`] refuses
+    /// those anyway.
+    pub fn with_data(&self, data: impl IntoIterator<Item = GestaltDef>) -> Self {
+        let mut defs = self.defs[..self.base].to_vec();
+        let mut by_id: HashMap<String, usize> = defs.iter().enumerate().map(|(i, d)| (d.id(), i)).collect();
+        for d in data {
+            if let std::collections::hash_map::Entry::Vacant(v) = by_id.entry(d.id()) {
+                v.insert(defs.len());
+                defs.push(d);
+            }
+        }
+        Gestalts { defs, by_id, base: self.base }
     }
 
     pub fn defs(&self) -> &[GestaltDef] {
         &self.defs
+    }
+
+    /// The definitions taken from ymls.
+    pub fn data(&self) -> &[GestaltDef] {
+        &self.defs[self.base..]
+    }
+
+    /// Whether `id` (`name@N`) is compiled in or comes from a model package, as opposed to a yml.
+    pub fn is_builtin(&self, id: &str) -> bool {
+        self.by_id.get(id).is_some_and(|&i| i < self.base)
+    }
+
+    /// The definition a `gestalt@1` yml holds, or what's wrong with it as one. Its shape as a yml is checked by
+    /// `gestalt@1` itself; this is the rest: that it is a definition, namespaced, named by its id, within the limits,
+    /// and not one of the app's own.
+    pub fn definition(&self, yml: &Yml) -> Result<GestaltDef, Vec<Problem>> {
+        if yml.raw.len() > MAX_DEFINITION_BYTES {
+            return Err(whole(format!("is longer than {MAX_DEFINITION_BYTES} bytes")));
+        }
+        let Some(m) = yml.map() else { return Err(whole("is not a map")) };
+        let rest: Mapping = m.iter().filter(|(k, _)| !matches!(k.as_str(), Some("id" | "gestalt"))).map(|(k, v)| (k.clone(), v.clone())).collect();
+        let def: GestaltDef = serde_yaml_ng::from_value(Value::Mapping(rest)).map_err(|e| whole(format!("is not a definition: {e}")))?;
+        def.validate().map_err(whole)?;
+        let id = def.id();
+        let Some(expected) = definition_id(&id) else { return Err(whole(format!("`{}` has no package: a definition yml names `package/name`", def.name))) };
+        if yml.id != expected {
+            return Err(whole(format!("defines {id}, so its id is `{expected}`")));
+        }
+        if self.is_builtin(&id) {
+            return Err(whole(format!("redefines {id}, which this app has built in")));
+        }
+        let (mut rules, mut depth) = (0, 0);
+        def.fields.values().for_each(|r| count_rules(r, 1, &mut rules, &mut depth));
+        if rules > MAX_DEFINITION_RULES {
+            return Err(whole(format!("has {rules} field rules, more than {MAX_DEFINITION_RULES}")));
+        }
+        if depth > MAX_DEFINITION_DEPTH {
+            return Err(whole(format!("nests rules {depth} deep, more than {MAX_DEFINITION_DEPTH}")));
+        }
+        Ok(def)
     }
 
     /// by `name@version`
@@ -604,7 +697,15 @@ impl Gestalts {
         }
         let Some(def) = self.get(gestalt) else { return YmlState::Unknown(gestalt.to_owned()) };
         let problems = def.check(m);
-        if problems.is_empty() { YmlState::Valid(gestalt.to_owned()) } else { YmlState::Invalid(problems) }
+        if !problems.is_empty() {
+            return YmlState::Invalid(problems);
+        }
+        if gestalt == GESTALT
+            && let Err(problems) = self.definition(yml)
+        {
+            return YmlState::Invalid(problems);
+        }
+        YmlState::Valid(gestalt.to_owned())
     }
 }
 
@@ -831,6 +932,51 @@ mod tests {
         blobs.sort();
         assert_eq!(blobs, vec!["a.png", "b.png"]);
         assert_eq!(def.searchable(n.map().unwrap()), vec!["see ![[a.png]]", "z", "T"].into_iter().collect::<Vec<_>>());
+    }
+
+    const NOUN: &str = "id: gestalt-t-ab12.noun.1\ngestalt: gestalt@1\nname: t-ab12/noun\nversion: 1\ndescription: A German noun.\nfields:\n  word: { type: string, required: true }\n  gender: { type: string, one_of: [m, f, n] }\n";
+
+    fn definition(raw: &str) -> Result<GestaltDef, String> {
+        let g = Gestalts::builtin();
+        let y = Yml::parse(raw.lines().next().unwrap().trim_start_matches("id: "), raw);
+        match g.classify(&y) {
+            YmlState::Valid(_) => Ok(g.definition(&y).unwrap()),
+            YmlState::Invalid(p) => Err(format!("{p:?}")),
+            other => panic!("{other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_definition_yml_is_a_namespaced_definition_named_by_its_id() {
+        assert_eq!(definition_id("t-ab12/noun@1").as_deref(), Some("gestalt-t-ab12.noun.1"));
+        assert_eq!(definition_id("note@1"), None);
+        let def = definition(NOUN).unwrap();
+        assert_eq!((def.id(), def.description.as_deref()), ("t-ab12/noun@1".to_owned(), Some("A German noun.")));
+        let g = Gestalts::builtin().with_data([def]);
+        assert_eq!(g.classify(&Yml::parse("n", "id: n\ngestalt: t-ab12/noun@1\nword: Haus\ngender: n\n")), YmlState::Valid("t-ab12/noun@1".into()));
+        assert!(matches!(g.classify(&Yml::parse("n", "id: n\ngestalt: t-ab12/noun@1\nword: Haus\ngender: x\n")), YmlState::Invalid(_)));
+        assert_eq!((g.data().len(), g.is_builtin("t-ab12/noun@1"), g.is_builtin("note@1")), (1, false, true));
+        // taking data again replaces the data, never the app's own
+        assert!(g.with_data([]).get("t-ab12/noun@1").is_none());
+    }
+
+    #[test]
+    fn a_definition_yml_is_refused_when() {
+        for (why, raw) in [
+            ("its id isn't its name", NOUN.replace("gestalt-t-ab12.noun.1", "gestalt-t-ab12.noun.2")),
+            ("it has no package", "id: gestalt-noun.1\ngestalt: gestalt@1\nname: noun\nversion: 1\n".into()),
+            ("a rule is broken", NOUN.replace("one_of: [m, f, n]", "targets: [note]")),
+            ("a key is unknown", NOUN.replace("description:", "summary:")),
+            ("it declares id", NOUN.replace("word:", "id:")),
+            ("its merge is broken", format!("{NOUN}merge: sometimes\n")),
+            ("it nests too deep", NOUN.replace("{ type: string, required: true }", &format!("{}{{ type: string }}{}", "{ type: map, fields: { x: ".repeat(7), " } }".repeat(7)))),
+            ("it's too long", format!("{NOUN}{}", (0..1000).map(|i| format!("  f{i}: {{ type: string }}\n")).collect::<String>())),
+        ] {
+            assert!(definition(&raw).is_err(), "{why}: {raw}");
+        }
+        let built_in = Gestalts::builtin_with(&["name: x/y\nversion: 1\n"]).unwrap();
+        let y = Yml::parse("gestalt-x.y.1", "id: gestalt-x.y.1\ngestalt: gestalt@1\nname: x/y\nversion: 1\n");
+        assert!(matches!(built_in.classify(&y), YmlState::Invalid(_)), "a package's gestalt is the app's own too");
     }
 
     #[test]

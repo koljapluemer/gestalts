@@ -63,6 +63,32 @@ A structural change is a new version. What's presentational (`description`) chan
 definition that isn't listed or whose structure differs, and `mise run gestalts:publish` lists new ones. A listed line
 may be deleted by hand only for a definition that has never gone out (not deployed, in no deck).
 
+### Definitions as ymls
+
+A gestalt made outside the repo (a teacher's lesson, a workshop draft) is defined by a yml of `gestalt@1`, travelling in
+the folder or deck like any other:
+
+```yaml
+id: gestalt-t-ab12.noun.1     # gestalt-<package>.<name>.<version>: every copy has the same id
+gestalt: gestalt@1
+name: t-ab12/noun             # always package/name
+version: 1
+description: A German noun.
+fields:
+  word: { type: string, required: true }
+  gender: { type: string, one_of: [m, f, n] }
+```
+
+- The repo takes a folder's definitions before judging anything else, and when one arrives, changes or goes (a sync, a
+  put, a mounted deck) judges that gestalt's ymls again, and only those. A change to `description` alone judges
+  nothing again.
+- A definition yml is invalid if its id isn't its name, its name has no package, it redefines a gestalt the app has
+  (compiled in or from a model package), or it's over the limits: 32 KiB, 200 field rules, rules nested 6 deep.
+- Two copies that differ in `name`, `version`, `fields` or `merge` don't merge: that's a sync conflict, one side kept
+  whole, never a union of both sides' fields. A `description` merges like any value.
+- Who may use which package is up to whoever hands out folders (the teacher app gives each teacher one); the core only
+  insists there is one.
+
 ## The core gestalts
 
 | Gestalt | |
@@ -83,6 +109,7 @@ may be deleted by hand only for a definition that has never gone out (not deploy
 | `plugin-install@1` | whether a plugin is on here |
 | `view@1` | a vibecoded view: `title`, `source`, `reads`, `writes` |
 | `conflict@1` | a value a sync couldn't settle |
+| `gestalt@1` | a gestalt's definition, as data (above) |
 
 `concept@1` (with `parents` and `children`) and `concept-practice-event@1` are still defined, so ymls of them stay valid,
 but nothing uses them: concepts form no tree, and events don't copy conclusions.

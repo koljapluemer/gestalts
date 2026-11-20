@@ -293,7 +293,7 @@ impl WasmRepo {
         let base = SyncBase::open(Opfs::open(&format!("{dir}-sync-base/{slug}")).await.map_err(err)?).await.map_err(err)?;
         marker(&mut timings, &mut last)("open_base");
         let fetched =
-            gestalts_core::fetch_remote(&*self.writable, &remote, &base, self.repo.gestalts(), &mut marker(&mut timings, &mut last)).await.map_err(err)?;
+            gestalts_core::fetch_remote(&*self.writable, &remote, &base, &self.repo.gestalts(), &mut marker(&mut timings, &mut last)).await.map_err(err)?;
         let run = SyncRun { remote, base, folder: folder_path.to_owned(), fetched: Some(fetched), pending: None, timings, last };
         *self.sync_run.borrow_mut() = Some(run);
         Ok(())
@@ -306,7 +306,7 @@ impl WasmRepo {
         let mut run = self.sync_run.borrow_mut().take().ok_or_else(|| JsError::new("syncFetch first"))?;
         let fetched = run.fetched.take().ok_or_else(|| JsError::new("syncFetch first"))?;
         let (mut timings, mut last) = (std::mem::take(&mut run.timings), run.last);
-        let pending = gestalts_core::merge_local(&*self.writable, &run.remote, &mut run.base, fetched, self.repo.gestalts(), &now(),
+        let pending = gestalts_core::merge_local(&*self.writable, &run.remote, &mut run.base, fetched, &self.repo.gestalts(), &now(),
                                                  &mut marker(&mut timings, &mut last)).await.map_err(err)?;
         (run.timings, run.last) = (timings, last);
         // only what sync wrote: the repo's own writes are indexed already
@@ -326,7 +326,7 @@ impl WasmRepo {
         let mut run = self.sync_run.borrow_mut().take().ok_or_else(|| JsError::new("syncMerge first"))?;
         let pending = run.pending.take().ok_or_else(|| JsError::new("syncMerge first"))?;
         let (mut timings, mut last) = (std::mem::take(&mut run.timings), run.last);
-        let report = gestalts_core::push(&*self.writable, &run.remote, &mut run.base, pending, self.repo.gestalts(),
+        let report = gestalts_core::push(&*self.writable, &run.remote, &mut run.base, pending, &self.repo.gestalts(),
                                          &mut marker(&mut timings, &mut last)).await.map_err(err)?;
         (run.timings, run.last) = (timings, last);
         let dir = self.dir.clone().unwrap_or_default();
