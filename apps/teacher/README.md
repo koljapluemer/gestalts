@@ -1,0 +1,16 @@
+# teacher
+
+Teachers make interactive lessons with an agent and publish them to their students by link. The server is
+`crates/teacher` (`gestalts-teacher`); lessons open in `apps/player` on another domain. See
+[`doc/architecture.md`](doc/architecture.md) and, for the box, [`deploy/teacher/`](../../deploy/teacher/README.md).
+
+Locally, from the repo root:
+
+```sh
+mise run teacher:admin add-school "Test"                          # prints its id
+mise run teacher:admin add-teacher --school <id> --email a@b.c    # prints a password
+ANTHROPIC_API_KEY=… mise run teacher:serve                        # API on :7740, lessons on :7741
+mise run teacher:app                                              # the app on :5178
+```
+
+Published links point at `http://127.0.0.1:7741/l/<lesson>`.

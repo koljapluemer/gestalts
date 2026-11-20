@@ -1,0 +1,23 @@
+[Unit]
+Description=Teacher app server (gestalts-teacher)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=teacher
+Group=teacher
+WorkingDirectory=/opt/gestalts-teacher/current
+# ANTHROPIC_API_KEY=…, TEACHER_LESSON_ORIGIN=https://lektion.example.net
+EnvironmentFile=/etc/gestalts-teacher.env
+Environment=TEACHER_DATA=/var/lib/gestalts-teacher
+Environment=TEACHER_REPO=/opt/gestalts-teacher/current
+ExecStart=/opt/gestalts-teacher/current/bin/gestalts-teacher serve
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/gestalts-teacher
+
+[Install]
+WantedBy=multi-user.target

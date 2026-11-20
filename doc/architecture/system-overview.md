@@ -11,6 +11,7 @@ crates/peer       another node over HTTP, a published deck, pairing
 crates/wasm       the core in the browser
 crates/device     a phone's folder and sync thread
 crates/node       the local server, watcher, backends, LAN pairing
+crates/teacher    the teacher app's server: accounts, drafts synced and validated, the agent, publishing, the lesson domain
 packages/view     @gestalts/view: everything a view gets from the app
 packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives); on view and sources
 packages/learning @gestalts/learning: FSRS, practice sessions
@@ -18,7 +19,8 @@ packages/sources  @gestalts/sources: bibliographic sources, BibTeX in and out
 packages/client   the wasm-backed repo, its core in a worker; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime (versioned by its hash)
-packages/workshop making a view with an agent: drafts, their preview, the chat, the agent protocol
+packages/workshop making a view with an agent: drafts, their preview, the chat, the agent protocol, the agent
+                  template, the lesson format
 packages/npm-bundle npm packages for views, installed without scripts, bundled and pinned on a server (Node)
 packages/viz      @gestalts/viz: interactive visualizations (params, clock, model, scene) and their runtime; imports nothing of ours
 plugins/          the views that live in source: notes, flashcards, sources, concepts

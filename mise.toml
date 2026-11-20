@@ -267,6 +267,11 @@ description = "The teacher app on :5178 with hot reload, its /api from the teach
 depends = ["setup"]
 run = "pnpm --dir apps/teacher dev"
 
+[tasks."teacher:deploy"]
+description = "Build the teacher server, app and player and ship them to TEACHER_HOST (deploy/teacher/README.md; needs a committed tree)"
+depends = ["setup"]
+run = "bash scripts/deploy-teacher.sh"
+
 [tasks."teacher:admin"]
 description = "Schools and teachers on the local teacher server: mise run teacher:admin add-school NAME, add-teacher --school ID --email E"
 run = "cargo run -q -p gestalts-teacher -- --data teacher-data admin"

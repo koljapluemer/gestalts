@@ -1,6 +1,10 @@
 # A hosted app for teachers: discussion
 
-Not built. Where the thinking stands, from a discussion on 2026-11-16 and 2026-11-17.
+The MVP is built (2026-11-20): admin-made accounts, drafts with their own gestalts and content, the agent on the
+server, previews under the closed CSP with npm from our own origin, publishing by link to the player, unpublishing
+([[../../apps/teacher/doc/architecture|Teacher app architecture]], `deploy/teacher/`). Not built yet: headless
+screenshots for the agent, QR and short codes, rotating links, the offline player, schools and sharing in the UI,
+submissions, OIDC. The thinking below is from a discussion on 2026-11-16 and 2026-11-17.
 
 ## What it is
 
