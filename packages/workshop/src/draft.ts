@@ -66,11 +66,14 @@ const STARTER = `export default function View() {
 }
 `;
 
-/** A new draft named after `title`; its id can be a file name. */
-export async function createDraft(repo: Pick<Repo, 'put'>, title: string, runtime?: string): Promise<string> {
+/**
+ * A new draft named after `title`; its id can be a file name. A server that hands out drafts gives the id and package
+ * (`given`); otherwise they're made here.
+ */
+export async function createDraft(repo: Pick<Repo, 'put'>, title: string, runtime?: string, given?: { id: string; package: string }): Promise<string> {
   const slug = title.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'view';
-  const id = `${slug}-${hash48(`${title}:${Date.now()}:${Math.random()}`).slice(0, 8)}`;
-  await repo.put(viewYml({ id, title, source: STARTER, reads: [], writes: [], npm: {}, runtime, package: packageOf(id), members: [] }));
+  const id = given?.id ?? `${slug}-${hash48(`${title}:${Date.now()}:${Math.random()}`).slice(0, 8)}`;
+  await repo.put(viewYml({ id, title, source: STARTER, reads: [], writes: [], npm: {}, runtime, package: given?.package ?? packageOf(id), members: [] }));
   return id;
 }
 

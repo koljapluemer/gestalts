@@ -17,11 +17,15 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": [
-      "node"
+      "vite/client",
+      "node",
+      "@gestalts/vite/client"
     ],
     "allowImportingTsExtensions": true
   },
   "include": [
-    "worker"
+    "src",
+    "worker",
+    "vite.config.ts"
   ]
 }

@@ -5,3 +5,4 @@ packages/client/wasm/
 *.tsbuildinfo
 __pycache__/
 .venv/
+teacher-data/

@@ -24,7 +24,9 @@ pub mod agent;
 pub mod auth;
 pub mod db;
 pub mod drafts;
+pub mod lessons;
 pub mod npm;
+pub mod publish;
 pub mod validate;
 pub mod worker;
 
@@ -91,12 +93,16 @@ pub struct Inner {
     pub writes: tokio::sync::Mutex<()>,
     pub worker: worker::Worker,
     pub agents: agent::Agents,
+    /// where lesson links point: the lesson domain, as students reach it
+    pub lesson_origin: String,
+    pub misses: lessons::Misses,
 }
 
 /// What the server runs besides itself.
 pub struct Services {
     pub worker: worker::WorkerConfig,
     pub model: agent::Model,
+    pub lesson_origin: String,
 }
 
 #[derive(Clone)]
@@ -115,7 +121,7 @@ impl AppState {
         let texts: Vec<&str> = models.iter().map(String::as_str).collect();
         let gestalts = Gestalts::builtin_with(&texts)?;
         let agents = agent::Agents::new(services.model, agent::Reference::new(services.worker.template.clone()));
-        let worker = worker::Worker::new(services.worker);
+        let worker = worker::Worker::new(services.worker.clone());
         Ok(AppState(Arc::new(Inner {
             db,
             data,
@@ -126,6 +132,8 @@ impl AppState {
             writes: tokio::sync::Mutex::default(),
             worker,
             agents,
+            lesson_origin: services.lesson_origin,
+            misses: lessons::Misses::default(),
         })))
     }
 }
@@ -210,10 +218,10 @@ pub fn now_iso() -> String {
 
 /// The app's routes, under `/api`.
 pub fn app(state: AppState) -> axum::Router {
-    axum::Router::new().nest("/api", auth::routes().merge(drafts::routes()).merge(agent::routes()).merge(npm::routes())).with_state(state)
+    axum::Router::new().nest("/api", auth::routes().merge(drafts::routes()).merge(agent::routes()).merge(npm::routes()).merge(publish::routes())).with_state(state)
 }
 
 /// The lesson domain's routes.
 pub fn lessons(state: AppState) -> axum::Router {
-    axum::Router::new().with_state(state)
+    lessons::routes().with_state(state)
 }

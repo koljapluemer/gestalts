@@ -251,6 +251,26 @@ run = "pnpm --dir apps/vizint-workshop build"
 
 # --- learning-workshop ---
 
+[tasks."teacher:serve"]
+description = "The teacher server on :7740 (API) and :7741 (lessons), data in teacher-data/, after installing the player build (needs ANTHROPIC_API_KEY for the agent)"
+depends = ["setup"]
+shell = "bash -c"
+run = """
+set -euo pipefail
+pnpm --dir apps/player build
+cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist apps/player/dist
+cargo run -q -p gestalts-teacher -- --data teacher-data serve --insecure-cookies
+"""
+
+[tasks."teacher:app"]
+description = "The teacher app on :5178 with hot reload, its /api from the teacher server (mise run teacher:serve)"
+depends = ["setup"]
+run = "pnpm --dir apps/teacher dev"
+
+[tasks."teacher:admin"]
+description = "Schools and teachers on the local teacher server: mise run teacher:admin add-school NAME, add-teacher --school ID --email E"
+run = "cargo run -q -p gestalts-teacher -- --data teacher-data admin"
+
 [tasks."workshop:dev"]
 description = "The local Make node on :7727 and the learning workshop on :5175 with hot reload"
 depends = ["setup"]

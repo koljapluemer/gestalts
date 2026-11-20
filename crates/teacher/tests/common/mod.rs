@@ -21,6 +21,7 @@ pub fn services(model: Option<String>, cache: &std::path::Path) -> Services {
     Services {
         worker: WorkerConfig { node: "node".into(), script: repo.join("apps/teacher/worker/worker.ts"), template: repo.join("packages/workshop/agent-template"), npm_cache: cache.to_owned() },
         model: Model { api_key: model.as_ref().map(|_| "test-key".into()), base_url: model.unwrap_or_default(), model: "claude-opus-5-5".into() },
+        lesson_origin: "https://lessons.example".into(),
     }
 }
 
@@ -54,6 +55,14 @@ impl Server {
         let set_cookie = res.headers().get(header::SET_COOKIE).map(|v| v.to_str().unwrap().split(';').next().unwrap().to_owned());
         let bytes = res.into_body().collect().await.unwrap().to_bytes();
         (status, serde_json::from_slice(&bytes).unwrap_or(Value::Null), set_cookie)
+    }
+
+    /// A GET on the lesson domain: status, headers, body.
+    pub async fn lessons(&self, path: &str) -> (StatusCode, axum::http::HeaderMap, Vec<u8>) {
+        let req = Request::builder().uri(path).body(Body::empty()).unwrap();
+        let res = gestalts_teacher::lessons(self.state.clone()).oneshot(req).await.unwrap();
+        let (status, headers) = (res.status(), res.headers().clone());
+        (status, headers, res.into_body().collect().await.unwrap().to_bytes().to_vec())
     }
 
     pub async fn login(&self, email: &str) -> String {

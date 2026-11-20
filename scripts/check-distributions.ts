@@ -43,6 +43,10 @@ for (const file of distributions(join(root, 'apps'))) {
     else if (!isPackage(path)) problems.push(`${where}: model ${entry} is not a package (gestalts/<package>/<name>/v<N>.yml)`);
   }
 }
+// a lesson made in the teacher app runs in the player and is checked by the server: all three know the same models
+const models = (app: string) => (((parse(readFileSync(join(root, 'apps', app, 'distribution.yml'), 'utf8')) ?? {}) as { models?: string[] }).models ?? []).map((m) => m.split('/').pop()).sort().join(', ');
+const server = /pub const MODELS: &\[&str\] = &\[([^\]]*)\]/.exec(readFileSync(join(root, 'crates/teacher/src/lib.rs'), 'utf8'))?.[1].split(',').map((m) => m.trim().replaceAll('"', '')).filter(Boolean).sort().join(', ');
+if (models('teacher') !== models('player') || models('teacher') !== server) problems.push(`the teacher app (${models('teacher')}), the player (${models('player')}) and crates/teacher's MODELS (${server}) must name the same models`);
 for (const p of problems) console.error(p);
 if (problems.length) process.exit(1);
 console.log('distribution.yml files: every plugin in plugins/, every model in gestalts/');

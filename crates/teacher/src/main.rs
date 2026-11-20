@@ -39,6 +39,9 @@ enum Command {
         /// the agent's model
         #[arg(long, default_value = MODEL)]
         model: String,
+        /// the lesson domain as students reach it, for links
+        #[arg(long, env = "TEACHER_LESSON_ORIGIN", default_value = "http://127.0.0.1:7741")]
+        lesson_origin: String,
     },
     /// Schools and accounts
     Admin {
@@ -62,6 +65,11 @@ enum Admin {
     ResetPassword {
         #[arg(long)]
         email: String,
+    },
+    /// A player build (apps/player/dist) under runtime/<its version>/, for the lessons made against it; prints the version
+    InstallPlayer {
+        #[arg(long, default_value = "apps/player/dist")]
+        dist: PathBuf,
     },
 }
 
@@ -95,6 +103,13 @@ async fn run(cli: Cli) -> Result<(), String> {
                     db.add_account(&random_hex(8), &school, &email, &auth::hash_password(&password), limits.token_budget, &now).map_err(|e| e.to_string())?;
                     println!("{password}");
                 }
+                Admin::InstallPlayer { dist } => {
+                    let meta = std::fs::read_to_string(dist.join("gestalts-runtime.json")).map_err(|e| format!("{}: {e}: build the player first", dist.display()))?;
+                    let version = serde_json::from_str::<serde_json::Value>(&meta).ok().and_then(|v| v["version"].as_str().map(str::to_owned)).ok_or("gestalts-runtime.json has no version")?;
+                    let to = cli.data.join("runtime").join(&version);
+                    copy_dir(&dist, &to).map_err(|e| format!("{}: {e}", to.display()))?;
+                    println!("{version}");
+                }
                 Admin::ResetPassword { email } => {
                     let password = random_token(12);
                     if !db.set_password(&email.trim().to_lowercase(), &auth::hash_password(&password)).map_err(|e| e.to_string())? {
@@ -105,7 +120,7 @@ async fn run(cli: Cli) -> Result<(), String> {
             }
             Ok(())
         }
-        Command::Serve { app, lessons, insecure_cookies, repo, node, model } => {
+        Command::Serve { app, lessons, insecure_cookies, repo, node, model, lesson_origin } => {
             let repo = std::fs::canonicalize(&repo).map_err(|e| format!("{}: {e}", repo.display()))?;
             let services = Services {
                 worker: WorkerConfig {
@@ -119,6 +134,7 @@ async fn run(cli: Cli) -> Result<(), String> {
                     base_url: std::env::var("ANTHROPIC_BASE_URL").unwrap_or_else(|_| "https://api.anthropic.com".into()),
                     model,
                 },
+                lesson_origin,
             };
             if services.model.api_key.is_none() {
                 eprintln!("no ANTHROPIC_API_KEY: the agent is off");
@@ -136,4 +152,17 @@ async fn run(cli: Cli) -> Result<(), String> {
             }
         }
     }
+}
+
+fn copy_dir(from: &std::path::Path, to: &std::path::Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(to)?;
+    for e in std::fs::read_dir(from)? {
+        let e = e?;
+        if e.file_type()?.is_dir() {
+            copy_dir(&e.path(), &to.join(e.file_name()))?;
+        } else {
+            std::fs::copy(e.path(), to.join(e.file_name()))?;
+        }
+    }
+    Ok(())
 }
