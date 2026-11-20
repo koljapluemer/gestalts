@@ -233,7 +233,9 @@ export function gestaltsPlugins(): PluginOption[] {
         res.end(readFileSync(file));
       });
     },
-    generateBundle() {
+    async generateBundle() {
+      // the frame runtime this build carries, by version, for whatever serves builds by it (the lesson player)
+      if (runtime) this.emitFile({ type: 'asset', fileName: 'gestalts-runtime.json', source: `${JSON.stringify({ version: (await runtime).version })}\n` });
       for (const p of load(appRoot).plugins) {
         for (const d of p.decks) {
           for (const f of files(d.dir)) {

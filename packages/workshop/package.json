@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Making a view with an agent: the draft format, its preview, the chat, and the agent protocol",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./lesson": "./src/lesson.ts"
   },
   "scripts": {
     "typecheck": "tsc -p ."
