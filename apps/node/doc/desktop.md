@@ -23,8 +23,9 @@ the settings page's Vite server (from :5176), which proxies the node's API so th
 by it; `mise run gestalter:dev` starts it the same way, with the settings page built in, next to gestalter's Vite
 server. The dev profile keeps its settings apart from an installed app, and the dev node stays clear of the installed
 one's 7717.
-`mise run dev` (`scripts/dev.sh`) starts the dev node with the settings page's Vite server, the workshop's Make node and
-every app's Vite server, each on the first free port from its usual one, and prints where they are.
+`mise run just dev` (`scripts/dev.sh`) starts the dev node with the settings page's Vite server, the workshops' and the
+teacher's nodes, the teacher server and every app's Vite server, each on the first free port from its usual one, and
+prints where they are.
 
 ## The apps on it
 

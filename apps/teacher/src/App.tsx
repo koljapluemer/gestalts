@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { LogOut, Plus } from 'lucide-react';
+import { LogOut, Plus, Settings as SettingsIcon } from 'lucide-react';
 import * as api from './api';
+import { loadChoice, saveChoice, type AgentChoice } from './agent';
 import { DraftPane } from './DraftPane';
+import { Settings } from './Settings';
 
 /** Signed in: the teacher's drafts, and the one open. Signed out: the sign-in. */
 export function App() {
@@ -52,6 +54,8 @@ function Teacher({ me, onOut }: { me: api.Me; onOut: () => void }) {
   const [list, setList] = useState<api.DraftInfo[]>();
   const [error, setError] = useState<string>();
   const [selected, setSelected] = useState<string | null>(() => { try { return localStorage.getItem(SELECTED); } catch { return null; } });
+  const [choice, setChoice] = useState<AgentChoice>(loadChoice);
+  const [settings, setSettings] = useState(false);
   const refresh = useCallback(() => api.drafts().then(setList, (e: unknown) => setError(e instanceof Error ? e.message : String(e))), []);
   useEffect(() => { void refresh(); }, [refresh]);
   const choose = (id: string | null) => {
@@ -76,6 +80,7 @@ function Teacher({ me, onOut }: { me: api.Me; onOut: () => void }) {
       <header className="navbar min-h-0 gap-2 border-b border-base-300 bg-base-100 px-4 py-1">
         <span className="flex-1 font-semibold">Lessons</span>
         <span className="hidden text-sm text-base-content/60 sm:inline">{me.email}</span>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSettings(true)} title="Settings"><SettingsIcon className="size-4" /></button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => void signOut()} title="Sign out"><LogOut className="size-4" /></button>
       </header>
       {error && <div role="alert" className="alert alert-error m-2">{error}</div>}
@@ -90,10 +95,11 @@ function Teacher({ me, onOut }: { me: api.Me; onOut: () => void }) {
         </nav>
         <main className="min-w-0 flex-1">
           {current
-            ? <DraftPane key={current.id} info={current} onChanged={() => void refresh()} onDeleted={() => { choose(null); void refresh(); }} />
+            ? <DraftPane key={current.id} info={current} agent={choice} onChanged={() => void refresh()} onDeleted={() => { choose(null); void refresh(); }} />
             : <div className="flex h-full items-center justify-center p-4 text-center text-base-content/60">Pick a lesson, or make a new one.</div>}
         </main>
       </div>
+      {settings && <Settings choice={choice} onClose={() => setSettings(false)} onSave={(c) => { saveChoice(c); setChoice(c); setSettings(false); }} />}
     </div>
   );
 }

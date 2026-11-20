@@ -17,6 +17,8 @@ export type TurnRequest = {
   gestalts: string[];
   /** what the preview reported since the last turn, and what couldn't be saved of the last one */
   diagnostics: Diagnostic[];
+  /** what the app tells the agent about who it makes views for, before the contract (the local CLI's; a server has its own) */
+  brief?: string;
 };
 
 /** An error from the preview, or a file of the last turn the repo refused (`save`). */

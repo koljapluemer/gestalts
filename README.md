@@ -27,10 +27,16 @@ packaging tools as pinned in `mise.toml`; rustup picks up the Rust version (and 
 `rust-toolchain.toml`.
 
 ```sh
-mise install          # once after cloning, and when mise.toml changes
-mise run setup        # JS dependencies, the core in wasm, the Make agent template
-mise run check        # tests, lints, typechecks, deck health
-mise run dev                                      # all of the below at once, beside an installed node
+mise run just setup   # a new machine: the pinned tools and Rust, dependencies, the core in wasm, a local teacher
+                      # account; again after pulling
+mise run just dev     # everything at once with hot reload, beside an installed node: an overview of where each app
+                      # is, their output in target/dev/<name>.log
+```
+
+The rest is hidden from `mise tasks` (`mise tasks --hidden` lists it), for one-offs and agents:
+
+```sh
+mise run check                                    # tests, lints, typechecks, deck health
 mise run gestalter:dev                            # gestalter on a dev node, hot reload
 mise run node:dev                                 # the desktop node and its settings page, hot reload
 mise run loops:dev                                # loops-for-learning
@@ -42,5 +48,5 @@ mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's dec
 mise run health-data ~/some-folder                # which ymls can't be used, and why
 mise run serve ~/some-folder                      # the node headless with the repo's plugins
 mise run deploy                                   # gestalter, loops-for-learning, vizint to their *.koljasam.com sites
-mise tasks            # everything else
+mise run teacher:deploy                           # the teacher app to its box (deploy/teacher/README.md)
 ```

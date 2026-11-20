@@ -5,9 +5,8 @@ import { registry } from 'virtual:gestalts-plugins';
 import { RepoProvider, useHostQuery, type Repo } from '@gestalts/client';
 import { ConnectorSettings, usePluginRepo } from '@gestalts/host';
 import type { ViewError } from '@gestalts/view';
-import { Chat, Preview, VIEWS, asDraft, createDraft, type Draft } from '@gestalts/workshop';
+import { Chat, Preview, VIEWS, asDraft, cliBackend, createDraft, repoNode, type Draft } from '@gestalts/workshop';
 import css from '../app.css?inline';
-import { cliBackend } from './agents/cli';
 
 /**
  * The workshop: views vibecoded into drafts (`view@2` ymls and their members, `@gestalts/workshop`), each run in a
@@ -40,7 +39,7 @@ export function Make() {
 
 function Workbench({ repo, draft }: { repo: Repo; draft: Draft }) {
   const [errors, setErrors] = useState<ViewError[]>([]);
-  const [backend] = useState(() => cliBackend(repo));
+  const [backend] = useState(() => cliBackend(repoNode(repo, 'mise run workshop:node')));
   const onError = useCallback((e: ViewError) => setErrors((es) => [...es, e].slice(-20)), []);
   return (
     <div className="grid h-full min-h-0 grid-rows-2 md:grid-cols-[minmax(0,1fr)_24rem] md:grid-rows-1">

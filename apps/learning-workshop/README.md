@@ -4,7 +4,7 @@ Make learning views: create drafts (a view with its own gestalts and content, `@
 have a local Claude CLI agent edit them. Deployed apart from loops-for-learning's public site.
 
 Drafts live in the browser (`workshop-views`) and sync with the local Make node, which keeps them in `$WORKSHOP_DATA`
-(default `~/gestalt-workshop-views`) and runs the agent (`plugins/workshop-agent`, workspaces in
+(default `~/gestalt-workshop-views`) and runs the agent (`packages/workshop/plugins/workshop-agent`, shared with the teacher app; workspaces in
 `$WORKSHOP_WORKSPACES`, default `~/.local/share/gestalt-workshop/workspaces`).
 
 From the repo root (the agent needs the `claude` CLI):

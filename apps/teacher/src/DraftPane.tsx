@@ -4,16 +4,17 @@ import { registry } from 'virtual:gestalts-plugins';
 import { RepoProvider, useConnector, useHostQuery, useOpenRepo, type Repo } from '@gestalts/client';
 import { closedCsp } from '@gestalts/host';
 import type { ViewError } from '@gestalts/view';
-import { Chat, Preview, VIEWS, asDraft, createDraft, httpBackend, saveDraft } from '@gestalts/workshop';
+import { Chat, Preview, VIEWS, asDraft, createDraft, saveDraft } from '@gestalts/workshop';
 import tailwind from '@tailwindcss/browser?raw';
 import css from './app.css?inline';
+import { backendFor, type AgentChoice } from './agent';
 import * as api from './api';
 
 /**
  * One draft: its own folder in this browser, synced with the server's copy, which the server checks. Opening it
  * makes its view if the server has none yet, and records the runtime it is now previewed against.
  */
-export function DraftPane({ info, onChanged, onDeleted }: { info: api.DraftInfo; onChanged: () => void; onDeleted: () => void }) {
+export function DraftPane({ info, agent, onChanged, onDeleted }: { info: api.DraftInfo; agent: AgentChoice; onChanged: () => void; onDeleted: () => void }) {
   const source = useMemo(() => ({ dir: `teacher-draft-${info.id}`, gestalts: registry.gestalts }), [info.id]);
   const { repo, error } = useOpenRepo(source);
   const [ready, setReady] = useState<Repo>();
@@ -31,15 +32,15 @@ export function DraftPane({ info, onChanged, onDeleted }: { info: api.DraftInfo;
   const problem = error ?? failed;
   if (problem) return <div role="alert" className="alert alert-error m-4">This lesson couldn’t open: {problem}</div>;
   if (!ready) return <div className="flex h-full items-center justify-center"><span className="loading loading-spinner" /></div>;
-  return <RepoProvider repo={ready}><Workbench repo={ready} info={info} onChanged={onChanged} onDeleted={onDeleted} /></RepoProvider>;
+  return <RepoProvider repo={ready}><Workbench repo={ready} info={info} agent={agent} onChanged={onChanged} onDeleted={onDeleted} /></RepoProvider>;
 }
 
-function Workbench({ repo, info, onChanged, onDeleted }: { repo: Repo; info: api.DraftInfo; onChanged: () => void; onDeleted: () => void }) {
+function Workbench({ repo, info, agent, onChanged, onDeleted }: { repo: Repo; info: api.DraftInfo; agent: AgentChoice; onChanged: () => void; onDeleted: () => void }) {
   const items = useHostQuery({ gestalt: VIEWS, ids: [info.id] });
   const draft = useMemo(() => (items[0] ? asDraft(items[0]) : undefined), [items]);
   const [errors, setErrors] = useState<ViewError[]>([]);
   const onError = useCallback((e: ViewError) => setErrors((es) => [...es, e].slice(-20)), []);
-  const backend = useMemo(() => httpBackend(`/api/drafts/${info.id}/agent`, { id: 'teacher-server', label: 'Claude' }), [info.id]);
+  const backend = useMemo(() => backendFor(agent, info.id), [agent, info.id]);
   const csp = useMemo(() => closedCsp({ scripts: [`${location.origin}/api/npm/`] }), []);
   const runtime = registry.runtime.version;
   // previewed against this runtime now, so that's what it's published for

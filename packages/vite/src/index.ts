@@ -34,7 +34,7 @@ function dependencies(root: string): string[] {
 
 function packageRoot(root: string, name: string): string {
   const link = join(root, 'node_modules', name);
-  if (!existsSync(link)) throw new Error(`${name} is not installed in ${root}; run \`mise run setup\``);
+  if (!existsSync(link)) throw new Error(`${name} is not installed in ${root}; run \`mise run just setup\``);
   return realpathSync(link);
 }
 

@@ -9,8 +9,11 @@ message; this writes them into a workspace per view, next to the agent template 
 hands back what it said and did, then the files it changed. It reads and writes no ymls: the browser does, so another
 agent backend can take this one's place.
 
-- `POST /turn` `{view, session?, message, files: {path: text}, gestalts: [name@N], diagnostics: [..]}` -> 202 `{job}`;
-  409 while that view has a turn running
+The app that uses it (learning-workshop, teacher) reaches it through a node it is allowed on (localhost, or
+`--allow-origin`); `brief` is what that app tells the agent about who it makes views for.
+
+- `POST /turn` `{view, session?, message, files: {path: text}, gestalts: [name@N], diagnostics: [..], brief?}` -> 202
+  `{job}`; 409 while that view has a turn running
 - `GET /events?job=&after=n` -> `{events, next, done}`, waiting up to 20 s for events after the `n`-th
 - `POST /cancel` `{job}` -> `{}`
 """
@@ -30,8 +33,8 @@ from pathlib import Path
 from gestalts_backend import Backend
 from runlog import RunLog
 
-REPO = Path(__file__).resolve().parents[2]
-TEMPLATE = Path(os.environ.get("WORKSHOP_TEMPLATE", REPO.parents[1] / "packages" / "workshop" / "agent-template"))
+PACKAGE = Path(__file__).resolve().parents[2]
+TEMPLATE = Path(os.environ.get("WORKSHOP_TEMPLATE", PACKAGE / "agent-template"))
 WORKSPACES = Path(os.environ.get("WORKSHOP_WORKSPACES", Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "gestalt-workshop" / "workspaces"))
 CLAUDE = os.environ.get("WORKSHOP_CLAUDE", "claude")
 # what the template brings into each workspace, replaced on every turn so a changed template takes effect
@@ -43,7 +46,8 @@ SYSTEM = ("You are editing one view in this directory. CLAUDE.md here is the con
 # well before then; completed jobs remain available briefly in case the client needs one last poll.
 EVENT_POLL_S = 20
 FINISHED_JOB_KEEP_S = 600
-VIEW_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+VIEW_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+MAX_BRIEF = 4000
 
 
 class Job:
@@ -148,7 +152,7 @@ def _summary(name: str, args: dict, workspace: Path) -> str:
     return ""
 
 
-def _run(job: Job, session: str | None, message: str, files: dict[str, str], gestalts: list[str], diagnostics: list) -> None:
+def _run(job: Job, session: str | None, message: str, files: dict[str, str], gestalts: list[str], diagnostics: list, brief: str | None) -> None:
     workspace = WORKSPACES / job.view
     runlog = RunLog(WORKSPACES, job.id, job.view, session, message, files, diagnostics)
     new_session = session
@@ -165,7 +169,7 @@ def _run(job: Job, session: str | None, message: str, files: dict[str, str], ges
         if diagnostics:
             prompt += f"\n\n(The preview reported {len(diagnostics)} runtime error(s) since the last turn: see runtime-errors.md.)"
         cmd = [CLAUDE, "-p", "--output-format", "stream-json", "--verbose", "--strict-mcp-config",
-               "--append-system-prompt", SYSTEM, "--allowedTools", *TOOLS]
+               "--append-system-prompt", f"{brief}\n\n{SYSTEM}" if brief else SYSTEM, "--allowedTools", *TOOLS]
         if session:
             cmd += ["--resume", session]
         # the prompt goes in on stdin, so no flag can take it for one of its values
@@ -255,6 +259,9 @@ def turn(req: dict) -> tuple[int, str, bytes]:
     gestalts = req.get("gestalts") or []
     if not isinstance(gestalts, list) or not all(isinstance(g, str) and GESTALT_ID.match(g) for g in gestalts):
         return _json(400, {"error": "gestalts: a list of name@N"})
+    brief = req.get("brief")
+    if brief is not None and (not isinstance(brief, str) or len(brief) > MAX_BRIEF):
+        return _json(400, {"error": f"brief: text, at most {MAX_BRIEF} characters"})
     _prune()
     with _jobs_lock:
         if any(j.view == view and not j.done for j in _jobs.values()):
@@ -262,7 +269,7 @@ def turn(req: dict) -> tuple[int, str, bytes]:
         job = Job(view)
         _jobs[job.id] = job
     session = req.get("session") if isinstance(req.get("session"), str) else None
-    threading.Thread(target=_run, args=(job, session, message, files, gestalts, req.get("diagnostics") or []), daemon=True).start()
+    threading.Thread(target=_run, args=(job, session, message, files, gestalts, req.get("diagnostics") or [], brief or None), daemon=True).start()
     return _json(202, {"job": job.id})
 
 

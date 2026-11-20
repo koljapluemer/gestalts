@@ -2,14 +2,13 @@
 
 ```
 src/workshop/Make.tsx        the list of drafts, and the workbench
-src/workshop/agents/cli.ts   the claude CLI behind the node, as an agent backend
-plugins/workshop-agent/      backend.py: one turn of the claude CLI
 
 packages/workshop/           shared with the teacher app:
   draft.ts                   a draft as ymls (`view@2` and its members) and as the files the agent sees
   Preview.tsx                compiles a draft's view in the browser and runs it in a frame, as any view runs
   Chat.tsx                   one conversation about one draft
-  agents/                    what an agent backend is; one run as a job over HTTP
+  agents/                    what an agent backend is; one run as a job over HTTP; the CLI behind a node (node.ts)
+  plugins/workshop-agent/    the node plugin, backend.py: one turn of the claude CLI (the teacher app uses it too)
   agent-template/            what the agent works against: its contract (CLAUDE.md), `check.ts`, examples
 ```
 

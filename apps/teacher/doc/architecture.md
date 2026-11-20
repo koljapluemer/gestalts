@@ -1,12 +1,13 @@
 # Teacher app architecture
 
 ```
-apps/teacher/src/          the app: sign-in, drafts, the workbench, publishing
+apps/teacher/src/          the app: sign-in, drafts, the workbench, publishing, settings (agent.ts)
 apps/teacher/worker/       Node beside the server: compile and check a view, bundle npm packages
+apps/teacher/scripts/       agent-node.sh: a teacher's own node for the CLI agent (mise run teacher:agent)
 apps/player/               runs a published lesson from its link
 crates/teacher/            gestalts-teacher: the API, the agent, publishing, the lesson domain
 packages/workshop/         shared with learning-workshop: drafts, Preview, Chat, the job protocol, the agent template,
-                           the lesson format (lesson.ts)
+                           the CLI agent's node plugin (plugins/workshop-agent), the lesson format (lesson.ts)
 packages/npm-bundle/       npm packages bundled and pinned, without a CDN
 deploy/teacher/            the box: Caddy, systemd, backups
 ```
@@ -28,6 +29,18 @@ template, and run the check (the worker: the template's `check.ts` plus npm pinn
 contract is the template's `CLAUDE.md` with a preface, cached. Turns use the workshop's job protocol, so `Chat` is the
 same as learning-workshop's; the browser writes the files a turn hands back. One turn at a time per teacher, within a
 monthly token budget (`turns` in the database). Conversations live in the server's memory for a day.
+
+### Or the claude CLI on the teacher's computer
+
+Settings (kept in the browser, `teacher:agent`) can switch a teacher to the CLI instead: the `workshop-agent` node
+plugin learning-workshop uses (`packages/workshop/plugins/workshop-agent`), on a node the teacher runs
+(`apps/teacher/scripts/agent-node.sh`, :7757, its folder empty). The app calls the node's `/services` directly
+(`nodeAt` in `packages/workshop/src/agents/node.ts`), so the node must allow the app's origin: localhost always,
+the deployed one with `TEACHER_AGENT_ORIGIN` (`--allow-origin`). Each turn carries a `brief` (`src/agent.ts`, the
+server's preface less its tools) that goes before the template's contract. The draft, its sync and its validation are
+the same as with the server's agent: the browser writes what a turn hands back, and the server checks it. CLI turns
+use the teacher's own Claude plan, not the school's budget; the npm bundling check runs only at publishing. Chat
+sessions are kept per backend, so switching starts a new conversation.
 
 ## Previewing
 

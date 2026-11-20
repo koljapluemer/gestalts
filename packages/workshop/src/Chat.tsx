@@ -6,8 +6,9 @@ import { applyFiles, filesOf, loadMembers, saveDraft, type Draft } from './draft
 
 type Line = { who: 'you' | 'agent' | 'tool' | 'error'; text: string };
 
-const sessionKey = (view: string) => `workshop:session:${view}`;
-function savedSession(view: string) { try { return localStorage.getItem(sessionKey(view)) ?? undefined; } catch { return undefined; } }
+/** a conversation is its backend's: another one can't continue it */
+const sessionKey = (backend: string, view: string) => `workshop:session:${backend}:${view}`;
+function savedSession(backend: string, view: string) { try { return localStorage.getItem(sessionKey(backend, view)) ?? undefined; } catch { return undefined; } }
 
 /**
  * One conversation about one draft. Each turn sends the draft as files, and saves what comes back. What couldn't be
@@ -43,7 +44,7 @@ export function Chat({ repo, draft, backend, runtime, errors, onTurnDone }: {
       const gestalts = (await repo.gestalts()).map((g) => `${g.name}@${g.version}`).filter((g) => !g.startsWith(`${current.package}/`));
       const diagnostics: Diagnostic[] = [...refused, ...errors];
       setRefused([]);
-      for await (const e of backend.turn({ view: draft.id, session: savedSession(draft.id), message, files: filesOf(current, members), gestalts, diagnostics }, controller.signal)) {
+      for await (const e of backend.turn({ view: draft.id, session: savedSession(backend.id, draft.id), message, files: filesOf(current, members), gestalts, diagnostics }, controller.signal)) {
         if (e.type === 'text') say({ who: 'agent', text: e.text });
         else if (e.type === 'tool') say({ who: 'tool', text: `${e.name} ${e.summary}` });
         else if (e.type === 'error') say({ who: 'error', text: e.message });
@@ -57,7 +58,7 @@ export function Chat({ repo, draft, backend, runtime, errors, onTurnDone }: {
             setRefused(saved.problems.map((p) => ({ kind: 'save', message: p, at })));
           }
         } else if (e.session) {
-          try { localStorage.setItem(sessionKey(draft.id), e.session); } catch { /* the next turn starts afresh */ }
+          try { localStorage.setItem(sessionKey(backend.id, draft.id), e.session); } catch { /* the next turn starts afresh */ }
         }
       }
       onTurnDone();
