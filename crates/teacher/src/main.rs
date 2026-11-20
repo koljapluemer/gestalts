@@ -4,7 +4,9 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use gestalts_teacher::{AppState, Limits, auth, db, now_iso, random_hex, random_token};
+use gestalts_teacher::agent::{MODEL, Model};
+use gestalts_teacher::worker::WorkerConfig;
+use gestalts_teacher::{AppState, Limits, Services, auth, db, now_iso, random_hex, random_token};
 
 #[derive(Parser)]
 #[command(about = "The teacher app's server")]
@@ -29,6 +31,14 @@ enum Command {
         /// cookies without `Secure`, for a local run over http
         #[arg(long)]
         insecure_cookies: bool,
+        /// the repo checkout: the worker (apps/teacher/worker) and the agent template (packages/workshop) are in it
+        #[arg(long, env = "TEACHER_REPO", default_value = ".")]
+        repo: PathBuf,
+        #[arg(long, env = "TEACHER_NODE", default_value = "node")]
+        node: String,
+        /// the agent's model
+        #[arg(long, default_value = MODEL)]
+        model: String,
     },
     /// Schools and accounts
     Admin {
@@ -95,8 +105,25 @@ async fn run(cli: Cli) -> Result<(), String> {
             }
             Ok(())
         }
-        Command::Serve { app, lessons, insecure_cookies } => {
-            let state = AppState::new(db, cli.data, limits, !insecure_cookies)?;
+        Command::Serve { app, lessons, insecure_cookies, repo, node, model } => {
+            let repo = std::fs::canonicalize(&repo).map_err(|e| format!("{}: {e}", repo.display()))?;
+            let services = Services {
+                worker: WorkerConfig {
+                    node,
+                    script: repo.join("apps/teacher/worker/worker.ts"),
+                    template: repo.join("packages/workshop/agent-template"),
+                    npm_cache: std::path::absolute(cli.data.join("npm-cache")).map_err(|e| e.to_string())?,
+                },
+                model: Model {
+                    api_key: std::env::var("ANTHROPIC_API_KEY").ok().filter(|k| !k.is_empty()),
+                    base_url: std::env::var("ANTHROPIC_BASE_URL").unwrap_or_else(|_| "https://api.anthropic.com".into()),
+                    model,
+                },
+            };
+            if services.model.api_key.is_none() {
+                eprintln!("no ANTHROPIC_API_KEY: the agent is off");
+            }
+            let state = AppState::new(db, cli.data, limits, !insecure_cookies, services)?;
             let app_listener = tokio::net::TcpListener::bind(app).await.map_err(|e| format!("{app}: {e}"))?;
             let lesson_listener = tokio::net::TcpListener::bind(lessons).await.map_err(|e| format!("{lessons}: {e}"))?;
             eprintln!("app API on http://{app}/api, lessons on http://{lessons}");

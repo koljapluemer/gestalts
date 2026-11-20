@@ -1350,6 +1350,7 @@ dependencies = [
  "getrandom 0.3.4",
  "http-body-util",
  "include_dir",
+ "reqwest",
  "rusqlite",
  "serde",
  "serde_json",

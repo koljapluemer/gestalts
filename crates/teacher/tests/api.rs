@@ -1,51 +1,13 @@
 //! The app's API over HTTP, as the browser uses it.
 
+mod common;
+
 use axum::body::Body;
 use axum::http::{Request, StatusCode, header};
-use gestalts_teacher::{AppState, Limits, auth, db::Db};
-use http_body_util::BodyExt;
-use serde_json::{Value, json};
+use common::Server;
+use gestalts_teacher::Limits;
+use serde_json::json;
 use tower::ServiceExt;
-
-pub struct Server {
-    pub state: AppState,
-    _dir: tempfile::TempDir,
-}
-
-impl Server {
-    pub fn new(limits: Limits) -> Self {
-        let dir = tempfile::tempdir().unwrap();
-        let db = Db::memory().unwrap();
-        db.add_school("s1", "A school", "2026-11-20T00:00:00Z").unwrap();
-        for (id, email) in [("a1", "ada@school.example"), ("a2", "bea@school.example")] {
-            db.add_account(id, "s1", email, &auth::hash_password("right"), 1000, "2026-11-20T00:00:00Z").unwrap();
-        }
-        let state = AppState::new(db, dir.path().to_owned(), limits, true).unwrap();
-        Server { state, _dir: dir }
-    }
-
-    pub async fn call(&self, method: &str, path: &str, cookie: Option<&str>, body: Option<Value>) -> (StatusCode, Value, Option<String>) {
-        let mut req = Request::builder().method(method).uri(path);
-        if let Some(c) = cookie {
-            req = req.header(header::COOKIE, c);
-        }
-        let req = match body {
-            Some(b) => req.header(header::CONTENT_TYPE, "application/json").body(Body::from(b.to_string())).unwrap(),
-            None => req.body(Body::empty()).unwrap(),
-        };
-        let res = gestalts_teacher::app(self.state.clone()).oneshot(req).await.unwrap();
-        let status = res.status();
-        let set_cookie = res.headers().get(header::SET_COOKIE).map(|v| v.to_str().unwrap().split(';').next().unwrap().to_owned());
-        let bytes = res.into_body().collect().await.unwrap().to_bytes();
-        (status, serde_json::from_slice(&bytes).unwrap_or(Value::Null), set_cookie)
-    }
-
-    pub async fn login(&self, email: &str) -> String {
-        let (status, _, cookie) = self.call("POST", "/api/login", None, Some(json!({ "email": email, "password": "right" }))).await;
-        assert_eq!(status, StatusCode::OK);
-        cookie.unwrap()
-    }
-}
 
 #[tokio::test]
 async fn signing_in_and_out() {

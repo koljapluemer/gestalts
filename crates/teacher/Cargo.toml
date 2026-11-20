@@ -18,8 +18,9 @@ base64 = "0.22"
 clap = { version = "4", features = ["derive", "env"] }
 getrandom = "0.3"
 include_dir = "0.7"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "process", "time", "sync", "io-util"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "process", "time", "sync", "io-util", "fs"] }
 
 [dev-dependencies]
 http-body-util = "0.1"

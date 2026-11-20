@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@gestalts/kit':
-        specifier: link:../../../packages/kit
-        version: link:../../../packages/kit
+        specifier: link:../../kit
+        version: link:../../kit
       '@gestalts/learning':
-        specifier: link:../../../packages/learning
-        version: link:../../../packages/learning
+        specifier: link:../../learning
+        version: link:../../learning
       '@gestalts/sources':
-        specifier: link:../../../packages/sources
-        version: link:../../../packages/sources
+        specifier: link:../../sources
+        version: link:../../sources
       '@gestalts/view':
-        specifier: link:../../../packages/view
-        version: link:../../../packages/view
+        specifier: link:../../view
+        version: link:../../view
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0

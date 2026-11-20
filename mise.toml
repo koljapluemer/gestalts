@@ -17,7 +17,7 @@ description = "JS dependencies, the core compiled to wasm (after cloning, and af
 run = [
   "pnpm install",
   "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",
-  "pnpm -C apps/learning-workshop/agent-template install --ignore-workspace",
+  "pnpm -C packages/workshop/agent-template install --ignore-workspace",
 ]
 
 [tasks.check]

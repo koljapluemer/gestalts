@@ -31,7 +31,7 @@ from gestalts_backend import Backend
 from runlog import RunLog
 
 REPO = Path(__file__).resolve().parents[2]
-TEMPLATE = Path(os.environ.get("WORKSHOP_TEMPLATE", REPO / "agent-template"))
+TEMPLATE = Path(os.environ.get("WORKSHOP_TEMPLATE", REPO.parents[1] / "packages" / "workshop" / "agent-template"))
 WORKSPACES = Path(os.environ.get("WORKSHOP_WORKSPACES", Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "gestalt-workshop" / "workspaces"))
 CLAUDE = os.environ.get("WORKSHOP_CLAUDE", "claude")
 # what the template brings into each workspace, replaced on every turn so a changed template takes effect

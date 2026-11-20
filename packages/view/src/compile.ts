@@ -10,7 +10,7 @@ export const RUNTIME_MODULES = ['react', 'react/jsx-runtime', 'react-dom', 'reac
 export type CompileError = { message: string; line?: number; column?: number };
 export type Compiled = { ok: true; js: string; npm: string[] } | { ok: false; errors: CompileError[] };
 
-const IMPORT = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"\n;]*?\bfrom\s+)?(['"])([^'"\n]+)\1/g;
+const IMPORT = /(?:^|[\n;])\s*(?:import|export)\s+(?:[^'"\n;]*?\bfrom\s+)?(['"])([^'"\n]+)\1/g;
 const runtime: readonly string[] = RUNTIME_MODULES;
 
 export function compile(source: string, filePath = 'view.tsx'): Compiled {

@@ -20,10 +20,13 @@ use gestalts_core::Gestalts;
 use include_dir::{Dir, include_dir};
 use serde::Serialize;
 
+pub mod agent;
 pub mod auth;
 pub mod db;
 pub mod drafts;
+pub mod npm;
 pub mod validate;
+pub mod worker;
 
 /// The repo's `gestalts/`, for the model packages a draft may use besides the core's.
 static GESTALTS: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/../../gestalts");
@@ -86,6 +89,14 @@ pub struct Inner {
     pub failures: Mutex<HashMap<String, (u32, Instant)>>,
     /// writes to drafts, one at a time, so what's checked is what's there when they land
     pub writes: tokio::sync::Mutex<()>,
+    pub worker: worker::Worker,
+    pub agents: agent::Agents,
+}
+
+/// What the server runs besides itself.
+pub struct Services {
+    pub worker: worker::WorkerConfig,
+    pub model: agent::Model,
 }
 
 #[derive(Clone)]
@@ -99,11 +110,23 @@ impl std::ops::Deref for AppState {
 }
 
 impl AppState {
-    pub fn new(db: db::Db, data: PathBuf, limits: Limits, secure_cookies: bool) -> Result<Self, String> {
+    pub fn new(db: db::Db, data: PathBuf, limits: Limits, secure_cookies: bool, services: Services) -> Result<Self, String> {
         let models = model_texts(MODELS)?;
         let texts: Vec<&str> = models.iter().map(String::as_str).collect();
         let gestalts = Gestalts::builtin_with(&texts)?;
-        Ok(AppState(Arc::new(Inner { db, data, gestalts, limits, secure_cookies, failures: Mutex::default(), writes: tokio::sync::Mutex::default() })))
+        let agents = agent::Agents::new(services.model, agent::Reference::new(services.worker.template.clone()));
+        let worker = worker::Worker::new(services.worker);
+        Ok(AppState(Arc::new(Inner {
+            db,
+            data,
+            gestalts,
+            limits,
+            secure_cookies,
+            failures: Mutex::default(),
+            writes: tokio::sync::Mutex::default(),
+            worker,
+            agents,
+        })))
     }
 }
 
@@ -187,7 +210,7 @@ pub fn now_iso() -> String {
 
 /// The app's routes, under `/api`.
 pub fn app(state: AppState) -> axum::Router {
-    axum::Router::new().nest("/api", auth::routes().merge(drafts::routes())).with_state(state)
+    axum::Router::new().nest("/api", auth::routes().merge(drafts::routes()).merge(agent::routes()).merge(npm::routes())).with_state(state)
 }
 
 /// The lesson domain's routes.
