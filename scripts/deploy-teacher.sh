@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Ships the teacher app to the box at $TEACHER_HOST (ssh, as root), from a clean, committed tree, so what runs is a
 # commit: the server built here, the app and the player built here, and the parts of the checkout the worker and the
-# agent read (apps/teacher/worker, packages/), whose npm dependencies are installed there. The box's setup is in
-# deploy/teacher/README.md.
+# agent read (web/server/worker, packages/), whose npm dependencies are installed there. The box's setup is in
+# web/server/deploy/README.md.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 : "${TEACHER_HOST:?set TEACHER_HOST to the box, e.g. root@lehrer.example.de}"
@@ -14,16 +14,16 @@ sha="$(git rev-parse --short HEAD)"
 release="/opt/gestalts-teacher/releases/$sha"
 
 cargo build --release -q -p gestalts-teacher
-pnpm --dir apps/web build
-pnpm --dir apps/player build
+pnpm --dir web/app build
+pnpm --dir web/player build
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-git archive --format=tar HEAD apps/teacher/worker apps/teacher/package.json packages gestalts package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json | tar -x -C "$tmp"
+git archive --format=tar HEAD web/server/worker web/server/package.json packages gestalts package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json | tar -x -C "$tmp"
 mkdir -p "$tmp/bin" "$tmp/player"
 cp target/release/gestalts-teacher "$tmp/bin/"
-cp -r apps/web/dist "$tmp/app"
-cp -r apps/player/dist/. "$tmp/player/"
+cp -r web/app/dist "$tmp/app"
+cp -r web/player/dist/. "$tmp/player/"
 
 ssh "$TEACHER_HOST" "mkdir -p $release"
 tar -C "$tmp" -c . | ssh "$TEACHER_HOST" "tar -x -C $release"

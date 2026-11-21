@@ -1,7 +1,7 @@
 packages:
   - packages/*
-  - apps/web
-  - apps/gestalter/distribution-android
-  - apps/player
-  - apps/teacher
-  - apps/node/settings
+  - web/app
+  - web/android
+  - web/player
+  - web/server
+  - installables/folder-sync/settings

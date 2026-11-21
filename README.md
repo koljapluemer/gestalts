@@ -8,14 +8,14 @@ packages/     what apps and views build with: client, host, view (the view contr
 gestalts/     gestalt definitions: the core's, and model packages (gestalts/<package>/<name>/)
 plugins/      the views (and their decks, workers), one folder each, usable by any app
 sdk/python/   what plugin workers import
-apps/
-  web/                  the one web app: notes, learning, visualizations, the workshops, lessons; data in the browser
+web/
+  app/                  the one web app: notes, learning, visualizations, the workshops, lessons; data in the browser
   player/               the lesson player, on the lesson domain
-  gestalter/            the Android page (distribution-android/)
-  learning-workshop/    the learning workshop's agent stats, tests and docs
-  vizint-workshop/      the viz agent (plugins/), its template, tests and docs
-  teacher/              the teacher server's worker and docs
-  node/                 gestalts-node, optional beside the app: desktop/ (tray), settings/ (its page), android/
+  android/              the page the Android app wraps
+  server/               the teacher server (gestalts-teacher), its worker, docs and deploy/
+installables/           optional, on the user's computer
+  folder-sync/          gestalts-node: a folder synced with the app and paired devices; desktop/ (tray), settings/, android/
+  claude-bridge/        runs the claude CLI for the web app's agents: plugins/, make/ and make-viz/ (their tests and docs)
 scripts/      shared by the tasks
 ```
 
@@ -30,7 +30,7 @@ packaging tools as pinned in `mise.toml`; rustup picks up the Rust version (and 
 ```sh
 mise run just setup   # a new machine: the pinned tools and Rust, dependencies, the core in wasm, a local teacher
                       # account; again after pulling
-mise run just dev     # the web app, the node and the teacher server with hot reload, beside an installed node:
+mise run just dev     # the web app, the claude bridge, folder-sync and the teacher server with hot reload:
                       # where each is, their output in target/dev/<name>.log
 ```
 
@@ -39,11 +39,12 @@ The rest is hidden from `mise tasks` (`mise tasks --hidden` lists it), for one-o
 ```sh
 mise run check                                    # tests, lints, typechecks, deck health
 mise run web:dev                                  # the web app alone, hot reload
-mise run node                                     # the node alone: the agents, plugin backends, the drafts
+mise run claude-bridge                            # the claude bridge alone: the agents, the workshops' drafts
+mise run node                                     # folder-sync headless: plugin backends, /net, /llm
 mise run node:dev                                 # the desktop node and its settings page, hot reload
 mise run android:dev                              # the Android app on a phone or emulator (needs the SDK and NDK)
 mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's deck
 mise run health-data ~/some-folder                # which ymls can't be used, and why
 mise run serve ~/some-folder                      # the node headless with the repo's plugins
-mise run teacher:deploy                           # the teacher app to its box (deploy/teacher/README.md)
+mise run teacher:deploy                           # the teacher app to its box (web/server/deploy/README.md)
 ```

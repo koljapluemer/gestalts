@@ -31,7 +31,7 @@ step "dependencies, the core in wasm, the agent template"
 mise run setup
 
 step "the Rust binaries"
-cargo build -q -p gestalts-node-desktop -p gestalts-teacher
+cargo build -q -p gestalts-node-desktop -p gestalts-claude-bridge -p gestalts-teacher
 
 if [[ ! -e teacher-data/teacher.db ]]; then
   step "a local teacher account"
@@ -45,6 +45,6 @@ fi
 step "optional"
 command -v claude > /dev/null || echo "no claude CLI: the workshops' and the teacher's local agent need it (https://claude.com/claude-code)"
 [[ -n "${ANTHROPIC_API_KEY:-}" ]] || echo "no ANTHROPIC_API_KEY: the teacher server's own agent stays off in just dev (the local CLI agent works without it)"
-echo "Android: needs the SDK and NDK, see apps/node/doc/android.md"
+echo "Android: needs the SDK and NDK, see installables/folder-sync/doc/android.md"
 
 printf '\nReady: mise run just dev\n'

@@ -1,8 +1,8 @@
 [workspace]
 resolver = "3"
-members = ["crates/merge", "crates/core", "crates/fs", "crates/peer", "crates/wasm", "crates/node", "crates/device", "crates/teacher", "apps/node/desktop"]
+members = ["crates/merge", "crates/core", "crates/fs", "crates/peer", "crates/wasm", "crates/node", "crates/device", "web/server", "installables/folder-sync/desktop", "installables/claude-bridge"]
 # a workspace of its own: Tauri pulls in webkit2gtk on a Linux host, which the desktop app avoids
-exclude = ["apps/node/android"]
+exclude = ["installables/folder-sync/android"]
 
 [workspace.package]
 edition = "2024"

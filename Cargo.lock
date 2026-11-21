@@ -1211,6 +1211,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "gestalts-claude-bridge"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "gestalts-node",
+]
+
+[[package]]
 name = "gestalts-core"
 version = "0.1.0"
 dependencies = [

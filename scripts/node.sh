@@ -1,23 +1,12 @@
 #!/usr/bin/env bash
-# The one node for development (`mise run node`): gestalts-node from this repo, headless, with the repo's plugins, the
-# workshop agent (packages/workshop/plugins) and the viz agent (apps/vizint-workshop/plugins). The web app's workshops
-# sync their drafts with its folder, the teacher area's CLI agent runs on it, and the home areas ask it for plugin
-# backends, /net and /llm.
-#   GESTALTS_DEV_DATA     the folder (notes/ + blobs/), default ~/gestalt-workshop-views (the learning workshop's)
-#   GESTALTS_NODE_PORT    default 7737, and the one after it for the home network (clear of an installed node on 7717)
-#   TEACHER_AGENT_ORIGIN  further origins allowed, space-separated (a deployed app); localhost always is
-# The agents need the claude CLI, signed in, and the agent template's packages (mise run setup). Chromium for the viz
-# agent's browser check is installed once, through uv.
+# folder-sync for development (`mise run node`, installables/folder-sync): gestalts-node headless with the repo's
+# plugins and the dev profile, so it stays apart from an installed one. The web app's home areas ask it for plugin
+# backends, /net and /llm, and may sync with it; its folder is the one remembered for the dev profile, if any.
+#   GESTALTS_NODE_PORT    default 7727, and the one after it for the home network (clear of an installed node on 7717)
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
-data="${GESTALTS_DEV_DATA:-$HOME/gestalt-workshop-views}"
-port="${GESTALTS_NODE_PORT:-7737}"
-mkdir -p "$data"
-uv run --quiet --with playwright==1.65.0 playwright install chromium
-origins=()
-for o in ${TEACHER_AGENT_ORIGIN:-}; do origins+=(--allow-origin "$o"); done
+port="${GESTALTS_NODE_PORT:-7727}"
 # from the repo root, so rustup picks up its rust-toolchain.toml
 cd "$root"
 exec cargo run -q -p gestalts-node-desktop -- --profile dev --port "$port" --lan-port "$((port + 1))" \
-  ${origins[@]+"${origins[@]}"} --plugins-dir "$root/plugins" --plugins-dir "$root/packages/workshop/plugins" \
-  --plugins-dir "$root/apps/vizint-workshop/plugins" --models-dir "$root/gestalts" serve --data "$data"
+  $(bash scripts/plugin-dirs.sh) serve

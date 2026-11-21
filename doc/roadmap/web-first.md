@@ -58,12 +58,18 @@ from the events it comes from keeps the learning model free to change.
 
 ## Built
 
-Step 1, on 2026-11-21: one web app to run and test, locally (`apps/web`, see
+Step 1, on 2026-11-21: one web app to run and test, locally (`web/app`, see
 [[../architecture/system-overview|Architecture]]). The separate frontends of gestalter, loops-for-learning, vizint,
 both workshops and the teacher app are its areas (paths); notes, learning and visualizations share one home store in
-the browser; `mise run just dev` starts the app, one node (the agents, plugin backends, the workshops' drafts) and the
-teacher server. Item 7 is taken as a single-page app for now. Deploying it is not done: the old sites keep their last
+the browser; `mise run just dev` starts the app, one node (the agents, plugin backends, the workshops' drafts; split in step 2)
+and the teacher server. Item 7 is taken as a single-page app for now. Deploying it is not done: the old sites keep their last
 deploy, and `scripts/deploy.sh` is gone.
+
+Step 2, on 2026-11-21: the repo split by where things run. `web/` is the web app (`app/`), the lesson player, the page
+the Android app wraps and the server; `installables/` the two desktop tools of item 9 as separate binaries on
+`crates/node`: `folder-sync` (gestalts-node as it was: tray, settings, pairing, the Android app; plugin backends,
+`/net`, `/llm`) and `claude-bridge` (the agents and the workshops' drafts, :7737; not packaged yet, it runs from a
+checkout). `mise run just dev` starts both.
 
 ## Open, in order
 

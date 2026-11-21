@@ -2,7 +2,7 @@
 
 The MVP is built (2026-11-20): admin-made accounts, drafts with their own gestalts and content, the agent on the
 server, previews under the closed CSP with npm from our own origin, publishing by link to the player, unpublishing
-([[../../apps/teacher/doc/architecture|Teacher app architecture]], `deploy/teacher/`). Not built yet: headless
+([[../../web/server/doc/architecture|Teacher app architecture]], `web/server/deploy/`). Not built yet: headless
 screenshots for the agent, QR and short codes, rotating links, the offline player, schools and sharing in the UI,
 submissions, OIDC. The thinking below is from a discussion on 2026-11-16 and 2026-11-17.
 
@@ -54,7 +54,7 @@ A sync peer, an agent runner and publishing. Not the node, hosted.
   cancel stay as the workshop's protocol has them.
 - **Seeing what it built**: compile and typecheck say little about an interactive view. The server renders the draft
   headless and gives the agent screenshots and runtime errors (the visual feedback in
-  `apps/learning-workshop/doc/local-agents-and-pattern-foundry.md`). That costs per turn, so budgets per account,
+  `installables/claude-bridge/make/doc/local-agents-and-pattern-foundry.md`). That costs per turn, so budgets per account,
   concurrency limits and prompt caching come with it.
 - **Auth**: admin-made accounts behind OIDC, so school logins can plug in later.
 - **Hosting** in the EU; published lessons on a CDN, also in the EU.
@@ -133,7 +133,7 @@ need permissions per yml. Later a school library is a read-only layer under a te
 A submission: a snapshot of the draft with its origin hash, a description, and a licence grant accepted with it. It
 lands in a review queue in the same app:
 
-1. the deterministic gates of `apps/learning-workshop/doc/workshop-integration.md`, plus actual against declared
+1. the deterministic gates of `installables/claude-bridge/make/doc/workshop-integration.md`, plus actual against declared
    network use, imports, bundle size, and a performance budget on a low-end device profile
 2. an AI review of kit and gestalt usage, advisory only
 3. a human, on the diff and on what it may read, write and reach

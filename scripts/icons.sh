@@ -24,20 +24,20 @@ stamp() {
 }
 
 web_apps=(
-  apps/web
-  apps/gestalter/distribution-android
-  apps/node/settings
+  web/app
+  web/android
+  installables/folder-sync/settings
 )
 for app in "${web_apps[@]}"; do
   cp "$(source_for "$app")" "$root/$app/public/favicon.svg"
 done
 
-desktop_source="$(source_for apps/node/desktop)"
-render "$desktop_source" 256 "$root/apps/node/desktop/assets/icon.png"
-stamp "$desktop_source" "$root/apps/node/desktop/assets/icon.source.sha256"
+desktop_source="$(source_for installables/folder-sync/desktop)"
+render "$desktop_source" 256 "$root/installables/folder-sync/desktop/assets/icon.png"
+stamp "$desktop_source" "$root/installables/folder-sync/desktop/assets/icon.source.sha256"
 
-android_source="$(source_for apps/node/android)"
-(cd "$root/apps/node/android" && mise exec -- cargo tauri icon "$android_source")
-stamp "$android_source" "$root/apps/node/android/icons/icon.source.sha256"
+android_source="$(source_for installables/folder-sync/android)"
+(cd "$root/installables/folder-sync/android" && mise exec -- cargo tauri icon "$android_source")
+stamp "$android_source" "$root/installables/folder-sync/android/icons/icon.source.sha256"
 
 echo "Updated web, desktop and Android icons."

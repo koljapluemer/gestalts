@@ -13,7 +13,7 @@ import { defineConfig } from 'oxlint';
  * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
  * - `@gestalts/workshop` (making a view with an agent) builds on client, host and view.
  * - `@gestalts/npm-bundle` (npm packages for views, bundled by a server, run by Node) imports only the view package.
- * - an app (`apps/<app>/src`, `apps/gestalter/<distribution>/src`, the node's settings page) imports only the packages
+ * - an app (`web/<app>/src`, folder-sync's settings page) imports only the packages
  *   (client, host, view, the kit's index, learning, sources, workshop) and its own files, never another app or a plugin;
  *   nothing imports an app.
  * External packages are always fine.
@@ -44,12 +44,12 @@ const allowed: Record<string, string[]> = {
 };
 
 export default defineConfig({
-  ignorePatterns: ['**/dist', 'packages/client/wasm', '**/node_modules', '**/decks', 'apps/node/android/gen'],
+  ignorePatterns: ['**/dist', 'packages/client/wasm', '**/node_modules', '**/decks', 'installables/folder-sync/android/gen'],
   plugins: ['typescript', 'react', 'oxc', 'unicorn'],
   jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }, 'eslint-plugin-boundaries'],
   categories: { correctness: 'error' },
   settings: {
-    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json', 'apps/*/tsconfig.json', 'apps/gestalter/*/tsconfig.json', 'apps/node/*/tsconfig.json'] }, node: true },
+    'import/resolver': { typescript: { project: ['packages/*/tsconfig.json', 'plugins/tsconfig.json', 'web/*/tsconfig.json', 'installables/folder-sync/*/tsconfig.json'] }, node: true },
     'boundaries/elements': [
       { type: 'view', pattern: 'packages/view/src' },
       { type: 'vite', pattern: 'packages/vite/src' },
@@ -69,9 +69,8 @@ export default defineConfig({
       { type: 'workshop', pattern: 'packages/workshop/src' },
       { type: 'npm-bundle', pattern: 'packages/npm-bundle/src' },
       // apps: each its own element, so one may not import another
-      { type: 'app', pattern: 'apps/gestalter/*/src', capture: ['app'] },
-      { type: 'app', pattern: 'apps/node/*/src', capture: ['app'] },
-      { type: 'app', pattern: 'apps/*/src', capture: ['app'] },
+      { type: 'app', pattern: 'installables/folder-sync/*/src', capture: ['app'] },
+      { type: 'app', pattern: 'web/*/src', capture: ['app'] },
     ],
   },
   rules: {
@@ -82,7 +81,7 @@ export default defineConfig({
     'react-hooks-js/refs': 'error',
   },
   overrides: [{
-    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/*.{ts,tsx}', 'apps/*/src/**/*.{ts,tsx}', 'apps/*/*/src/**/*.{ts,tsx}'],
+    files: ['packages/*/src/**/*.{ts,tsx}', 'plugins/*/*.{ts,tsx}', 'web/*/src/**/*.{ts,tsx}', 'installables/*/*/src/**/*.{ts,tsx}'],
     rules: {
       'boundaries/no-unknown-files': 'error',
       'boundaries/dependencies': ['error', {

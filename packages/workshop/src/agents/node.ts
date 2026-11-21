@@ -2,7 +2,7 @@ import type { Repo, ServiceStatus } from '@gestalts/client';
 import { jobBackend } from './jobs';
 import type { AgentBackend } from './types';
 
-/** The node plugin that runs the claude CLI on a draft's files (`packages/workshop/plugins/workshop-agent`). */
+/** The node plugin that runs the claude CLI on a draft's files (`installables/claude-bridge/plugins/workshop-agent`). */
 export const AGENT_SERVICE = 'workshop-agent';
 
 /** How a page reaches a node's plugin backends, and what to say when it can't. */

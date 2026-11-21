@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 const webApps = [
-  'apps/web',
-  'apps/gestalter/distribution-android',
-  'apps/node/settings',
+  'web/app',
+  'web/android',
+  'installables/folder-sync/settings',
 ];
 
 const sourceFor = (app: string) => {
@@ -34,29 +34,29 @@ const pngSize = (path: string) => {
   return [png.readUInt32BE(16), png.readUInt32BE(20)];
 };
 const nativeTargets = [
-  ['apps/node/desktop', 'apps/node/desktop/assets/icon.source.sha256'],
-  ['apps/node/android', 'apps/node/android/icons/icon.source.sha256'],
+  ['installables/folder-sync/desktop', 'installables/folder-sync/desktop/assets/icon.source.sha256'],
+  ['installables/folder-sync/android', 'installables/folder-sync/android/icons/icon.source.sha256'],
 ];
 for (const [app, stamp] of nativeTargets) {
   if (readFileSync(stamp, 'utf8').trim() !== hash(sourceFor(app))) fail(`${app}'s generated icons are stale`);
 }
 
 const pngs = new Map([
-  ['apps/node/desktop/assets/icon.png', 256],
-  ['apps/node/android/icons/32x32.png', 32],
-  ['apps/node/android/icons/128x128.png', 128],
-  ['apps/node/android/icons/128x128@2x.png', 256],
-  ['apps/node/android/icons/icon.png', 512],
+  ['installables/folder-sync/desktop/assets/icon.png', 256],
+  ['installables/folder-sync/android/icons/32x32.png', 32],
+  ['installables/folder-sync/android/icons/128x128.png', 128],
+  ['installables/folder-sync/android/icons/128x128@2x.png', 256],
+  ['installables/folder-sync/android/icons/icon.png', 512],
 ]);
 for (const [path, expected] of pngs) {
   const [width, height] = pngSize(path);
   if (width !== expected || height !== expected) fail(`${path} is ${width}x${height}, expected ${expected}x${expected}`);
 }
 
-const desktopConfig = readFileSync('apps/node/desktop/Cargo.toml', 'utf8');
+const desktopConfig = readFileSync('installables/folder-sync/desktop/Cargo.toml', 'utf8');
 if (!desktopConfig.includes('icons = ["assets/icon.png"]')) fail('the desktop packager does not reference its icon');
 if (!desktopConfig.includes('dest = "/usr/share/icons/hicolor/256x256/apps/gestalts-node.png"')) fail('the RPM does not install its icon');
-const androidConfig = readFileSync('apps/node/android/tauri.conf.json', 'utf8');
+const androidConfig = readFileSync('installables/folder-sync/android/tauri.conf.json', 'utf8');
 for (const name of ['32x32.png', '128x128.png', '128x128@2x.png', 'icon.png']) {
   if (!androidConfig.includes(`icons/${name}`)) fail(`the Android bundle does not reference ${name}`);
 }

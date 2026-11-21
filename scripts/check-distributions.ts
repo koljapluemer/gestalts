@@ -26,10 +26,11 @@ function distributions(dir: string): string[] {
 
 const inside = (dir: string, path: string) => path.startsWith(dir + sep);
 const problems: string[] = [];
-for (const file of distributions(join(root, 'apps'))) {
+const web = join(root, 'web');
+for (const file of distributions(web)) {
   // paths are from the file
   const app = dirname(file);
-  const own = join(root, 'apps', relative(join(root, 'apps'), app).split(sep)[0], 'plugins');
+  const own = join(web, relative(web, app).split(sep)[0], 'plugins');
   const d = (parse(readFileSync(file, 'utf8')) ?? {}) as { core?: string[]; plugins?: string[]; models?: string[] };
   for (const entry of [...(d.core ?? []), ...(d.plugins ?? [])]) {
     const path = resolve(app, entry);
@@ -45,11 +46,11 @@ for (const file of distributions(join(root, 'apps'))) {
   }
 }
 // a lesson made in the teacher app runs in the player and is checked by the server: all three know the same models
-const models = (file: string) => (((parse(readFileSync(join(root, 'apps', file), 'utf8')) ?? {}) as { models?: string[] }).models ?? []).map((m) => m.split('/').pop()).sort().join(', ');
-const server = /pub const MODELS: &\[&str\] = &\[([^\]]*)\]/.exec(readFileSync(join(root, 'crates/teacher/src/lib.rs'), 'utf8'))?.[1].split(',').map((m) => m.trim().replaceAll('"', '')).filter(Boolean).sort().join(', ');
-const teacher = models('web/distributions/teacher.yml');
+const models = (file: string) => (((parse(readFileSync(join(web, file), 'utf8')) ?? {}) as { models?: string[] }).models ?? []).map((m) => m.split('/').pop()).sort().join(', ');
+const server = /pub const MODELS: &\[&str\] = &\[([^\]]*)\]/.exec(readFileSync(join(root, 'web/server/src/lib.rs'), 'utf8'))?.[1].split(',').map((m) => m.trim().replaceAll('"', '')).filter(Boolean).sort().join(', ');
+const teacher = models('app/distributions/teacher.yml');
 const player = models('player/distribution.yml');
-if (teacher !== player || teacher !== server) problems.push(`the web app's teacher area (${teacher}), the player (${player}) and crates/teacher's MODELS (${server}) must name the same models`);
+if (teacher !== player || teacher !== server) problems.push(`the web app's teacher area (${teacher}), the player (${player}) and web/server's MODELS (${server}) must name the same models`);
 for (const p of problems) console.error(p);
 if (problems.length) process.exit(1);
 console.log('distributions: every plugin in plugins/, every model in gestalts/');

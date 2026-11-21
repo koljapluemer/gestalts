@@ -11,7 +11,7 @@ crates/peer       another node over HTTP, a published deck, pairing
 crates/wasm       the core in the browser
 crates/device     a phone's folder and sync thread
 crates/node       the local server, watcher, backends, LAN pairing
-crates/teacher    the teacher app's server: accounts, drafts synced and validated, the agent, publishing, the lesson domain
+web/server        the teacher app's server: accounts, drafts synced and validated, the agent, publishing, the lesson domain
 packages/view     @gestalts/view: everything a view gets from the app
 packages/kit      @gestalts/kit: the UI kit views import (primitives < components < widgets < perspectives); on view and sources
 packages/learning @gestalts/learning: FSRS, practice sessions
@@ -24,6 +24,8 @@ packages/workshop making a view with an agent: drafts, their preview, the chat, 
 packages/npm-bundle npm packages for views, installed without scripts, bundled and pinned on a server (Node)
 packages/viz      @gestalts/viz: interactive visualizations (params, clock, model, scene) and their runtime; imports nothing of ours
 plugins/          the views that live in source: notes, flashcards, sources, concepts
+web/              the web app (app/), the lesson player (player/), the page the Android app wraps (android/), the server
+installables/     optional tools on the user's computer: folder-sync (gestalts-node: tray, settings, the Android app), claude-bridge (the agents)
 sdk/python        gestalts_backend.py, what a backend.py imports
 ```
 
@@ -31,13 +33,13 @@ sdk/python        gestalts_backend.py, what a backend.py imports
 
 ## The apps
 
-`apps/web` is the one web app, `/` a landing page of cards, its areas paths: `/notes` (the gestalter), `/learn`, `/viz`, `/make` and `/make-viz`
+`web/app` is the one web app, `/` a landing page of cards, its areas paths: `/notes` (the gestalter), `/learn`, `/viz`, `/make` and `/make-viz`
 (the workshops), `/teach` (the teacher app). It needs no node. Notes, learning and visualizations share the **home**
-store, the user's ymls in this browser (OPFS), opened once for the app (`apps/web/src/home.tsx`) and asking the
+store, the user's ymls in this browser (OPFS), opened once for the app (`web/app/src/home.tsx`) and asking the
 desktop node, if one runs, for plugin backends, `/net` and `/llm` without syncing with it (`bridge` in `Repo.open`).
-The workshops share a `drafts` store synced with the node that runs the agents; each lesson draft is its own store
-synced with the teacher server. `apps/player` runs published lessons on the lesson domain; the Android app wraps
-`apps/gestalter/distribution-android`.
+The workshops share a `drafts` store synced with the claude bridge (`installables/claude-bridge`), which runs the agents; each lesson draft is its own store
+synced with the teacher server. `web/player` runs published lessons on the lesson domain; the Android app wraps
+`web/android`.
 
 ## Data
 
@@ -116,10 +118,12 @@ pauses collection, since what's in use can't be known for sure.
 
 ## The node
 
-`gestalts-node` (`apps/node/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
+`gestalts-node` (folder-sync, `installables/folder-sync/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
 backends. It ships no app and no app needs it: the apps are websites that use it from their own origin (allowed: localhost, the origins
 in `ORIGINS` and the config's `extra_origins`). It brings the backends of the repo's `plugins/`, every model package
-of `gestalts/`, and its own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
+of `gestalts/`, and its own settings page at `/`. The claude bridge (`gestalts-claude-bridge`) is the same library with
+the agent plugins and a drafts folder of its own: another port (7737), profile and data, no tray, page or home network.
+A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
 
 | Route | |
 |---|---|

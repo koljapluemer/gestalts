@@ -1,7 +1,0 @@
-# The lesson player (`id` is its for good): it runs one teacher's lesson at a time, no plugins. Its models are what
-# lessons may read besides the core's and their own: the web app's teacher area (apps/web/distributions/teacher.yml), always the same.
-id: player
-plugins: []
-models:
-  - ../../gestalts/geography
-  - ../../gestalts/typing

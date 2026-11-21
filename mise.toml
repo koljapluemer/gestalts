@@ -44,11 +44,10 @@ pnpm lint
 node scripts/check-distributions.ts
 pnpm typecheck
 pnpm test
-python3 -m unittest discover -s apps/learning-workshop/tests
-python3 -m unittest discover -s packages/workshop/tests
-apps/learning-workshop/scripts/check-example.sh
-python3 -m unittest discover -s apps/vizint-workshop/tests
-apps/vizint-workshop/scripts/check-examples.sh
+python3 -m unittest discover -s installables/claude-bridge/make/tests
+installables/claude-bridge/make/scripts/check-example.sh
+python3 -m unittest discover -s installables/claude-bridge/make-viz/tests
+installables/claude-bridge/make-viz/scripts/check-examples.sh
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
@@ -92,43 +91,51 @@ hide = true
 description = "The web app on the first free port from :5173 with hot reload, without the node or the teacher server (mise run just dev starts all three)"
 depends = ["setup"]
 shell = "bash -c"
-run = 'pnpm --dir apps/web dev --port "$(scripts/free-port.sh 5173)" --strictPort'
+run = 'pnpm --dir web/app dev --port "$(scripts/free-port.sh 5173)" --strictPort'
 
 [tasks."web:build"]
 hide = true
-description = "Production build of the web app into apps/web/dist, a static site (serve every path as index.html)"
+description = "Production build of the web app into web/app/dist, a static site (serve every path as index.html)"
 depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/web build"
+run = "pnpm --dir web/app build"
 
 [tasks.node]
 hide = true
-description = "The one node for development on :7737 (scripts/node.sh): the agents, the plugin backends, the workshops' drafts in $GESTALTS_DEV_DATA or ~/gestalt-workshop-views"
+description = "folder-sync headless for development on :7727 (scripts/node.sh): the plugin backends, /net and /llm"
 depends = ["setup"]
 run = "bash scripts/node.sh"
 
-# --- gestalts-node: the desktop app ---
+# --- the claude bridge ---
+
+[tasks.claude-bridge]
+hide = true
+description = "The claude bridge for development on :7737 (scripts/claude-bridge.sh): the agents, the workshops' drafts in $GESTALTS_DEV_DATA or ~/gestalt-workshop-views"
+depends = ["setup"]
+run = "bash scripts/claude-bridge.sh"
+
+# --- folder-sync: gestalts-node, the desktop app ---
 
 [tasks."node:dev"]
 hide = true
-description = "The desktop app (tray, the repo's plugins, dev profile) and its settings page with hot reload, on the first free ports from :5176 and :7737"
+description = "The desktop app (tray, the repo's plugins, dev profile) and its settings page with hot reload, on the first free ports from :5176 and :7727"
 depends = ["setup"]
 shell = "bash -c"
 run = """
 trap 'kill 0' EXIT
 page="$(scripts/free-port.sh 5176)"
 # in steps of two: the port after it is this node's home-network port. Clear of an installed node on 7717
-node="$(scripts/free-port.sh 7737 2)"
+node="$(scripts/free-port.sh 7727 2)"
 echo "gestalts-node settings: http://localhost:$page/ on the node at :$node"
 cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --open-url "http://localhost:$page/" &
-GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/node/settings dev --port "$page" --strictPort &
+GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir installables/folder-sync/settings dev --port "$page" --strictPort &
 wait
 """
 
 [tasks."node:settings-build"]
 hide = true
-description = "The node's settings page into apps/node/settings/dist, which the desktop app embeds"
+description = "The node's settings page into installables/folder-sync/settings/dist, which the desktop app embeds"
 depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/node/settings build"
+run = "pnpm --dir installables/folder-sync/settings build"
 
 [tasks."node:package"]
 hide = true
@@ -139,7 +146,7 @@ run = """
 set -euo pipefail
 case "$(uname -s)" in
   Linux)  cargo packager -p gestalts-node-desktop --release --formats deb,appimage
-          cargo generate-rpm -p apps/node/desktop -o target/packages ;;
+          cargo generate-rpm -p installables/folder-sync/desktop -o target/packages ;;
   Darwin) cargo packager -p gestalts-node-desktop --release --formats dmg ;;
   *)      cargo packager -p gestalts-node-desktop --release --formats nsis ;;
 esac
@@ -156,7 +163,7 @@ run = "bash scripts/install-package.sh target/packages"
 
 [tasks."android:check"]
 hide = true
-description = "Clippy on the Android app for arm64 Android (needs the NDK, see apps/gestalter/doc/android.md)"
+description = "Clippy on the Android app for arm64 Android (needs the NDK, see installables/folder-sync/doc/android.md)"
 shell = "bash -c"
 run = """
 set -euo pipefail
@@ -164,14 +171,14 @@ source scripts/android-env.sh
 bin="$(echo "$NDK_HOME"/toolchains/llvm/prebuilt/*/bin)"
 export CC_aarch64_linux_android="$bin/aarch64-linux-android24-clang" AR_aarch64_linux_android="$bin/llvm-ar"
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$bin/aarch64-linux-android24-clang"
-cargo clippy --manifest-path apps/node/android/Cargo.toml -q --target aarch64-linux-android -- -D warnings
+cargo clippy --manifest-path installables/folder-sync/android/Cargo.toml -q --target aarch64-linux-android -- -D warnings
 """
 
 [tasks."android:dev"]
 hide = true
-description = "The Android app on a connected phone or a running emulator, with the page hot-reloading from this machine; the page is $GESTALTS_ANDROID_DISTRIBUTION (default apps/gestalter/distribution-android)"
+description = "The Android app on a connected phone or a running emulator, with the page hot-reloading from this machine; the page is $GESTALTS_ANDROID_DISTRIBUTION (default web/android)"
 depends = ["setup"]
-dir = "apps/node/android"
+dir = "installables/folder-sync/android"
 shell = "bash -c"
 run = """
 source ../../../scripts/android-env.sh
@@ -183,9 +190,9 @@ cargo tauri android dev --config "$(distribution_config "http://localhost:$GESTA
 
 [tasks."android:build"]
 hide = true
-description = "A debug APK for arm64 phones, to install with adb, of $GESTALTS_ANDROID_DISTRIBUTION (default apps/gestalter/distribution-android)"
+description = "A debug APK for arm64 phones, to install with adb, of $GESTALTS_ANDROID_DISTRIBUTION (default web/android)"
 depends = ["setup", "icons:check"]
-dir = "apps/node/android"
+dir = "installables/folder-sync/android"
 shell = "bash -c"
 run = """
 set -euo pipefail
@@ -235,7 +242,7 @@ run = ["node plugins/vietnamese-typing-practice/tools/build-deck.ts", "mise run 
 [tasks."workshop:agent-stats"]
 hide = true
 description = "Summarize local Make agent time, token use, cost and tool activity"
-run = "python3 apps/learning-workshop/scripts/agent_stats.py"
+run = "python3 installables/claude-bridge/make/scripts/agent_stats.py"
 
 
 # --- teacher ---
@@ -247,8 +254,8 @@ depends = ["setup"]
 shell = "bash -c"
 run = """
 set -euo pipefail
-pnpm --dir apps/player build
-cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist apps/player/dist
+pnpm --dir web/player build
+cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist web/player/dist
 cargo run -q -p gestalts-teacher -- --data teacher-data serve --insecure-cookies
 """
 
@@ -259,6 +266,6 @@ run = "cargo run -q -p gestalts-teacher -- --data teacher-data admin"
 
 [tasks."teacher:deploy"]
 hide = true
-description = "Build the teacher server, app and player and ship them to TEACHER_HOST (deploy/teacher/README.md; needs a committed tree)"
+description = "Build the teacher server, app and player and ship them to TEACHER_HOST (web/server/deploy/README.md; needs a committed tree)"
 depends = ["setup"]
 run = "bash scripts/deploy-teacher.sh"

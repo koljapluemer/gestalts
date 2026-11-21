@@ -1,0 +1,13 @@
+[package]
+name = "gestalts-claude-bridge"
+description = "Runs the claude CLI for the web app's agents (Make, Make viz, lessons) on this computer, on 127.0.0.1"
+edition.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "gestalts-claude-bridge"
+path = "src/main.rs"
+
+[dependencies]
+gestalts-node.workspace = true
+clap = { version = "4", features = ["derive"] }

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # `mise run just dev`: everything for development at once, with hot reload, stopped together (Ctrl-C, or when any of
 # it exits):
-#   - the web app (apps/web): notes, learning and visualizations on the home store in the browser, the workshops, the
+#   - the web app (web/app): notes, learning and visualizations on the home store in the browser, the workshops, the
 #     teacher area
-#   - the node (scripts/node.sh): the workshops' drafts sync with it, it runs the agents (the claude CLI) and the
-#     plugin backends
+#   - the claude bridge (scripts/claude-bridge.sh): the workshops' drafts sync with it, it runs the agents (the
+#     claude CLI)
+#   - folder-sync, headless (scripts/node.sh): the plugin backends, /net and /llm for the home areas
 #   - the teacher server (teacher-data/; its agent with ANTHROPIC_API_KEY), and the player it serves lessons with
 # Each server gets the first free port from its usual one (scripts/free-port.sh), so it runs beside an installed node
 # (7717/7718) and whatever else listens here. What they print goes to target/dev/<name>.log; this shows one overview,
@@ -34,8 +35,9 @@ take() {
   for ((i = 0; i < ${3:-1}; i++)); do taken+=($((p + i))); done
   printf -v "$1" '%s' "$p"
 }
+take bridge 7737
 # the node in a step of two: the port after it is its home-network port. Clear of an installed node on 7717
-take node 7737 2
+take node 7727 2
 take teacherapi 7740 2
 take web 5173
 teacherlessons=$((teacherapi + 1))
@@ -57,10 +59,10 @@ prepare() {
 # dependencies, the wasm core and the agent template up to date (after a pull)
 prepare "dependencies" mise run setup
 # the binaries once, so the node and the teacher server don't wait on each other's cargo
-prepare "Rust binaries" cargo build -q -p gestalts-node-desktop -p gestalts-teacher
+prepare "Rust binaries" cargo build -q -p gestalts-node-desktop -p gestalts-claude-bridge -p gestalts-teacher
 # the teacher server serves lessons with the player built from here
-prepare "the player" pnpm --dir apps/player build
-prepare "the player, installed" cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist apps/player/dist
+prepare "the player" pnpm --dir web/player build
+prepare "the player, installed" cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist web/player/dist
 
 trap 'kill 0' EXIT
 
@@ -75,7 +77,9 @@ serve() {
   pids+=($!)
 }
 
-serve servers node "node" "http://127.0.0.1:$node" "$node" "the agents and plugin backends · drafts in ${GESTALTS_DEV_DATA:-~/gestalt-workshop-views}" \
+serve servers bridge "claude bridge" "http://127.0.0.1:$bridge" "$bridge" "the agents · drafts in ${GESTALTS_DEV_DATA:-~/gestalt-workshop-views}" \
+  env GESTALTS_BRIDGE_PORT="$bridge" scripts/claude-bridge.sh
+serve servers node "folder-sync" "http://127.0.0.1:$node" "$node" "plugin backends, /net, /llm · dev profile" \
   env GESTALTS_NODE_PORT="$node" scripts/node.sh
 teachernote="API · lessons on :$teacherlessons"
 [[ -n "${ANTHROPIC_API_KEY:-}" ]] || teachernote+=" · $N${Y}its agent is off without ANTHROPIC_API_KEY"
@@ -86,8 +90,8 @@ serve servers teacherapi "teacher server" "http://127.0.0.1:$teacherapi" "$teach
 if [[ -e teacher-data/dev-login.txt ]]; then login="lessons sign-in: teacher-data/dev-login.txt"
 else login="lessons sign-in: your account, or mise run teacher:admin add-teacher / reset-password"; fi
 serve apps web "web app" "http://localhost:$web/" "$web" "$login" \
-  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" VITE_AGENT_NODE="http://127.0.0.1:$node" \
-  VITE_TEACHER_API="http://127.0.0.1:$teacherapi" pnpm --dir apps/web dev --port "$web" --strictPort
+  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" VITE_AGENT_NODE="http://127.0.0.1:$bridge" \
+  VITE_TEACHER_API="http://127.0.0.1:$teacherapi" pnpm --dir web/app dev --port "$web" --strictPort
 
 listening() { (exec 3<> "/dev/tcp/127.0.0.1/$1") 2> /dev/null || (exec 3<> "/dev/tcp/::1/$1") 2> /dev/null; }
 

@@ -1,5 +1,5 @@
 //! gestalts-node: serves a folder on this computer to the gestalts apps over HTTP on 127.0.0.1, and hosts plugin
-//! workers. The desktop app (`apps/node/desktop`) embeds it with a tray, the repo's plugins and the node's settings
+//! workers. The desktop app (`installables/folder-sync/desktop`) embeds it with a tray, the repo's plugins and the node's settings
 //! page, which the node serves at `/`; its `serve` subcommand is the same server headless.
 
 use std::path::PathBuf;
@@ -204,7 +204,7 @@ pub fn serve(opts: &Opts, embedded: Embedded, data: Option<PathBuf>) -> Result<(
         None => (remembered_folder(&paths), true),
     };
     match &folder {
-        Some(f) => println!("gestalts-node serving {} on http://127.0.0.1:{}", f.info().path, opts.port),
+        Some(f) => println!("{} serving {} on http://127.0.0.1:{}", embedded.name, f.info().path, opts.port),
         None => println!("gestalts-node on http://127.0.0.1:{} (no folder yet: pass --data or choose one in the desktop app)", opts.port),
     }
     let server = start_server(opts, embedded, paths, folder, remember, Arc::new(server::Headless))?;
