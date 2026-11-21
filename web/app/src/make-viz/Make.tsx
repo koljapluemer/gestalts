@@ -3,6 +3,7 @@ import { Plus, Settings } from 'lucide-react';
 import { registry } from 'virtual:gestalts-plugins/workshop';
 import { RepoProvider, useHostQuery, type Repo } from '@gestalts/client';
 import { ConnectorSettings, SingleView } from '@gestalts/host';
+import { HOME_NODE } from '../nodes';
 import css from '../app.css?inline';
 import { useDrafts } from '../drafts';
 import { Areas } from '../router';
@@ -60,7 +61,7 @@ function Shell({ repo }: { repo: Repo }) {
         <span className="flex-1 truncate text-sm font-medium text-base-content/70">{viz?.title ?? 'Make a visualization'}</span>
         <details className="dropdown dropdown-end">
           <summary className="btn btn-sm btn-ghost btn-square" title="Sync settings"><Settings className="size-4" /></summary>
-          <div className="dropdown-content z-50 mt-2 rounded-box border border-base-300 bg-base-100 p-3 shadow"><ConnectorSettings /></div>
+          <div className="dropdown-content z-50 mt-2 rounded-box border border-base-300 bg-base-100 p-3 shadow"><ConnectorSettings defaultUrl={HOME_NODE} /></div>
         </details>
       </header>
       <div className="flex min-h-0 flex-1">

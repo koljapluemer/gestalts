@@ -19,13 +19,15 @@ packages/sources  @gestalts/sources: bibliographic sources, BibTeX in and out
 packages/client   the wasm-backed repo, its core in a worker; host side only
 packages/host     frames, the bridge, tabs, installs
 packages/vite     builds an app with its plugins and the frame runtime (versioned by its hash)
-packages/workshop making a view with an agent: drafts, their preview, the chat, the agent protocol, the agent
+packages/check    @gestalts/check: what an agent's work (a view, a viz) is checked with, in the page and in Node
+packages/workshop making a view with an agent: drafts, their preview, the chat, the agent protocol, the agents' tools, the agent
                   template, the lesson format
 packages/npm-bundle npm packages for views, installed without scripts, bundled and pinned on a server (Node)
 packages/viz      @gestalts/viz: interactive visualizations (params, clock, model, scene) and their runtime; imports nothing of ours
 plugins/          the views that live in source: notes, flashcards, sources, concepts
 web/              the web app (app/), the lesson player (player/), the page the Android app wraps (android/), the server
-installables/     optional tools on the user's computer: folder-sync (gestalts-node: tray, settings, the Android app), claude-bridge (the agents)
+installables/     optional tools on the user's computer: folder-sync (gestalts-node: tray, settings, the Android app), claude-bridge
+                  (Claude Code for a site the person allowed, with the site's tools)
 sdk/python        gestalts_backend.py, what a backend.py imports
 ```
 
@@ -37,7 +39,8 @@ sdk/python        gestalts_backend.py, what a backend.py imports
 (the workshops), `/teach` (the teacher app). It needs no node. Notes, learning and visualizations share the **home**
 store, the user's ymls in this browser (OPFS), opened once for the app (`web/app/src/home.tsx`) and asking the
 desktop node, if one runs, for plugin backends, `/net` and `/llm` without syncing with it (`bridge` in `Repo.open`).
-The workshops share a `drafts` store synced with the claude bridge (`installables/claude-bridge`), which runs the agents; each lesson draft is its own store
+The workshops share a `drafts` store in the browser; their agent is Claude Code through the Claude bridge
+(`installables/claude-bridge`), whose tool calls come back to the page (the `check` is `@gestalts/check`, run there); each lesson draft is its own store
 synced with the teacher server. `web/player` runs published lessons on the lesson domain; the Android app wraps
 `web/android`.
 
@@ -121,9 +124,7 @@ pauses collection, since what's in use can't be known for sure.
 `gestalts-node` (folder-sync, `installables/folder-sync/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
 backends. It ships no app and no app needs it: the apps are websites that use it from their own origin (allowed: localhost, the origins
 in `ORIGINS` and the config's `extra_origins`). It brings the backends of the repo's `plugins/`, every model package
-of `gestalts/`, and its own settings page at `/`. The claude bridge (`gestalts-claude-bridge`) is the same library with
-the agent plugins and a drafts folder of its own: another port (7737), profile and data, no tray, page or home network.
-A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
+of `gestalts/`, and its own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
 
 | Route | |
 |---|---|

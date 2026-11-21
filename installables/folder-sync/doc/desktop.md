@@ -23,7 +23,7 @@ the settings page's Vite server (from :5176), which proxies the node's API so th
 by it. The dev profile keeps its settings apart from an installed app, and the dev node stays clear of the installed
 one's 7717.
 `mise run just dev` (`scripts/dev.sh`) starts the web app, this node headless (`scripts/node.sh`, :7727: the repo's
-plugins), the claude bridge (`installables/claude-bridge`, :7737: the agents) and the teacher server, each on the first free port from its usual one, and prints where they are. The
+plugins), the Claude bridge (`installables/claude-bridge`, :7737: the agents) and the teacher server, each on the first free port from its usual one, and prints where they are. The
 web app doesn't need a node: its notes are in the browser.
 
 ## The apps on it

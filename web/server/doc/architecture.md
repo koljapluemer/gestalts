@@ -2,14 +2,15 @@
 
 ```
 web/app/src/teach/        the app (/teach): sign-in, drafts, the workbench, publishing, settings (agent.ts)
-web/server/worker/       Node beside the server: compile and check a view, bundle npm packages
-scripts/claude-bridge.sh   the claude bridge, for the CLI agent on a teacher's own computer (mise run claude-bridge)
-web/player/               runs a published lesson from its link
-web/server/            gestalts-teacher: the API, the agent, publishing, the lesson domain
-packages/workshop/         shared with learning-workshop: drafts, Preview, Chat, the job protocol, the agent template,
-                           the CLI agent's node plugin (plugins/workshop-agent), the lesson format (lesson.ts)
+web/server/worker/         Node beside the server: compile and check a view, bundle npm packages
+web/player/                runs a published lesson from its link
+web/server/                gestalts-teacher: the API, the agent, publishing, the lesson domain
+packages/workshop/         shared with /make: drafts, Preview, Chat, the job protocol, the agent template, the Claude
+                           bridge's client and the agents' tools (agents/), the lesson format (lesson.ts)
+packages/check/            the check the local agent runs, in the page
+installables/claude-bridge/  the CLI agent on a teacher's own computer
 packages/npm-bundle/       npm packages bundled and pinned, without a CDN
-web/server/deploy/            the box: Caddy, systemd, backups
+web/server/deploy/         the box: Caddy, systemd, backups
 ```
 
 ## A draft
@@ -32,12 +33,12 @@ monthly token budget (`turns` in the database). Conversations live in the server
 
 ### Or the claude CLI on the teacher's computer
 
-Settings (kept in the browser, `teacher:agent`) can switch a teacher to the CLI instead: the `workshop-agent` node
-plugin learning-workshop uses (`installables/claude-bridge/plugins/workshop-agent`), on the claude bridge the teacher runs
-(the claude bridge, `installables/claude-bridge`, :7737; the agent reads and writes no ymls, so the drafts in its folder are the workshops'). The app calls the node's `/services` directly
-(`nodeAt` in `packages/workshop/src/agents/node.ts`), so the node must allow the app's origin: localhost always,
-the deployed one with `TEACHER_AGENT_ORIGIN` (`--allow-origin`). Each turn carries a `brief` (`src/agent.ts`, the
-server's preface less its tools) that goes before the template's contract. The draft, its sync and its validation are
+Settings (kept in the browser, `teacher:agent`) can switch a teacher to the CLI instead: Claude Code on their own
+computer through the Claude bridge (`installables/claude-bridge`, :7737), as `/make` uses it (`bridgeBackend` in
+`packages/workshop/src/agents/bridge.ts`). The bridge asks the teacher once, in a dialog on their computer, whether
+the site may use it. A turn sends the draft and the template; the check runs in the teacher's page
+(`@gestalts/check`). Each turn carries a `brief` (`src/agent.ts`, the server's preface less its tools) that goes
+before the template's contract. The draft, its sync and its validation are
 the same as with the server's agent: the browser writes what a turn hands back, and the server checks it. CLI turns
 use the teacher's own Claude plan, not the school's budget; the npm bundling check runs only at publishing. Chat
 sessions are kept per backend, so switching starts a new conversation.

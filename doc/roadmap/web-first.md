@@ -68,8 +68,16 @@ deploy, and `scripts/deploy.sh` is gone.
 Step 2, on 2026-11-21: the repo split by where things run. `web/` is the web app (`app/`), the lesson player, the page
 the Android app wraps and the server; `installables/` the two desktop tools of item 9 as separate binaries on
 `crates/node`: `folder-sync` (gestalts-node as it was: tray, settings, pairing, the Android app; plugin backends,
-`/net`, `/llm`) and `claude-bridge` (the agents and the workshops' drafts, :7737; not packaged yet, it runs from a
-checkout). `mise run just dev` starts both.
+`/net`, `/llm`) and `claude-bridge`. `mise run just dev` starts both.
+
+Step 3, the same day: the Claude bridge of item 9, built. It is a small native relay that knows nothing about gestalts.
+A site the person allowed (in a dialog, once) sends a turn's files, instructions and tools over a WebSocket. The bridge
+runs `claude -p` on them and relays every tool call back to the page (its own MCP server). The agents' tools are the
+app's: `check` is `@gestalts/check`, one TypeScript module run in the page (TypeScript in a worker, esbuild-wasm,
+renders in sandboxed frames) and in Node. So the check is the same whichever model runs the loop, and the bridge needs
+no Node, templates or Chromium: it installs on its own (`mise run claude-bridge:package`). The workshops' drafts no
+longer sync with it. An agent loop in the page (a model behind an API) would use the same tools, plus simple file
+tools on the draft (`fileTools`); none is built yet.
 
 ## Open, in order
 
@@ -94,7 +102,7 @@ checkout). `mise run just dev` starts both.
    prerender script. Decided by how much public content there will be (CMS, docs, public decks). Shared by both sides
    and owned by neither: the kit (with the app's components apart from the API views get) and the frame packages.
 8. **Server scope.** What stays central: accounts and sync, publishing and the lesson domain, the hosted agent.
-9. **Desktop tools.** Small and optional, each released on its own: Claude Bridge (native, it runs a CLI), Sync to
+9. **Desktop tools.** Small and optional, each released on its own: Claude Bridge (built, step 3), Sync to
    Folder, YouTube subtitles, imports. A browser extension where it can do the job (cross-origin fetches, store
    installs and updates, no signing); a native tool speaking one localhost interface to the app's origin where it
    can't.

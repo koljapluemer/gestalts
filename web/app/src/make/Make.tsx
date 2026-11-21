@@ -5,16 +5,16 @@ import { registry } from 'virtual:gestalts-plugins/workshop';
 import { RepoProvider, useHostQuery, type Repo } from '@gestalts/client';
 import { ConnectorSettings } from '@gestalts/host';
 import type { ViewError } from '@gestalts/view';
-import { Chat, Preview, VIEWS, asDraft, cliBackend, createDraft, repoNode, type Draft } from '@gestalts/workshop';
+import { Chat, Preview, VIEWS, asDraft, bridgeBackend, createDraft, type Draft } from '@gestalts/workshop';
 import css from '../app.css?inline';
 import { useDrafts } from '../drafts';
-import { START_AGENT_NODE } from '../nodes';
+import { AGENT_NODE, HOME_NODE } from '../nodes';
 import { Areas } from '../router';
 
 /**
  * The learning workshop: views vibecoded into drafts (`view@2` ymls and their members, `@gestalts/workshop`), each run
- * in a frame beside the chat that edits it. The ymls live in this browser and sync with the node that runs the agents
- * (`mise run claude-bridge`), which runs the claude CLI.
+ * in a frame beside the chat that edits it. The ymls live in this browser; the agent is Claude Code on this computer,
+ * through the Claude bridge, with the workshop's check run here.
  */
 const SELECTED = 'workshop:view';
 
@@ -37,7 +37,7 @@ export function Make() {
 
 function Workbench({ repo, draft }: { repo: Repo; draft: Draft }) {
   const [errors, setErrors] = useState<ViewError[]>([]);
-  const [backend] = useState(() => cliBackend(repoNode(repo, START_AGENT_NODE)));
+  const [backend] = useState(() => bridgeBackend(AGENT_NODE));
   const onError = useCallback((e: ViewError) => setErrors((es) => [...es, e].slice(-20)), []);
   return (
     <div className="grid h-full min-h-0 grid-rows-2 md:grid-cols-[minmax(0,1fr)_24rem] md:grid-rows-1">
@@ -68,7 +68,7 @@ function Shell({ repo }: { repo: Repo }) {
         <span className="flex-1 truncate text-sm font-medium text-base-content/70">{current?.title ?? 'Make a learning view'}</span>
         <details className="dropdown dropdown-end">
           <summary className="btn btn-sm btn-ghost btn-square" title="Sync settings"><Settings className="size-4" /></summary>
-          <div className="dropdown-content z-50 mt-2 rounded-box border border-base-300 bg-base-100 p-3 shadow"><ConnectorSettings /></div>
+          <div className="dropdown-content z-50 mt-2 rounded-box border border-base-300 bg-base-100 p-3 shadow"><ConnectorSettings defaultUrl={HOME_NODE} /></div>
         </details>
       </header>
       <div className="flex min-h-0 flex-1">

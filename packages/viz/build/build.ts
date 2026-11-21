@@ -14,9 +14,12 @@ import { pathToFileURL } from 'node:url';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 
+import { LOADERS, MAX_BYTES, TARGET, checksEntry, pageEntry, pageHtml, pixelsModule } from '../src/page.ts';
+
+export { MAX_BYTES };
+
 /** the runtime's sources: `@gestalts/viz` resolves here whatever the viz folder has installed */
 const RUNTIME = resolve(import.meta.dirname, '../src');
-export const MAX_BYTES = 5 * 1024 * 1024;
 
 export function decodeImage(path: string, bytes: Buffer): { width: number; height: number; data: Uint8Array } {
   const ext = extname(path).toLowerCase();
@@ -35,17 +38,9 @@ const pixels: Plugin = {
   name: 'pixels',
   setup(b) {
     b.onResolve({ filter: /\?pixels$/ }, (a) => ({ path: resolve(a.resolveDir, a.path.slice(0, -'?pixels'.length)), namespace: 'pixels' }));
-    b.onLoad({ filter: /.*/, namespace: 'pixels' }, async (a) => {
-      const img = decodeImage(a.path, await readFile(a.path));
-      const b64 = Buffer.from(img.data).toString('base64');
-      return {
-        loader: 'js',
-        watchFiles: [a.path],
-        contents: `const s = atob(${JSON.stringify(b64)}); const d = new Uint8ClampedArray(s.length);
-for (let i = 0; i < s.length; i++) d[i] = s.charCodeAt(i);
-export default { width: ${img.width}, height: ${img.height}, data: d };`,
-      };
-    });
+    b.onLoad({ filter: /.*/, namespace: 'pixels' }, async (a) => ({
+      loader: 'js', watchFiles: [a.path], contents: pixelsModule(decodeImage(a.path, await readFile(a.path))),
+    }));
   },
 };
 
@@ -54,54 +49,26 @@ const common = (dir: string, contents: string): BuildOptions => ({
   bundle: true,
   write: false,
   outdir: join(dir, 'dist'),
-  target: 'es2022',
+  target: TARGET,
   logLevel: 'silent',
   alias: { '@gestalts/viz': RUNTIME },
   plugins: [pixels],
-  loader: {
-    '.png': 'dataurl', '.jpg': 'dataurl', '.jpeg': 'dataurl', '.webp': 'dataurl', '.gif': 'dataurl', '.svg': 'dataurl',
-    '.woff': 'dataurl', '.woff2': 'dataurl', '.ttf': 'dataurl', '.otf': 'dataurl',
-    '.csv': 'text', '.tsv': 'text', '.txt': 'text', '.md': 'text', '.geojson': 'json',
-  },
+  loader: { ...LOADERS },
 });
-
-const inline = (code: string, tag: string) => code.replaceAll(`</${tag}`, `<\\/${tag}`);
 
 /** The viz in `dir` as one self-contained page. */
 export async function buildPage(dir: string): Promise<string> {
-  const entry = JSON.stringify(join(resolve(dir), 'viz.ts'));
-  const r = await build({
-    ...common(resolve(dir), `import def from ${entry};\nimport { mount } from '@gestalts/viz/mount';\nmount(def);\n`),
-    format: 'iife',
-    minify: true,
-    legalComments: 'none',
-  });
+  const r = await build({ ...common(resolve(dir), pageEntry(join(resolve(dir), 'viz.ts'))), format: 'iife', minify: true, legalComments: 'none' });
   const out = (ext: string) => (r.outputFiles ?? []).filter((f) => f.path.endsWith(ext)).map((f) => f.text).join('\n');
-  const html = `<!doctype html>
-<html lang="en" data-gestalts-viz>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>${inline(out('.css'), 'style')}</style>
-</head>
-<body>
-<div id="viz"></div>
-<script>${inline(out('.js'), 'script')}</script>
-</body>
-</html>
-`;
-  const size = Buffer.byteLength(html);
-  if (size > MAX_BYTES) throw new Error(`the page is ${size} bytes, more than ${MAX_BYTES}: reduce what it imports`);
-  return html;
+  return pageHtml(out('.js'), out('.css'));
 }
 
 export type CheckResult = { name: string; ok: boolean; message?: string };
 
 /** Runs `checks` of the viz in `dir` (and its model and scene once at the defaults), in node. */
 export async function runVizChecks(dir: string): Promise<CheckResult[]> {
-  const entry = JSON.stringify(join(resolve(dir), 'viz.ts'));
   const r = await build({
-    ...common(resolve(dir), `import def from ${entry};\nimport { runChecks } from '@gestalts/viz';\nexport const results = runChecks(def);\n`),
+    ...common(resolve(dir), checksEntry(join(resolve(dir), 'viz.ts'))),
     format: 'esm',
     platform: 'node',
   });

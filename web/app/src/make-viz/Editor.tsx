@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Hammer, Paperclip, Trash2, X } from 'lucide-react';
 import type { Repo } from '@gestalts/client';
-import { available, build } from './agent';
+import { available, build, connect } from './agent';
 import { fromBase64, saveViz, storeBlob, toBase64, type Viz } from './viz';
 
 type Line = { kind: 'text' | 'tool' | 'error' | 'ok' | 'fail'; text: string; detail?: string };
@@ -22,7 +22,13 @@ export function Editor({ repo, viz, onDelete }: { repo: Repo; viz: Viz; onDelete
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => { latest.current = viz; }, [viz]);
-  useEffect(() => { void available(repo).then((a) => setUnavailable(a === true ? undefined : a)); }, [repo, busy]);
+  const [checked, setChecked] = useState(0);
+  useEffect(() => { void available().then((a) => setUnavailable(a === true ? undefined : a)); }, [busy, checked]);
+  const connectBridge = async () => {
+    const r = await connect();
+    if (r === true) setChecked((n) => n + 1);
+    else setUnavailable(r);
+  };
 
   const flush = async () => {
     clearTimeout(timer.current);
@@ -69,7 +75,7 @@ export function Editor({ repo, viz, onDelete }: { repo: Repo; viz: Viz; onDelete
       const files: Record<string, string> = {};
       for (const f of v.files) files[f.label] = toBase64((await repo.readBlob(f.file)) ?? new Uint8Array());
       const req = { viz: v.id, title: draft.title, spec: draft.spec, source: v.source || undefined, packages: v.packages, files };
-      for await (const e of build(repo, req, controller.signal)) {
+      for await (const e of build(req, controller.signal)) {
         if (e.type === 'text') say({ kind: 'text', text: e.text });
         else if (e.type === 'tool') say({ kind: 'tool', text: `${e.name} ${e.summary}` });
         else if (e.type === 'error') say({ kind: 'error', text: e.message });
@@ -141,7 +147,13 @@ export function Editor({ repo, viz, onDelete }: { repo: Repo; viz: Viz; onDelete
         <button type="button" className="btn btn-sm btn-ghost" title="Delete this viz" aria-label="Delete this viz"
                 onClick={() => { if (confirm(`Delete “${viz.title}”?`)) onDelete(); }}><Trash2 className="size-4" /></button>
       </div>
-      {unavailable && <p role="status" className="text-xs text-warning">{unavailable}</p>}
+      {unavailable && (
+        <div role="status" className="flex items-center gap-2 text-xs text-warning">
+          <span className="flex-1">{unavailable}</span>
+          <button type="button" className="btn btn-xs" onClick={() => void connectBridge()}>Connect</button>
+          <button type="button" className="btn btn-xs btn-ghost" onClick={() => setChecked((n) => n + 1)}>Check again</button>
+        </div>
+      )}
       {viz.generator && !busy && !lines.length && <p className="text-xs text-base-content/50">Last built by {viz.generator}.</p>}
 
       {lines.length > 0 && (

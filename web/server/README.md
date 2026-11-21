@@ -17,5 +17,6 @@ mise run web:dev                                                  # the app; /te
 
 Published links point at `http://127.0.0.1:7741/l/<lesson>`.
 
-To make lessons with the `claude` CLI on your own computer instead of the server's agent: `mise run claude-bridge` (:7737;
-`TEACHER_AGENT_ORIGIN=https://…` to allow the deployed app), then Settings → Claude Code on this computer.
+To make lessons with Claude Code on your own computer instead of the server's agent: the Claude bridge
+([`installables/claude-bridge`](../../installables/claude-bridge); `mise run claude-bridge` in development, part of
+`mise run just dev`), then Settings → Claude Code on this computer.

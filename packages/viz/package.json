@@ -8,7 +8,8 @@
     "./mount": "./src/mount.ts",
     "./tex": "./src/tex.ts",
     "./build": "./build/build.ts",
-    "./client": "./client.d.ts"
+    "./client": "./client.d.ts",
+    "./page": "./src/page.ts"
   },
   "files": [
     "src",

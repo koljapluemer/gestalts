@@ -24,16 +24,17 @@ run = "bash scripts/{{usage.what}}.sh"
 
 [tasks.setup]
 hide = true
-description = "JS dependencies, the core compiled to wasm (after cloning, and after changing crates/core, crates/peer or crates/wasm) and the Make agent template"
+description = "JS dependencies, the core compiled to wasm (after cloning, and after changing crates/core, crates/peer or crates/wasm), the agent template (for the teacher server's check) and what @gestalts/check records (packages/check/pack)"
 run = [
   "pnpm install",
   "wasm-pack --log-level warn build crates/wasm --target web --out-dir ../../packages/client/wasm --out-name gestalts",
   "pnpm -C packages/workshop/agent-template install --ignore-workspace",
+  "node packages/check/scripts/pack.ts",
 ]
 
 [tasks.check]
 hide = true
-description = "Tests, lints, typechecks, every deck's health and the agent templates' examples"
+description = "Tests (the checks on every agent example among them), lints, typechecks, every deck's health"
 depends = ["setup", "icons:check"]
 shell = "bash -c"
 run = """
@@ -44,10 +45,7 @@ pnpm lint
 node scripts/check-distributions.ts
 pnpm typecheck
 pnpm test
-python3 -m unittest discover -s installables/claude-bridge/make/tests
-installables/claude-bridge/make/scripts/check-example.sh
-python3 -m unittest discover -s installables/claude-bridge/make-viz/tests
-installables/claude-bridge/make-viz/scripts/check-examples.sh
+python3 -m unittest discover -s installables/claude-bridge/scripts/tests
 for d in plugins/*/decks/*/; do cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) health "$d" > /dev/null; done
 """
 
@@ -109,9 +107,30 @@ run = "bash scripts/node.sh"
 
 [tasks.claude-bridge]
 hide = true
-description = "The claude bridge for development on :7737 (scripts/claude-bridge.sh): the agents, the workshops' drafts in $GESTALTS_DEV_DATA or ~/gestalt-workshop-views"
+description = "The Claude bridge headless for development on :7737 (scripts/claude-bridge.sh): pages on localhost may use it without asking"
 depends = ["setup"]
 run = "bash scripts/claude-bridge.sh"
+
+[tasks."claude-bridge:package"]
+hide = true
+description = "Claude bridge installers for this OS into target/packages"
+depends = ["icons:check"]
+shell = "bash -c"
+run = """
+set -euo pipefail
+case "$(uname -s)" in
+  Linux)  cargo packager -p gestalts-claude-bridge --release --formats deb,appimage
+          cargo generate-rpm -p installables/claude-bridge -o target/packages ;;
+  Darwin) cargo packager -p gestalts-claude-bridge --release --formats dmg ;;
+  *)      cargo packager -p gestalts-claude-bridge --release --formats nsis ;;
+esac
+"""
+
+[tasks."claude-bridge:install"]
+hide = true
+description = "Build and install the Claude bridge on this machine, the way a user gets it"
+depends = ["claude-bridge:package"]
+run = "bash scripts/install-package.sh target/packages gestalts-claude-bridge"
 
 # --- folder-sync: gestalts-node, the desktop app ---
 
@@ -241,8 +260,8 @@ run = ["node plugins/vietnamese-typing-practice/tools/build-deck.ts", "mise run 
 
 [tasks."workshop:agent-stats"]
 hide = true
-description = "Summarize local Make agent time, token use, cost and tool activity"
-run = "python3 installables/claude-bridge/make/scripts/agent_stats.py"
+description = "Summarize the Claude bridge's turns: time, token use, cost and tool activity"
+run = "python3 installables/claude-bridge/scripts/agent_stats.py"
 
 
 # --- teacher ---

@@ -1,0 +1,37 @@
+{
+  "name": "@gestalts/check",
+  "private": true,
+  "type": "module",
+  "description": "What an agent (or the app) checks a draft view or a viz with: in the page and in Node, whatever model made it",
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts",
+    "./browser": "./src/browser.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "pack": "node scripts/pack.ts"
+  },
+  "dependencies": {
+    "@gestalts/view": "workspace:*",
+    "esbuild-wasm": "0.28.2",
+    "html-to-image": "1.11.13",
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0",
+    "typescript-js": "npm:typescript@5.9.3",
+    "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "@gestalts/kit": "workspace:*",
+    "@gestalts/learning": "workspace:*",
+    "@gestalts/sources": "workspace:*",
+    "@gestalts/viz": "workspace:*",
+    "@types/node": "26.6.6",
+    "@types/pngjs": "6.0.5",
+    "@types/react": "19.3.0",
+    "esbuild": "0.28.2",
+    "lucide-react": "1.66.0",
+    "react": "19.3.1",
+    "vite": "8.3.5"
+  }
+}

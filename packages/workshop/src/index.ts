@@ -2,5 +2,6 @@ export { DEFINITION, VIEW, VIEWS, applyFiles, asDraft, createDraft, definitionId
 export { Chat } from './Chat';
 export { Preview, type ResolveNpm } from './Preview';
 export { httpBackend, jobBackend, type Call } from './agents/jobs';
-export { AGENT_SERVICE, cliBackend, nodeAt, repoNode, type NodeServices } from './agents/node';
+export { INSTALL_BRIDGE, VIEW_FILES, bridgeAvailable, bridgeBackend, bridgeStatus, pairBridge, runOnBridge, type BridgeEvent, type BridgeStart, type BridgeStatus } from './agents/bridge';
+export { checkResult, fileTools, viewCheckTool, vizCheckTool, type AgentTool, type ToolContent, type ToolResult } from './agents/tools';
 export type { AgentBackend, AgentEvent, Diagnostic, TurnRequest } from './agents/types';

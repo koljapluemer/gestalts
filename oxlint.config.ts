@@ -11,10 +11,11 @@ import { defineConfig } from 'oxlint';
  * - `@gestalts/client` (the core in the browser) builds on the view package; the host on client, view, kit, learning and
  *   sources (learning, sources and the kit only for the runtime frames load).
  * - `@gestalts/vite` (the build preset, run by Node) imports only the view package's compiler.
- * - `@gestalts/workshop` (making a view with an agent) builds on client, host and view.
+ * - `@gestalts/check` (what an agent's work is checked with, in the page and in Node) imports the view and viz packages.
+ * - `@gestalts/workshop` (making a view with an agent) builds on client, host, view and check.
  * - `@gestalts/npm-bundle` (npm packages for views, bundled by a server, run by Node) imports only the view package.
  * - an app (`web/<app>/src`, folder-sync's settings page) imports only the packages
- *   (client, host, view, the kit's index, learning, sources, workshop) and its own files, never another app or a plugin;
+ *   (client, host, view, the kit's index, learning, sources, workshop, check) and its own files, never another app or a plugin;
  *   nothing imports an app.
  * External packages are always fine.
  */
@@ -38,9 +39,10 @@ const allowed: Record<string, string[]> = {
   plugin: ['view', 'kit-index', 'learning', 'sources'],
   debug: ['client', 'view'],
   host: ['client', 'view', 'kit-index', 'learning', 'sources', 'debug'],
-  workshop: ['client', 'host', 'view'],
+  workshop: ['client', 'host', 'view', 'check'],
+  check: ['view', 'viz'],
   'npm-bundle': ['view'],
-  app: ['client', 'host', 'view', 'kit-index', 'learning', 'sources', 'workshop'],
+  app: ['client', 'host', 'view', 'kit-index', 'learning', 'sources', 'workshop', 'check'],
 };
 
 export default defineConfig({
@@ -56,6 +58,7 @@ export default defineConfig({
       { type: 'learning', pattern: 'packages/learning/src' },
       { type: 'sources', pattern: 'packages/sources/src' },
       { type: 'viz', pattern: 'packages/viz/src' },
+      { type: 'check', pattern: 'packages/check/src' },
       { type: 'client', pattern: 'packages/client/src' },
       { type: 'primitive', pattern: `${kit}/primitives` },
       { type: 'component', pattern: `${kit}/components` },

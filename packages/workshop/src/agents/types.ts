@@ -1,7 +1,7 @@
 import type { ViewError } from '@gestalts/view';
 
 /**
- * What a workshop asks of an agent, whatever runs it (the claude CLI behind a local node, the teacher app's server).
+ * What a workshop asks of an agent, whatever runs it (the claude CLI through the Claude bridge, the teacher app's server).
  * The agent sees a draft as files ([`filesOf`](../draft.ts)) and returns the files it changed; the browser turns them
  * into ymls and writes them, so no agent needs access to any.
  */
@@ -38,5 +38,7 @@ export interface AgentBackend {
   label: string;
   /** whether it can take a turn now, else why not */
   available(): Promise<true | string>;
+  /** when it isn't available until the person allows this site (the Claude bridge): asks, true when allowed */
+  connect?(): Promise<true | string>;
   turn(req: TurnRequest, signal: AbortSignal): AsyncIterable<AgentEvent>;
 }

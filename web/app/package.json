@@ -9,6 +9,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@gestalts/check": "workspace:*",
     "@gestalts/client": "workspace:*",
     "@gestalts/host": "workspace:*",
     "@gestalts/kit": "workspace:*",

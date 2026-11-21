@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
+import { pairBridge } from '@gestalts/workshop';
 import { DEFAULT_NODE, START, cliAgent, nodeProblem, type AgentChoice } from './agent';
 
 /** This browser's settings: who makes lessons with the teacher. */
@@ -27,7 +28,7 @@ export function Settings({ choice, onSave, onClose }: { choice: AgentChoice; onS
           </label>
           <label className="flex items-start gap-2">
             <input type="radio" className="radio radio-sm mt-0.5" name="agent" checked={agent === 'cli'} onChange={() => setAgent('cli')} />
-            <span>Claude Code on this computer<span className="block text-xs text-base-content/60">The <code>claude</code> command you’re signed in to here, on your own plan, through a local node.</span></span>
+            <span>Claude Code on this computer<span className="block text-xs text-base-content/60">The <code>claude</code> command you’re signed in to here, on your own plan, through the Claude bridge.</span></span>
           </label>
         </fieldset>
         {agent === 'cli' && <Node node={node} setNode={setNode} problem={problem} />}
@@ -54,24 +55,32 @@ function Node({ node, setNode, problem }: { node: string; setNode: (s: string) =
     const t = setTimeout(() => { void cliAgent(url).available().then((a) => { if (live) setAnswer({ question, status: a }); }); }, 400);
     return () => { live = false; clearTimeout(t); };
   }, [url, problem, question]);
-  const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+  const connect = async () => {
+    const r = await pairBridge(url);
+    if (r === true) setAsked((n) => n + 1);
+    else setAnswer({ question, status: r });
+  };
   return (
     <div className="flex flex-col gap-2 rounded-box bg-base-200 p-3">
-      <label className="flex flex-col gap-1">The node’s address
+      <label className="flex flex-col gap-1">The Claude bridge’s address
         <div className="flex gap-1">
           <input className="input input-sm min-w-0 flex-1 font-mono" type="url" value={node} placeholder={DEFAULT_NODE} onChange={(e) => setNode(e.target.value)} />
           <button type="button" className="btn btn-sm" onClick={() => setAsked((n) => n + 1)}>Check</button>
         </div>
       </label>
       {problem && <p className="text-xs text-error">{problem}</p>}
-      {!problem && status === undefined && <p className="text-xs text-base-content/60"><span className="loading loading-spinner loading-xs" /> Asking the node…</p>}
-      {status === true && <p className="text-xs text-success">The node is there and runs the agent.</p>}
-      {typeof status === 'string' && <p role="status" className="text-xs text-warning">{status}</p>}
+      {!problem && status === undefined && <p className="text-xs text-base-content/60"><span className="loading loading-spinner loading-xs" /> Asking the bridge…</p>}
+      {status === true && <p className="text-xs text-success">The bridge is there, finds Claude Code, and lets this site use it.</p>}
+      {typeof status === 'string' && (
+        <div role="status" className="flex items-center gap-2 text-xs text-warning">
+          <span className="flex-1">{status}</span>
+          <button type="button" className="btn btn-xs" onClick={() => void connect()}>Connect</button>
+        </div>
+      )}
       <p className="text-xs text-base-content/70">
-        Start it in a checkout of the gestalts repo, with the <code>claude</code> CLI installed and signed in:
+        {START}. It asks you once, on this computer, whether this site may use it. Your browser may ask too, whether this
+        site may use apps on this device.
       </p>
-      <code className="block overflow-x-auto whitespace-pre rounded bg-base-100 p-2 text-xs">{local ? START : `TEACHER_AGENT_ORIGIN=${location.origin} ${START}`}</code>
-      {!local && <p className="text-xs text-base-content/60">Your browser may ask once whether this site may use apps on this device.</p>}
     </div>
   );
 }

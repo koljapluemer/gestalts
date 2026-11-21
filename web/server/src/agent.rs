@@ -139,7 +139,7 @@ programmers.
 Here the folder below is not a disk: you work on the draft's files through tools. `read_file`, `write_file`, \
 `edit_file`, `delete_file` and `list_files` work on `view.tsx`, `view.json`, `gestalts/` and `data/`; the kit's \
 sources (`node_modules/@gestalts/<package>/src/…`) and `examples/` can be read and listed, not written; `search` \
-finds text in all of them. Where the contract says to run `node check.ts`, use the `check` tool. There is no shell.";
+finds text in all of them; `check` is the contract's check. There is no shell.";
 
 fn tools() -> Value {
     let path = json!({ "type": "string", "description": "e.g. view.tsx, gestalts/noun@1.yml, data/haus.yml, examples/noun-gender/view.tsx" });

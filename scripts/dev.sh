@@ -3,8 +3,8 @@
 # it exits):
 #   - the web app (web/app): notes, learning and visualizations on the home store in the browser, the workshops, the
 #     teacher area
-#   - the claude bridge (scripts/claude-bridge.sh): the workshops' drafts sync with it, it runs the agents (the
-#     claude CLI)
+#   - the Claude bridge (scripts/claude-bridge.sh): runs the agents (the claude CLI), with the pages' tools: the
+#     workshops' and the teacher area's
 #   - folder-sync, headless (scripts/node.sh): the plugin backends, /net and /llm for the home areas
 #   - the teacher server (teacher-data/; its agent with ANTHROPIC_API_KEY), and the player it serves lessons with
 # Each server gets the first free port from its usual one (scripts/free-port.sh), so it runs beside an installed node
@@ -77,7 +77,7 @@ serve() {
   pids+=($!)
 }
 
-serve servers bridge "claude bridge" "http://127.0.0.1:$bridge" "$bridge" "the agents · drafts in ${GESTALTS_DEV_DATA:-~/gestalt-workshop-views}" \
+serve servers bridge "Claude bridge" "http://127.0.0.1:$bridge" "$bridge" "the agents: claude, with the pages' tools" \
   env GESTALTS_BRIDGE_PORT="$bridge" scripts/claude-bridge.sh
 serve servers node "folder-sync" "http://127.0.0.1:$node" "$node" "plugin backends, /net, /llm · dev profile" \
   env GESTALTS_NODE_PORT="$node" scripts/node.sh

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=gestalts-claude-bridge
+Comment=Lets a website you allow run Claude Code on this computer
+Exec=gestalts-claude-bridge
+Icon=gestalts-claude-bridge
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=false

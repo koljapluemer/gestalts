@@ -1,6 +1,7 @@
-import type { Repo } from '@gestalts/client';
-
-const SERVICE = 'vizint-agent';
+import { bridgeAvailable, pairBridge, runOnBridge, vizCheckTool } from '@gestalts/workshop';
+import { AGENT_NODE } from '../nodes';
+import { vizTemplate } from './template';
+import { fromBase64, toBase64 } from './viz';
 
 export type BuildRequest = {
   viz: string; title: string; spec: string; source?: string; packages: string[];
@@ -16,48 +17,59 @@ export type BuildEvent =
   | { type: 'result'; ok: boolean; check: string; generator: string; source: string | null; packages: string[]; built?: string; still?: string }
   | { type: 'done' };
 
-/** Whether the node this page syncs with offers the agent, else why not. */
-export async function available(repo: Repo): Promise<true | string> {
-  const services = await repo.services();
-  if (!services) return 'not connected to a node (settings)';
-  const s = services.find((x) => x.id === SERVICE);
-  if (!s) return `the claude bridge offers no ${SERVICE}: start it with mise run claude-bridge`;
-  if (!s.available) return `${SERVICE} isn't running (yet): see the node's log`;
-  return true;
-}
+/** Who built it, kept on the viz. */
+const GENERATOR = 'claude-bridge-1';
+const SYSTEM = 'You build one visualization in this directory. CLAUDE.md here is the contract: read it first. Only viz.ts and package.json are kept; run the check tool before you finish.';
+/** what a build makes: everything else in its workspace is the template's or the spec's */
+const KEEP = String.raw`viz\.ts|package\.json`;
+
+export const available = () => bridgeAvailable(AGENT_NODE);
+export const connect = () => pairBridge(AGENT_NODE);
+
+const packagesJson = (packages: string[]) => `${JSON.stringify({
+  private: true, type: 'module', dependencies: Object.fromEntries(packages.map((p) => [p.slice(0, p.lastIndexOf('@')), p.slice(p.lastIndexOf('@') + 1)])),
+}, null, 2)}\n`;
 
 /**
- * One build by the claude CLI, through the `vizint-agent` backend on the node: a cancellable job read through short
- * event polls, so no request has to last as long as the build.
+ * One build by Claude Code on this computer, through the Claude bridge: it writes viz.ts from the spec, checking it
+ * with the page's check as it goes. Then the page checks what came back itself, so what's saved as built passed here.
  */
-export async function* build(repo: Repo, req: BuildRequest, signal: AbortSignal): AsyncIterable<BuildEvent> {
-  const call = (path: string, init?: RequestInit) => repo.service(SERVICE, path, init) ?? Promise.reject(new Error('not connected to a node'));
-  const json = (body: unknown): RequestInit => ({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const started = await call('build', json(req));
-  const body = (await started.json().catch(() => ({}))) as { job?: string; error?: string };
-  if (!started.ok || !body.job) { yield { type: 'error', message: body.error ?? `${SERVICE} answered ${started.status}` }; return; }
-  const job = body.job;
-  const cancel = () => { void call('cancel', json({ job })); };
-  signal.addEventListener('abort', cancel, { once: true });
-  try {
-    let after = 0;
-    for (;;) {
-      let r: Response;
-      try {
-        r = await call(`events?job=${job}&after=${after}`);
-      } catch {
-        // a dropped poll is retried; the build goes on meanwhile
-        if (signal.aborted) return;
-        await new Promise((res) => setTimeout(res, 1000));
-        continue;
+export async function* build(req: BuildRequest, signal: AbortSignal): AsyncIterable<BuildEvent> {
+  const template = await vizTemplate();
+  const files: Record<string, string> = {
+    ...template.files,
+    'SPEC.md': req.title ? `# ${req.title}\n\n${req.spec.trim()}\n` : `${req.spec.trim()}\n`,
+    'package.json': packagesJson(req.packages),
+  };
+  if (req.source?.trim()) files['viz.ts'] = req.source;
+  const own = Object.fromEntries(Object.entries(req.files).map(([name, b64]) => [`files/${name}`, b64]));
+  const bytes = Object.fromEntries(Object.entries(own).map(([p, b64]) => [p, fromBase64(b64)]));
+  const prompt = req.source?.trim()
+    ? 'Build the visualization SPEC.md describes, starting from the previous version in viz.ts: keep what works and change what the spec requires.'
+    : 'Build the visualization SPEC.md describes.';
+
+  const made: Record<string, string> = { 'package.json': files['package.json'] };
+  if (files['viz.ts']) made['viz.ts'] = files['viz.ts'];
+  const start = { workspace: req.viz, prompt, system: SYSTEM, files, binary: { ...template.binary, ...own }, keep: KEEP };
+  for await (const e of runOnBridge(AGENT_NODE, start, [vizCheckTool(bytes)], signal)) {
+    if (e.type === 'files') {
+      for (const [p, t] of Object.entries(e.files)) {
+        if (t === null) delete made[p];
+        else made[p] = t;
       }
-      const page = (await r.json().catch(() => ({}))) as { events?: BuildEvent[]; next?: number; done?: boolean; error?: string };
-      if (!r.ok) { yield { type: 'error', message: page.error ?? `${SERVICE} answered ${r.status}` }; return; }
-      for (const e of page.events ?? []) yield e;
-      after = page.next ?? after;
-      if (page.done) return;
+    } else if (e.type !== 'done') {
+      yield e;
     }
-  } finally {
-    signal.removeEventListener('abort', cancel);
   }
+  if (signal.aborted || !made['viz.ts']) { yield { type: 'done' }; return; }
+
+  yield { type: 'tool', name: 'check', summary: 'what came back, here' };
+  const [{ checkViz, packagesOf }, { browserPlatform }] = await Promise.all([import('@gestalts/check'), import('@gestalts/check/browser')]);
+  const r = await checkViz({ ...bytes, ...made }, browserPlatform);
+  const packages = Object.entries(packagesOf(made['package.json']).packages).map(([n, v]) => `${n}@${v}`);
+  yield {
+    type: 'result', ok: r.ok, check: r.report, generator: GENERATOR, source: made['viz.ts'], packages,
+    built: r.built, still: r.still ? toBase64(r.still) : undefined,
+  };
+  yield { type: 'done' };
 }

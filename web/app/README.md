@@ -7,8 +7,10 @@ local agent), `/teach` (lessons, on the teacher server). It needs no node: the u
 - notes, learning and visualizations share the home store and `distributions/home.yml`; the desktop node, when one
   runs (`VITE_GESTALTS_NODE`, default :7717), is asked for plugin backends, `/net` and `/llm`, and the user may sync
   with it (settings)
-- the workshops share a `drafts` store (`distributions/workshop.yml`), synced with the claude bridge, which runs the agents
-  (`VITE_AGENT_NODE`, default :7737, `mise run claude-bridge`)
+- the workshops share a `drafts` store in the browser (`distributions/workshop.yml`); their agent, and the teacher's
+  local one, is Claude Code through the Claude bridge (`VITE_AGENT_NODE`, default :7737, `mise run claude-bridge`),
+  with the page's tools: the `check` is `@gestalts/check`, run here. See [`doc/make`](doc/make) and
+  [`doc/make-viz.md`](doc/make-viz.md)
 - each lesson draft is its own store (`distributions/teacher.yml`), synced with the teacher server under `/api`
   (`VITE_TEACHER_API` in dev, default :7740)
 

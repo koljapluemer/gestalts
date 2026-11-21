@@ -17,9 +17,9 @@ Work only in this folder.
 - **`runtime-errors.md`**, when present, holds what the preview reported, and what couldn't be saved of your last
   turn, since then. Fix those first.
 
-Nothing else here is kept. Run **`node check.ts`** before you finish: it compiles `view.tsx` the way the workshop does,
-typechecks it, and checks `view.json`, `gestalts/` and `data/`. A turn ending with a failing check shows the person an
-error instead of the view.
+Nothing else here is kept. Run the **`check`** tool before you finish: it compiles `view.tsx` the way the workshop does,
+typechecks it, and checks `view.json`, `gestalts/`, `data/` and that each npm import is pinned in `view.json`. A turn
+ending with a failing check shows the person an error instead of the view.
 
 ## The data
 
@@ -79,7 +79,7 @@ how many items), `one_of: [..]`.
 | `@gestalts/sources` | sources: `FIELDS`, `ENTRY_TYPES`, `normalise`, `bibOf`, `parseBibtex`, `renderBibtex`, `match`, `mergeSource` |
 | any npm package | loaded at run time (`d3`, `three`, ...); list it in `view.json`'s `npm` with its version. No types here, so type what you use |
 
-The sources are in `node_modules/@gestalts/*/src`. Read them when unsure; don't guess signatures.
+The sources are in `node_modules/@gestalts/*/src` (read-only). Read them when unsure; don't guess signatures.
 
 Style with Tailwind classes and daisyUI components. Keep it responsive: the frame can be narrow.
 

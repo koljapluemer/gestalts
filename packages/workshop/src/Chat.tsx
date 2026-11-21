@@ -25,7 +25,13 @@ export function Chat({ repo, draft, backend, runtime, errors, onTurnDone }: {
   const abort = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { void backend.available().then((a) => setUnavailable(a === true ? undefined : a)); }, [backend, busy]);
+  const [checked, setChecked] = useState(0);
+  useEffect(() => { void backend.available().then((a) => setUnavailable(a === true ? undefined : a)); }, [backend, busy, checked]);
+  const connect = async () => {
+    const r = await backend.connect?.();
+    if (r !== undefined && r !== true) setUnavailable(r);
+    else setChecked((n) => n + 1);
+  };
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [lines]);
 
   const say = (l: Line) => setLines((ls) => [...ls, l]);
@@ -79,7 +85,13 @@ export function Chat({ repo, draft, backend, runtime, errors, onTurnDone }: {
         {busy && <span className="loading loading-dots loading-sm" />}
         <div ref={end} />
       </div>
-      {unavailable && <p role="status" className="px-3 text-xs text-warning">{unavailable}</p>}
+      {unavailable && (
+        <div role="status" className="flex items-center gap-2 px-3 text-xs text-warning">
+          <span className="flex-1">{unavailable}</span>
+          {backend.connect && <button type="button" className="btn btn-xs" onClick={() => void connect()}>Connect</button>}
+          <button type="button" className="btn btn-xs btn-ghost" onClick={() => setChecked((n) => n + 1)}>Check again</button>
+        </div>
+      )}
       {errors.length + refused.length > 0 && <p role="status" className="px-3 text-xs text-error">{errors.length + refused.length} error(s) from the preview and saving go with your next message.</p>}
       <div className="flex gap-2 border-t border-base-300 p-2">
         <textarea className="textarea textarea-sm min-w-0 flex-1" rows={2} placeholder="What should it do?" value={text} onChange={(e) => setText(e.target.value)}

@@ -1,5 +1,5 @@
-import { cliBackend, httpBackend, nodeAt, type AgentBackend } from '@gestalts/workshop';
-import { AGENT_NODE, START_AGENT_NODE } from '../nodes';
+import { INSTALL_BRIDGE, bridgeBackend, httpBackend, type AgentBackend } from '@gestalts/workshop';
+import { AGENT_NODE } from '../nodes';
 
 /**
  * Who works on a lesson with the teacher: the server's agent (on our API key, within the school's budget), or the
@@ -10,7 +10,7 @@ export type AgentChoice = { agent: 'server' | 'cli'; node: string };
 
 const KEY = 'teacher:agent';
 export const DEFAULT_NODE: string = AGENT_NODE;
-export const START = START_AGENT_NODE;
+export const START = INSTALL_BRIDGE;
 
 export function loadChoice(): AgentChoice {
   try {
@@ -29,7 +29,7 @@ export function nodeProblem(url: string): string | undefined {
   try {
     const u = new URL(url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return 'an http:// address';
-    if (u.pathname !== '/' || u.search || u.hash) return 'the node’s address only, like http://127.0.0.1:7737';
+    if (u.pathname !== '/' || u.search || u.hash) return 'the bridge’s address only, like http://127.0.0.1:7737';
   } catch {
     return 'an address like http://127.0.0.1:7737';
   }
@@ -48,7 +48,7 @@ npm packages are bundled and pinned. Speak to the teacher plainly, in the langua
 programmers.`;
 
 export function cliAgent(node: string): AgentBackend {
-  return cliBackend(nodeAt(node, START), { brief: BRIEF });
+  return bridgeBackend(node, { brief: BRIEF });
 }
 
 export function backendFor(choice: AgentChoice, draft: string): AgentBackend {
