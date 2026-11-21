@@ -2,13 +2,9 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 const webApps = [
-  'apps/gestalter/distribution',
+  'apps/web',
   'apps/gestalter/distribution-android',
-  'apps/learning-workshop',
-  'apps/loops-for-learning',
   'apps/node/settings',
-  'apps/vizint',
-  'apps/vizint-workshop',
 ];
 
 const sourceFor = (app: string) => {

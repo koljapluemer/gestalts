@@ -5,7 +5,7 @@ and Android packages use PNGs rendered from the same source. `mise run icons:che
 packaging so a missing or stale reference fails early.
 
 To give one app its own icon later, add a square SVG as `<app>/icon.svg` (for example
-`apps/vizint/icon.svg` or `apps/node/desktop/icon.svg`) and run:
+`apps/web/icon.svg` or `apps/node/desktop/icon.svg`) and run:
 
 ```sh
 mise run icons

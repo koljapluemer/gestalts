@@ -2,3 +2,7 @@
 declare module 'virtual:gestalts-plugins' {
   export const registry: import('@gestalts/host').Registry;
 }
+/** One of an app's `distributions/<name>.yml`. */
+declare module 'virtual:gestalts-plugins/*' {
+  export const registry: import('@gestalts/host').Registry;
+}

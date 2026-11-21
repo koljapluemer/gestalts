@@ -19,7 +19,8 @@ writes: [note@1]
 ```
 
 `reads` and `writes` are enforced outside the view. An app lists its plugins by path in `distribution.yml`, as `core`
-(always there) or `plugins` (installable).
+(always there) or `plugins` (installable). An app with areas that need different plugins or models (the web app) has
+`distributions/<name>.yml` instead, one per registry (`virtual:gestalts-plugins/<name>`), sharing one frame runtime.
 
 ## Models
 

@@ -22,6 +22,11 @@ export type RepoSource = YmlsIn & {
   decks?: DeckSource[];
   /** gestalt definitions (YAML) beyond the core's, from plugins */
   gestalts?: string[];
+  /**
+   * A node asked for plugin backends, `/net` and `/llm` without syncing with it (the desktop app beside a browser
+   * that keeps its notes itself). A connector, once set, is asked instead.
+   */
+  bridge?: string;
 };
 
 /** One of a node's `/services`: `available` while its worker runs. */
@@ -147,7 +152,7 @@ export class Repo {
    */
   firstSync: Promise<void> = Promise.resolve();
 
-  private constructor(private wasm: Core, private storageKey: string) {}
+  private constructor(private wasm: Core, private storageKey: string, private bridge: string | null = null) {}
 
   static async open(source: RepoSource): Promise<Repo> {
     const span = log.span('open', { dir: source.dir, decks: (source.decks ?? []).map((d) => d.source) });
@@ -177,7 +182,7 @@ export class Repo {
     }
     span.end();
     if (source.node !== undefined) return Repo.direct(wasm, source.node);
-    const repo = new Repo(wasm, `gestalts-connector:${source.dir}`);
+    const repo = new Repo(wasm, `gestalts-connector:${source.dir}`, source.bridge ?? null);
     let saved: string | null = null;
     try { saved = localStorage.getItem(repo.storageKey); } catch { /* no storage: start disconnected */ }
     repo.firstSync = saved ? repo.connect(saved).catch(() => undefined) : Promise.resolve();
@@ -365,13 +370,17 @@ export class Repo {
 
   /** Answers a request to the backend of plugin `id`; `undefined` where this app has no node. */
   service(id: string, path: string, init?: RequestInit): Promise<Response> | undefined {
-    if (!this.status.url || this.status.mode === 'paired') return undefined;
-    return fetch(`${withSlash(this.status.url)}services/${encodeURIComponent(id)}/${path.replace(/^\//, '')}`, init);
+    const url = this.nodeUrl();
+    if (!url) return undefined;
+    return fetch(`${url}services/${encodeURIComponent(id)}/${path.replace(/^\//, '')}`, init);
   }
 
-  /** The node to ask for `/net` and `/llm`: none when there's none, or when it's a native app's paired one. */
+  /**
+   * The node to ask for backends, `/net` and `/llm`: the one synced with, else the bridge; none when it's a native
+   * app's paired one.
+   */
   private nodeUrl(): string | null {
-    return this.status.url && this.status.mode !== 'paired' ? withSlash(this.status.url) : null;
+    return nodeFor(this.status, this.bridge);
   }
 
   /** Whether `net`, `llm` and the LLM settings can work here. */
@@ -413,10 +422,10 @@ export class Repo {
 
   /** The backends the node offers and whether each is running; null without a node, or if it didn't answer. */
   async services(): Promise<ServiceStatus[] | null> {
-    const url = this.status.url;
-    if (!url || this.status.mode === 'paired') return null;
+    const url = this.nodeUrl();
+    if (!url) return null;
     try {
-      const r = await fetch(new URL('services', withSlash(url)));
+      const r = await fetch(new URL('services', url));
       return r.ok ? ((await r.json()) as ServiceStatus[]) : null;
     } catch {
       return null;
@@ -539,6 +548,13 @@ export class Repo {
       this.setStatus({ state: 'error', error: e instanceof Error ? e.message : String(e) });
     }
   }
+}
+
+/** The node a repo asks for backends, `/net` and `/llm`, with a slash: see `Repo.nodeUrl`. */
+export function nodeFor(status: Pick<ConnectorStatus, 'mode' | 'url'>, bridge: string | null): string | null {
+  if (status.mode === 'paired') return null;
+  const url = status.url ?? bridge;
+  return url ? withSlash(url) : null;
 }
 
 function nativeStatus(s: NativeStatus): Partial<ConnectorStatus> {

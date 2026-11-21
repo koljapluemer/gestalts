@@ -9,12 +9,13 @@ gestalts/     gestalt definitions: the core's, and model packages (gestalts/<pac
 plugins/      the views (and their decks, workers), one folder each, usable by any app
 sdk/python/   what plugin workers import
 apps/
-  gestalter/            notes and learning, a website on the node: distribution/, distribution-android/
-  loops-for-learning/   the learning views, one at a time: a static site
-  learning-workshop/    make learning views with a local agent
-  vizint/               interactive visualizations, one at a time: a static site
-  vizint-workshop/      make visualizations from a spec with a local agent
-  node/                 gestalts-node, keeping your ymls: desktop/ (tray), settings/ (its page), android/, iOS later
+  web/                  the one web app: notes, learning, visualizations, the workshops, lessons; data in the browser
+  player/               the lesson player, on the lesson domain
+  gestalter/            the Android page (distribution-android/)
+  learning-workshop/    the learning workshop's agent stats, tests and docs
+  vizint-workshop/      the viz agent (plugins/), its template, tests and docs
+  teacher/              the teacher server's worker and docs
+  node/                 gestalts-node, optional beside the app: desktop/ (tray), settings/ (its page), android/
 scripts/      shared by the tasks
 ```
 
@@ -29,24 +30,20 @@ packaging tools as pinned in `mise.toml`; rustup picks up the Rust version (and 
 ```sh
 mise run just setup   # a new machine: the pinned tools and Rust, dependencies, the core in wasm, a local teacher
                       # account; again after pulling
-mise run just dev     # everything at once with hot reload, beside an installed node: an overview of where each app
-                      # is, their output in target/dev/<name>.log
+mise run just dev     # the web app, the node and the teacher server with hot reload, beside an installed node:
+                      # where each is, their output in target/dev/<name>.log
 ```
 
 The rest is hidden from `mise tasks` (`mise tasks --hidden` lists it), for one-offs and agents:
 
 ```sh
 mise run check                                    # tests, lints, typechecks, deck health
-mise run gestalter:dev                            # gestalter on a dev node, hot reload
+mise run web:dev                                  # the web app alone, hot reload
+mise run node                                     # the node alone: the agents, plugin backends, the drafts
 mise run node:dev                                 # the desktop node and its settings page, hot reload
-mise run loops:dev                                # loops-for-learning
-mise run workshop:dev                             # the learning workshop and its local Make node
-mise run vizint:dev                               # vizint
-mise run vizint-workshop:dev                      # the vizint workshop and its node
 mise run android:dev                              # the Android app on a phone or emulator (needs the SDK and NDK)
 mise run publish-data plugins/<id>/decks/<deck>   # after editing a plugin's deck
 mise run health-data ~/some-folder                # which ymls can't be used, and why
 mise run serve ~/some-folder                      # the node headless with the repo's plugins
-mise run deploy                                   # gestalter, loops-for-learning, vizint to their *.koljasam.com sites
 mise run teacher:deploy                           # the teacher app to its box (deploy/teacher/README.md)
 ```

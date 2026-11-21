@@ -1,7 +1,9 @@
 /**
  * What an app builds with, as the virtual module `virtual:gestalts-plugins`. `distribution.yml` next to the app names
- * the distribution and lists its plugins and model packages (the gestalts beyond the core's), as folders. Each plugin's `view.tsx` is compiled to the module its frame runs,
- * and everything frames load (React, the kit, learning) is built into one script. The host never imports a plugin.
+ * the distribution and lists its plugins and model packages (the gestalts beyond the core's), as folders. An app with
+ * several (one per area) has `distributions/<name>.yml` instead, each as `virtual:gestalts-plugins/<name>`. Each
+ * plugin's `view.tsx` is compiled to the module its frame runs, and everything frames load (React, the kit, learning)
+ * is built into one script, shared by all of an app's distributions. The host never imports a plugin.
  *
  * Packages may be linked from a sibling checkout, so this also dedupes React (and lucide), lets the dev server read
  * those checkouts, and replaces `@gestalts-sources;` in the app's CSS with an `@source` per package and plugin
@@ -9,7 +11,7 @@
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { compile } from '@gestalts/view/compile';
 import { build, searchForWorkspaceRoot, type Plugin, type PluginOption, type Rollup } from 'vite';
 import { parse } from 'yaml';
@@ -18,6 +20,9 @@ import { grantsFor } from '@gestalts/vite/grants';
 
 const VIRTUAL = 'virtual:gestalts-plugins';
 const RESOLVED = '\0' + VIRTUAL;
+const DISTRIBUTIONS = 'distributions';
+/** the frame runtime, once for all of an app's registries */
+const RUNTIME = 'virtual:gestalts-runtime';
 const SOURCES = /^@gestalts-sources;$/m;
 
 type Manifest = { id: string; title: string; version: string; reads?: string[]; requires?: string[]; permissions?: string[] };
@@ -66,9 +71,9 @@ const isPackage = (dir: string) => isDir(dir) && !definitionsIn(dir).length && s
 const gestaltId = (text: string) => { const d = parse(text) as { name: string; version: number }; return `${d.name}@${d.version}`; };
 
 /** A model package's definitions, as YAML, and the gestalts they define. */
-function loadModel(appRoot: string, path: string) {
-  const root = realpathSync(resolve(appRoot, path));
-  if (!isPackage(root)) throw new Error(`distribution.yml: model ${path} is not a package (gestalts/<package>/<name>/v<N>.yml)`);
+function loadModel(base: string, path: string, where: string) {
+  const root = realpathSync(resolve(base, path));
+  if (!isPackage(root)) throw new Error(`${where}: model ${path} is not a package (gestalts/<package>/<name>/v<N>.yml)`);
   const texts = subdirs(root).flatMap(definitionsIn).map((f) => readFileSync(f, 'utf8'));
   return { root, texts, ids: texts.map(gestaltId) };
 }
@@ -112,8 +117,8 @@ function readDecks(pluginId: string, root: string) {
   });
 }
 
-function loadPlugin(appRoot: string, path: string, core: boolean) {
-  const root = realpathSync(resolve(appRoot, path));
+function loadPlugin(base: string, path: string, core: boolean) {
+  const root = realpathSync(resolve(base, path));
   const manifest = parse(readFileSync(join(root, 'plugin.yml'), 'utf8')) as Manifest;
   const viewFile = join(root, 'view.tsx');
   const compiled = compile(readFileSync(viewFile, 'utf8'), viewFile);
@@ -122,19 +127,37 @@ function loadPlugin(appRoot: string, path: string, core: boolean) {
   return { id: manifest.id, root, manifest, decks: readDecks(manifest.id, root), js: compiled.js, npm: compiled.npm, core, backend: existsSync(join(root, 'backend.py')) };
 }
 
-function load(appRoot: string) {
-  const file = parse(readFileSync(join(appRoot, 'distribution.yml'), 'utf8')) as DistributionFile;
-  const unknown = Object.keys(file).filter((k) => !DISTRIBUTION_KEYS.includes(k));
-  if (unknown.length) throw new Error(`distribution.yml: unknown key ${unknown.join(', ')} (known: ${DISTRIBUTION_KEYS.join(', ')})`);
-  if (typeof file.id !== 'string' || !/^[a-z0-9-]+$/.test(file.id)) throw new Error('distribution.yml needs an `id` (lowercase letters, digits and -)');
-  const plugins = [...(file.core ?? []).map((p) => loadPlugin(appRoot, p, true)), ...(file.plugins ?? []).map((p) => loadPlugin(appRoot, p, false))];
+/**
+ * The app's distributions, by the name its virtual module has: `''` for `distribution.yml` (`virtual:gestalts-plugins`),
+ * `<name>` for each `distributions/<name>.yml` (`virtual:gestalts-plugins/<name>`).
+ */
+export function distributionFiles(appRoot: string): Map<string, string> {
+  const single = join(appRoot, 'distribution.yml');
+  const dir = join(appRoot, DISTRIBUTIONS);
+  if (existsSync(single) && isDir(dir)) throw new Error(`${appRoot} has both distribution.yml and ${DISTRIBUTIONS}/: one or the other`);
+  if (existsSync(single)) return new Map([['', single]]);
+  if (!isDir(dir)) throw new Error(`${appRoot} has no distribution.yml (nor ${DISTRIBUTIONS}/<name>.yml)`);
+  const names = readdirSync(dir).filter((f) => f.endsWith('.yml')).sort();
+  for (const f of names) if (!/^[a-z0-9-]+\.yml$/.test(f)) throw new Error(`${DISTRIBUTIONS}/${f}: name it with lowercase letters, digits and -`);
+  return new Map(names.map((f) => [f.slice(0, -'.yml'.length), join(dir, f)]));
+}
+
+/** One distribution, from its file; paths in it are from that file. */
+export function loadDistribution(file: string) {
+  const base = dirname(file);
+  const where = basename(base) === DISTRIBUTIONS ? `${DISTRIBUTIONS}/${basename(file)}` : basename(file);
+  const parsed = parse(readFileSync(file, 'utf8')) as DistributionFile;
+  const unknown = Object.keys(parsed).filter((k) => !DISTRIBUTION_KEYS.includes(k));
+  if (unknown.length) throw new Error(`${where}: unknown key ${unknown.join(', ')} (known: ${DISTRIBUTION_KEYS.join(', ')})`);
+  if (typeof parsed.id !== 'string' || !/^[a-z0-9-]+$/.test(parsed.id)) throw new Error(`${where} needs an \`id\` (lowercase letters, digits and -)`);
+  const plugins = [...(parsed.core ?? []).map((p) => loadPlugin(base, p, true)), ...(parsed.plugins ?? []).map((p) => loadPlugin(base, p, false))];
   const seen = new Set<string>();
   for (const p of plugins) {
-    if (seen.has(p.id)) throw new Error(`plugin ${p.id} is listed twice`);
+    if (seen.has(p.id)) throw new Error(`${where}: plugin ${p.id} is listed twice`);
     seen.add(p.id);
   }
-  for (const v of file.default_views ?? []) if (!seen.has(v)) throw new Error(`default view ${v} is in no plugin of the distribution`);
-  const models = (file.models ?? []).map((m) => loadModel(appRoot, m));
+  for (const v of parsed.default_views ?? []) if (!seen.has(v)) throw new Error(`${where}: default view ${v} is in no plugin of the distribution`);
+  const models = (parsed.models ?? []).map((m) => loadModel(base, m, where));
   // every gestalt a view reads or a deck holds is the core's or a named model's
   const defined = new Set([...coreGestalts(), ...models.flatMap((m) => m.ids)]);
   for (const p of plugins) {
@@ -142,15 +165,45 @@ function load(appRoot: string) {
     for (const [g, how] of used) {
       if (defined.has(g)) continue;
       const pkg = packageOf(g);
-      throw new Error(`${p.id} ${how} ${g}, which ${pkg ? `package ${relative(appRoot, pkg)} defines: add it to \`models\` in distribution.yml` : 'nothing defines'}`);
+      throw new Error(`${where}: ${p.id} ${how} ${g}, which ${pkg ? `package ${relative(base, pkg)} defines: add it to \`models\`` : 'nothing defines'}`);
     }
   }
-  const granted = grantsFor(file.grants, plugins.map((p) => ({ id: p.id, permissions: p.manifest.permissions, npm: p.npm })));
+  const granted = grantsFor(parsed.grants, plugins.map((p) => ({ id: p.id, permissions: p.manifest.permissions, npm: p.npm })));
   return {
-    distribution: { id: file.id, default_views: file.default_views ?? [], install_ui: file.install_ui ?? false },
+    file,
+    distribution: { id: parsed.id, default_views: parsed.default_views ?? [], install_ui: parsed.install_ui ?? false },
     plugins: plugins.map((p) => ({ ...p, granted: granted.get(p.id) ?? [] })),
     models,
   };
+}
+
+type Loaded = ReturnType<typeof loadDistribution>;
+
+/**
+ * Every distribution of the app, by name. Distributions may share a plugin (the same folder), whose decks are then
+ * served once; two different plugins with one id would serve each other's decks, so they're refused.
+ */
+export function loadApp(appRoot: string): Map<string, Loaded> {
+  const loaded = new Map([...distributionFiles(appRoot)].map(([name, file]) => [name, loadDistribution(file)] as const));
+  const ids = new Set<string>();
+  const roots = new Map<string, string>();
+  for (const [name, d] of loaded) {
+    if (ids.has(d.distribution.id)) throw new Error(`${DISTRIBUTIONS}/${name}.yml: id ${d.distribution.id} is another distribution's too`);
+    ids.add(d.distribution.id);
+    for (const p of d.plugins) {
+      const other = roots.get(p.id);
+      if (other !== undefined && other !== p.root) throw new Error(`plugin id ${p.id} is two plugins: ${other} and ${p.root}`);
+      roots.set(p.id, p.root);
+    }
+  }
+  return loaded;
+}
+
+/** Each plugin of the app once, whichever distributions it is in. */
+function appPlugins(appRoot: string): Loaded['plugins'] {
+  const byId = new Map<string, Loaded['plugins'][number]>();
+  for (const d of loadApp(appRoot).values()) for (const p of d.plugins) byId.set(p.id, p);
+  return [...byId.values()];
 }
 
 /** Everything a frame loads, as one script and its styles. */
@@ -193,7 +246,7 @@ export function gestaltsPlugins(): PluginOption[] {
     },
     transform(code, id) {
       if (!/\.css(\?|$)/.test(id) || !SOURCES.test(code)) return;
-      const dirs = [...gestaltsPackages(appRoot).map((d) => join(d, 'src')).filter((d) => existsSync(d)), ...load(appRoot).plugins.map((p) => join(p.root, 'view.tsx'))];
+      const dirs = [...gestaltsPackages(appRoot).map((d) => join(d, 'src')).filter((d) => existsSync(d)), ...appPlugins(appRoot).map((p) => join(p.root, 'view.tsx'))];
       return code.replace(SOURCES, dirs.map((d) => `@source ${JSON.stringify(d)};`).join('\n'));
     },
   };
@@ -206,13 +259,24 @@ export function gestaltsPlugins(): PluginOption[] {
       return { resolve: { dedupe: ['react', 'react-dom', 'lucide-react'] }, server: { fs: { allow } }, worker: { format: 'es' } };
     },
     configResolved(config) { appRoot = config.root; },
-    resolveId(id) { return id === VIRTUAL ? RESOLVED : undefined; },
+    resolveId(id) {
+      if (id === RUNTIME) return `\0${RUNTIME}`;
+      return id === VIRTUAL || id.startsWith(`${VIRTUAL}/`) ? `\0${id}` : undefined;
+    },
     async load(id) {
-      if (id !== RESOLVED) return;
-      const { distribution, plugins, models } = load(appRoot);
-      this.addWatchFile(join(appRoot, 'distribution.yml'));
+      if (id === `\0${RUNTIME}`) {
+        runtime ??= buildRuntime(appRoot);
+        return `export const runtime = ${JSON.stringify(await runtime)};\n`;
+      }
+      if (id !== RESOLVED && !id.startsWith(`${RESOLVED}/`)) return;
+      const name = id.slice(RESOLVED.length + 1);
+      const files = distributionFiles(appRoot);
+      const file = files.get(name);
+      if (!file) throw new Error(`${id.slice(1)}: the app has no such distribution (it has ${[...files.keys()].map((n) => (n ? `${VIRTUAL}/${n}` : VIRTUAL)).join(', ')})`);
+      loadApp(appRoot);
+      const { distribution, plugins, models } = loadDistribution(file);
+      this.addWatchFile(file);
       for (const m of models) for (const f of subdirs(m.root).flatMap(definitionsIn)) this.addWatchFile(f);
-      runtime ??= buildRuntime(appRoot);
       const entries = plugins.map((p) => {
         this.addWatchFile(join(p.root, 'plugin.yml'));
         this.addWatchFile(join(p.root, 'view.tsx'));
@@ -220,13 +284,13 @@ export function gestaltsPlugins(): PluginOption[] {
         return { manifest: p.manifest, decks, js: p.js, npm: p.npm, core: p.core, granted: p.granted, backend: p.backend };
       });
       const gestalts = models.flatMap((m) => m.texts);
-      return `export const registry = ${JSON.stringify({ distribution, plugins: entries, gestalts, runtime: await runtime })};\n`;
+      return `import { runtime } from ${JSON.stringify(RUNTIME)};\nexport const registry = { ...${JSON.stringify({ distribution, plugins: entries, gestalts })}, runtime };\n`;
     },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const m = /^\/decks\/([a-z0-9.-]+)\/([a-z0-9.-]+)\/(.+)$/.exec((req.url ?? '').split('?')[0]);
         if (!m) return next();
-        const d = load(appRoot).plugins.find((x) => x.id === m[1])?.decks.find((x) => x.id === m[2]);
+        const d = appPlugins(appRoot).find((x) => x.id === m[1])?.decks.find((x) => x.id === m[2]);
         if (d && m[3] === 'ymls.json') { res.setHeader('content-type', 'application/json'); res.end(deckBundle(d.dir)); return; }
         const file = d && resolve(d.dir, decodeURIComponent(m[3]));
         if (!d || !file || !file.startsWith(d.dir + '/') || !existsSync(file)) { res.statusCode = 404; res.end(); return; }
@@ -236,7 +300,7 @@ export function gestaltsPlugins(): PluginOption[] {
     async generateBundle() {
       // the frame runtime this build carries, by version, for whatever serves builds by it (the lesson player)
       if (runtime) this.emitFile({ type: 'asset', fileName: 'gestalts-runtime.json', source: `${JSON.stringify({ version: (await runtime).version })}\n` });
-      for (const p of load(appRoot).plugins) {
+      for (const p of appPlugins(appRoot)) {
         for (const d of p.decks) {
           for (const f of files(d.dir)) {
             this.emitFile({ type: 'asset', fileName: `decks/${p.id}/${d.id}/${relative(d.dir, f)}`, source: readFileSync(f) });

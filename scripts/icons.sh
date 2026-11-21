@@ -24,13 +24,9 @@ stamp() {
 }
 
 web_apps=(
-  apps/gestalter/distribution
+  apps/web
   apps/gestalter/distribution-android
-  apps/learning-workshop
-  apps/loops-for-learning
   apps/node/settings
-  apps/vizint
-  apps/vizint-workshop
 )
 for app in "${web_apps[@]}"; do
   cp "$(source_for "$app")" "$root/$app/public/favicon.svg"

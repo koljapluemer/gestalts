@@ -14,7 +14,7 @@ sha="$(git rev-parse --short HEAD)"
 release="/opt/gestalts-teacher/releases/$sha"
 
 cargo build --release -q -p gestalts-teacher
-pnpm --dir apps/teacher build
+pnpm --dir apps/web build
 pnpm --dir apps/player build
 
 tmp="$(mktemp -d)"
@@ -22,7 +22,7 @@ trap 'rm -rf "$tmp"' EXIT
 git archive --format=tar HEAD apps/teacher/worker apps/teacher/package.json packages gestalts package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json | tar -x -C "$tmp"
 mkdir -p "$tmp/bin" "$tmp/player"
 cp target/release/gestalts-teacher "$tmp/bin/"
-cp -r apps/teacher/dist "$tmp/app"
+cp -r apps/web/dist "$tmp/app"
 cp -r apps/player/dist/. "$tmp/player/"
 
 ssh "$TEACHER_HOST" "mkdir -p $release"

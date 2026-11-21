@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # `mise run just dev`: everything for development at once, with hot reload, stopped together (Ctrl-C, or when any of
 # it exits):
-#   - the dev desktop node (tray, the repo's plugins, --profile dev) and its settings page
-#   - the learning workshop's Make node (headless, --profile workshop), and the vizint workshop's node
-#   - gestalter, loops-for-learning and vizint on the dev node, each workshop on its own node
-#   - the teacher server (teacher-data/; its agent with ANTHROPIC_API_KEY), its app, and the node for its CLI agent
+#   - the web app (apps/web): notes, learning and visualizations on the home store in the browser, the workshops, the
+#     teacher area
+#   - the node (scripts/node.sh): the workshops' drafts sync with it, it runs the agents (the claude CLI) and the
+#     plugin backends
+#   - the teacher server (teacher-data/; its agent with ANTHROPIC_API_KEY), and the player it serves lessons with
 # Each server gets the first free port from its usual one (scripts/free-port.sh), so it runs beside an installed node
 # (7717/7718) and whatever else listens here. What they print goes to target/dev/<name>.log; this shows one overview,
 # updated as they come up, and the end of the log of one that stops.
@@ -33,19 +34,10 @@ take() {
   for ((i = 0; i < ${3:-1}; i++)); do taken+=($((p + i))); done
   printf -v "$1" '%s' "$p"
 }
-# the nodes in steps of two: the port after each is its home-network port. Clear of an installed node on 7717
+# the node in a step of two: the port after it is its home-network port. Clear of an installed node on 7717
 take node 7737 2
-take make 7727 2
-take viznode 7747 2
-take teacheragent 7757 2
 take teacherapi 7740 2
-take gestalter 5173
-take loops 5174
-take workshop 5175
-take settings 5176
-take vizint 5178
-take vizworkshop 5179
-take teacher 5180
+take web 5173
 teacherlessons=$((teacherapi + 1))
 
 # prepare LABEL CMD...: CMD with its output in target/dev/prepare.log; on failure, the end of it
@@ -64,7 +56,7 @@ prepare() {
 }
 # dependencies, the wasm core and the agent template up to date (after a pull)
 prepare "dependencies" mise run setup
-# the binaries once, so the nodes and the teacher server don't wait on each other's cargo
+# the binaries once, so the node and the teacher server don't wait on each other's cargo
 prepare "Rust binaries" cargo build -q -p gestalts-node-desktop -p gestalts-teacher
 # the teacher server serves lessons with the player built from here
 prepare "the player" pnpm --dir apps/player build
@@ -83,38 +75,19 @@ serve() {
   pids+=($!)
 }
 
-serve servers node "dev node" "http://127.0.0.1:$node" "$node" "profile dev · home network :$((node + 1))" \
-  cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" \
-  $(bash scripts/plugin-dirs.sh) --background --open-url "http://localhost:$settings/"
-serve servers make "Make node" "http://127.0.0.1:$make" "$make" "learning workshop · home network :$((make + 1))" \
-  env WORKSHOP_NODE_PORT="$make" apps/learning-workshop/scripts/node.sh
-serve servers viznode "vizint node" "http://127.0.0.1:$viznode" "$viznode" "vizint workshop · home network :$((viznode + 1))" \
-  env VIZINT_WORKSHOP_NODE_PORT="$viznode" apps/vizint-workshop/scripts/node.sh
+serve servers node "node" "http://127.0.0.1:$node" "$node" "the agents and plugin backends · drafts in ${GESTALTS_DEV_DATA:-~/gestalt-workshop-views}" \
+  env GESTALTS_NODE_PORT="$node" scripts/node.sh
 teachernote="API · lessons on :$teacherlessons"
 [[ -n "${ANTHROPIC_API_KEY:-}" ]] || teachernote+=" · $N${Y}its agent is off without ANTHROPIC_API_KEY"
 serve servers teacherapi "teacher server" "http://127.0.0.1:$teacherapi" "$teacherapi" "$teachernote" \
   env TEACHER_LESSON_ORIGIN="http://127.0.0.1:$teacherlessons" cargo run -q -p gestalts-teacher -- --data teacher-data \
   serve --insecure-cookies --app "127.0.0.1:$teacherapi" --lessons "127.0.0.1:$teacherlessons"
-serve servers teacheragent "teacher agent node" "http://127.0.0.1:$teacheragent" "$teacheragent" "the claude CLI, for the teacher app's settings" \
-  env TEACHER_AGENT_PORT="$teacheragent" apps/teacher/scripts/agent-node.sh
 
-serve apps gestalter "gestalter" "http://localhost:$gestalter/" "$gestalter" "on the dev node" \
-  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$gestalter" --strictPort
-serve apps loops "loops-for-learning" "http://localhost:$loops/" "$loops" "on the dev node" \
-  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/loops-for-learning dev --port "$loops" --strictPort
-serve apps vizint "vizint" "http://localhost:$vizint/" "$vizint" "on the dev node" \
-  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/vizint dev --port "$vizint" --strictPort
-serve apps workshop "learning workshop" "http://localhost:$workshop/" "$workshop" "on the Make node" \
-  env VITE_WORKSHOP_NODE="http://127.0.0.1:$make" pnpm --dir apps/learning-workshop dev --port "$workshop" --strictPort
-serve apps vizworkshop "vizint workshop" "http://localhost:$vizworkshop/" "$vizworkshop" "on the vizint node" \
-  env VITE_VIZINT_WORKSHOP_NODE="http://127.0.0.1:$viznode" pnpm --dir apps/vizint-workshop dev --port "$vizworkshop" --strictPort
-if [[ -e teacher-data/dev-login.txt ]]; then login="sign-in: teacher-data/dev-login.txt"
-else login="sign-in: your account, or mise run teacher:admin add-teacher / reset-password"; fi
-serve apps teacher "teacher" "http://localhost:$teacher/" "$teacher" "$login" \
-  env VITE_TEACHER_API="http://127.0.0.1:$teacherapi" VITE_TEACHER_AGENT_NODE="http://127.0.0.1:$teacheragent" \
-  pnpm --dir apps/teacher dev --port "$teacher" --strictPort
-serve apps settings "node settings" "http://localhost:$settings/" "$settings" "the dev node's" \
-  env GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/node/settings dev --port "$settings" --strictPort
+if [[ -e teacher-data/dev-login.txt ]]; then login="lessons sign-in: teacher-data/dev-login.txt"
+else login="lessons sign-in: your account, or mise run teacher:admin add-teacher / reset-password"; fi
+serve apps web "web app" "http://localhost:$web/" "$web" "$login" \
+  env VITE_GESTALTS_NODE="http://127.0.0.1:$node" VITE_AGENT_NODE="http://127.0.0.1:$node" \
+  VITE_TEACHER_API="http://127.0.0.1:$teacherapi" pnpm --dir apps/web dev --port "$web" --strictPort
 
 listening() { (exec 3<> "/dev/tcp/127.0.0.1/$1") 2> /dev/null || (exec 3<> "/dev/tcp/::1/$1") 2> /dev/null; }
 
@@ -123,7 +96,7 @@ overview() {
   local i group mark
   waiting=0 stopped=-1 out=''
   for group in apps servers; do
-    if [[ $group == apps ]]; then out+="  ${B}Apps${N}$K"$'\n'; else out+="$K"$'\n'"  ${B}Servers${N}$K"$'\n'; fi
+    if [[ $group == apps ]]; then out+="  ${B}App${N}$K"$'\n'; else out+="$K"$'\n'"  ${B}Servers${N}$K"$'\n'; fi
     for i in "${!ids[@]}"; do
       [[ ${groups[$i]} == "$group" ]] || continue
       if ! kill -0 "${pids[$i]}" 2> /dev/null; then mark="$R✗$N"; stopped=$i

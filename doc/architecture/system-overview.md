@@ -29,6 +29,16 @@ sdk/python        gestalts_backend.py, what a backend.py imports
 
 `oxlint.config.ts` enforces who may import whom.
 
+## The apps
+
+`apps/web` is the one web app, its areas paths: `/notes` (the gestalter), `/learn`, `/viz`, `/make` and `/make-viz`
+(the workshops), `/teach` (the teacher app). It needs no node. Notes, learning and visualizations share the **home**
+store, the user's ymls in this browser (OPFS), opened once for the app (`apps/web/src/home.tsx`) and asking the
+desktop node, if one runs, for plugin backends, `/net` and `/llm` without syncing with it (`bridge` in `Repo.open`).
+The workshops share a `drafts` store synced with the node that runs the agents; each lesson draft is its own store
+synced with the teacher server. `apps/player` runs published lessons on the lesson domain; the Android app wraps
+`apps/gestalter/distribution-android`.
+
 ## Data
 
 See [[../reference/data-format|Data format]]. Every yml names exactly one gestalt and is judged by that definition alone.
@@ -107,7 +117,7 @@ pauses collection, since what's in use can't be known for sure.
 ## The node
 
 `gestalts-node` (`apps/node/desktop`, the library in `crates/node`) serves a folder on 127.0.0.1 and runs plugin
-backends. It ships no app: the apps are websites that use it from their own origin (allowed: localhost, the origins
+backends. It ships no app and no app needs it: the apps are websites that use it from their own origin (allowed: localhost, the origins
 in `ORIGINS` and the config's `extra_origins`). It brings the backends of the repo's `plugins/`, every model package
 of `gestalts/`, and its own settings page at `/`. A folder is marked in `.gestalts/format`; one holding ymls without that marker is refused.
 

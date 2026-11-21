@@ -1,0 +1,8 @@
+# The teacher area (/teach; `id` is its for good): teachers make lessons with an agent and publish them. No plugins: a
+# draft's view is the only one. Its models are what a lesson may read besides the core's and its own, and must be the
+# player's (apps/player/distribution.yml) and the server's (crates/teacher, MODELS).
+id: teacher
+plugins: []
+models:
+  - ../../../gestalts/geography
+  - ../../../gestalts/typing

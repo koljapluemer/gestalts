@@ -1,0 +1,10 @@
+# The workshops (/make, /make-viz): drafts are user data, not plugins. These are the views a draft's preview runs
+# beside, and the vizint view that shows the viz being made. `id` is the learning workshop's, for good.
+id: learning-workshop
+plugins:
+  - ../../../plugins/flashcards
+  - ../../../plugins/alphabet-pronunciation-trainer
+  - ../../../plugins/phrasebook
+  - ../../../plugins/vizint
+models:
+  - ../../../gestalts/viz

@@ -85,11 +85,26 @@ description = "Prepare a data folder for publishing as a read-only deck: content
 usage = 'arg "<dir>" help="the data folder, e.g. plugins/phrasebook/decks/<deck>"'
 run = "cargo run -q --release -p gestalts-node-desktop -- $(bash scripts/plugin-dirs.sh) publish {{usage.dir}}"
 
-[tasks.deploy]
+# --- the web app ---
+
+[tasks."web:dev"]
 hide = true
-description = "Build gestalter, loops-for-learning and vizint and deploy them to gestalter.koljasam.com, loop.koljasam.com and vizint.koljasam.com (Netlify; needs `netlify login` and a committed tree)"
+description = "The web app on the first free port from :5173 with hot reload, without the node or the teacher server (mise run just dev starts all three)"
 depends = ["setup"]
-run = "bash scripts/deploy.sh"
+shell = "bash -c"
+run = 'pnpm --dir apps/web dev --port "$(scripts/free-port.sh 5173)" --strictPort'
+
+[tasks."web:build"]
+hide = true
+description = "Production build of the web app into apps/web/dist, a static site (serve every path as index.html)"
+depends = ["setup", "icons:check"]
+run = "pnpm --dir apps/web build"
+
+[tasks.node]
+hide = true
+description = "The one node for development on :7737 (scripts/node.sh): the agents, the plugin backends, the workshops' drafts in $GESTALTS_DEV_DATA or ~/gestalt-workshop-views"
+depends = ["setup"]
+run = "bash scripts/node.sh"
 
 # --- gestalts-node: the desktop app ---
 
@@ -136,28 +151,6 @@ description = "Build and install the desktop app on this machine, the way a user
 depends = ["node:package"]
 run = "bash scripts/install-package.sh target/packages"
 
-# --- gestalter ---
-
-[tasks."gestalter:dev"]
-hide = true
-description = "gestalter with hot reload on the first free port from :5173, on a dev desktop app (tray, the repo's plugins) from :7737"
-depends = ["setup", "node:settings-build"]
-shell = "bash -c"
-run = """
-trap 'kill 0' EXIT
-page="$(scripts/free-port.sh 5173)"
-node="$(scripts/free-port.sh 7737 2)"
-echo "gestalter: http://localhost:$page/ on the node at :$node (its settings: http://127.0.0.1:$node/)"
-cargo run -q -p gestalts-node-desktop -- --profile dev --port "$node" --lan-port "$((node + 1))" $(bash scripts/plugin-dirs.sh) --background &
-VITE_GESTALTS_NODE="http://127.0.0.1:$node" pnpm --dir apps/gestalter/distribution dev --port "$page" --strictPort --open &
-wait
-"""
-
-[tasks."gestalter:build"]
-hide = true
-description = "Production build of gestalter into apps/gestalter/distribution/dist, a static site to host anywhere"
-depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/gestalter/distribution build"
 
 # --- the Android app ---
 
@@ -202,33 +195,7 @@ cargo tauri android build --debug --apk --target aarch64 --config "$(distributio
 ls gen/android/app/build/outputs/apk/*/debug/*.apk
 """
 
-# --- loops-for-learning ---
 
-[tasks."loops:dev"]
-hide = true
-description = "The Loops app on :5174 with hot reload"
-depends = ["setup"]
-run = "pnpm --dir apps/loops-for-learning dev"
-
-[tasks."loops:build"]
-hide = true
-description = "Production build into apps/loops-for-learning/dist, static files to host anywhere"
-depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/loops-for-learning build"
-
-# --- vizint ---
-
-[tasks."vizint:dev"]
-hide = true
-description = "The vizint app on :5178 with hot reload"
-depends = ["setup"]
-run = "pnpm --dir apps/vizint dev"
-
-[tasks."vizint:build"]
-hide = true
-description = "Production build into apps/vizint/dist, static files to host anywhere"
-depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/vizint build"
 
 # --- decks: rebuilt from their sources, and published ---
 
@@ -263,60 +230,13 @@ hide = true
 description = "Rebuild plugins/vietnamese-typing-practice's deck from its tools/data and the phrasebook's Vietnamese deck, and publish it"
 run = ["node plugins/vietnamese-typing-practice/tools/build-deck.ts", "mise run publish-data plugins/vietnamese-typing-practice/decks/vietnamese-typing"]
 
-# --- learning-workshop ---
-
-[tasks."workshop:dev"]
-hide = true
-description = "The local Make node on :7727 and the learning workshop on :5175 with hot reload"
-depends = ["setup"]
-run = "apps/learning-workshop/scripts/dev.sh"
-
-[tasks."workshop:app"]
-hide = true
-description = "The learning workshop on :5175 without the local node; preview still works without an agent"
-depends = ["setup"]
-run = "pnpm --dir apps/learning-workshop dev"
-
-[tasks."workshop:node"]
-hide = true
-description = "The local Make node on :7727, using $WORKSHOP_DATA or ~/gestalt-workshop-views"
-run = "apps/learning-workshop/scripts/node.sh"
-
-[tasks."workshop:build"]
-hide = true
-description = "Production build into apps/learning-workshop/dist"
-depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/learning-workshop build"
+# --- the workshops ---
 
 [tasks."workshop:agent-stats"]
 hide = true
 description = "Summarize local Make agent time, token use, cost and tool activity"
 run = "python3 apps/learning-workshop/scripts/agent_stats.py"
 
-# --- vizint-workshop ---
-
-[tasks."vizint-workshop:dev"]
-hide = true
-description = "The vizint workshop's node on :7747 (with the viz agent) and the workshop on :5179 with hot reload"
-depends = ["setup"]
-run = "apps/vizint-workshop/scripts/dev.sh"
-
-[tasks."vizint-workshop:app"]
-hide = true
-description = "The vizint workshop on :5179 without its node; the preview works, building doesn't"
-depends = ["setup"]
-run = "pnpm --dir apps/vizint-workshop dev"
-
-[tasks."vizint-workshop:node"]
-hide = true
-description = "The vizint workshop's node on :7747, using $VIZINT_WORKSHOP_DATA or ~/vizint-workshop-data"
-run = "apps/vizint-workshop/scripts/node.sh"
-
-[tasks."vizint-workshop:build"]
-hide = true
-description = "Production build into apps/vizint-workshop/dist"
-depends = ["setup", "icons:check"]
-run = "pnpm --dir apps/vizint-workshop build"
 
 # --- teacher ---
 
@@ -331,18 +251,6 @@ pnpm --dir apps/player build
 cargo run -q -p gestalts-teacher -- --data teacher-data admin install-player --dist apps/player/dist
 cargo run -q -p gestalts-teacher -- --data teacher-data serve --insecure-cookies
 """
-
-[tasks."teacher:app"]
-hide = true
-description = "The teacher app on :5178 with hot reload, its /api from the teacher server (mise run teacher:serve)"
-depends = ["setup"]
-run = "pnpm --dir apps/teacher dev"
-
-[tasks."teacher:agent"]
-hide = true
-description = "A node on :7757 that runs the claude CLI for the teacher app (its settings: Claude on this computer); TEACHER_AGENT_ORIGIN allows a deployed app"
-depends = ["setup"]
-run = "apps/teacher/scripts/agent-node.sh"
 
 [tasks."teacher:admin"]
 hide = true

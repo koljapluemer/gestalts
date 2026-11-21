@@ -15,17 +15,17 @@ function mountedDecks(dir: string, registry: Registry): string[] {
 }
 
 /**
- * The app's repo: ymls in OPFS under `dir` or in the folder of the node at `node` (`where`), with the gestalts of the
- * distribution's model packages and the decks of the installed plugins. Installs the distribution's plugins in a new
- * folder. Which decks to mount is only known once the folder is open, so it's remembered per browser; if the installs
- * changed since, the repo opens once more with the right decks.
+ * The app's repo: ymls in OPFS under `dir` or in the folder of the node at `node` (`where`; beside OPFS, `bridge` is
+ * the node to ask for backends), with the gestalts of the distribution's model packages and the decks of the installed
+ * plugins. Installs the distribution's plugins in a new folder. Which decks to mount is only known once the folder is
+ * open, so it's remembered per browser; if the installs changed since, the repo opens once more with the right decks.
  */
-export function usePluginRepo(where: YmlsIn, registry: Registry): { repo?: Repo; installed: PluginEntry[]; decks: string[]; error?: string } {
+export function usePluginRepo(where: YmlsIn & { bridge?: string }, registry: Registry): { repo?: Repo; installed: PluginEntry[]; decks: string[]; error?: string } {
   const dir = where.dir ?? (where.node !== undefined ? `node:${where.node}` : `native:${where.native}`);
   const [mounted, setMounted] = useState(() => mountedDecks(dir, registry));
   const whereKey = JSON.stringify(where);
   const source = useMemo(() => ({
-    ...(JSON.parse(whereKey) as YmlsIn),
+    ...(JSON.parse(whereKey) as YmlsIn & { bridge?: string }),
     decks: deckSources(registry.plugins.flatMap((p) => p.decks).filter((d) => mounted.includes(d.source))),
     gestalts: registry.gestalts,
   }), [whereKey, registry, mounted]);
