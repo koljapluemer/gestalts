@@ -31,7 +31,7 @@ sdk/python        gestalts_backend.py, what a backend.py imports
 
 ## The apps
 
-`apps/web` is the one web app, its areas paths: `/notes` (the gestalter), `/learn`, `/viz`, `/make` and `/make-viz`
+`apps/web` is the one web app, `/` a landing page of cards, its areas paths: `/notes` (the gestalter), `/learn`, `/viz`, `/make` and `/make-viz`
 (the workshops), `/teach` (the teacher app). It needs no node. Notes, learning and visualizations share the **home**
 store, the user's ymls in this browser (OPFS), opened once for the app (`apps/web/src/home.tsx`) and asking the
 desktop node, if one runs, for plugin backends, `/net` and `/llm` without syncing with it (`bridge` in `Repo.open`).

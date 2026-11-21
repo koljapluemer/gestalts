@@ -1,17 +1,17 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { LayoutGrid } from 'lucide-react';
 
-/** The app's areas, by path. */
+/** The app's areas, by path, in the landing page's order; `/` is the landing page. */
 export const AREAS = [
-  { path: '/notes', title: 'Notes' },
-  { path: '/learn', title: 'Learn' },
-  { path: '/viz', title: 'Visualizations' },
-  { path: '/make', title: 'Learning workshop' },
-  { path: '/make-viz', title: 'vizint workshop' },
-  { path: '/teach', title: 'Lessons' },
+  { path: '/teach', title: 'Teacher portal', about: 'Make lessons with an agent and publish them.' },
+  { path: '/make', title: 'Learning workshop', about: 'Make learning views with a local agent.' },
+  { path: '/make-viz', title: 'vizint workshop', about: 'Make interactive visualizations with a local agent.' },
+  { path: '/notes', title: 'Gestalter', about: 'Your notes, and the views you install, in tabs.' },
+  { path: '/learn', title: 'Learning', about: 'The learning views, one at a time.' },
+  { path: '/viz', title: 'Interactive visualizations', about: 'The visualizations, one at a time.' },
 ] as const;
-export type AreaPath = (typeof AREAS)[number]['path'];
-const HOME: AreaPath = '/notes';
+export type AreaPath = '/' | (typeof AREAS)[number]['path'];
+const HOME: AreaPath = '/';
 
 const listeners = new Set<() => void>();
 const areaOf = (pathname: string): AreaPath => AREAS.find((a) => pathname === a.path || pathname.startsWith(`${a.path}/`))?.path ?? HOME;
@@ -23,7 +23,7 @@ export function navigate(path: AreaPath) {
   listeners.forEach((l) => l());
 }
 
-/** The area shown: from the path, `/notes` for anything else (and the path made to say so). */
+/** The area shown: from the path, the landing page `/` for anything else (and the path made to say so). */
 export function useArea(): AreaPath {
   const [area, setArea] = useState(() => areaOf(location.pathname));
   useEffect(() => {
@@ -54,6 +54,7 @@ export function Areas({ end = false }: { end?: boolean }) {
     <details className={`dropdown ${end ? 'dropdown-end' : ''}`}>
       <summary className="btn btn-sm btn-ghost btn-square" title="Areas"><LayoutGrid className="size-4" /></summary>
       <ul className="dropdown-content menu z-50 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-2 shadow">
+        <li><AreaLink path="/">All areas</AreaLink></li>
         {AREAS.map((a) => <li key={a.path}><AreaLink path={a.path} className={a.path === here ? 'menu-active' : ''}>{a.title}</AreaLink></li>)}
       </ul>
     </details>

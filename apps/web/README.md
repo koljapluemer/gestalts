@@ -1,6 +1,6 @@
 # web
 
-The one web app. Each area is a path: `/notes` (the gestalter: notes and installable views in tabs), `/learn` (the
+The one web app. `/` is a landing page with a card per area; each area is a path: `/notes` (the gestalter: notes and installable views in tabs), `/learn` (the
 learning views, one at a time), `/viz` (interactive visualizations), `/make` and `/make-viz` (the workshops, with a
 local agent), `/teach` (lessons, on the teacher server). It needs no node: the user's data is in the browser (OPFS).
 
